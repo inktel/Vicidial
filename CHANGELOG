@@ -1,17 +1,5 @@
-################ INSTALL
+################ CHANGELOG
 
-For in-depth installation instructions read the docs/SCRATCH_INSTALL.txt file
-
-For more brief install instructions read the docs/BASE_INSTALL.txt file
-
-For Requirements of astGUIclient/VICIDIAL read the docs/REQUIREMENTS.txt file
-
-For installtion on Ubuntu Linux read the docs/Ubuntu_install.txt
-
-
-To place the astGUIclient/VICIDIAL files where they belong on the server:
-run the install.pl script from this directory:
-perl install.pl
-
-
-If you are upgrading from a previous version, see the UPGRADE file
+# 110617-1519 - Changed bin/AST_VDautodial.pl to fix bug in substring on line 1339
+# 110617-1430 - Added ability to support dispositions per ingroup on line 8278
+# 110814-0910 - Added ability to sort by status in AST_timeonVDADcall.php on line 2011
