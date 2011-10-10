@@ -1,0 +1,46 @@
+# /etc/asterisk/zapata.conf:
+# Digium/Clone T100P EXAMPLE:
+# Here is an example of a configuration where an T100P single T1 card is used 
+# for connecting a single T1 PRI circuit with 23 voice channels
+
+[channels]
+group=1
+language=en
+signalling=pri_cpe
+usecallerid=yes
+callerid=asreceived
+callprogress=no
+busydetect=no
+context=default
+echocancel=64
+echocancelwhenbridged=yes
+rxgain=1.0
+txgain=1.0
+channel => 1-23
+
+# FOR A RBS WinkStart T1 YOU WOULD USE SOMETHING LIKE THIS:
+# group=1
+# language=en
+# signalling=em_w
+# usecallerid=yes
+# callerid=asreceived
+# context=default
+# echocancel=64
+# echocancelwhenbridged=yes
+# rxgain=1.0
+# txgain=1.0
+# channel => 1-24
+# 
+# FOR AN ANALOG T1 ChannelBank YOU WOULD USE SOMETHING LIKE THIS:
+# group=4
+# language=en
+# signalling=fxo_ks
+# usecallerid=yes
+# callerid=asreceived
+# context=default
+# echocancel=64
+# echocancelwhenbridged=no
+# rxgain=-1.0
+# txgain=-1.0
+# channel => 1-24
+

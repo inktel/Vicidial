@@ -1,0 +1,5 @@
+TODAY:     Saturday      2011-06-11
+
+AGENT                USER     CALLS  TALK     PAUSE    WAIT     DISPO    ACTIVE   LOGTIME  FIRST                LAST                    
+Eddie Gako          60084         1  0:00:00  0:00:00  0:00:00  0:00:00  0:00:00  0:00:00  2011-06-11 00:03:45  2011-06-11 00:03:45
+Hector Manon        61933         1  0:00:00  0:00:00  0:00:00  0:00:00  0:00:00  0:00:00  2011-06-11 00:00:02  2011-06-11 00:00:02

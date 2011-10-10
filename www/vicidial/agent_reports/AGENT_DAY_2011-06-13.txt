@@ -1,0 +1,4 @@
+TODAY:     Monday        2011-06-13
+
+AGENT                USER     CALLS  TALK     PAUSE    WAIT     DISPO    ACTIVE   LOGTIME  FIRST                LAST                    
+Teri Lee jump       60266         1  0:00:00  0:00:00  0:00:00  0:00:00  0:00:00  0:00:00  2011-06-13 00:00:05  2011-06-13 00:00:05

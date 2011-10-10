@@ -1,0 +1,406 @@
+--- ../vtigercrm510orig/Smarty/templates/DetailViewFields.tpl	2009-12-29 10:45:35.000000000 -0500
++++ ./Smarty/templates/DetailViewFields.tpl	2009-12-29 10:46:20.000000000 -0500
+@@ -13,7 +13,7 @@
+ -->*}
+ 
+ <!-- This file is used to display the fields based on the ui type in detailview -->
+-		{if $keyid eq '1' || $keyid eq 2 || $keyid eq '11' || $keyid eq '7' || $keyid eq '9' || $keyid eq '55' || $keyid eq '71' || $keyid eq '72' || $keyid eq '255'} <!--TextBox-->
++		{if $keyid eq '1' || $keyid eq '2' || $keyid eq '7' || $keyid eq '9' || $keyid eq '55' || $keyid eq '71' || $keyid eq '72' || $keyid eq '255'} <!--TextBox-->
+ 			<td width=25% class="dvtCellInfo" align="left">&nbsp;
+ 				{if $keyid eq '55' || $keyid eq '255'}<!--SalutationSymbol-->
+ 					{if $keyaccess eq $APP.LBL_NOT_ACCESSIBLE}
+@@ -71,6 +71,12 @@
+ 				{/if}
+ 				</span>
+ 			</td>
++                {elseif $keyid eq '11'} <!--VICIDIALcall-->
++                        <td width=25% class="dvtCellInfo" align="left">
++                        <span id ="dtlview_{$label}">
++                           VCcall: <a href="javascript:VICIDIALcall({$ID},'{$keyfldname}','{$keyval}');">{$keyval}</a>
++                        </span>
++                        </td>
+ 		{elseif $keyid eq '15' || $keyid eq '16'} <!--ComboBox-->
+ 			<td width=25% class="dvtCellInfo" align="left">&nbsp;
+ 				{foreach item=arr from=$keyoptions}
+--- ../vtigercrm510orig/Smarty/templates/DetailViewUI.tpl	2009-12-29 10:45:35.000000000 -0500
++++ ./Smarty/templates/DetailViewUI.tpl	2009-12-29 10:46:20.000000000 -0500
+@@ -13,7 +13,7 @@
+ -->*}
+ 
+ <!-- This file is used to display the fields based on the ui type in detailview -->
+-		{if $keyid eq '1' || $keyid eq 2 || $keyid eq '11' || $keyid eq '7' || $keyid eq '9' || $keyid eq '55' || $keyid eq '71' || $keyid eq '72' || $keyid eq '103' || $keyid eq '255'} <!--TextBox-->
++		{if $keyid eq '1' || $keyid eq '2' || $keyid eq '7' || $keyid eq '9' || $keyid eq '11' || $keyid eq '55' || $keyid eq '71' || $keyid eq '72' || $keyid eq '103' || $keyid eq '255'} <!--TextBox-->
+ 			<td width=25% class="dvtCellInfo" align="left" id="mouseArea_{$label}" onmouseover="hndMouseOver({$keyid},'{$label}');" onmouseout="fnhide('crmspanid');" valign="top">
+ 				{if $keyid eq '55' || $keyid eq '255'}<!--SalutationSymbol-->
+ 					{if $keyaccess eq $APP.LBL_NOT_ACCESSIBLE}
+@@ -23,11 +23,13 @@
+ 					{/if}
+ 				{/if}
+ 
+-				{if $keyid eq 11}
++				{if $keyid eq '11'}
+ 					{if $USE_ASTERISK eq 'true'}
+ 						&nbsp;&nbsp;<span id="dtlview_{$label}"><a href='javascript:;' onclick='startCall("{$keyval}")'>{$keyval}</a></span>
+ 					{else}
+-						&nbsp;&nbsp;<span id="dtlview_{$label}">{$keyval}</span>
++                                          VCcall: <span id="dtlview_{$label}">
++                                          <a href="javascript:VICIDIALcall({$ID},'{$keyfldname}','{$keyval}');">{$keyval}</a>
++                                          </span>
+ 					{/if}
+ 				{else}
+ 					&nbsp;&nbsp;<span id="dtlview_{$label}">{$keyval}</span>
+--- ../vtigercrm510orig/include/js/dtlviewajax.js	2009-12-29 10:45:35.000000000 -0500
++++ ./include/js/dtlviewajax.js	2009-12-29 10:46:20.000000000 -0500
+@@ -293,7 +293,7 @@
+ 		if(typeof(use_asterisk) != 'undefined' && use_asterisk == true){
+ 			getObj(dtlView).innerHTML = "<a href=\"javascript:;\" onclick=\"startCall('"+tagValue+"')\">"+tagValue+"</a>";
+ 		}else{
+-			getObj(dtlView).innerHTML = tagValue;
++                getObj(dtlView).innerHTML = "<a href=\"javascript:VICIDIALcall("+crmId+",'"+fieldName+"','"+tagValue+"');\">"+tagValue+"&nbsp;</a>";
+ 		}
+ 	}else if(uitype == '17')
+ 	{
+--- ../vtigercrm510orig/include/utils/ListViewUtils.php	2009-12-29 10:45:35.000000000 -0500
++++ ./include/utils/ListViewUtils.php	2009-12-29 10:46:20.000000000 -0500
+@@ -1861,7 +1861,7 @@
+ 	}
+ 	//added for asterisk integration
+ 	elseif($uitype == 11){
+-		$value = "<a href='javascript:;' onclick='startCall(&quot;$temp_val&quot;, &quot;$entity_id&quot;)'>".$temp_val."</a>";
++		$value = "VCcall: <a href=\"javascript:VICIDIALcall($entity_id,'$fieldname','$temp_val','$current_user->user_name');\">$temp_val</a>";
+ 	}
+ 	//asterisk changes end here
+ 	//Added for email status tracking
+@@ -4596,4 +4596,4 @@
+ 	return $recordListRangeMsg;
+ }
+ 
+-?>
+\ No newline at end of file
++?>
+--- ../vtigercrm510orig/include/utils/UserInfoUtil.php	2009-12-29 10:45:35.000000000 -0500
++++ ./include/utils/UserInfoUtil.php	2009-12-29 10:46:20.000000000 -0500
+@@ -748,6 +748,18 @@
+ 	global $adb;
+ 	global $current_user;
+ 	global $seclog;
++	if (!file_exists('user_privileges/user_privileges_'.$current_user->id.'.php'))
++	{
++		# create User Priviledges file
++		require('modules/Users/CreateUserPrivilegeFile.php');
++		createUserPrivilegesfile($current_user->id);
++	}
++	if (!file_exists('user_privileges/sharing_privileges_'.$current_user->id.'.php'))
++	{
++		# create Sharing Priviledges file
++		require('modules/Users/CreateUserPrivilegeFile.php');
++		createUserSharingPrivilegesfile($current_user->id);
++	}
+ 	require('user_privileges/user_privileges_'.$current_user->id.'.php');
+ 	require('user_privileges/sharing_privileges_'.$current_user->id.'.php');
+ 	$permission = "no";
+@@ -4403,4 +4415,4 @@
+ 	return ($fieldid !== false);
+ }
+ 
+-?>
+\ No newline at end of file
++?>
+--- ../vtigercrm510orig/Smarty/templates/DetailView.tpl	2009-12-29 10:45:35.000000000 -0500
++++ ./Smarty/templates/DetailView.tpl	2009-12-29 11:13:21.000000000 -0500
+@@ -444,7 +444,16 @@
+ 					</tr>
+ 						{/if}
+ 					{/if}
+-					
++					{if $MODULE eq 'Accounts'}
++					 <a href="javascript:VICIDIALcall({$ID},'fax','');">VC fax log</a> &nbsp; &nbsp; 
++					 <a href="javascript:VICIDIALcall({$ID},'email','');">VC email log</a> 
++                                        {/if}
++
++                                        {if $MODULE eq 'Contacts'}
++                                         <a href="javascript:VICIDIALupdate({$ID},'update');">VC SELECT THIS CONTACT</a>
++                                        {/if}
++
++
+ 					{if $MODULE eq 'Contacts' || $EVENT_PERMISSION eq 'true'}	
+ 					<tr>
+ 						<td align="left" style="padding-left:10px;"> 
+@@ -717,4 +726,4 @@
+ 
+ {if $MODULE eq 'Leads' or $MODULE eq 'Contacts' or $MODULE eq 'Accounts' or $MODULE eq 'Campaigns' or $MODULE eq 'Vendors'}
+ 	<form name="SendMail"><div id="sendmail_cont" style="z-index:100001;position:absolute;"></div></form>
+-{/if}
+\ No newline at end of file
++{/if}
+--- ../vtigercrm510orig/include/js/general.js	2009-12-29 10:45:35.000000000 -0500
++++ ./include/js/general.js	2009-12-29 11:16:03.000000000 -0500
+@@ -1849,6 +1849,119 @@
+         openPopUp('xComposeEmail',this,url,'createemailWin',830,662,opts);
+ }
+ 
++function VICIDIALcall(record_id,field_name,phone,user_name) {
++//alert(record_id + "|" + field_name + "|" + phone + "|" user_name);
++var xmlhttp=false;
++/*@cc_on @*/
++/*@if (@_jscript_version >= 5)
++// JScript gives us Conditional compilation, we can cope with old IE versions.
++// and security blocked creation of the objects.
++ try {
++  xmlhttp = new ActiveXObject("Msxml2.XMLHTTP");
++ } catch (e) {
++  try {
++   xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
++  } catch (E) {
++   xmlhttp = false;
++  }
++ }
++@end @*/
++if (!xmlhttp && typeof XMLHttpRequest!='undefined')
++	{
++	xmlhttp = new XMLHttpRequest();
++	}
++if (xmlhttp) 
++	{
++	var callback_flag='';
++	if (field_name=='CallBack')
++		{
++		var log_call = record_id + '';
++		while (log_call.length < 10)
++			{log_call = "0" + log_call;}
++		phone = "99" + log_call;
++		callback_flag = '&callback=1';
++		}
++	if (field_name=='fax')
++		{
++		var log_call = record_id + '';
++		while (log_call.length < 8)
++			{log_call = "0" + log_call;}
++		phone = "18" + log_call;
++		}
++	if (field_name=='email')
++		{
++		var log_call = record_id + '';
++		while (log_call.length < 8)
++			{log_call = "0" + log_call;}
++		phone = "19" + log_call;
++		}
++	var VCcallQuery = "VCcall=1&phone=" + phone + "&vendor_id=" + record_id + '' + callback_flag;
++	xmlhttp.open('POST', 'vtigerservice.php'); 
++	xmlhttp.setRequestHeader('Content-Type','application/x-www-form-urlencoded; charset=UTF-8');
++	xmlhttp.send(VCcallQuery); 
++	xmlhttp.onreadystatechange = function() 
++		{ 
++		if (xmlhttp.readyState == 4 && xmlhttp.status == 200) 
++			{
++		//	alert(xmlhttp.responseText);
++			var Xoutput = null;
++			Xoutput = xmlhttp.responseText;
++			var regXFerr = new RegExp("ERROR","g");
++			if (Xoutput.match(regXFerr))
++				{
++				alert(xmlhttp.responseText);
++				}
++			}
++		}
++	delete xmlhttp;
++	}
++}
++
++function VICIDIALupdate(record_id,field_name) {
++//alert(record_id + "|" + field_name + "|");
++var xmlhttp=false;
++/*@cc_on @*/
++/*@if (@_jscript_version >= 5)
++// JScript gives us Conditional compilation, we can cope with old IE versions.
++// and security blocked creation of the objects.
++ try {
++  xmlhttp = new ActiveXObject("Msxml2.XMLHTTP");
++ } catch (e) {
++  try {
++   xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
++  } catch (E) {
++   xmlhttp = false;
++  }
++ }
++@end @*/
++if (!xmlhttp && typeof XMLHttpRequest!='undefined')
++        {
++        xmlhttp = new XMLHttpRequest();
++        }
++if (xmlhttp)
++        {
++        var VCupdateQuery = "VCupdate=1&contact_id=" + record_id + '';
++        xmlhttp.open('POST', 'vtigerservice.php');
++        xmlhttp.setRequestHeader('Content-Type','application/x-www-form-urlencoded; charset=UTF-8');
++        xmlhttp.send(VCupdateQuery);
++        xmlhttp.onreadystatechange = function()
++                {
++                if (xmlhttp.readyState == 4 && xmlhttp.status == 200)
++                        {
++                //      alert(xmlhttp.responseText);
++                        var Xoutput = null;
++                        Xoutput = xmlhttp.responseText;
++                        var regXFerr = new RegExp("ERROR","g");
++                        if (Xoutput.match(regXFerr))
++                                {
++                                alert(xmlhttp.responseText);
++                                }
++                        }
++                }
++        delete xmlhttp;
++        }
++}
++
+ function fnHide_Event(obj){
+         document.getElementById(obj).style.visibility = 'hidden';
+ }
+--- ../vtigercrm510orig/vtigerservice.php	2009-12-29 10:45:35.000000000 -0500
++++ ./vtigerservice.php	2009-12-29 10:53:48.000000000 -0500
+@@ -41,13 +41,115 @@
+ }
+ else
+ {
+-	echo "<h1>vtigerCRM Soap Services</h1>";
++	if(isset($_REQUEST['VCcall']))
++	{
++		$CL=':';
++		$server_name = getenv("SERVER_NAME");
++		$server_port = getenv("SERVER_PORT");
++		if (eregi("443",$server_port)) {$HTTPprotocol = 'https://';}
++		  else {$HTTPprotocol = 'http://';}
++		if (($server_port == '80') or ($server_port == '443') ) {$server_port='';}
++		else {$server_port = "$CL$server_port";}
++		$URLbase = "$HTTPprotocol$server_name$server_port";
++		
++		$callback_flag='';
++		if(isset($_REQUEST['callback']))
++			{
++			$callback_flag = '&vtiger_callback=YES';
++			}
++		global $entityDel;
++		global $display;
++		global $category;
++		header('Content-Type: text/html; charset='. $charset);
++		session_start();
++		require_once('include/utils/utils.php');
++		require_once('config.inc.php');
++		$default_config_values = Array( "allow_exports"=>"all","upload_maxsize"=>"3000000", "listview_max_textlength" => "40" );
++		set_default_config($default_config_values);
++		require_once('include/logging.php');
++		require_once('modules/Users/Users.php');
++		global $currentModule;
++		$current_user = new Users();
++
++		$log =& LoggerManager::getLogger('index');
++		global $seclog;
++		$seclog =& LoggerManager::getLogger('SECURITY');
++		$log->debug($_REQUEST);
++
++		// Check to see if there is an authenticated user in the session.
++		if(isset($_SESSION["authenticated_user_id"]) && (isset($_SESSION["app_unique_key"]) && $_SESSION["app_unique_key"] == $application_unique_key))
++		{
++			$log->debug("We have an authenticated user id: ".$_SESSION["authenticated_user_id"]);
++			$result = $current_user->retrieveCurrentUserInfoFromFile($_SESSION['authenticated_user_id']);
++			$log->debug('Current user is: '.$current_user->user_name);
++		}
++
++		$phone = $_REQUEST['phone'];   $vendor_id = $_REQUEST['vendor_id'];
++		$user = $current_user->user_name;
++
++		$VCapiURL = "/agc/api.php";
++		$VCpauseQuery = "?source=vtiger&user=1000&pass=1234&agent_user=$user&function=external_pause&value=PAUSE";
++		$VCcallQuery = "?source=vtiger&user=1000&pass=1234&agent_user=$user&function=external_dial&value=$phone&phone_code=1&search=YES&preview=NO&focus=YES&vendor_id=$vendor_id$callback_flag";
++		$replyP = file("$URLbase$VCapiURL$VCpauseQuery");
++//		sleep(1);
++		$replyC = file("$URLbase$VCapiURL$VCcallQuery");
++		echo "$replyP[0]|$replyC[0]\n";
++//		echo "$URLbase$VCapiURL$VCcallQuery\n";
++	}
++        elseif(isset($_REQUEST['VCupdate']))
++        {
++                $CL=':';
++                $server_name = getenv("SERVER_NAME");
++                $server_port = getenv("SERVER_PORT");
++                if (eregi("443",$server_port)) {$HTTPprotocol = 'https://';}
++                  else {$HTTPprotocol = 'http://';}
++                if (($server_port == '80') or ($server_port == '443') ) {$server_port='';}
++                else {$server_port = "$CL$server_port";}
++                $URLbase = "$HTTPprotocol$server_name$server_port";
++                global $entityDel;
++                global $display;
++                global $category;
++                header('Content-Type: text/html; charset='. $charset);
++                session_start();
++                require_once('include/utils/utils.php');
++                require_once('config.inc.php');
++                $default_config_values = Array( "allow_exports"=>"all","upload_maxsize"=>"3000000", "listview_max_textlength" => "40" );
++                set_default_config($default_config_values);
++                require_once('include/logging.php');
++                require_once('modules/Users/Users.php');
++                global $currentModule;
++                $current_user = new Users();
++
++                $log =& LoggerManager::getLogger('index');
++                global $seclog;
++                $seclog =& LoggerManager::getLogger('SECURITY');
++                $log->debug($_REQUEST);
++
++                // Check to see if there is an authenticated user in the session.
++                if(isset($_SESSION["authenticated_user_id"]) && (isset($_SESSION["app_unique_key"]) && $_SESSION["app_unique_key"] == $application_unique_key))
++                {
++                        $log->debug("We have an authenticated user id: ".$_SESSION["authenticated_user_id"]);
++                        $result = $current_user->retrieveCurrentUserInfoFromFile($_SESSION['authenticated_user_id']);
++                        $log->debug('Current user is: '.$current_user->user_name);
++                }
++
++                $contact_id = $_REQUEST['contact_id'];
++                $user = $current_user->user_name;
++
++                $VCapiURL = "/agc/api.php";
++                $VCupdateQuery = "?source=vtiger&user=1000&pass=1234&agent_user=$user&function=update_fields&vendor_lead_code=$contact_id";
++                $replyU = file("$URLbase$VCapiURL$VCupdateQuery");
++                echo "$replyU[0]\n";
++        }
++	else
++	{	echo "<h1>vtigerCRM Soap Services</h1>";
+ 	echo "<li>vtigerCRM Outlook Plugin EndPoint URL -- Click <a href='vtigerservice.php?service=outlook'>here</a></li>";
+ 	echo "<li>vtigerCRM Word Plugin EndPoint URL -- Click <a href='vtigerservice.php?service=wordplugin'>here</a></li>";
+ 	echo "<li>vtigerCRM ThunderBird Extenstion EndPoint URL -- Click <a href='vtigerservice.php?service=thunderbird'>here</a></li>";
+ 	echo "<li>vtigerCRM Customer Portal EndPoint URL -- Click <a href='vtigerservice.php?service=customerportal'>here</a></li>";
+ 	echo "<li>vtigerCRM WebForm EndPoint URL -- Click <a href='vtigerservice.php?service=webforms'>here</a></li>";
+ 	echo "<li>vtigerCRM FireFox Extension EndPoint URL -- Click <a href='vtigerservice.php?service=firefox'>here</a></li>";
++	}
+ }
+ 
+ 
+--- ../vtigercrm510orig/modules/Users/Authenticate.php	2009-12-29 10:45:35.000000000 -0500
++++ ./modules/Users/Authenticate.php	2009-12-29 10:46:20.000000000 -0500
+@@ -64,7 +64,19 @@
+ 	//Security related entries start
+ 	require_once('include/utils/UserInfoUtil.php');
+ 
+-	createUserPrivilegesfile($focus->id);
++	if (file_exists('user_privileges/user_privileges_'.$focus->id.'.php'))
++	{
++		# delete User Priviledges file
++		unlink('user_privileges/user_privileges_'.$focus->id.'.php');
++	}
++	if (file_exists('user_privileges/sharing_privileges_'.$focus->id.'.php'))
++	{
++		# delete Sharing Priviledges file
++		unlink('user_privileges/sharing_privileges_'.$focus->id.'.php');
++	}
++	# create User Sharing Priviledges files
++ 	createUserPrivilegesfile($focus->id);
++	createUserSharingPrivilegesfile($focus->id);
+ 	
+ 	//Security related entries end
+ 	session_unregister('login_password');
+@@ -142,4 +154,4 @@
+ 	header("Location: index.php");
+ }
+ 
+-?>
+\ No newline at end of file
++?>

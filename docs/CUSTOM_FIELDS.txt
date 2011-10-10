@@ -1,0 +1,111 @@
+Custom Fields within the vicidial agent interface		Started: 2010-05-06
+
+
+This document outlines the features and design of the customized fields available in ViciDial.
+
+
+
+Started from this thread: 
+http://www.vicidial.org/VICIDIALforum/viewtopic.php?t=3952&sid=6453071bd2c1859d9bae44add9dae2ff 
+
+Goal: 
+To have a highly scalable, dynamic custom field creation system for use with ViciDial that would be tied to the list_id and could have up to 255 dynamically-defined fields. 
+
+Development Stages: 
+1. Create admin interface to manage dynamic fields per list_id 
+2. Create display of custom fields within the ViciDial agent interface, including variables to be used in web forms and scripts 
+3. Add exporting of custom tables to list download feature as well as the calls export report 
+4. Create list loading interface to put leads into the vicidial_list table and the custom fields, includes reusable template definitions(field mapping) 
+
+Limitations: 
+- You could not dial leads sorted by any custom fields 
+- Only one set of custom fields per list_id
+
+
+
+
+
+
+The new lead loader:
+
+The existing web-based PHP lead loader will be completely removed. In it's place will be a web front-end to upload lead files and trigger lead loading processes that will be run by the current CLI lead loader since it is more full-featured and much easier to maintain. There will be a template(field mapping) creation and modification tool that will allow you to map a field in a file to a specific database table and field.
+
+
+
+
+
+Database backend:
+
+The database elements of this featureset will consist of a definitions table(vicidial_lists_fields) that will define the custom fields for each vicidial list ID, a custom table that is created dynamically in the system using "custom_" + list_id (i.e.: custom_101) that will be created from the table definitions table.
+
+There will also be a field mapping table that you can use as a template to match up file fields with database fields when importing data into ViciDial.
+
+New settings will be added in the astguiclient.conf file for DB_custom_user and DB_custom_pass. These will be used to create and alter the custom_XXX tables.
+
+
+
+
+
+Admin changes:
+
+Added admin_lists_custom.php for these features to be administered. This will allow the viewing of custom fields as well as the copying of custom field definitions to lists with no custom fields.
+
+
+
+
+
+
+MySQL tables:
+####### FOR REFERENCE ONLY, DO NOT USE THESE!!!!!!!!!!!!! ########
+
+GRANT ALTER,CREATE on asterisk.* TO custom@'%' IDENTIFIED BY 'custom1234';
+GRANT ALTER,CREATE on asterisk.* TO custom@localhost IDENTIFIED BY 'custom1234';
+
+ALTER TABLE system_settings ADD custom_fields_enabled ENUM('0','1') default '0';
+
+ALTER TABLE vicidial_users ADD custom_fields_modify ENUM('0','1') default '0';
+
+CREATE TABLE vicidial_lists_fields (
+field_id INT(9) UNSIGNED AUTO_INCREMENT PRIMARY KEY NOT NULL,
+list_id BIGINT(14) UNSIGNED NOT NULL DEFAULT '0',
+field_label VARCHAR(50),
+field_name VARCHAR(1000),
+field_description VARCHAR(100),
+field_rank SMALLINT(5),
+field_help VARCHAR(1000),
+field_type ENUM('TEXT','AREA','SELECT','MULTI','RADIO','CHECKBOX','DATE','TIME') default 'TEXT',
+field_options VARCHAR(5000),
+field_size SMALLINT(5),
+field_max SMALLINT(5),
+field_default VARCHAR(255),
+field_cost SMALLINT(5),
+field_required ENUM('Y','N') default 'N',
+name_position ENUM('LEFT','TOP') default 'LEFT',
+multi_position ENUM('HORIZONTAL','VERTICAL') default 'HORIZONTAL',
+field_order SMALLINT(5) default '1'
+);
+
+CREATE UNIQUE INDEX listfield on vicidial_lists_fields (list_id, field_label);
+
+
+
+
+
+
+
+CREATE TABLE vicidial_lead_import_map (
+map_id VARCHAR(50) PRIMARY KEY NOT NULL,
+map_name VARCHAR(50) DEFAULT '',
+map_notes VARCHAR(255) DEFAULT ''
+);
+
+CREATE TABLE vicidial_lead_import_map_fields (
+map_id VARCHAR(50) NOT NULL,
+file_field SMALLINT(5),
+db_field VARCHAR(100),
+field_functions VARCHAR(255) DEFAULT '',
+field_notes VARCHAR(100) DEFAULT '',
+index (map_id)
+);
+
+CREATE UNIQUE INDEX mapdbfield on vicidial_lead_import_map_fields (map_id, file_field, db_field);

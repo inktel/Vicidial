@@ -1,0 +1,667 @@
+#!/usr/bin/perl
+#
+# VD_amd.agi version 2.4
+#
+# runs after a call goes through AMD in extensions.conf to send the call on to
+# it's proper destination, or when agent sends to VM message
+#
+# You need to put lines similar to those below in your extensions.conf file:
+# 
+# ; VICIDIAL_auto_dialer transfer script AMD with Load Balanced:
+# exten => 8369,1,AGI(call_log.agi,${EXTEN})
+# exten => 8369,2,(AMD),AMD
+# exten => 8369,3,AGI(VD_amd.agi,${EXTEN}-----NO)
+# exten => 8369,4,AGI(agi-VDAD_LB_transfer.agi,${EXTEN})
+# exten => 8369,5,AGI(agi-VDAD_LB_transfer.agi,${EXTEN})
+# exten => 8369,6,AGI(agi-VDAD_LB_transfer.agi,${EXTEN})
+# exten => 8369,7,Hangup
+# 
+# exten => 8320,1,AGI(VD_amd.agi,${EXTEN}-----YES)
+# exten => 8320,2,Hangup
+# exten => _8320*.,1,AGI(VD_amd.agi,${EXTEN}-----YES)
+# exten => _8320*.,2,Hangup
+#
+# Copyright (C) 2011  Matt Florell <vicidial@gmail.com>    LICENSE: AGPLv2
+#
+# changes:
+# 60206-1434 first build
+# 60207-1205 added database records entries/modifications
+# 60207-1507 added ability to send AMs to campaign-defined message to leave
+# 60731-1407 - changed to use DBI-DBD::mysql
+#            - changed to use /etc/astguiclient.conf for configs
+# 60815-1310 - added output options check from database
+# 71118-0252 - compatibility with Asterisk 1.4, added AA and AM statuses
+# 90916-1317 - Changed to audio file playback and TTS playback
+# 90924-1533 - Added answering machine message list_id override option
+# 100205-1025 - Fixed CPD send to message
+# 100327-0819 - Fixed issue with Manual dial treansfers
+# 100430-1606 - Added list_id update to vicidial_log updates
+# 100823-0850 - Changed vac to UPDATE for Auto-alt-dial to function properly
+# 100903-0041 - Changed lead_id max length to 10 digits
+# 101111-1552 - Fixed minor bug in TTS filtering
+# 110324-2334 - Logging changes made
+#
+
+$script = 'VD_amd.agi';
+
+$A = 1;		# set to 1 for AMD output messages mode
+$AMD_LOG = 1;	# set to 1 for logfile
+
+($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
+$year = ($year + 1900);
+$mon++;
+if ($mon < 10) {$mon = "0$mon";}
+if ($mday < 10) {$mday = "0$mday";}
+if ($hour < 10) {$hour = "0$hour";}
+if ($min < 10) {$min = "0$min";}
+if ($sec < 10) {$sec = "0$sec";}
+
+$now_date_epoch = time();
+$now_date = "$year-$mon-$mday $hour:$min:$sec";
+
+# default path to astguiclient configuration file:
+$PATHconf =		'/etc/astguiclient.conf';
+
+open(conf, "$PATHconf") || die "can't open $PATHconf: $!\n";
+@conf = <conf>;
+close(conf);
+$i=0;
+foreach(@conf)
+	{
+	$line = $conf[$i];
+	$line =~ s/ |>|\n|\r|\t|\#.*|;.*//gi;
+	if ( ($line =~ /^PATHhome/) && ($CLIhome < 1) )
+		{$PATHhome = $line;   $PATHhome =~ s/.*=//gi;}
+	if ( ($line =~ /^PATHlogs/) && ($CLIlogs < 1) )
+		{$PATHlogs = $line;   $PATHlogs =~ s/.*=//gi;}
+	if ( ($line =~ /^PATHagi/) && ($CLIagi < 1) )
+		{$PATHagi = $line;   $PATHagi =~ s/.*=//gi;}
+	if ( ($line =~ /^PATHweb/) && ($CLIweb < 1) )
+		{$PATHweb = $line;   $PATHweb =~ s/.*=//gi;}
+	if ( ($line =~ /^PATHsounds/) && ($CLIsounds < 1) )
+		{$PATHsounds = $line;   $PATHsounds =~ s/.*=//gi;}
+	if ( ($line =~ /^PATHmonitor/) && ($CLImonitor < 1) )
+		{$PATHmonitor = $line;   $PATHmonitor =~ s/.*=//gi;}
+	if ( ($line =~ /^VARserver_ip/) && ($CLIserver_ip < 1) )
+		{$VARserver_ip = $line;   $VARserver_ip =~ s/.*=//gi;}
+	if ( ($line =~ /^VARDB_server/) && ($CLIDB_server < 1) )
+		{$VARDB_server = $line;   $VARDB_server =~ s/.*=//gi;}
+	if ( ($line =~ /^VARDB_database/) && ($CLIDB_database < 1) )
+		{$VARDB_database = $line;   $VARDB_database =~ s/.*=//gi;}
+	if ( ($line =~ /^VARDB_user/) && ($CLIDB_user < 1) )
+		{$VARDB_user = $line;   $VARDB_user =~ s/.*=//gi;}
+	if ( ($line =~ /^VARDB_pass/) && ($CLIDB_pass < 1) )
+		{$VARDB_pass = $line;   $VARDB_pass =~ s/.*=//gi;}
+	if ( ($line =~ /^VARDB_port/) && ($CLIDB_port < 1) )
+		{$VARDB_port = $line;   $VARDB_port =~ s/.*=//gi;}
+	$i++;
+	}
+
+if (!$VARDB_port)	{$VARDB_port='3306';}
+if (!$AGILOGfile)	{$AGILOGfile = "$PATHlogs/agiout.$year-$mon-$mday";}
+if (!$CEPLOGfile)	{$CEPLOGfile = "$PATHlogs/Cepstral.$year-$mon-$mday";}
+
+use DBI;
+use Asterisk::AGI;
+$AGI = new Asterisk::AGI;
+
+  
+$dbhA = DBI->connect("DBI:mysql:$VARDB_database:$VARDB_server:$VARDB_port", "$VARDB_user", "$VARDB_pass")
+    or die "Couldn't connect to database: " . DBI->errstr;
+
+### Grab Server values from the database
+$stmtA = "SELECT agi_output FROM servers where server_ip = '$VARserver_ip';";
+$sthA = $dbhA->prepare($stmtA) or die "preparing: ",$dbhA->errstr;
+$sthA->execute or die "executing: $stmtA ", $dbhA->errstr;
+$sthArows=$sthA->rows;
+if ($sthArows > 0)
+	{
+	$AGILOG = '0';
+	@aryA = $sthA->fetchrow_array;
+	$DBagi_output =			$aryA[0];
+	if ($DBagi_output =~ /STDERR/)	{$AGILOG = '1';}
+	if ($DBagi_output =~ /FILE/)	{$AGILOG = '2';}
+	if ($DBagi_output =~ /BOTH/)	{$AGILOG = '3';}
+	}
+$sthA->finish();
+
+### begin parsing run-time options ###
+if (length($ARGV[0])>1)
+	{
+	if ($AGILOG) 
+		{$agi_string = "Perl Environment Dump:";   &agi_output;}
+	$i=0;
+	while ($#ARGV >= $i)
+		{
+		$args = "$args $ARGV[$i]";
+		if ($AGILOG) {$agi_string = "$i|$ARGV[$i]";   &agi_output;}
+		$i++;
+		}
+	
+	### list of command-line array arguments:
+	@ARGV_vars = split(/-----/, $ARGV[0]);
+	$CLI_exten =		$ARGV_vars[0];
+	$force_playback = 	$ARGV_vars[1];
+	}
+
+
+$|=1;
+while(<STDIN>) 
+	{
+	chomp;
+	last unless length($_);
+	if ($AGILOG)
+		{
+		if (/^agi_(\w+)\:\s+(.*)$/)
+			{
+			$AGI{$1} = $2;
+			}
+		}
+
+	if (/^agi_uniqueid\:\s+(.*)$/)		{$unique_id = $1; $uniqueid = $unique_id;}
+	if (/^agi_priority\:\s+(.*)$/)		{$priority = $1;}
+	if (/^agi_channel\:\s+(.*)$/)		{$channel = $1;}
+	if (/^agi_extension\:\s+(.*)$/)		{$extension = $1;}
+	if (/^agi_type\:\s+(.*)$/)		{$type = $1;}
+	if (/^agi_callerid\:\s+(.*)$/)		{$callerid = $1;   $calleridnum = $callerid;}
+	if (/^agi_calleridname\:\s+(.*)$/)	{$calleridname = $1;}
+	}
+
+# extension variables if set: 8320*TESTCAMP*1*9998888112*194239
+if ($extension =~ /\*/)
+	{
+	@EXT_vars = split(/\*/, $extension);
+	$referring_extension =	$EXT_vars[0];
+	$CLIcampaign_id =		$EXT_vars[1];
+	$CLIphone_code = 		$EXT_vars[2];
+	$CLIphone_number =		$EXT_vars[3];
+	$CLIlead_id =			$EXT_vars[4];
+	}
+
+if ( (length($callerid)>20) && ($callerid =~ /\"\S\S\S\S\S\S\S\S\S\S\S\S\S\S\S\S\S\S/) )
+	{
+	$callerid =~ s/^\"//gi;
+	$callerid =~ s/\".*$//gi;
+#	### set the callerid to the ACQS value(calleridname)
+#	print "SET CALLERID $callerid\n";
+#	checkresult($result);
+#	print STDERR "callerID changed: $callerid\n";
+	}
+if ( (
+(length($calleridname)>5) && ( (!$callerid) or ($callerid =~ /unknown|private|00000000/i) or ($callerid =~ /5551212/) )
+) or ( (length($calleridname)>17) && ($calleridname =~ /\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d/) ) )
+	{
+	$callerid = $calleridname;
+#	### set the callerid to the ACQS value(calleridname)
+#	print "SET CALLERID $callerid\n";
+#	checkresult($result);
+#	print STDERR "callerID changed: $callerid\n";
+	}
+
+
+if ($AGILOG) {$agi_string = "AGI Environment Dump:";   &agi_output;}
+
+foreach $i (sort keys %AGI) 
+	{
+	if ($AGILOG) {$agi_string = " -- $i = $AGI{$i}";   &agi_output;}
+	}
+
+if ($AGILOG) {$agi_string = "AGI Variables: |$unique_id|$channel|$extension|$type|$callerid|";   &agi_output;}
+
+
+$VDADcampaign='';
+$VDADphone='';
+$VDADphone_code='';
+
+$callerid =~ s/\"//gi;
+$callerid =~ s/ .*//gi;
+$CIDlead_id = $callerid;
+$CIDlead_id = substr($CIDlead_id, 10, 10);
+$CIDlead_id = ($CIDlead_id + 0);
+if ( ($CLIlead_id > 0) && ($CIDlead_id < 1) ) {$CIDlead_id = $CLIlead_id;}
+$VD_lead_id = $CIDlead_id;
+
+if ($AGILOG) {$agi_string = "+++++ VD amd START : |$CIDlead_id|$now_date|$AST_ver|$priority|$calleridname|";   &agi_output;}
+
+
+if ( ($channel =~ /Local/i) && ($AST_ver !~ /^1\.0\.8|^1\.0\.9/) )
+	{
+	if ($AGILOG) {$agi_string = "+++++ VDAD START LOCAL CHANNEL: EXITING- $priority";   &agi_output;}
+	if ($priority > 2) {sleep(1);}
+	exit;
+	}
+
+
+$AMDSTATUS = $AGI->get_variable(AMDSTATUS);
+$AMDCAUSE =	$AGI->get_variable(AMDCAUSE);
+
+if ($A)
+	{
+	if ($AGILOG) {$agi_string = "AAAAA AMD results: |$AMDSTATUS|$AMDCAUSE|";   &agi_output;}
+	}
+
+# Asterisk 1.2.X
+# AAAAA AMD results: |AMD_PERSON|AMD_HUMAN-300-300|
+# AAAAA AMD results: |AMD_MACHINE|AMD_LONGGREETING-1500-1500|
+# Asterisk 1.4.X:
+# AAAAA AMD results: |HUMAN|HUMAN-1000-1000|0000000000| 
+# AAAAA AMD results: |MACHINE|MAXWORDS-4-4|0000000000| 
+
+if ($AMD_LOG) 
+	{
+	open(Lout, ">>$PATHlogs/AMD_log.txt")
+			|| die "Can't open $PATHlogs/AMD_log.txt: $!\n";
+	print Lout "$now_date|$VD_lead_id|      |$AMDSTATUS|$AMDCAUSE|$calleridnum|\n";
+	close(Lout);
+	}
+
+
+##################################################################################
+########## AMD says it's a person so exit and go on to transfer scripts ##########
+if ( ($AMDSTATUS =~ /PERSON|HUMAN|NOTSURE|HANGUP/) && ($force_playback !~ /YES/) )
+	{
+	if ($A) 
+		{
+		if ($AGILOG) {$agi_string = "      AMD exiting";   &agi_output;}
+		}
+	exit;
+	}
+
+else
+	{
+	################################################################################
+	########## AMD says it's a machine so modify statuses and hangup call ##########
+	########## or play back a message on AMs  ##########
+
+	$AGI->stream_file('sip-silence');
+	$AGI->stream_file('sip-silence');
+
+
+	########## FIND ext_context from the servers table ##########
+	$stmtA = "SELECT ext_context FROM servers where server_ip = '$VARserver_ip';";
+		if ($AGILOG) {$agi_string = "|$stmtA|";   &agi_output;}
+	$sthA = $dbhA->prepare($stmtA) or die "preparing: ",$dbhA->errstr;
+	$sthA->execute or die "executing: $stmtA ", $dbhA->errstr;
+	$sthArows=$sthA->rows;
+	 $rec_count=0;
+	while ($sthArows > $rec_count)
+		{
+		@aryA = $sthA->fetchrow_array;
+		$DBext_context	= $aryA[0];
+		if ($DBext_context)		{$ext_context = $DBext_context;}
+		 $rec_count++;
+		}
+	$sthA->finish();
+
+
+	########## FIND vicidial_auto_calls record ##########
+	$stmtA = "SELECT campaign_id,phone_code,phone_number FROM vicidial_auto_calls where callerid='$callerid' order by auto_call_id desc limit 1;";
+	$sthA = $dbhA->prepare($stmtA) or die "preparing: ",$dbhA->errstr;
+	$sthA->execute or die "executing: $stmtA ", $dbhA->errstr;
+	$sthArows=$sthA->rows;
+	if ($AGILOG) {$agi_string = "$sthArows|$stmtA|";   &agi_output;}
+	if ($sthArows > 0)
+		{
+		@aryA = $sthA->fetchrow_array;
+		$VD_campaign_id		= $aryA[0];
+		$VD_phone_code		= $aryA[1];
+		$VD_phone_number	= $aryA[2];
+		$sthA->finish();
+		}
+	if ( (length($CLIcampaign_id) > 1) && (length($VD_campaign_id) < 1) )
+		{$VD_campaign_id = $CLIcampaign_id;}
+	if ( (length($CLIphone_code) > 1) && (length($VD_phone_code) < 1) )
+		{$VD_phone_code = $CLIphone_code;}
+	if ( (length($CLIphone_number) > 1) && (length($VD_phone_number) < 1) )
+		{$VD_phone_number = $CLIphone_number;}
+
+	if ($AMDSTATUS !~ /CPD/)
+		{
+		########## UPDATE vicidial_list ##########
+		$stmtA = "UPDATE vicidial_list set status='AA' where lead_id = '$VD_lead_id';";
+			if ($AGILOG) {$agi_string = "|$stmtA|";   &agi_output;}
+			$affected_rows = $dbhA->do($stmtA);
+		if ($AGILOG) {$agi_string = "--    VDAD vicidial_list update: |$affected_rows|$VD_lead_id";   &agi_output;}
+		}
+
+	### find list_id for this lead
+	$stmtA = "SELECT list_id from vicidial_list where lead_id = '$VD_lead_id';";
+	$sthA = $dbhA->prepare($stmtA) or die "preparing: ",$dbhA->errstr;
+	$sthA->execute or die "executing: $stmtA ", $dbhA->errstr;
+	$sthArowsL=$sthA->rows;
+	if ($sthArowsL > 0)
+		{
+		@aryA = $sthA->fetchrow_array;
+		$VD_list_id =	$aryA[0];
+		}
+	$sthA->finish();
+
+	########## UPDATE vicidial_auto_calls entry ##########
+	$stmtA = "UPDATE vicidial_auto_calls set status='AA' where callerid='$callerid' order by auto_call_id desc limit 1;";
+		$affected_rows = $dbhA->do($stmtA);
+	if ($AGILOG) {$agi_string = "--    VDAC record updated: |$affected_rows|   |$VD_lead_id|$uniqueid|$VD_callerid";   &agi_output;}
+
+	########## FIND AND UPDATE vicidial_log ##########
+	$Euniqueid=$uniqueid;
+	$Euniqueid =~ s/\.\d+$//gi;
+	$stmtA = "SELECT start_epoch,uniqueid FROM vicidial_log where lead_id='$VD_lead_id' and uniqueid LIKE \"$Euniqueid%\" order by call_date desc limit 10;";
+		if ($AGILOG) {$agi_string = "|$stmtA|";   &agi_output;}
+	$sthA = $dbhA->prepare($stmtA) or die "preparing: ",$dbhA->errstr;
+	$sthA->execute or die "executing: $stmtA ", $dbhA->errstr;
+	$sthArows=$sthA->rows;
+	$epc_countCUSTDATA=0;
+	$first_uniqueid='';
+	while ($sthArows > $epc_countCUSTDATA)
+		{
+		@aryA = $sthA->fetchrow_array;
+		$VD_start_epoch		= $aryA[0];
+		$uniqueid			= $aryA[1];
+		if ($epc_countCUSTDATA < 1) {$first_uniqueid = $aryA[1];}
+		$epc_countCUSTDATA++;
+		}
+	$sthA->finish();
+
+	if ($epc_countCUSTDATA > 1)
+		{
+		$stmtA = "DELETE from vicidial_log where uniqueid='$first_uniqueid' and lead_id='$VD_lead_id' limit 1;";
+			if ($AGILOG) {$agi_string = "|$stmtA|";   &agi_output;}
+		$affected_rows = $dbhA->do($stmtA);
+		if ($AGILOG) {$agi_string = "--    VDAD vicidial_log duplicate delete: |$affected_rows|$uniqueid|$first_uniqueid|$VD_lead_id|";   &agi_output;}
+		}
+
+	if (!$epc_countCUSTDATA)
+		{
+		if ($AGILOG) {$agi_string = "no VDL record found: $uniqueid $calleridname $VD_lead_id $uniqueid";   &agi_output;}
+		$end_epoch = ($now_date_epoch + 3);
+		$stmtA = "INSERT INTO vicidial_log (uniqueid,lead_id,campaign_id,call_date,start_epoch,status,phone_code,phone_number,user,processed,length_in_sec,end_epoch,list_id) values('$uniqueid','$VD_lead_id','$VD_campaign_id','$now_date','$now_date_epoch','AA','$VD_phone_code','$VD_phone_number','VDAD','N','3','$end_epoch','$VD_list_id')";
+			if ($AGILOG) {$agi_string = "|$stmtA|";   &agi_output;}
+		$affected_rows = $dbhA->do($stmtA);
+		}
+	else
+		{
+		$VD_seconds = ($now_date_epoch - $VD_start_epoch);
+		$stmtA = "UPDATE vicidial_log set status='AA',end_epoch='$now_date_epoch',length_in_sec='$VD_seconds',list_id='$VD_list_id' where uniqueid='$uniqueid' and  lead_id='$VD_lead_id' order by call_date desc limit 1;";
+			if ($AGILOG) {$agi_string = "|$stmtA|";   &agi_output;}
+		$affected_rows = $dbhA->do($stmtA);
+		if ($AGILOG) {$agi_string = "--    VDAD vicidial_log update: |$affected_rows|$uniqueid|";   &agi_output;}
+		}
+
+
+	### Grab vmail forward message values from the database
+	$stmtA = "SELECT am_message_exten,amd_send_to_vmx,waitforsilence_options FROM vicidial_campaigns where campaign_id = '$VD_campaign_id' limit 1;";
+		if ($AGILOG) {$agi_string = "|$stmtA|";   &agi_output;}
+	$sthA = $dbhA->prepare($stmtA) or die "preparing: ",$dbhA->errstr;
+	$sthA->execute or die "executing: $stmtA ", $dbhA->errstr;
+	$sthArows=$sthA->rows;
+	if ($sthArows > 0)
+		{
+		@aryA = $sthA->fetchrow_array;
+		$DB_am_message_exten	= $aryA[0];
+		$DB_amd_send_to_vmx		= $aryA[1];
+		$waitforsilence_options = $aryA[2];
+		$sthA->finish();
+		}
+	else
+		{
+		$sthA->finish();
+		### Grab vmail forward message values from the database
+		$stmtA = "SELECT am_message_exten,amd_send_to_vmx,waitforsilence_options FROM vicidial_campaigns where closer_campaigns LIKE \"% $VD_campaign_id %\" order by campaign_id limit 1;";
+			if ($AGILOG) {$agi_string = "|$stmtA|";   &agi_output;}
+		$sthA = $dbhA->prepare($stmtA) or die "preparing: ",$dbhA->errstr;
+		$sthA->execute or die "executing: $stmtA ", $dbhA->errstr;
+		$sthArows=$sthA->rows;
+		if ($sthArows > 0)
+			{
+			@aryA = $sthA->fetchrow_array;
+			$DB_am_message_exten	= $aryA[0];
+			$DB_amd_send_to_vmx		= $aryA[1];
+			$waitforsilence_options = $aryA[2];
+			$sthA->finish();
+			}
+		else
+			{$sthA->finish();}
+		}
+
+	### check for list_id override
+	if ( ($DB_amd_send_to_vmx =~ /Y/) || ($AMDSTATUS =~ /CPD/) )
+		{
+		$am_message_exten_override='';
+		### gather list_id overrides
+		$stmtA = "SELECT am_message_exten_override FROM vicidial_lists where list_id='$VD_list_id';";
+		$sthA = $dbhA->prepare($stmtA) or die "preparing: ",$dbhA->errstr;
+		$sthA->execute or die "executing: $stmtA ", $dbhA->errstr;
+		$sthArowsL=$sthA->rows;
+		if ($sthArowsL > 0)
+			{
+			@aryA = $sthA->fetchrow_array;
+			$am_message_exten_override =	$aryA[0];
+			if (length($am_message_exten_override) > 0)
+				{$DB_am_message_exten = $am_message_exten_override;}
+			}
+		$sthA->finish();
+		}
+
+	if ($AGILOG) {$agi_string = "--    AMD campaign values: |$VD_campaign_id|$DB_am_message_exten|$DB_amd_send_to_vmx|";   &agi_output;}
+
+	if ( ( ($DB_amd_send_to_vmx =~ /Y/) || ($force_playback =~ /YES/) ) && (length($DB_am_message_exten) > 0) )
+		{
+		$stmtA = "UPDATE vicidial_log set status='AM' where uniqueid='$uniqueid' and lead_id='$VD_lead_id' order by call_date desc limit 1;";
+			if ($AGILOG) {$agi_string = "|$stmtA|";   &agi_output;}
+		$affected_rows = $dbhA->do($stmtA);
+		if ($AGILOG) {$agi_string = "--    VDAD vicidial_log AM update: |$affected_rows|$uniqueid|";   &agi_output;}
+
+		$stmtA = "UPDATE vicidial_list set status='AM' where lead_id='$VD_lead_id';";
+			if ($AGILOG) {$agi_string = "|$stmtA|";   &agi_output;}
+		$affected_rows = $dbhA->do($stmtA);
+		if ($AGILOG) {$agi_string = "--    VDAD vicidial_list AM update: |$affected_rows|$uniqueid|";   &agi_output;}
+
+
+		##### BEGIN Check if prompt uses TTS, if so, create TTS and set the filename to the generated prompt #####
+		if ($DB_am_message_exten =~ /^TTS/) 
+			{
+			$TTS_filename = $DB_am_message_exten;
+			$TTS_filename =~s/^TTS//gi;
+			$TTS_filename =~s/\|.*//gi;
+
+			if ($AGILOG) {$agi_string = "--    TTS : |$TTS_filename|";   &agi_output;}
+
+			$stmtA = "SELECT lead_id,entry_date,modify_date,status,user,vendor_lead_code,source_id,list_id,phone_number,title,first_name,middle_initial,last_name,address1,address2,address3,city,state,province,postal_code,country_code,gender,date_of_birth,alt_phone,email,security_phrase,comments,called_count,last_local_call_time,rank,owner FROM vicidial_list where lead_id='$VD_lead_id';";
+			$sthA = $dbhA->prepare($stmtA) or die "preparing: ",$dbhA->errstr;
+			$sthA->execute or die "executing: $stmtA ", $dbhA->errstr;
+			$sthArows=$sthA->rows;
+			if ($sthArows > 0)
+				{
+				@aryA = $sthA->fetchrow_array;
+				$TTS_lead_id =			$aryA[0];
+				$TTS_entry_date =		$aryA[1];
+				$TTS_modify_date =		$aryA[2];
+				$TTS_status =			$aryA[3];
+				$TTS_user =				$aryA[4];
+				$TTS_vendor_lead_code =	$aryA[5];
+				$TTS_source_id =		$aryA[6];
+				$TTS_list_id =			$aryA[7];
+				$TTS_phone_number =		$aryA[8];
+				$TTS_title =			$aryA[9];
+				$TTS_first_name =		$aryA[10];
+				$TTS_middle_initial =	$aryA[11];
+				$TTS_last_name =		$aryA[12];
+				$TTS_address1 =			$aryA[13];
+				$TTS_address2 =			$aryA[14];
+				$TTS_address3 =			$aryA[15];
+				$TTS_city =				$aryA[16];
+				$TTS_state =			$aryA[17];
+				$TTS_province =			$aryA[18];
+				$TTS_postal_code =		$aryA[19];
+				$TTS_country_code =		$aryA[20];
+				$TTS_gender =			$aryA[21];
+				$TTS_date_of_birth =	$aryA[22];
+				$TTS_alt_phone =		$aryA[23];
+				$TTS_email =			$aryA[24];
+				$TTS_security_phrase =	$aryA[25];
+				$TTS_comments =			$aryA[26];
+				$TTS_called_count =		$aryA[27];
+				$TTS_last_local_call_time = $aryA[28];
+				$TTS_rank =				$aryA[29];
+				$TTS_owner =			$aryA[30];
+				}
+			$sthA->finish();
+
+			$stmtA = "SELECT tts_text,tts_voice FROM vicidial_tts_prompts where tts_id='$TTS_filename';";
+			$sthA = $dbhA->prepare($stmtA) or die "preparing: ",$dbhA->errstr;
+			$sthA->execute or die "executing: $stmtA ", $dbhA->errstr;
+			$sthArows=$sthA->rows;
+			if ($sthArows > 0)
+				{
+				@aryA = $sthA->fetchrow_array;
+				$TTS_voice =	$aryA[1];
+				$TTS_text =		$aryA[0];
+				$TTS_text =~ s/--A--lead_id--B--/$TTS_lead_id/gi;
+				$TTS_text =~ s/--A--entry_date--B--/$TTS_entry_date/gi;
+				$TTS_text =~ s/--A--modify_date--B--/$TTS_modify_date/gi;
+				$TTS_text =~ s/--A--status--B--/$TTS_status/gi;
+				$TTS_text =~ s/--A--user--B--/$TTS_user/gi;
+				$TTS_text =~ s/--A--vendor_lead_code--B--/$TTS_vendor_lead_code/gi;
+				$TTS_text =~ s/--A--source_id--B--/$TTS_source_id/gi;
+				$TTS_text =~ s/--A--list_id--B--/$TTS_list_id/gi;
+				$TTS_text =~ s/--A--phone_number--B--/$TTS_phone_number/gi;
+				$TTS_text =~ s/--A--title--B--/$TTS_title/gi;
+				$TTS_text =~ s/--A--first_name--B--/$TTS_first_name/gi;
+				$TTS_text =~ s/--A--middle_initial--B--/$TTS_middle_initial/gi;
+				$TTS_text =~ s/--A--last_name--B--/$TTS_last_name/gi;
+				$TTS_text =~ s/--A--address1--B--/$TTS_address1/gi;
+				$TTS_text =~ s/--A--address2--B--/$TTS_address2/gi;
+				$TTS_text =~ s/--A--address3--B--/$TTS_address3/gi;
+				$TTS_text =~ s/--A--city--B--/$TTS_city/gi;
+				$TTS_text =~ s/--A--state--B--/$TTS_state/gi;
+				$TTS_text =~ s/--A--province--B--/$TTS_province/gi;
+				$TTS_text =~ s/--A--postal_code--B--/$TTS_postal_code/gi;
+				$TTS_text =~ s/--A--country_code--B--/$TTS_country_code/gi;
+				$TTS_text =~ s/--A--gender--B--/$TTS_gender/gi;
+				$TTS_text =~ s/--A--date_of_birth--B--/$TTS_date_of_birth/gi;
+				$TTS_text =~ s/--A--alt_phone--B--/$TTS_alt_phone/gi;
+				$TTS_text =~ s/--A--email--B--/$TTS_email/gi;
+				$TTS_text =~ s/--A--security_phrase--B--/$TTS_security_phrase/gi;
+				$TTS_text =~ s/--A--comments--B--/$TTS_comments/gi;
+				$TTS_text =~ s/--A--called_count--B--/$TTS_called_count/gi;
+				$TTS_text =~ s/--A--last_local_call_time--B--/$TTS_last_local_call_time/gi;
+				$TTS_text =~ s/--A--rank--B--/$TTS_rank/gi;
+				$TTS_text =~ s/--A--owner--B--/$TTS_owner/gi;
+				$TTS_text =~ s/[^,\.\<\>\'\/\=\_\-\: 0-9a-zA-Z]//gi;
+				$TTS_textRAW =	$TTS_text;
+				$TTS_text =~ s/ /\\ /gi;
+				$TTS_text =~ s/\./\\./gi;
+				$TTS_text =~ s/\=/\\=/gi;
+				$TTS_text =~ s/\</\\</gi;
+				$TTS_text =~ s/\>/\\>/gi;
+				$TTS_text =~ s/\//\\\//gi;
+				$TTS_text =~ s/\'/\\'/gi;
+			#	$voice = 'Allison-8kHz';
+				print STDERR "\nGenerating: $TTS_text - $TTS_voice\n";
+				`$PATHagi/cepstral_generate.pl --debug --voice=$TTS_voice --dialog=$TTS_text >> $CEPLOGfile `;
+
+				use Digest::MD5 qw(md5_hex);
+
+				$enc = md5_hex("$TTS_textRAW-$TTS_voice");	# the hash
+				$enc_ftl = substr($enc, 0, 2);	# first letter of hash
+				$TTS_filename_path = $PATHsounds . "/tts/" . $enc_ftl . "/tts-" . $enc;
+				print STDERR "\nfilename: $TTS_filename_path\n";
+
+				$DB_am_message_exten = $TTS_filename_path;
+				}
+			$sthA->finish();
+			}
+		##### END Check if prompt uses TTS, if so, create TTS and set the filename to the generated prompt #####
+
+
+		### run waitforsilence if enabled
+		if (length($waitforsilence_options) > 0)
+			{
+			$AGI->exec("WaitForSilence","$waitforsilence_options");
+			}
+
+		### play messages
+		if ($DB_am_message_exten =~ /\|/)
+			{
+			@DB_am_message_exten_array = split(/\|/,$DB_am_message_exten);
+			$w=0;
+			foreach(@DB_am_message_exten_array)
+				{
+				if (length($DB_am_message_exten_array[$w])>0)
+					{
+					$AGI->stream_file("$DB_am_message_exten_array[$w]");
+					}
+				$w++;
+				}
+			}
+		else
+			{$AGI->stream_file("$DB_am_message_exten");}
+
+
+		$stmtA = "UPDATE vicidial_log set status='AL' where uniqueid='$uniqueid' and lead_id='$VD_lead_id' order by call_date desc limit 1;";
+			if ($AGILOG) {$agi_string = "|$stmtA|";   &agi_output;}
+		$affected_rows = $dbhA->do($stmtA);
+		if ($AGILOG) {$agi_string = "--    VDAD vicidial_log AL update: |$affected_rows|$uniqueid|";   &agi_output;}
+
+		$stmtA = "UPDATE vicidial_list set status='AL' where lead_id='$VD_lead_id';";
+			if ($AGILOG) {$agi_string = "|$stmtA|";   &agi_output;}
+		$affected_rows = $dbhA->do($stmtA);
+		if ($AGILOG) {$agi_string = "--    VDAD vicidial_list AL update: |$affected_rows|$uniqueid|";   &agi_output;}
+		}
+
+
+	$dbhA->disconnect();
+
+	$AGI->hangup($channel);
+
+	exit;
+	}
+
+
+
+
+
+exit;
+
+sub checkresult 
+	{
+	my ($res) = @_;
+	my $retval;
+	$tests++;
+	chomp $res;
+	if ($res =~ /^200/) 
+		{
+		$res =~ /result=(-?\d+)/;
+		if (!length($1)) 
+			{
+		#	print STDERR "FAIL ($res)\n";
+			$fail++;
+			} 
+		else 
+			{
+		#	print STDERR "PASS ($1)\n";
+			$pass++;
+			}
+		}
+	else
+		{
+	#	print STDERR "FAIL (unexpected result '$res')\n";
+		$fail++;
+		}
+	}
+
+
+sub agi_output
+	{
+	if ($AGILOG >=2)
+		{
+		### open the log file for writing ###
+		open(Lout, ">>$AGILOGfile")
+				|| die "Can't open $AGILOGfile: $!\n";
+		print Lout "$now_date|$script|$agi_string\n";
+		close(Lout);
+		}
+		### send to STDERR writing ###
+	if ( ($AGILOG == '1') || ($AGILOG == '3') )
+		{print STDERR "$now_date|$script|$agi_string\n";}
+	$agi_string='';
+	}

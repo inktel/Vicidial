@@ -1,0 +1,415 @@
+#!/usr/bin/perl
+#
+# agi-record_prompts.agi version 2.2.0-4
+#
+# for recording prompts to GSM file over the phone
+# Saves recordings with 8-digit filenames to be played when exten is dialed
+#
+#	; prompts for recording AGI script, ID is 4321
+#   ; first variable is format (gsm/wav)
+#	; second variable is timeout in milliseconds (default is 360000 [6 minutes])
+#	exten => 8167,1,Answer
+#	exten => 8167,2,AGI(agi-record_prompts.agi,wav-----360000)
+#	exten => 8167,3,Hangup
+#	exten => 8168,1,Answer
+#	exten => 8168,2,AGI(agi-record_prompts.agi,gsm-----360000)
+#	exten => 8168,3,Hangup
+#
+#	; playback of recorded prompts
+#	exten => _851XXXXX,1,Answer
+#	exten => _851XXXXX,2,Playback(${EXTEN})
+#	exten => _851XXXXX,3,Hangup
+#
+#	GSM Sound Files used:
+#	- ld_welcome_pin_number
+#	- ld_invalid_pin_number
+#	- vm-rec-generic
+#	- auth-thankyou
+#	- vm-review
+#	- vm-msgsaved
+#	- vm-goodbye
+#
+# Copyright (C) 2009  Matt Florell <vicidial@gmail.com>    LICENSE: AGPLv2
+#
+# CHANGELOG
+# 71226-1303 - Added option to change format GSM/WAV and timeout through flags
+# 90519-1019 - Changed formatting to conform to other scripts
+#
+
+$US='_';
+
+use Asterisk::AGI;
+$AGI = new Asterisk::AGI;
+
+### begin parsing run-time options ###
+if (length($ARGV[0])>1)
+	{
+	$i=0;
+	while ($#ARGV >= $i)
+		{
+		$args = "$args $ARGV[$i]";
+		$i++;
+		}
+	
+	### list of command-line array arguments:
+	@ARGV_vars = split(/-----/, $ARGV[0]);
+
+	$format = 	$ARGV_vars[0];
+	$timeout = 	$ARGV_vars[1];
+	}
+
+$|=1;
+while(<STDIN>) 
+	{
+	chomp;
+	last unless length($_);
+	if ($V)
+		{
+		if (/^agi_(\w+)\:\s+(.*)$/)
+			{
+			$AGI{$1} = $2;
+			}
+		}
+	if (/^agi_uniqueid\:\s+(.*)$/)		{$unique_id = $1;}
+	}
+
+if ($format =~ /WAV/i) {$format = 'wav';}
+else {$format = 'gsm';}
+
+if ($timeout < 1) {$timeout = 360000;} # default is 6 minutes
+
+$unique_id_out = $unique_id;
+@NEW_ID = split(/\./, $unique_id_out);
+$NEW_ID_DIF = '.0';
+$unique_id_out = "$NEW_ID[0]$NEW_ID_DIF$NEW_ID[1]";
+
+$pin='';
+$stop_loop=0;
+$quit_program=0;
+$loop_counter=0;
+$REC_id = 85100000;
+$REC_next = 0;
+
+if (-e "/prompt_count.txt")
+	{
+	open(test, "/prompt_count.txt") || die "can't open /prompt_count.txt: $!\n";
+	@test = <test>;
+	close(test);
+
+	$REC_next = ($test[0] + 1);
+	$REC_id = ($REC_id + $REC_next);
+
+	open(test, ">/prompt_count.txt") || die "can't open /prompt_count.txt: $!\n";
+	print test "$REC_next";
+	close(test);
+	}
+else
+	{
+	open(test, ">/prompt_count.txt") || die "can't open /prompt_count.txt: $!\n";
+	print test "1";
+	close(test);
+	$REC_id = ($REC_id + 1);
+	}
+
+$session_recording = "$REC_id";
+print STDERR "Recording ID: $REC_id\n";
+
+&welcome_1;
+
+
+
+print STDERR "DONE Exiting...\n";
+exit;
+
+
+
+##### SUBROUTINES ########################################################
+##### steps ########################################################
+
+sub welcome_1
+	{
+	##### Play welcome message and capture PIN ########################################################
+	while ( (length($pin) ne 4) && (!$stop_loop) )	
+		{
+		&enter_pin_number;
+		&log_transfer;
+
+
+		$loop_counter++;
+		if ($loop_counter > 3) {$stop_loop++;   $quit_program++;}
+		print STDERR "\nPIN|$pin|\n";
+		}
+
+	##### Check PIN account in database ########################################################
+	$rec_count=0;
+		&lookup_account;
+	if (!$rec_count)
+		{
+		# please enter the pin number followed by the pound key
+
+		$AGI->stream_file('ld_invalid_pin_number');   
+
+		$quit_program++;
+		}
+
+	##### quit program if error ########################################################
+	if ($quit_program)
+		{
+		print STDERR "\nexiting the ping app\n";
+		print "SET CONTEXT demo\n";
+			checkresult($result);
+		print "SET EXTENSION 8158\n";
+			checkresult($result);
+		print "SET PRIORITY 3\n";
+			checkresult($result);
+		exit;
+		}
+
+	&record_prompts;
+	}
+
+
+sub record_prompts
+	{
+	$AGI->stream_file('beep');
+	print STDERR "\nrecord_prompts AGI welcome\n";
+	$AGI->stream_file('vm-rec-generic');
+	$AGI->stream_file('beep');
+
+	$digit='';
+	$interrupt_digit='';
+
+	$interrupt_digit = $AGI->record_file("$session_recording", "$format", '123456789*#', "$timeout", 1);
+
+	print STDERR "interrupt_digit |$interrupt_digit|\n";
+
+	$digits_being_entered=1;
+	$digit_loop_counter=0;
+	$totalDTMF='';
+	if ($interrupt_digit > 1)
+		{
+		if ($interrupt_digit == 35) {$interrupt_digit='#';}
+		if ($interrupt_digit == 42) {$interrupt_digit='*';}
+		if ($interrupt_digit == 48) {$interrupt_digit=0;}
+		if ($interrupt_digit == 49) {$interrupt_digit=1;}
+		if ($interrupt_digit == 50) {$interrupt_digit=2;}
+		if ($interrupt_digit == 51) {$interrupt_digit=3;}
+		if ($interrupt_digit == 52) {$interrupt_digit=4;}
+		if ($interrupt_digit == 53) {$interrupt_digit=5;}
+		if ($interrupt_digit == 54) {$interrupt_digit=6;}
+		if ($interrupt_digit == 55) {$interrupt_digit=7;}
+		if ($interrupt_digit == 56) {$interrupt_digit=8;}
+		if ($interrupt_digit == 57) {$interrupt_digit=9;}
+		
+		$totalDTMF=$interrupt_digit;
+		$digit_loop_counter++;
+		}
+
+	$AGI->stream_file('beep');
+
+	if (length($totalDTMF) > 0) {print STDERR "digit |$digit|     TotalDTMF |$totalDTMF|\n";}
+
+	&verify_recording;
+	}
+
+
+sub verify_recording
+	{
+	$digit='';
+	$interrupt_digit='';
+
+	$interrupt_digit = $AGI->stream_file('vm-review','123456789');
+
+	print STDERR "interrupt_digit |$interrupt_digit|\n";
+
+	$digits_being_entered=1;
+	$digit_loop_counter=0;
+	$totalDTMF='';
+	if ($interrupt_digit > 1)
+		{
+		if ($interrupt_digit == 35) {$interrupt_digit='#';}
+		if ($interrupt_digit == 42) {$interrupt_digit='*';}
+		if ($interrupt_digit == 48) {$interrupt_digit=0;}
+		if ($interrupt_digit == 49) {$interrupt_digit=1;}
+		if ($interrupt_digit == 50) {$interrupt_digit=2;}
+		if ($interrupt_digit == 51) {$interrupt_digit=3;}
+		if ($interrupt_digit == 52) {$interrupt_digit=4;}
+		if ($interrupt_digit == 53) {$interrupt_digit=5;}
+		if ($interrupt_digit == 54) {$interrupt_digit=6;}
+		if ($interrupt_digit == 55) {$interrupt_digit=7;}
+		if ($interrupt_digit == 56) {$interrupt_digit=8;}
+		if ($interrupt_digit == 57) {$interrupt_digit=9;}
+		
+		$totalDTMF=$interrupt_digit;
+		$digit_loop_counter++;
+		}
+
+
+	while ($digit_loop_counter < 1)
+		{
+		$digit = chr($AGI->wait_for_digit('2000000'));  # wait 0.2 seconds for input or until the pound key is pressed
+		if ($digit =~ /\d/)
+			{
+			$totalDTMF = "$totalDTMF$digit";
+			print STDERR "digit |$digit|     TotalDTMF |$totalDTMF|\n";
+	#		$AGI->say_digits("$digit");
+			undef $digit;
+			}
+		else
+			{
+			$digit_loop_counter=1;
+			}
+		
+		$digit_loop_counter++;
+		}
+
+	$totalDTMF =~ s/\D//gi;
+	$pin = $totalDTMF;
+
+	if (length($pin)< 1)
+		{
+		&verify_recording;
+		}
+	else
+		{
+		if ($pin == '1')
+			{
+			$AGI->stream_file('auth-thankyou');   
+			$AGI->say_digits("$REC_id");
+			$AGI->stream_file('beep');   
+			$AGI->say_digits("$REC_id");
+			$AGI->stream_file('vm-goodbye');   
+			exit;
+			}
+		if ($pin == '2')
+			{
+			$AGI->stream_file("$session_recording");
+			&verify_recording;
+			}
+		if ($pin == '3')
+			{
+			&record_prompts;
+			}
+
+		}
+	}
+
+
+
+
+
+##### SUBROUTINES PROCESSES ########################################################
+
+sub log_transfer
+	{
+	# nothing
+	}
+
+
+sub lookup_account
+	{
+	if ($pin eq '4321')
+		{
+		$rec_count++;
+		} 
+	}
+
+
+sub get_time_now	#get the current date and time and epoch for logging call lengths and datetimes
+	{
+	($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
+	$year = ($year + 1900);
+	$mon++;
+	if ($mon < 10) {$mon = "0$mon";}
+	if ($mday < 10) {$mday = "0$mday";}
+	if ($hour < 10) {$hour = "0$hour";}
+	if ($min < 10) {$min = "0$min";}
+	if ($sec < 10) {$sec = "0$sec";}
+
+	$now_date_epoch = time();
+	$now_date = "$year-$mon-$mday $hour:$min:$sec";
+	}
+
+
+
+
+
+sub enter_pin_number
+	{
+	# please enter the pin number followed by the pound key
+
+	$interrupt_digit='';
+
+	$interrupt_digit = $AGI->stream_file('ld_welcome_pin_number','123456789');   
+
+	print STDERR "interrupt_digit |$interrupt_digit|\n";
+
+	$digits_being_entered=1;
+	$totalDTMF='';
+	if ($interrupt_digit > 0)
+		{
+		if ($interrupt_digit == 48) {$interrupt_digit=0;}
+		if ($interrupt_digit == 49) {$interrupt_digit=1;}
+		if ($interrupt_digit == 50) {$interrupt_digit=2;}
+		if ($interrupt_digit == 51) {$interrupt_digit=3;}
+		if ($interrupt_digit == 52) {$interrupt_digit=4;}
+		if ($interrupt_digit == 53) {$interrupt_digit=5;}
+		if ($interrupt_digit == 54) {$interrupt_digit=6;}
+		if ($interrupt_digit == 55) {$interrupt_digit=7;}
+		if ($interrupt_digit == 56) {$interrupt_digit=8;}
+		if ($interrupt_digit == 57) {$interrupt_digit=9;}
+		
+		$totalDTMF=$interrupt_digit;
+		}
+
+	$digit_loop_counter=0;
+	while ( ($digits_being_entered) && ($digit_loop_counter < 20) )
+		{
+		$digit = chr($AGI->wait_for_digit('90000'));  # wait 90 seconds for input or until the pound key is pressed
+		if ($digit =~ /\d/)
+			{
+			$totalDTMF = "$totalDTMF$digit";
+			print STDERR "digit |$digit|     TotalDTMF |$totalDTMF|\n";
+	#		$AGI->say_digits("$digit");
+			undef $digit;
+			}
+		else
+			{
+			$digits_being_entered=0;
+			}
+		
+		$digit_loop_counter++;
+		}
+
+	$totalDTMF =~ s/\D//gi;
+	$pin = $totalDTMF;
+	if ($totalDTMF) {print STDERR "digit |$digit|     TotalDTMF |$totalDTMF|\n";}
+	}
+
+
+sub checkresult 
+	{
+	my ($res) = @_;
+	my $retval;
+	$tests++;
+	chomp $res;
+	if ($res =~ /^200/) 
+		{
+		$res =~ /result=(-?\d+)/;
+		if (!length($1)) 
+			{
+			print STDERR "FAIL ($res)\n";
+			$fail++;
+			} 
+		else 
+			{
+			print STDERR "PASS ($1)\n";
+			$pass++;
+			}
+		} 
+	else 
+		{
+		print STDERR "FAIL (unexpected result '$res')\n";
+		$fail++;
+		}
+	}

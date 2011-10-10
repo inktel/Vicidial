@@ -1,0 +1,293 @@
+#!/usr/bin/perl
+#
+# agi-VDADlisten_DTMF.agi version 2.0.5   *DBI-version*
+# 
+# To be initiated by an agent so during a call. Agent will click a PIN NUMBER
+# link on a web form webpage that will Originate a new call to this script
+#
+# This script plays a beep and waits for entry of 4 digits then inserts record
+#
+# ***** THIS SCRIPT ONLY WORKS WITH A CROSSOVER T1 CABLE FROM ONE T1 PORT *****
+# ***** TO ANOTHER T1 PORT WHETHER ON THE SAME SERVER OR DIFFERENT ONE    *****
+#
+# IN THE CAMPAIGN OR IN-GROUP NUMBER PRESET FIELD:
+# AXFER83009
+#
+# ON THE SERVER ORIGINATING THE CALL:
+#;outbound DTMF VICIDIAL calls:
+#exten => _983009.,1,AGI(call_log.agi,${EXTEN})
+#exten => _983009.,2,Dial(${TRUNKY}/${EXTEN:1},60)
+#exten => _983009.,3,Hangup
+#
+# ON THE SERVER THAT HAS THIS SCRIPT:
+#;inbound DTMF VICIDIAL calls:
+#exten => _83009.,1,AGI(agi-VDADlisten_DTMF.agi,${EXTEN})
+#exten => _83009.,2,Hangup
+#
+# Copyright (C) 2008  Matt Florell <vicidial@gmail.com>    LICENSE: AGPLv2
+#
+# changes:
+# 60206-1434 first build
+# 60207-1205 - added database records entries/modifications
+# 60207-1507 - added ability to send AMs to campaign-defined message to leave
+# 60731-1536 - changed to use DBI-DBD::mysql
+#            - changed to use /etc/astguiclient.conf for configs
+# 60817-1113 - added output options check from database
+# 70806-1619 - added HeavyDTMF check and filter
+#
+
+$script = 'agi-VDADlisten_DTMF.agi';
+
+$heavyDTMFcheck = 1;	# set to 1 to check for heavy DTMF double-tones
+
+### set defaults for testing
+$referring_extension =	'83009';
+$phone_number =		'9999999999';
+$lead_id =		'999999999';
+$campaign_id =		'TESTCAMP';
+$product_code =		'ABC';
+$user =			'1234';
+$pin =			'0';
+
+($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
+$year = ($year + 1900);
+$mon++;
+if ($mon < 10) {$mon = "0$mon";}
+if ($mday < 10) {$mday = "0$mday";}
+if ($hour < 10) {$hour = "0$hour";}
+if ($min < 10) {$min = "0$min";}
+if ($sec < 10) {$sec = "0$sec";}
+	$SQLdate = "$year-$mon-$mday $hour:$min:$sec";
+
+# default path to astguiclient configuration file:
+$PATHconf =		'/etc/astguiclient.conf';
+
+open(conf, "$PATHconf") || die "can't open $PATHconf: $!\n";
+@conf = <conf>;
+close(conf);
+$i=0;
+foreach(@conf)
+	{
+	$line = $conf[$i];
+	$line =~ s/ |>|\n|\r|\t|\#.*|;.*//gi;
+	if ( ($line =~ /^PATHhome/) && ($CLIhome < 1) )
+		{$PATHhome = $line;   $PATHhome =~ s/.*=//gi;}
+	if ( ($line =~ /^PATHlogs/) && ($CLIlogs < 1) )
+		{$PATHlogs = $line;   $PATHlogs =~ s/.*=//gi;}
+	if ( ($line =~ /^PATHagi/) && ($CLIagi < 1) )
+		{$PATHagi = $line;   $PATHagi =~ s/.*=//gi;}
+	if ( ($line =~ /^PATHweb/) && ($CLIweb < 1) )
+		{$PATHweb = $line;   $PATHweb =~ s/.*=//gi;}
+	if ( ($line =~ /^PATHsounds/) && ($CLIsounds < 1) )
+		{$PATHsounds = $line;   $PATHsounds =~ s/.*=//gi;}
+	if ( ($line =~ /^PATHmonitor/) && ($CLImonitor < 1) )
+		{$PATHmonitor = $line;   $PATHmonitor =~ s/.*=//gi;}
+	if ( ($line =~ /^VARserver_ip/) && ($CLIserver_ip < 1) )
+		{$VARserver_ip = $line;   $VARserver_ip =~ s/.*=//gi;}
+	if ( ($line =~ /^VARDB_server/) && ($CLIDB_server < 1) )
+		{$VARDB_server = $line;   $VARDB_server =~ s/.*=//gi;}
+	if ( ($line =~ /^VARDB_database/) && ($CLIDB_database < 1) )
+		{$VARDB_database = $line;   $VARDB_database =~ s/.*=//gi;}
+	if ( ($line =~ /^VARDB_user/) && ($CLIDB_user < 1) )
+		{$VARDB_user = $line;   $VARDB_user =~ s/.*=//gi;}
+	if ( ($line =~ /^VARDB_pass/) && ($CLIDB_pass < 1) )
+		{$VARDB_pass = $line;   $VARDB_pass =~ s/.*=//gi;}
+	if ( ($line =~ /^VARDB_port/) && ($CLIDB_port < 1) )
+		{$VARDB_port = $line;   $VARDB_port =~ s/.*=//gi;}
+	$i++;
+	}
+
+if (!$VARDB_port) {$VARDB_port='3306';}
+if (!$AGILOGfile) {$AGILOGfile = "$PATHlogs/agiout.$year-$mon-$mday";}
+
+use Time::HiRes qw(gettimeofday);
+use DBI;
+use Asterisk::AGI;
+$AGI = new Asterisk::AGI;
+
+$dbhA = DBI->connect("DBI:mysql:$VARDB_database:$VARDB_server:$VARDB_port", "$VARDB_user", "$VARDB_pass")
+    or die "Couldn't connect to database: " . DBI->errstr;
+
+### Grab Server values from the database
+$stmtA = "SELECT agi_output FROM servers where server_ip = '$VARserver_ip';";
+$sthA = $dbhA->prepare($stmtA) or die "preparing: ",$dbhA->errstr;
+$sthA->execute or die "executing: $stmtA ", $dbhA->errstr;
+$sthArows=$sthA->rows;
+$rec_count=0;
+while ($sthArows > $rec_count)
+	{
+	$AGILOG = '0';
+	 @aryA = $sthA->fetchrow_array;
+		$DBagi_output =			"$aryA[0]";
+		if ($DBagi_output =~ /STDERR/)	{$AGILOG = '1';}
+		if ($DBagi_output =~ /FILE/)	{$AGILOG = '2';}
+		if ($DBagi_output =~ /BOTH/)	{$AGILOG = '3';}
+	 $rec_count++;
+	}
+$sthA->finish();
+
+
+### begin parsing run-time options ###
+if (length($ARGV[0])>1)
+{
+	if ($AGILOG) {$agi_string = "Perl Environment Dump:";   &agi_output;}
+	$i=0;
+	while ($#ARGV >= $i)
+	{
+	$args = "$args $ARGV[$i]";
+	if ($AGILOG) {$agi_string = "$i|$ARGV[$i]";   &agi_output;}
+	$i++;
+	}
+
+	if ($args =~ /--help/i)
+	{
+	print "allowed run time options:\n  [-q] = quiet\n  [-t] = test\n  [-debug] = verbose debug messages\n\n";
+	}
+	else
+	{
+		if ($args =~ /-V/i)
+		{
+		$V=1;
+		}
+		if ($args =~ /-debug/i)
+		{
+		$DG=1;
+		}
+		if ($args =~ /-q/i)
+		{
+		$q=1;
+		$Q=1;
+		}
+		if ($args =~ /-t/i)
+		{
+		$TEST=1;
+		$T=1;
+		}
+	}
+}
+
+$|=1;
+while(<STDIN>) {
+	chomp;
+	last unless length($_);
+	if ($AGILOG)
+	{
+		if (/^agi_(\w+)\:\s+(.*)$/)
+		{
+			$AGI{$1} = $2;
+		}
+	}
+
+	if (/^agi_extension\:\s+(.*)$/)		{$extension = $1;}
+	### allow for internal transfer data string "83009*3125551212*10000123*TESTCAMP*ABC*1234*"
+	if ($extension =~ /^8300\d\*/)
+		{
+		@EXT_vars = split(/\*/, $extension);
+		
+		$referring_extension =	$EXT_vars[0];	# initial extension sent
+		$phone_number =		$EXT_vars[1];	# phone number
+		$lead_id =		$EXT_vars[2];	# lead_id in vicidial_list
+		$campaign_id =		$EXT_vars[3];	# campaign id
+		$product_code =		$EXT_vars[4];	# product code
+		$user =			$EXT_vars[5];	# vicidial_user that sent the call here
+		}
+}
+
+	if ($AGILOG) {$agi_string = "INBOUND DTMF CALL VDCL STARTED";   &agi_output;}
+
+&enter_pin_number;
+
+if (length($pin) < 4) {$AGI->stream_file('buzz');}
+else {$AGI->stream_file('ding');}
+
+### insert a record into the vicidial_list_pins table 
+$stmtA = "INSERT INTO vicidial_list_pins (entry_time,phone_number,lead_id,campaign_id,product_code,user,digits) values('$SQLdate','$phone_number','$lead_id','$campaign_id','$product_code','$user','$pin');";
+
+$affected_rows = $dbhA->do($stmtA);
+
+$insert_pin_id = $dbhA->{'mysql_insertid'};
+
+if ($AGILOG) {$agi_string = "|$stmtA|$insert_pin_id|$affected_rows|";   &agi_output;}
+
+$dbhA->disconnect();
+
+exit;
+
+
+
+
+
+
+
+
+sub enter_pin_number
+{
+$lastdigit='';
+$lastdigittime='';
+
+$AGI->stream_file('beep');
+
+while ( ($digit_loop_counter < 4) )
+	{
+	$digit = chr($AGI->wait_for_digit('30000'));  # wait 30 seconds for input or until the pound key is pressed
+	if ($digit =~ /\d/)
+		{
+		# get seconds and microseconds since the epoch
+		  ($s, $usec) = gettimeofday();
+		  $Susec = sprintf("%06s", $usec);
+		  $utime = "$s$Susec";
+ 
+		  if (length($lastdigittime)<1) {$lastdigittime = $utime;  $lastdigit = 99;  $difftime = 0;}
+		  else
+			{
+			$difftime = ($utime - $lastdigittime);
+			}
+		  print STDERR "$s$Susec - $digit - $lastdigittime - $difftime\n";
+		if ( ($difftime < 200000) && ($digit == $lastdigit) && ($heavyDTMFcheck>0) )
+			{
+			print STDERR "HEAVY DTMF DETECTED AND IGNORED: $digit - $lastdigit - $difftime\n";
+			$digit_loop_counter = ($digit_loop_counter - 1);
+			}
+		else
+			{
+			$totalDTMF = "$totalDTMF$digit";
+			if ($AGILOG) {$agi_string = "digit |$digit|     TotalDTMF |$totalDTMF|";   &agi_output;}
+		#	$AGI->say_digits("$digit");
+			}
+		$lastdigittime = $utime;   $lastdigit = $digit;
+		undef $digit;
+		}
+	else
+		{
+		$digit_loop_counter=4;
+		}
+	
+	$digit_loop_counter++;
+	}
+
+$totalDTMF =~ s/\D//gi;
+$pin = $totalDTMF;
+if ($totalDTMF) 
+	{
+	if ($AGILOG) {$agi_string = "digit |$digit|     TotalDTMF |$totalDTMF|";   &agi_output;}
+	}
+#	$AGI->say_digits("$pin");
+}
+
+
+
+sub agi_output
+{
+if ($AGILOG >=2)
+	{
+	### open the log file for writing ###
+	open(Lout, ">>$AGILOGfile")
+			|| die "Can't open $AGILOGfile: $!\n";
+	print Lout "$now_date|$script|$agi_string\n";
+	close(Lout);
+	}
+	### send to STDERR writing ###
+if ( ($AGILOG == '1') || ($AGILOG == '3') )
+	{print STDERR "$now_date|$script|$agi_string\n";}
+$agi_string='';
+}

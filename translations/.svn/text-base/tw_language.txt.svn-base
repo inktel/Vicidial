@@ -1,0 +1,524 @@
+﻿# tw_language.txt - this file is for the internationalization of the astGUIclient 
+# client web pages. The associated install.pl file will take the language as an 
+# argument and alter the php scripts to the language typed in the command line:
+# example: ./install.pl --language=zt
+# current languages in the file:
+# - English - (en) no alterations
+# - Traditional Chinese - (zt_tw) second column
+***LANGUAGES***
+en-English|tw-中文繁體|
+***FILES***
+agc|astguiclient.php|0
+agc|vicidial.php|0
+agc|vdc_db_query.php|0
+agc|manager_send.php|0
+agc|conf_exten_check.php|0
+agc|inbound_popup.php|0
+agc|active_list_refresh.php|0
+agc|park_calls_display.php|0
+agc|live_exten_check.php|0
+agc|call_log_display.php|0
+agc|voicemail_check.php|0
+agc|dbconnect.php|1
+agc|htglobalize.php|1
+agc|timeclock.php|0
+agc|vdc_script_display.php|1
+agc|vdc_script_notes.php|0
+agc|functions.php|1
+agc|vdc_form_display.php|1
+agc|calendar.css|1
+agc|calendar_db.js|0
+***TRANSLATIONS***
+### special translations that should stay at the top of the file ###
+"JAN"|"一月"|
+"FEB"|"二月"|
+"MAR"|"三月"|
+"APR"|"四月"|
+"MAY"|"五月"|
+"JUN"|"六月"|
+"JLY"|"七月"|
+"AUG"|"八月"|
+"SEP"|"九月"|
+"OCT"|"十月"|
+"NOV"|"十一月"|
+"DEC"|"十二月"|
+\./images/|../agc/images/|
+BORDER|邊界|
+VALUE=SUBMIT|VALUE=SUBMIT|
+TYPE=SUBMIT|TYPE=Submit|
+MAXLENGTH|maxlength|
+### BEGIN translation phrases through 1.1.11 release ###
+English|英文|
+Spanish|西班牙文|
+French|法文|
+German|德文|
+Italian|義大利文|
+agc_check_voicemail_BLINK.gif|agc_check_voicemail_BLINK_tw.gif|
+agc_check_voicemail_OFF.gif|agc_check_voicemail_OFF_tw.gif|
+agc_check_voicemail_ON.gif|agc_check_voicemail_ON_tw.gif|
+agc_live_call_OFF.gif|agc_live_call_OFF.gif|
+agc_live_call_ON.gif|agc_live_call_ON.gif|
+agc_tab_active_lines.gif|agc_tab_active_lines_tw.gif|
+agc_tab_conferences.gif|agc_tab_conferences_tw.gif|
+agc_tab_main.gif|agc_tab_main_tw.gif|
+vdc_LB_dialnextnumber.gif|vdc_LB_dialnextnumber_tw.gif|
+vdc_LB_dialnextnumber_OFF.gif|vdc_LB_dialnextnumber_OFF_tw.gif|
+vdc_LB_grabparkedcall.gif|vdc_LB_grabparkedcall_tw.gif|
+vdc_LB_hangupcustomer.gif|vdc_LB_hangupcustomer_tw.gif|
+vdc_LB_hangupcustomer_OFF.gif|vdc_LB_hangupcustomer_OFF_tw.gif|
+vdc_LB_parkcall.gif|vdc_LB_parkcall_tw.gif|
+vdc_LB_parkcall_OFF.gif|vdc_LB_parkcall_OFF_tw.gif|
+vdc_LB_pause.gif|vdc_LB_pause_tw.gif|
+vdc_LB_pause_OFF.gif|vdc_LB_pause_OFF_tw.gif|
+vdc_LB_resume.gif|vdc_LB_resume_tw.gif|
+vdc_LB_resume_OFF.gif|vdc_LB_resume_OFF_tw.gif|
+vdc_LB_startrecording.gif|vdc_LB_startrecording_tw.gif|
+vdc_LB_stoprecording.gif|vdc_LB_stoprecording_tw.gif|
+vdc_LB_transferconf.gif|vdc_LB_transferconf_tw.gif|
+vdc_LB_transferconf_OFF.gif|vdc_LB_transferconf_OFF_tw.gif|
+vdc_LB_webform.gif|vdc_LB_webform_tw.gif|
+vdc_LB_webform_OFF.gif|vdc_LB_webform_OFF_tw.gif|
+vdc_XB_blindtransfer.gif|vdc_XB_blindtransfer_tw.gif|
+vdc_XB_blindtransfer_OFF.gif|vdc_XB_blindtransfer_OFF_tw.gif|
+vdc_XB_dialwithcustomer.gif|vdc_XB_dialwithcustomer_tw.gif|
+vdc_XB_dialwithcustomer_OFF.gif|vdc_XB_dialwithcustomer_OFF_tw.gif|
+vdc_XB_hangupbothlines.gif|vdc_XB_hangupbothlines_tw.gif|
+vdc_XB_hangupbothlines_OFF.gif|vdc_XB_hangupbothlines_OFF_tw.gif|
+vdc_XB_hangupxferline.gif|vdc_XB_hangupxferline_tw.gif|
+vdc_XB_hangupxferline_OFF.gif|vdc_XB_hangupxferline_OFF_tw.gif|
+vdc_XB_internalcloser.gif|vdc_XB_internalcloser_tw.gif|
+vdc_XB_internalcloser_OFF.gif|vdc_XB_internalcloser_OFF_tw.gif|
+vdc_XB_leave3waycall.gif|vdc_XB_leave3waycall_tw.gif|
+vdc_XB_leave3waycall_OFF.gif|vdc_XB_leave3waycall_OFF_tw.gif|
+vdc_XB_localcloser.gif|vdc_XB_localcloser_tw.gif|
+vdc_XB_localcloser_OFF.gif|vdc_XB_localcloser_OFF_tw.gif|
+vdc_XB_parkcustomerdial.gif|vdc_XB_parkcustomerdial_tw.gif|
+vdc_XB_parkcustomerdial_OFF.gif|vdc_XB_parkcustomerdial_OFF_tw.gif|
+vdc_XB_hotkeysactive.gif|vdc_XB_hotkeysactive_tw.gif|
+vdc_XB_hotkeysactive_OFF.gif|vdc_XB_hotkeysactive_OFF_tw.gif|
+vdc_LB_senddtmf.gif|vdc_LB_senddtmf_tw.gif|
+vdc_LB_senddtmf_OFF.gif|vdc_LB_senddtmf_OFF_tw.gif|
+vdc_XB_header.gif|vdc_XB_header_tw.gif|
+vdc_XB_number.gif|vdc_XB_number_tw.gif|
+vdc_XB_channel.gif|vdc_XB_channel_tw.gif|
+vdc_XB_seconds.gif|vdc_XB_seconds_tw.gif|
+You have now logged out. Thank you|您已成功登出系統|
+astGUIclient web-client VERSION|astGUIclient web-client版本|
+astGUIclient web client|astGUIclient web client|
+VICIDIAL web client|VICIDIAL web client|
+VICIDIAL web-client version|VICIDIAL Web-Client版本|
+You can only monitor Zap channels|您只能監控Zap channels|
+Stop Record|停止錄音|
+you are logged into this phone|您已登入此分機|
+Back to Main Window|回主畫面|
+LIVE CALLS ON THIS PHONE|通話號碼清單|
+LIVE CALLS IN THIS CONFERENCE|多方通話中的參與號碼|
+LIVE CALL TRANSFER|來電轉接|
+CLIENT CHANNEL|進端通道|
+REMOTE CHANNEL|遠端通道|
+CLICK HERE TO LOG IN AGAIN|按此重新登入|
+ACTIVE DISPLAY PAUSED|暫停啟用顯示|
+Main Panel|主控台|
+Active Lines Panel|現行線路控制台|
+Conferences Panel|電話會議控制台|
+Check Voicemail|檢視語音信箱|
+Live Call|通話中電話|
+Hangup Trunk|掛斷 Trunk|
+Hijack Trunk|介入 Trunk|
+Listen Trunk|監聽 Trunk|
+Active Local Menu|啟用Local畫面|
+Hangup Local|掛斷 Local|
+Hijack Local|介入 Local|
+Listen Local|監聽 Local|
+Channel to be transferred|通話已被轉接|
+Extensions Menu|分機表|
+Send to selected extension|傳送給所選分機|
+Send to selected vmail box|傳送給所選語音信箱|
+Send to this number|傳送至該號碼|
+click on a number below to send to a conference|點選號碼以送出會議邀請n|
+Send my channel too|傳送我的CHANNEL|
+Conferences Menu|電話會議功能|
+LOCAL Extensions Dial|撥給LOCAL分機|
+Phone calling from|電話來源|
+Call selected extension|撥打所選分機|
+Call selected vmail box|撥打所選語音信箱|
+LOCAL DIAL EXTENSIONS|LOCAL撥打分機|
+OUTBOUND CALLS|外撥電話|
+INBOUND CALLS|進線電話|
+Refresh rate|更新比例|
+MANUAL DIAL|人工撥號|
+CALL DATE\/TIME|通話日期\/時間|
+LOCAL HANGUP|LOCAL 掛斷|
+PARKED CALLS|PARKED CALLS|
+PARKED BY|PARKED BY|
+PARKED TIME|PARKED TIME|
+Registered to|註冊至|
+Enter Conference|進入電話會議|
+Dial From Conf|由電話會議中撥號|
+Active Extensions|使用中分機|
+Outside Lines|外線|
+Local Extensions|區域分機|
+Data Goes Here|資料至此|
+Trunk Action|Trunk 活動|
+Local Action|Local 活動|
+Conferences List|電話會議列表|
+Click on a conference room number on the left for info on that conference|點選會議室左方可瀏覽相關資訊|
+List Display|清單顯示|
+Live Extensions|進線分機|
+Busy Extensions|忙線分機|
+Outside Lines|外線|
+script runtime|運行腳本|
+Call Log Display|通話記錄顯示|
+is not valid|是無效的|
+or protocol|或協定|
+Conf Extension Check|確認會議中分機|
+has been registered to|被註冊至|
+LIVE INBOUND CALL|進線通話|
+Number Dialed|已撥號碼|
+SEND TO MY VOICEMAIL|傳送至我的語音信箱|
+Live Extension Check|使用中分機確認|
+Manager Send|管理者發送|
+command not inserted|指令未插入|
+command sent for|指令發送 |
+One of these variables|其中一個變數|
+must be greater than 2 characters|需大於兩個字元|
+must be greater than 14 characters|需大於14個字元|
+must be set|需被設定|
+not sent|未送出|
+Cannot find empty conference|找不到空會議|
+is not live|非可用|
+RECORDING WILL LAST UP TO 60 MINUTES|錄音長達60分鐘|
+Parked Calls Display|顯示Parked Call|
+Database Query Script|資料查詢語法|
+Group Choice|群組選項|
+has been registered to user|被註冊至使用者|
+HOPPER EMPTY|HOPPER EMPTY|
+LOG NOT ENTERED|LOG未輸入|
+has been changed to|已被修改為|
+information has been updated|資料已被更新|
+is now in status|目前狀態為|
+Voicemail Check|檢視語音信箱|
+voicemail box|語音信箱|
+Re-Login|重新登入|
+User Password|使用者密碼|
+User Login|使用者登入|
+Phone Login|登入分機|
+Phone Password|分機密碼|
+Campaign not active, please try again|專案活動未啟用，請再試一次|
+Login incorrect, please try again|登入失敗，請重試|
+Campaign Login|專案活動登入|
+Sorry, your phone login and password are not active in this system, please try again|抱歉，分機所輸入的帳號密碼於系統中尚未啟用，請再試一次|
+leads left to call in hopper|leads left to call in hopper|
+CAMPAIGN CUSTOM PARKING|專案活動 CUSTOM PARKING|
+CAMPAIGN DEFAULT PARKING|專案活動 DEFAULT PARKING|
+CAMPAIGN CUSTOM WEB FORM|專案活動 客制表格|
+CAMPAIGN DEFAULT WEB FORM|專案活動 預設表格|
+CAMPAIGN ALLOWS CLOSERS|專案活動 容許關閉|
+CAMPAIGN ALLOWS NO CLOSERS|專案活動 不容許關閉|
+USING PREVIOUS MEETME ROOM|使用先前的會議室|
+USING NEW MEETME ROOM|使用新的會議室|
+old QUEUE and INCALL reverted list|舊的佇列和INCALL回覆列表|
+old QUEUE and INCALL reverted hopper|舊的佇列和INCALL回覆 Hopper|
+old vicidial_live_agents records cleared|值機人員錄音檔清理完畢|
+campaign is set to auto_dial_level|專案活動已設定為自動撥號|
+new vicidial_live_agents record inserted|錄音檔已被新增|
+campaign is set to manual dial|專案活動已設定為人工撥號|
+Sorry, there are no leads in the hopper for this campaign|抱歉，本專案活動已無名單|
+Dial Next Number|撥下一個號碼|
+LIVE CALLS IN YOUR SESSION|您通話中的號碼|
+Stop Recording|停止錄音|
+Start Recording|啟動錄音|
+Transfer number must have more than 1 digit|轉接號碼必須超過一個數字|
+Grab Parked Call|接起 Parked Call|
+Park Call|Park Call|
+Waiting for Ring|進入閒置狀態|
+Called 3rd party|撥給第三方|
+LEAVE 3-WAY CALL|離開三方通話|
+Dial With Customer|Dial With Customer|
+Park Customer Dial|Park Customer Dial|
+Hangup Xfer Line|掛斷轉接線|
+Hangup Both Lines|全部掛斷|
+Hangup Customer|掛斷客戶電話|
+Transfer - Conference|轉接 - 電話會議|
+LOCAL CLOSER|LOCAL CLOSER|
+INTERNAL CLOSER|INTERNAL CLOSER|
+Dial Blind Transfer|Dial Blind Transfer|
+Dial timed out, contact your system administrator|撥號逾時，請與系統管理員聯繫|
+No more leads in the hopper for campaign|本專案活動已無名單|
+Web Form|表格|
+You Must Select a Disposition|請選擇結束碼|
+GROUPS NOT SELECTED|未選擇群組|
+SELECTED GROUPS|已選群組|
+You cannot log out during a Dial attempt|撥號過程中無法登出系統|
+Wait 50 seconds for the dial to fail out if it is not answered|如超過50秒無回應，則屬於撥號失敗|
+STILL A LIVE CALL! Hang it up then you can log out|電話仍在通話中，請先掛斷再登出系統|
+Hide conference call channel information|隱藏電話會議中的來電通道資訊|
+Show conference call channel information|顯示電話會議中的來電通道資訊|
+Logged in as User|以使用者身份登入|
+No one is in your session|無人在你主持的會議中|
+Customer has hung up|客戶已掛斷電話|
+End-of-call Disposition Selection|結束碼選擇|
+CLOSER INBOUND GROUP SELECTION|CLOSER INBOUND GROUP SELECTION|
+Closer Inbound Group Selection|Closer Inbound Group Selection|
+BLENDED CALLING|INBOUND/OUTBOUND BLENDING|
+outbound activated|啟動外撥|
+Preview the Lead then|預覽資料後|
+Lead was not reverted, there was an error|錯誤！名單尚未恢復！|
+call was not placed, there was an error|錯誤！電話未置入！|
+Number to call|撥打號碼|
+Customer Information|客戶資訊|
+Lead Dispositioned As|設定結束碼為|
+Any changes made to the customer information below at this time will not be comitted, You must change customer information before you Hangup the call|你必須先更改客戶資料，再掛斷電話。否則所做變更將不會生效！|
+When active, simply press the keyboard key for the desired disposition for this call. The call will then be hungup and dispositioned automatically|啟用時，只需點選結束碼對應之快捷鍵，系統即會自動下結束碼與掛斷電話|
+Disposition Hot Keys|結束碼快捷鍵|
+Cust Time|Cust Time|
+RECORD ID|音檔編號|
+RECORDING FILE|錄音檔|
+HOT KEYS ACTIVE|啟用快捷鍵|
+HOT KEYS INACTIVE|關閉快捷鍵|
+DIAL OVERRIDE|重撥|
+SKIP LEAD|SKIP LEAD|
+DIAL LEAD|DIAL LEAD|
+LEAD PREVIEW|LEAD PREVIEW|
+PAUSE AGENT DIALING|暫停值機員撥號|
+DISPOSITION CALL|通話結束|
+ session ID| Session ID|
+ to campaign| to campaign|
+Select a CallBack Date|選擇回撥日期|
+ maximize | 最大 |
+ minimize | 最小 |
+You must choose a date|您必須選擇日期|
+Select a Date Below|選擇日期小於|
+Click on a callback below to call the customer back now. If you click on a record below to call it, it will be removed from the list|點選以下回撥紀錄進行客戶回撥，如果點選紀錄進行撥號，該筆紀錄將會從名單內移除|
+If you want to dial a number and have it NOT be added as a new lead, enter in the exact dialstring that you want to call in the Dial Override field below. To hangup this call you will have to open the CALLS IN THIS SESSION link at the bottom of the screen and hang it up by clicking on its channel link there|If you want to dial a number and have it NOT be added as a new lead, enter in the exact dialstring that you want to call in the Dial Override field below. To hangup this call you will have to open the CALLS IN THIS SESSION link at the bottom of the screen and hang it up by clicking on its channel link there|
+YOU CANNOT SKIP A CALLBACK OR MANUAL DIAL, YOU MUST DIAL THE LEAD|您不能跳過回撥或是人工撥號，您必須撥打該筆紀錄|
+YOU MUST BE PAUSED TO MANUAL DIAL A NEW LEAD IN AUTO-DIAL MODE|在自動外撥模式下您必須暫停才可以人工外撥一個新的紀錄|
+Enter information below for the new lead you wish to call|請輸入下面的資訊給您想要外撥的新紀錄|
+YOU MUST BE PAUSED TO CHECK CALLBACKS IN AUTO-DIAL MODE|在自動外撥模式下您必須暫停才可以檢查回撥|
+Note: all new manual dial leads will go into list 999|注意: 所有新的人工外撥紀錄將會進入名單 999|
+YOU DO NOT HAVE PERMISSIONS TO TRANSFER CALLS|您沒有轉接電話的權限|
+will be added to the beginning of this number|將會加在此號碼之前|
+This is usually a 1 in the USA-Canada|This is usually a 1 in the USA-Canada|
+NEW MANUAL DIAL LEAD FOR|新的人工撥號紀錄給|
+Finish and Disposition Call|結束通話並註記結束碼|
+10 digits max - digits only|最多10位數 - 僅支援數字|
+Note: a dial prefix of|Note: a dial prefix of|
+Hangup Again|再次掛斷|
+Go Back|回上一頁|
+Call Agent Again|再次呼叫值機員|
+MY CALLBACK ONLY|只有個人回撥|
+NO ACTIVE CALLBACKS|沒有生效的回撥電話|
+ACTIVE CALLBACKS|生效的回撥電話|
+CALLBACKS FOR AGENT|值機員的回撥電話|
+Dial Code:|Dial Code:|
+Dial Override|Dial Override|
+digits only please|限數字碼輸入|
+Dial Now|立即撥號|
+CB Comments|CB Comments|
+Title|職銜|
+Your Status|您目前的狀態|
+ STATUS| 狀態|
+ RESET| 重置|
+CLEAR FORM|清除表單|
+SUBMIT|確認送出|
+Incoming|Incoming|
+Calling|撥號中|
+Called|已撥號|
+Campaign|活動|
+Status|狀態|
+Inserted|已插入|
+ seconds| 秒|
+HELP|協助|
+ Login | 登入 |
+Login:|登入:|
+User |使用者 |
+Password|密碼|
+VERSION|版本|
+BUILD|版次|
+Server|主機|
+RECORD |錄音 |
+>HANGUP|>掛斷|
+>XFER|轉接|
+PARK|駐留|
+IN-NUMBER|IN-NUMMER|
+NUMBER|號碼|
+CALLERID|CALLERID|
+ CALL| 撥號|
+PICKUP|接起|
+CONFERENCE|會議|
+Refresh|更新|
+Send DTMF|傳送 DTMF|
+ORDER|次序|
+ on | on |
+>LOGOUT|>登出|
+ Channel| 渠道|
+Extensions|分機|
+Conferences|會議|
+Conference|會議|
+Recording|錄音|
+Record|錄音|
+Welcome|歡迎|
+VOICEMAIL|語音信箱|
+ NEW| 新|
+ OLD| 舊|
+ Pause | 暫停 |
+Resume|恢復|
+Faster|較快速|
+Slower|較慢速|
+Initializing|起始中|
+Invalid|無效|
+Username|Username|
+Notes|注意|
+First|名|
+MI: |MI:|
+Last|姓|
+Address|地址|
+City|市|
+State|州|
+PostCode|郵遞區號|
+Province|省|
+Vendor ID|Vendor ID|
+DialCode|DialCode|
+Alt. Phone|其他電話|
+Show|展現|
+Email|電郵|
+Comments|備註|
+REFRESH|更新|
+ALT PHONE DIAL|撥打其他電話|
+MAIN PHONE|主要電話|
+ALT PHONE|其他電話|
+ADDRESS3|地址3|
+FINISH LEAD|結束紀錄|
+Dial Alt Phone Number|撥打其他電話號碼|
+Phone|電話|
+ DIAL| WÄHLEN|
+SUBMIT FAVORITES CHANGES - requires logout|確認送出我的最愛變更 - 需要登出|
+BACK TO MAIN WINDOW - ignore changes made|回到主視窗 - 忽略變更|
+AVAILABLE EXTENSIONS|有空閒的分機|
+ edit| 編輯|
+ FAVORITES| 我的最愛|
+### END translation phrases through 1.1.11 release ###
+Search Existing Leads|搜尋存在的紀錄|
+This option if checked will attempt to find the phone number in the system before inserting it as a new lead|本選項勾選時，在增加新的紀錄時會尋找系統中的電話號碼|
+Finish Wrapup and Move On|結束文書並繼續|
+seconds remaining in wrapup|文書狀態尚餘秒數|
+Call Wrapup:|電話文書:|
+### months of the year for CallBack date select screen ###
+January|一月|
+Frebruary|二月|
+March|三月|
+April|四月|
+May|五月|
+June|六月|
+July|七月|
+August|八月|
+September|九月|
+October|十月|
+November|十一月|
+December|十二月|
+### BEGIN translation phrases for 2.0.1 release ###
+Previous Callback Information|過去的回撥資訊|
+Last Call: |上一通電話:|
+CallBack: |回撥電話:|
+Agent: |值機員:|
+Comments: |備註:|
+### BEGIN translation phrases for 2.0.2 release ###
+VOLUME|音量|
+### BEGIN translation phrases for 2.0.3 release ###
+FAST DIAL|快速撥號|
+YOU MUST ENTER A PHONE NUMBER AND DIAL CODE TO USE FAST DIAL|您必須輸入電話號碼和 DIAL CODE 以使用快速撥號|
+ SELECT A PAUSE CODE :| 選擇暫停原因代碼 :|
+ENTER A PAUSE CODE|輸入暫停原因代碼|
+YOU MUST BE PAUSED TO ENTER A PAUSE CODE IN AUTO-DIAL MODE|在自動撥號模式下您必須入暫停原因代碼才能暫停|
+Your session has been disabled|Your session has been disabled|
+### BEGIN translation phrases for 2.0.4 release ###
+PLEASE CLICK THE LOGOUT LINK TO LOG OUT NEXT TIME|下次登出時請點擊登出連結|
+### BEGIN translation phrases for 2.0.5 release ###
+Gender: |性別: |
+Date of Birth: |生日: |
+YOU MUST BE PAUSED TO CHANGE GROUPS|您必須暫停才能變更群組|
+Calls in Queue:|佇列中等待電話:|
+ Timeclock| Timeclock|
+The user and password you entered are not active in the system|您所輸入的帳號和密碼並未在系統中被啟動|
+Please try again|請重試|
+You cannot log in or out within 30 seconds of your last login or logout|您不能在前次登出或登入後30秒內再次登出或登入|
+You have now logged-out|您目前已登出|
+You logged out at |您登出在|
+Amount of time you were logged-in: |您登入的時間(多久時間): |
+ERROR: timeclock log entry already made: |ERROR: timeclock log entry already made: |
+BACK to Agent Login Screen|回到值機員登入畫面|
+BACK to Administration|回到系統管理|
+BACK to Welcome Screen|回到歡迎畫面|
+Time since you were last logged-in: |自從您上次登入已經有(多久時間): |
+You last logged-out at: |您上次登出在: |
+Click LOGIN below to log-in|點選下方登入進行登入|
+Amount of time you have been logged-in: |您已經登入的時間(多久時間): |
+You logged-in at:|您登入在:|
+Click LOGOUT below to log-out|點選下方登出進行登出|
+Undefined|尚未定義|
+This phone number is not in the campaign lists|此電話號碼不在活動名單中|
+Unspecified error|Unspecified error|
+Extended Alt Phone Information: |擴充的其他電話資訊: |
+ALT DIAL NUMBER:|其他撥打號碼:|
+Phone Code and Number:|Phone Code and Number:|
+Notes: |注意: |
+Active: |啟動: |
+Alt Count: |Alt Count: |
+Change this phone number to INACTIVE|變更此電話號碼為未啟動|
+Change this phone number to ACTIVE|變更此電話號碼為啟動|
+### BEGIN translation phrases for 2.0.5 release ###
+Gender: |性別:|
+Date of Birth: |生日:|
+YOU MUST BE PAUSED TO CHANGE GROUPS|您必須暫停才能變更群組|
+Calls in Queue:|佇列中等待電話:|
+ Timeclock| Timeclock|
+The user and password you entered are not active in the system|您所輸入的帳號和密碼並未在系統中被啟動|
+Please try again|請重試|
+You cannot log in or out within 30 seconds of your last login or logout|您不能在前次登出或登入後30秒內再次登出或登入|
+You have now logged-out|您目前已登出|
+You logged out at |您登出在|
+Amount of time you were logged-in: |您登入的時間(多久時間):|
+ERROR: timeclock log entry already made: |ERROR: timeclock log entry already made: |
+BACK to Agent Login Screen|回到值機員登入畫面|
+BACK to Administration|回到系統管理|
+BACK to Welcome Screen|回到歡迎畫面|
+Time since you were last logged-in: |自從您上次登入已經有(多久時間):|
+You last logged-out at: |您上次登出在:|
+Click LOGIN below to log-in|點選下方登入進行登入|
+Amount of time you have been logged-in: |您已經登入的時間(多久時間):|
+You logged-in at:|您登入在:|
+Click LOGOUT below to log-out|點選下方登出進行登出|
+Undefined|尚未定義|
+This phone number is not in the campaign lists|此電話號碼不在活動名單中|
+Unspecified error|Unspecified error|
+Extended Alt Phone Information: |擴充的其他電話資訊:|
+ALT DIAL NUMBER:|其他撥打號碼:|
+Phone Code and Number:|Phone Code and Number:|
+Notes: |注意:|
+Active: |啟動:|
+Alt Count: |Alt Count:|
+Change this phone number to INACTIVE|變更此電話號碼為未啟動|
+Change this phone number to ACTIVE|變更此電話號碼為啟動|
+YOU MUST LOG IN TO THE TIMECLOCK FIRST|您必須先登入TIMECLOCK|
+There is a time synchronization problem with your system, please tell your system administrator|系統中有時間同步問題，請洽系統管理者|
+Preview Call|預覽電話|
+SELECT A GROUP ALIAS|選擇群組代名|
+Group Alias Selection|群組代名選擇|
+Click Here to Choose a Group Alias|點及此處選擇群組代名|
+Group Alias|群組代名|
+### START translations for 2.2.0 release ###
+You are not allowed to dial into other agent sessions|你不能撥入其他代理商會議|
+QUICK TRANSFER|快速傳遞|
+Other Agents Status|其他代理狀態|
+Available Agents Transfer|可用代理轉讓|
+Show Calls In Queue|查看呼籲在隊列|
+Calls In Queue|呼籲在隊列|
+Hide Calls In Queue|隱藏呼籲在隊列|
+Calls in Queue View Disabled for this campaign|呼籲隊列查看停用此活動|
+YOU MUST BE PAUSED TO GRAB CALLS IN QUEUE|您必須暫停籲請搶占隊列|
+Manager |經理|
+has selected your in-group choices|您的選擇組的選擇|
+CONSULTATIVE|協商|
+Close Message|關閉消息|
+TIMER NOTIFICATION|計時器通知|
+>AGENTS<|>經營者<|

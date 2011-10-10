@@ -1,0 +1,104 @@
+[general]
+context=trunkinbound            ; Default context for incoming calls
+allowguest=no                  ; Allow or reject guest calls (default is yes)
+allowoverlap=no                 ; Disable overlap dialing support. (Default is yes)
+;allowtransfer=no               ; Disable all transfers (unless enabled in peers or users)
+;realm=mydomain.tld             ; Realm for digest authentication
+bindport=5060                   ; UDP Port to bind to (SIP standard port is 5060)
+bindaddr=0.0.0.0                ; IP address to bind to (0.0.0.0 binds to all)
+srvlookup=yes                   ; Enable DNS SRV lookups on outbound calls
+;domain=mydomain.tld            ; Set default domain for this host
+;pedantic=yes                   ; Enable checking of tags in headers,
+;tos_sip=cs3                    ; Sets TOS for SIP packets.
+;tos_audio=ef                   ; Sets TOS for RTP audio packets.
+;tos_video=af41                 ; Sets TOS for RTP video packets.
+;maxexpiry=3600                 ; Maximum allowed time of incoming registrations
+;minexpiry=60                   ; Minimum length of registrations/subscriptions (default 60)
+;defaultexpiry=120              ; Default length of incoming/outgoing registration
+;t1min=100                      ; Minimum roundtrip time for messages to monitored hosts
+;notifymimetype=text/plain      ; Allow overriding of mime type in MWI NOTIFY
+;checkmwi=10                    ; Default time between mailbox checks for peers
+;buggymwi=no                    ; Cisco SIP firmware doesn't support the MWI RFC
+;vmexten=voicemail              ; dialplan extension to reach mailbox sets the
+disallow=all                    ; First disallow all codecs
+allow=ulaw                      ; Allow codecs in order of preference
+allow=gsm
+mohinterpret=default
+mohsuggest=default
+language=en                     ; Default language setting for all users/peers
+relaxdtmf=yes                   ; Relax dtmf handling
+trustrpid = no                  ; If Remote-Party-ID should be trusted
+sendrpid = yes                  ; If Remote-Party-ID should be sent
+progressinband=no               ; If we should generate in-band ringing always
+;useragent=Asterisk PBX         ; Allows you to change the user agent string
+;promiscredir = no              ; If yes, allows 302 or REDIR to non-local SIP address
+;usereqphone = no               ; If yes, ";user=phone" is added to uri that contains
+dtmfmode = rfc2833              ; Set default dtmfmode for sending DTMF. Default: rfc2833
+;compactheaders = yes           ; send compact sip headers.
+videosupport=no                 ; Turn on support for SIP video. You need to turn this on
+;maxcallbitrate=384             ; Maximum bitrate for video calls (default 384 kb/s)
+callevents=yes                  ; generate manager events when sip ua
+;alwaysauthreject = yes         ; When an incoming INVITE or REGISTER is to be rejected,
+;g726nonstandard = yes          ; If the peer negotiates G726-32 audio, use AAL2 packing
+;matchexterniplocally = yes     ; Only substitute the externip or externhost setting if it matches
+;regcontext=sipregistrations
+rtptimeout=60                   ; Terminate call if 60 seconds of no RTP or RTCP activity
+;rtpholdtimeout=300             ; Terminate call if 300 seconds of no RTP or RTCP activity
+;rtpkeepalive=<secs>            ; Send keepalives in the RTP stream to keep NAT open
+;sipdebug = yes                 ; Turn on SIP debugging by default, from
+;recordhistory=yes              ; Record SIP history by default
+;dumphistory=yes                ; Dump SIP history at end of SIP dialogue
+;allowsubscribe=no              ; Disable support for subscriptions. (Default is yes)
+;subscribecontext = default     ; Set a specific context for SUBSCRIBE requests
+notifyringing = yes             ; Notify subscriptions on RINGING state (default: no)
+notifyhold = yes                ; Notify subscriptions on HOLD state (default: no)
+limitonpeers = yes              ; Apply call limits on peers only. This will improve
+;t38pt_udptl = yes            ; Default false
+;register => 1234:password@mysipprovider.com
+;registertimeout=20             ; retry registration calls every 20 seconds (default)
+;registerattempts=10            ; Number of registration attempts before we give up
+;externip = 192.168.1.1        ; Address that we're going to put in outbound SIP
+;externhost=test.test.com     ; Alternatively you can specify a domain
+;externrefresh=10               ; How often to refresh externhost if
+localnet=192.168.0.0/255.255.0.0; All RFC 1918 addresses are local networks
+localnet=10.0.0.0/255.0.0.0     ; Also RFC1918
+localnet=172.16.0.0/12          ; Another RFC1918 with CIDR notation
+localnet=169.254.0.0/255.255.0.0 ;Zero conf local network
+nat=yes                         ; Global NAT settings  (Affects all peers and users)
+canreinvite=no          ; Asterisk by default tries to redirect the
+;directrtpsetup=yes             ; Enable the new experimental direct RTP setup. This sets up
+;rtcachefriends=yes             ; Cache realtime friends by adding them to the internal list
+;rtsavesysname=yes              ; Save systemname in realtime database at registration
+;rtupdate=yes                   ; Send registry updates to database using realtime? (yes|no)
+;rtautoclear=yes                ; Auto-Expire friends created on the fly on the same schedule
+;ignoreregexpire=yes            ; Enabling this setting has two functions:
+;domain=mydomain.tld,mydomain-incoming
+;domain=1.2.3.4                 ; Add IP address as local domain
+;allowexternaldomains=no        ; Disable INVITE and REFER to non-local domains
+;autodomain=yes                 ; Turn this on to have Asterisk add local host
+;fromdomain=mydomain.tld        ; When making outbound SIP INVITEs to
+jbenable = yes              ; Enables the use of a jitterbuffer on the receiving side of a
+jbforce = no                ; Forces the use of a jitterbuffer on the receive side of a SIP
+jbmaxsize = 100             ; Max length of the jitterbuffer in milliseconds.
+jbresyncthreshold = 1000    ; Jump in the frame timestamps over which the jitterbuffer is
+jbimpl = fixed              ; Jitterbuffer implementation, used on the receiving side of a SIP
+jblog = no                  ; Enables jitterbuffer frame logging. Defaults to "no".
+qualify=yes             ; By default, qualify all peers at 2000ms
+limitonpeer = yes       ; enable call limit on a per peer basis, different from limitonpeers
+
+#include sip-vicidial.conf
+
+; register SIP account on remote machine if using SIP trunks
+; register => testSIPtrunk:test@10.10.10.16:5060
+;
+; setup account for SIP trunking:
+; [SIPtrunk]
+; disallow=all
+; allow=ulaw
+; allow=alaw
+; type=friend
+; username=testSIPtrunk
+; secret=test
+; host=10.10.10.16
+; dtmfmode=inband
+; qualify=1000

@@ -1,0 +1,275 @@
+ASTERISK CONF FILE GENERATION	   Started: 2009-02-11	   Updated: 2011-10-04
+
+This file details the process for how the system automatically generates Asterisk conf files purely from VICIDIAL settings.
+
+The conf files that are generated are:
+	/etc/asterisk/extensions-vicidial.conf
+	/etc/asterisk/iax-vicidial.conf
+	/etc/asterisk/sip-vicidial.conf
+	/etc/asterisk/voicemail.conf
+	/etc/asterisk/meetme-vicidial.conf
+	/etc/asterisk/musiconhold-vicidial.conf
+
+All of the above files are included in their respective conf files by #include links that you can see if you look at the sample conf files in the docs directory.
+
+IMPORTANT!!! - Files will only be generated for SIP and IAX phones and carriers that are listed as active=Y in the VICIDIAL administration web interface.
+             - Files will only be generated on servers where the server record is set to active_asterisk_server='Y' and generate_vicidial_conf='Y'
+	     - The automatic reloading of new conf files by the system is only possible if you started Asterisk with the start_asterisk_boot.pl script, or if Asterisk is running in a screen session named 'asterisk'.
+
+After any phone, server, carrier, musiconhold, call menu or voicemail entry is edited in the admin interface, a flag(rebuild_conf_files='Y') will be set to have the ADMIN_keepalive_ALL.pl script(that should be running once a minute in the crontab) run and generate new conf files and reload Asterisk.
+
+Phones are defined in the admin.php -> Admin -> Show Phones
+Carriers are defined in the admin.php -> Admin -> Servers -> Show Carriers
+
+If you have special settings that you want to use for phones such as codecs you can use either a Template(admin.php -> Admin -> Servers -> Show Templates) or enter in the full account record(not including the "[extension]") into the "Conf Override" field.
+
+If you are using a SIP carrier, then you may need to manually set "externip=XXX.XXX.XXX.XXX" in the /etc/asterisk/sip.conf file where XXX.XXX.XXX.XXX is the external IP address of your server as the outside world(or your carrier) sees it.
+
+
+
+
+
+
+
+
+CALL MENUS (aka IVRs):
+
+The Call Menus feature allows for the creation of IVR segments that can be linked together through contexts in the dialplan. In this way, both simple and complex menus can be created, to deliver anything from a simple Automated Atttendant to more detailed IVR applications. 
+
+The Menu ID is the unique identifier of the call menu and it is also used as the context when the entry is created in the dialplan.
+
+
+Call Menu Options:
+0,1,2,3,4,5,6,7,8,9,*,#,A,B,C,D,TIMECHECK,TIMEOUT,INVALID,INVALID_2ND,INVALID_3RD
+
+The options are the DTMF digits that a caller can select within this Call Menu, with the exception of the TIMECHECK, TIMEOUT and INVALID options which are used when the call is taking place outside of the call_time as defined in the Call menu, when the menu times out or when an invalid choice is made.
+
+
+Call Menu Routes:
+CALLMENU,HANGUP,DID,EXTENSION,PHONE,VOICEMAIL,AGI
+
+The option route is similar to the DID route since it defines what method to use to send the call to the option route value. The route value is dependant upon the route selected, for example if you selected DID as the route you would then need to select a value DID to send the call to. Or if you selected PHONE as the route, the route value would need to be a valid phone login as defined in the phones section of Administration.
+
+
+Log Key Press - This option if enabled will log the DTMF key press by the caller in this Call Menu. Default is 0 for disabled.
+
+Log Field - If the Log Key Press option is enabled, this optional setting can allow the response to also be stored in this list field. vendor_lead_code, source_id, phone_code, title, first_name, middle_initial, last_name, address1, address2, address3, city, state, province, postal_code, country_code, alt_phone, email, security_phrase, comments, rank, owner, status, user. Default is NONE for disabled. 
+
+
+An example of a call menu:
+
+menu_id =			test_menu
+menu_name =			this is only a test
+menu_prompt =			hello
+menu_timeout =			10
+menu_timeout_prompt =		vm-goodbye
+menu_invalid_prompt =		
+menu_repeat =			1
+menu_time_check =		1
+call_time_id =			9am-5pm
+track_in_vdac =			1
+custom_dialplan_entry =		
+tracking_group =		CALLMENU
+dtmf_log =			0
+dtmf_field =			NONE
+
+
+menu_id =			test_menu
+option_value =			1
+option_description = 		This is what happens when you press 1
+option_route =			DID
+option_route_value =		6666
+option_route_value_context =	
+
+menu_id =			test_menu
+option_value =			2
+option_description = 		This is what happens when you press 2
+option_route =			DID
+option_route_value =		6667
+option_route_value_context =	
+
+menu_id =			test_menu
+option_value =			3
+option_description = 		This is what happens when you press 3
+option_route =			EXTENSION
+option_route_value =		101
+option_route_value_context =	default
+
+menu_id =			test_menu
+option_value =			4
+option_description = 		This is what happens when you press 4
+option_route =			PHONE
+option_route_value =		350
+option_route_value_context =	
+
+menu_id =			test_menu
+option_value =			5
+option_description = 		This is what happens when you press 5
+option_route =			CALLMENU
+option_route_value =		test_menu_2
+option_route_value_context =	
+
+menu_id =			test_menu
+option_value =			6
+option_description = 		This is what happens when you press 6
+option_route =			HANGUP
+option_route_value =		vm-goodbye
+option_route_value_context =	
+
+menu_id =			test_menu
+option_value =			7
+option_description = 		This is what happens when you press 7
+option_route =			VOICEMAIL
+option_route_value =		350
+option_route_value_context =	
+
+menu_id =			test_menu
+option_value =			8
+option_description = 		This is what happens when you press 8
+option_route =			AGI
+option_route_value =		agi-test.agi,variables-go-here
+option_route_value_context =	
+
+menu_id =			test_menu
+option_value =			TIMECHECK
+option_description = 		
+option_route =			EXTENSION
+option_route_value =		101
+option_route_value_context =	default
+
+
+
+This is what it would look like in the dialplan:
+
+
+; this is only a test
+[test_menu]
+exten => s,1,AGI(agi-VDAD_inbound_calltime_check.agi,-----YES-----test_menu-----24hours-----EXTENSION-----101-----default)
+exten => s,n,Background(hello)
+exten => s,n,WaitExten(10)
+exten => s,n,Background(hello)
+exten => s,n,WaitExten(10)
+exten => s,n,Hangup
+
+; This is what happens when you press 1
+exten => 1,1,Goto(6666,1,trunkinbound)
+; This is what happens when you press 2
+exten => 2,1,Goto(6667,1,trunkinbound)
+; This is what happens when you press 3
+exten => 3,1,Goto(101,1,default)
+; This is what happens when you press 4
+exten => 4,1,Goto(350,1,default)
+; This is what happens when you press 5
+exten => 5,1,Goto(s,1,test_menu_2)
+; This is what happens when you press 6
+exten => 6,1,Playback(vm-goodbye)
+exten => 6,n,Hangup
+; This is what happens when you press 7
+exten => 7,1,Goto(85026666666666350,1,default)
+; This is what happens when you press 8
+exten => 8,1,AGI(agi-test.agi,variables-go-here)
+
+exten => i,1,Goto(s,2)
+exten => t,1,Playback(vm-goodbye)
+exten => t,n,Goto(s,2)
+exten => h,1,DeadAGI(agi://127.0.0.1:4577/call_log--HVcauses--PRI-----NODEBUG-----${HANGUPCAUSE}-----${DIALSTATUS}-----${DIALEDTIME}-----${ANSWEREDTIME})
+
+
+
+
+
+
+
+
+Example of an inbound IVR using Call Menus and updating existing customer records after querying for a vendor_lead_code with TTS confirmation of last name:
+
+1. Make sure Admin -> System Settings options are set:
+	- Allow Custom Dialplan Entries = 1
+	- Enable TTS Integration = 1
+2. Make sure Cepstral TTS is installed(with licenses) and create this TTS prompt in Admin -> Text To Speech
+	- TTS ID: lastname_oneyestwono
+	- TTS Name: Confirm last name one for yes two for no
+	- TTS Active: Y
+	- TTS Voice: Allison-8kHz
+	- TTS Text: Is this the members last name? <break time='500ms'/> --A--last_name--B-- <break time='1000ms'/> Press one for yes, or two for no.
+
+3. Create first Call Menu in Inbound -> Add A New Call Menu
+	- Menu ID: enter_your_id
+	- Menu Name: Enter a Member ID
+	- Menu Prompt: <record a prompt and add it through the Admin -> Audio Store> (remember, 8k/16bit/mono/pcm/wav files)
+	- Menu Timeout: 10
+	- Menu Repeat: 1
+	- Menu Timecheck: 0
+	- Log Key Press: 0
+	- Log Field: NONE
+	- Custom Dialplan Entry:
+		exten => _XXXXXXXX,1,AGI(cm_lookup.agi,vendor_lead_code---CAMPLISTSALL---TESTCAMP---lastname_oneyestwono)
+	<submit to save changes>
+4. Create second Call Menu - 
+	- Menu ID: enter_date
+	- Menu Name: Enter visit date mmdd
+	- Menu Prompt: <recorded prompt>
+	- Menu Timeout: 10
+	- Menu Repeat: 1
+	- Menu Timecheck: 0
+	- Log Key Press: 1
+	- Log Field: email <this is the field that will get the date stored in>
+	- Custom Dialplan Entry:
+		exten => _XXXX,1,AGI(cm.agi,CALLMENU-----${EXTEN}-----email)
+		exten => _XXXX,n,Goto(complete_visit,s,1)
+	<submit to save changes>
+5. Create third Call Menu - 
+	- Menu ID: complete_visit
+	- Menu Name: Was visit complete or not
+	- Menu Prompt: <recorded prompt>
+	- Menu Timeout: 10
+	- Menu Repeat: 1
+	- Menu Timecheck: 0
+	- Log Key Press: 1
+	- Log Field: province <this is the field that will get the response stored in>
+	<submit to save changes>
+6. Create fourth Call Menu - 
+	- Menu ID: incomplete_reason
+	- Menu Name: Reason visit was incomplete
+	- Log Key Press: 1
+	- Log Field: security_phrase <this is the field that will get the response stored in>
+	<submit to save changes>
+7. Create fifth Call Menu - 
+	- Menu ID: followup_required
+	- Menu Name: Is a follow-up required
+	- Log Key Press: 1
+	- Log Field: alt_phone <this is the field that will get the response stored in>
+	<submit to save changes>
+8. Create sixth Call Menu - 
+	- Menu ID: followup_action
+	- Menu Name: Follow-up action
+	- Log Key Press: 1
+	- Log Field: owner <this is the field that will get the response stored in>
+	<submit to save changes>
+9. Create seventh Call Menu - 
+	- Menu ID: update_another_record
+	- Menu Name: Ask if you want to update another record
+	- Log Key Press: 0
+	- Log Field: NONE
+	<submit to save changes>
+10. Add the following options to these call menus that we have just created:
+	- enter_your_id
+		- Add a "A" option to go to CALLMENU "enter_date", matching IDs will move on
+		- Add a "B" option to go to CALLMENU "enter_your_id", no-match will repeat prompt
+	- enter_date
+		- Add a "INVALID" option to go to CALLMENU "enter_date"
+	- complete_visit
+		- Add a "1" option to go to CALLMENU "update_another_record"
+		- Add a "2" option to go to CALLMENU "incomplete_reason"
+	- incomplete_reason
+		- Add options "1-5" to go to CALLMENU "followup_required"
+	- followup_required
+		- Add a "1" option to go to CALLMENU "followup_action"
+		- Add a "2" option to go to CALLMENU "update_another_record"
+		- Add a "3" option to go to CALLMENU "update_another_record"
+	- incomplete_reason
+		- Add options "1-9" to go to CALLMENU "update_another_record"
+	- followup_required
+		- Add a "1" option to go to CALLMENU "enter_your_id"
+		- Add a "2" option to go to HANGUP with audio prompt "vm-goodbye"
+

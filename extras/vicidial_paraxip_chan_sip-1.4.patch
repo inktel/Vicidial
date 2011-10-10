@@ -1,0 +1,32 @@
+--- ./channels/chan_sip.c.old	2008-12-23 11:33:09.000000000 -0500
++++ ./channels/chan_sip.c	2009-02-02 03:43:48.000000000 -0500
+@@ -6964,6 +6964,7 @@
+ 	char tmp2[SIPBUFSIZE/2];
+ 	const char *l = NULL, *n = NULL;
+ 	const char *urioptions = "";
++	const char *paraxipcpd = ";cpd=on";  /* string used to enable ParaXip's CPD */
+ 
+ 	if (ast_test_flag(&p->flags[0], SIP_USEREQPHONE)) {
+ 	 	const char *s = p->username;	/* being a string field, cannot be NULL */
+@@ -7050,6 +7051,9 @@
+ 	if (p->options && !ast_strlen_zero(p->options->uri_options))
+ 		ast_build_string(&invite, &invite_max, ";%s", p->options->uri_options);
+ 	
++	/* Tell ParaXip to enable CPD */
++	ast_build_string(&invite, &invite_max, "%s", paraxipcpd);
++	
+ 	ast_string_field_set(p, uri, invite_buf);
+ 
+ 	if (sipmethod == SIP_NOTIFY && !ast_strlen_zero(p->theirtag)) { 
+@@ -12214,6 +12218,11 @@
+ 					ast_set_flag(&p->flags[0], SIP_PENDINGBYE);	
+ 		}
+ 
++		/* See what ParaXip had to say */
++		char cpd_result[SIPBUFSIZE];
++		ast_copy_string(cpd_result, get_header(req, "CPD-Result"), sizeof(cpd_result));
++		manager_event(EVENT_FLAG_SYSTEM, "CPD-Result", "ChannelDriver: SIP\r\nChannel: %s\r\nCallerIDName: %s\r\nUniqueid: %s\r\nResult: %s\r\n", p->owner->name, p->owner->cid.cid_name, p->owner->uniqueid, cpd_result);
++		
+ 		/* Parse contact header for continued conversation */
+ 		/* When we get 200 OK, we know which device (and IP) to contact for this call */
+ 		/* This is important when we have a SIP proxy between us and the phone */

@@ -1,0 +1,667 @@
+#!/usr/bin/perl
+#
+# agi-VDADautoREMINDER.agi version 0.4    *DBI-version*
+# 
+# runs when a call comes in from the VICIDIAL auto_dialer. This script will 
+# send the calls out to specified voicemail boxes in if called person presses key.
+# The voicemail box is defined per-lead in the vicidial_list.security_phrase field
+# This campaign does not send calls to live agents.
+#
+#   Call statuses from this script:
+#	N- Call was picked up, didn't finish initial message
+#	MP- Initial message was played
+#	VM- call was sent to voicemail
+#	CALLBK- customer selected to be called back
+#
+# It is recommended that you run this campaign at a dial level of 1.0
+# It is recommended that you use remote_agents for activation of this script
+#
+# You need to put lines similar to those below in your extensions.conf file:
+# 
+# ;VICIDIAL_auto_dialer transfer script:
+# exten => 8372,1,AGI(call_log.agi,${EXTEN})
+# exten => 8372,2,AGI(agi-VDADautoREMINDER.agi,${EXTEN})
+#
+# Copyright (C) 2006  Matt Florell <vicidial@gmail.com>    LICENSE: GPLv2
+#
+# CHANGES
+# 60313-1626 - First build
+# 60810-1729 - Changed to DBI
+#            - changed to use /etc/astguiclient.conf for configs
+# 60818-1144 - added output options check from database
+#
+
+$script = 'agi-VDADautoREMINDER.agi';
+
+##### AUDIO FILES IN THIS PROGRAM #####
+$message_audio_file = 'US_reminder_message';
+$options_audio_file = 'US_reminder_options';
+# $voicemail_xfer_file = 'US_reminder_voicemail'; not used
+$callback_audio_file = 'US_reminder_callback';
+$goodbye_audio_file = 'US_reminder_goodbye';
+
+
+($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
+$year = ($year + 1900);
+$mon++;
+if ($mon < 10) {$mon = "0$mon";}
+if ($mday < 10) {$mday = "0$mday";}
+if ($hour < 10) {$hour = "0$hour";}
+if ($min < 10) {$min = "0$min";}
+if ($sec < 10) {$sec = "0$sec";}
+
+$now_date_epoch = time();
+$now_date = "$year-$mon-$mday $hour:$min:$sec";
+$start_time=$now_date;
+	$CIDdate = "$mon$mday$hour$min$sec";
+	$tsSQLdate = "$year$mon$mday$hour$min$sec";   #20060310100402
+	$SQLdate = "$year-$mon-$mday $hour:$min:$sec";
+	$SQLdateBEGIN = $SQLdate;
+
+$BDtarget = ($secX - 5);
+($Bsec,$Bmin,$Bhour,$Bmday,$Bmon,$Byear,$Bwday,$Byday,$Bisdst) = localtime($BDtarget);
+$Byear = ($Byear + 1900);
+$Bmon++;
+if ($Bmon < 10) {$Bmon = "0$Bmon";}
+if ($Bmday < 10) {$Bmday = "0$Bmday";}
+if ($Bhour < 10) {$Bhour = "0$Bhour";}
+if ($Bmin < 10) {$Bmin = "0$Bmin";}
+if ($Bsec < 10) {$Bsec = "0$Bsec";}
+	$BDtsSQLdate = "$Byear$Bmon$Bmday$Bhour$Bmin$Bsec";
+
+# default path to astguiclient configuration file:
+$PATHconf =		'/etc/astguiclient.conf';
+
+open(conf, "$PATHconf") || die "can't open $PATHconf: $!\n";
+@conf = <conf>;
+close(conf);
+$i=0;
+foreach(@conf)
+	{
+	$line = $conf[$i];
+	$line =~ s/ |>|\n|\r|\t|\#.*|;.*//gi;
+	if ( ($line =~ /^PATHhome/) && ($CLIhome < 1) )
+		{$PATHhome = $line;   $PATHhome =~ s/.*=//gi;}
+	if ( ($line =~ /^PATHlogs/) && ($CLIlogs < 1) )
+		{$PATHlogs = $line;   $PATHlogs =~ s/.*=//gi;}
+	if ( ($line =~ /^PATHagi/) && ($CLIagi < 1) )
+		{$PATHagi = $line;   $PATHagi =~ s/.*=//gi;}
+	if ( ($line =~ /^PATHweb/) && ($CLIweb < 1) )
+		{$PATHweb = $line;   $PATHweb =~ s/.*=//gi;}
+	if ( ($line =~ /^PATHsounds/) && ($CLIsounds < 1) )
+		{$PATHsounds = $line;   $PATHsounds =~ s/.*=//gi;}
+	if ( ($line =~ /^PATHmonitor/) && ($CLImonitor < 1) )
+		{$PATHmonitor = $line;   $PATHmonitor =~ s/.*=//gi;}
+	if ( ($line =~ /^VARserver_ip/) && ($CLIserver_ip < 1) )
+		{$VARserver_ip = $line;   $VARserver_ip =~ s/.*=//gi;}
+	if ( ($line =~ /^VARDB_server/) && ($CLIDB_server < 1) )
+		{$VARDB_server = $line;   $VARDB_server =~ s/.*=//gi;}
+	if ( ($line =~ /^VARDB_database/) && ($CLIDB_database < 1) )
+		{$VARDB_database = $line;   $VARDB_database =~ s/.*=//gi;}
+	if ( ($line =~ /^VARDB_user/) && ($CLIDB_user < 1) )
+		{$VARDB_user = $line;   $VARDB_user =~ s/.*=//gi;}
+	if ( ($line =~ /^VARDB_pass/) && ($CLIDB_pass < 1) )
+		{$VARDB_pass = $line;   $VARDB_pass =~ s/.*=//gi;}
+	if ( ($line =~ /^VARDB_port/) && ($CLIDB_port < 1) )
+		{$VARDB_port = $line;   $VARDB_port =~ s/.*=//gi;}
+	$i++;
+	}
+
+if (!$VARDB_port) {$VARDB_port='3306';}
+if (!$AGILOGfile) {$AGILOGfile = "$PATHlogs/agiout.$year-$mon-$mday";}
+
+use DBI;	  
+use Time::HiRes ('gettimeofday','usleep','sleep');  # necessary to have perl sleep command of less than one second
+use Asterisk::AGI;
+$AGI = new Asterisk::AGI;
+
+$dbhA = DBI->connect("DBI:mysql:$VARDB_database:$VARDB_server:$VARDB_port", "$VARDB_user", "$VARDB_pass")
+    or die "Couldn't connect to database: " . DBI->errstr;
+
+### Grab Server values from the database
+$stmtA = "SELECT agi_output FROM servers where server_ip = '$VARserver_ip';";
+$sthA = $dbhA->prepare($stmtA) or die "preparing: ",$dbhA->errstr;
+$sthA->execute or die "executing: $stmtA ", $dbhA->errstr;
+$sthArows=$sthA->rows;
+$rec_count=0;
+while ($sthArows > $rec_count)
+	{
+	$AGILOG = '0';
+	 @aryA = $sthA->fetchrow_array;
+		$DBagi_output =			"$aryA[0]";
+		if ($DBagi_output =~ /STDERR/)	{$AGILOG = '1';}
+		if ($DBagi_output =~ /FILE/)	{$AGILOG = '2';}
+		if ($DBagi_output =~ /BOTH/)	{$AGILOG = '3';}
+	 $rec_count++;
+	}
+$sthA->finish();
+
+
+### begin parsing run-time options ###
+if (length($ARGV[0])>1)
+{
+	if ($AGILOG) {$agi_string = "Perl Environment Dump:";   &agi_output;}
+	$i=0;
+	while ($#ARGV >= $i)
+	{
+	$args = "$args $ARGV[$i]";
+	if ($AGILOG) {$agi_string = "$i|$ARGV[$i]";   &agi_output;}
+	$i++;
+	}
+
+	if ($args =~ /--help/i)
+	{
+	print "allowed run time options:\n  [-q] = quiet\n  [-t] = test\n  [-debug] = verbose debug messages\n\n";
+	}
+	else
+	{
+		if ($args =~ /-V/i)
+		{
+		$V=1;
+		}
+		if ($args =~ /-debug/i)
+		{
+		$DG=1;
+		}
+		if ($args =~ /-dbAVS/i)
+		{
+		$DGA=1;
+		}
+		if ($args =~ /-q/i)
+		{
+		$q=1;
+		$Q=1;
+		}
+		if ($args =~ /-t/i)
+		{
+		$TEST=1;
+		$T=1;
+		}
+	}
+}
+
+$|=1;
+while(<STDIN>) {
+	chomp;
+	last unless length($_);
+	if ($AGILOG)
+	{
+		if (/^agi_(\w+)\:\s+(.*)$/)
+		{
+			$AGI{$1} = $2;
+		}
+	}
+
+	if (/^agi_uniqueid\:\s+(.*)$/)		{$unique_id = $1; $uniqueid = $unique_id;}
+	if (/^agi_priority\:\s+(.*)$/)		{$priority = $1;}
+	if (/^agi_channel\:\s+(.*)$/)		{$channel = $1;}
+	if (/^agi_extension\:\s+(.*)$/)		{$extension = $1;}
+	if (/^agi_type\:\s+(.*)$/)		{$type = $1;}
+	if (/^agi_callerid\:\s+(.*)$/)		{$callerid = $1;}
+	if (/^agi_calleridname\:\s+(.*)$/)	{$calleridname = $1;}
+}
+
+if ( (length($callerid)>20) && ($callerid =~ /\"\S\S\S\S\S\S\S\S\S\S\S\S\S\S\S\S\S\S/) )
+  {
+   $callerid =~ s/^\"//gi;
+   $callerid =~ s/\".*$//gi;
+	### set the callerid to the ACQS value(calleridname)
+	print "SET CALLERID $callerid\n";
+	checkresult($result);
+	if ($AGILOG) {$agi_string = "callerID changed: $callerid";   &agi_output;}
+  }
+if ( (
+(length($calleridname)>5) && ( (!$callerid) or ($callerid =~ /unknown|private|00000000/i) or ($callerid =~ /5551212/) )
+) or ( (length($calleridname)>17) && ($calleridname =~ /\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d/) ) )
+  {
+   $callerid = $calleridname;
+	### set the callerid to the ACQS value(calleridname)
+	print "SET CALLERID $callerid\n";
+	checkresult($result);
+	if ($AGILOG) {$agi_string = "callerID changed: $callerid";   &agi_output;}
+  }
+
+
+if ($AGILOG) {$agi_string = "AGI Environment Dump:";   &agi_output;}
+
+foreach $i (sort keys %AGI) 
+{
+	if ($AGILOG) {$agi_string = " -- $i = $AGI{$i}";   &agi_output;}
+}
+
+if ($AGILOG) {$agi_string = "AGI Variables: |$unique_id|$channel|$extension|$type|$callerid|";   &agi_output;}
+
+
+$VDADcampaign='';
+$VDADphone='';
+$VDADphone_code='';
+
+$callerid =~ s/\"//gi;
+$CIDlead_id = $callerid;
+$CIDlead_id = substr($CIDlead_id, 11, 9);
+$CIDlead_id = ($CIDlead_id + 0);
+
+if ($AGILOG) {$agi_string = "+++++ VDAD START : |$CIDlead_id|$now_date|";   &agi_output;}
+
+if ( ($channel =~ /Local/i) && ($AST_ver !~ /^1\.0\.8|^1\.0\.9/) )
+{
+if ($AGILOG) {$agi_string = "+++++ VDAD START LOCAL CHANNEL: EXITING- $priority";   &agi_output;}
+if ($priority > 2) {sleep(1);}
+exit;
+}
+
+
+
+sleep(1);
+
+$AGI->stream_file('beep');
+
+
+### Grab Server values from the database
+$stmtA = "SELECT voicemail_dump_exten,ext_context,answer_transfer_agent,local_gmt,asterisk_version,max_vicidial_trunks FROM servers where server_ip = '$VARserver_ip';";
+$sthA = $dbhA->prepare($stmtA) or die "preparing: ",$dbhA->errstr;
+$sthA->execute or die "executing: $stmtA ", $dbhA->errstr;
+$sthArows=$sthA->rows;
+ $rec_count=0;
+while ($sthArows > $rec_count)
+	{
+	@aryA = $sthA->fetchrow_array;
+	$DBvoicemail_dump_exten	= "$aryA[0]";
+	$DBext_context		= "$aryA[1]";
+	$DBanswer_transfer_agent	= "$aryA[2]";
+	$DBSERVER_GMT		= "$aryA[3]";
+	$DBasterisk_version	= "$aryA[4]";
+	$DBmax_vicidial_trunks	= "$aryA[5]";
+	if ($DBvoicemail_dump_exten)	{$voicemail_dump_exten = $DBvoicemail_dump_exten;}
+	if ($DBext_context)		{$ext_context = $DBext_context;}
+	if ($DBanswer_transfer_agent)	{$answer_transfer_agent = $DBanswer_transfer_agent;}
+	if ($DBSERVER_GMT)		{$SERVER_GMT = $DBSERVER_GMT;}
+	if ($DBasterisk_version)	{$AST_ver = $DBasterisk_version;}
+	if ($DBmax_vicidial_trunks)	{$max_vicidial_trunks = $DBmax_vicidial_trunks;}
+	 $rec_count++;
+	}
+$sthA->finish();
+
+### Grab call parameters from vicidial_auto_calls table
+$stmtA = "UPDATE vicidial_auto_calls set uniqueid='$unique_id', channel='$channel',status='LIVE',stage='LIVE-0' where callerid='$callerid' order by call_time desc limit 1;";
+$affected_rows = $dbhA->do($stmtA);
+if ($AGILOG) {$agi_string = "--    VDAD : |$affected_rows|update of vac table: $callerid\n|$stmtA|";   &agi_output;}
+if ($affected_rows > 0)
+	{
+	$stmtA = "SELECT campaign_id,phone_number,phone_code,lead_id,call_time FROM vicidial_auto_calls where callerid='$callerid' order by call_time desc limit 1;";
+	$sthA = $dbhA->prepare($stmtA) or die "preparing: ",$dbhA->errstr;
+	$sthA->execute or die "executing: $stmtA ", $dbhA->errstr;
+	$sthArows=$sthA->rows;
+	 $rec_count=0;
+	while ($sthArows > $rec_count)
+		{
+		@aryA = $sthA->fetchrow_array;
+		$VDADcampaign	= "$aryA[0]";
+		$VDADphone	= "$aryA[1]";
+		$VDADphone_code	= "$aryA[2]";
+		$VDADlead_id	= "$aryA[3]";
+		$VDADcall_time	= "$aryA[4]";
+		 $rec_count++;
+		}
+	$sthA->finish();
+
+	$stmtA = "INSERT INTO vicidial_log (uniqueid,lead_id,campaign_id,call_date,start_epoch,status,phone_code,phone_number,user,processed) values('$uniqueid','$CIDlead_id','$VDADcampaign','$SQLdate','$now_date_epoch','N','$VDADphone_code','$VDADphone','VDAD','N')";
+		if ($AGILOG) {$agi_string = "|$stmtA|";   &agi_output;}
+	$affected_rows = $dbhA->do($stmtA);
+
+	if ($AGILOG) {$agi_string = "--    VDAD : |$VDADlead_id|$CIDlead_id|insert to vicidial_log: $uniqueid";   &agi_output;}
+	}
+
+
+
+
+######### REMINDER CHOICE FROM RECORDINGS ########
+&reminder_choice;
+
+if ($pin < 1)
+	{
+	&reminder_choice;
+
+	if ($pin < 1)
+		{
+		$AGI->stream_file("$goodbye_audio_file");
+
+		$stmtA = "DELETE FROM vicidial_auto_calls where callerid='$callerid' order by call_time desc limit 1;";
+		$affected_rows = $dbhA->do($stmtA);
+		if ($AGILOG) {$agi_string = "--    VDAD vac record deleted: |$affected_rows|$VDADcampaign|";   &agi_output;}
+
+		$end_date_epoch = time();
+		$length_in_sec = ($end_date_epoch - $now_date_epoch);
+
+		$stmtA = "UPDATE vicidial_log set end_epoch='$end_date_epoch', length_in_sec='$length_in_sec' where uniqueid='$uniqueid' and lead_id='$CIDlead_id';";
+		$affected_rows = $dbhA->do($stmtA);
+		if ($AGILOG) {$agi_string = "--    VDAD vac record deleted: |$affected_rows|$VDADcampaign|$end_date_epoch|$now_date_epoch|$length_in_sec|";   &agi_output;}
+
+		$VHqueryCID = "VHNGUP$tsSQLdate";
+		### insert a NEW record to the vicidial_manager table to be processed
+		$stmtA = "INSERT INTO vicidial_manager values('','','$SQLdate','NEW','N','$VARserver_ip','','Hangup','$VHqueryCID','Channel: $channel','','','','','','','','','')";
+		$affected_rows = $dbhA->do($stmtA);
+		if ($AGILOG) {$agi_string = "--    VDAD call_hungup timout: |$VHqueryCID|$VDADconf_exten|$channel|insert to vicidial_manager";   &agi_output;}
+
+		sleep(1);
+
+		exit;
+		}
+	}
+
+if ($AGILOG) {$agi_string = "+++++ VDAD STATUS : pressed $pin|$unique_id|$channel|$extension|$type|$callerid|$CIDlead_id|$now_date";   &agi_output;}
+
+if ($pin !~ /^1|^2/) {exit;}
+
+if (!$DB_port) {$DB_port='3306';}
+
+
+
+
+
+if ($pin =~ /^1|^2/)
+{
+
+if ($pin == "1")	### send call to voicemail
+	{
+#	message can be left on agent vmail box
+#	# Thank you for your response, we will now transfer you to your agent's voicemail box.
+#	$AGI->stream_file("$voicemail_xfer_file");
+
+	$stmtA = "UPDATE vicidial_auto_calls set status='XFER', stage='XFER-$drop_timer' where callerid='$callerid';";
+	$affected_rows = $dbhA->do($stmtA);
+	if ($AGILOG) {$agi_string = "--    VDAD XFER : |$affected_rows|update of vac table: $callerid\n|$stmtA|";   &agi_output;}
+	
+	$stmtA = "UPDATE vicidial_list set status='VM' where lead_id = '$CIDlead_id';";
+		if ($AGILOG) {$agi_string = "|$stmtA|";   &agi_output;}
+	$affected_rows = $dbhA->do($stmtA);
+	if ($AGILOG) {$agi_string = "--    VDAD vicidial_list update: |$affected_rows|$CIDlead_id|XFER";   &agi_output;}
+
+		($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
+		$year = ($year + 1900);
+		$mon++;
+		if ($mon < 10) {$mon = "0$mon";}
+		if ($mday < 10) {$mday = "0$mday";}
+		if ($hour < 10) {$hour = "0$hour";}
+		if ($min < 10) {$min = "0$min";}
+		if ($sec < 10) {$sec = "0$sec";}
+
+		$end_date_epoch = time();
+		$length_in_sec = ($end_date_epoch - $now_date_epoch);
+		$now_date = "$year-$mon-$mday $hour:$min:$sec";
+	if ($AGILOG) {$agi_string = "XXXXXXXXXX VDAD transferred: start|stop      $start_time|$now_date";   &agi_output;}
+
+	$stmtA = "UPDATE vicidial_log set status='VM', end_epoch='$end_date_epoch', length_in_sec='$length_in_sec' where uniqueid='$uniqueid' and lead_id='$CIDlead_id';";
+	$affected_rows = $dbhA->do($stmtA);
+	if ($AGILOG) {$agi_string = "--    VDAD vac record updated: |$affected_rows|$VDADcampaign|";   &agi_output;}
+
+	$VMAIL_box=0;
+	### Grab Server values from the database
+	$stmtA = "SELECT security_phrase FROM vicidial_list where lead_id = '$CIDlead_id';";
+	$sthA = $dbhA->prepare($stmtA) or die "preparing: ",$dbhA->errstr;
+	$sthA->execute or die "executing: $stmtA ", $dbhA->errstr;
+	$sthArows=$sthA->rows;
+	 $rec_count=0;
+	while ($sthArows > $rec_count)
+		{
+		@aryA = $sthA->fetchrow_array;
+		$VMAIL_box		= "$aryA[0]";
+		 $rec_count++;
+		}
+	$sthA->finish();
+
+	### SEND CALL TO VOICEMAIL BOX ###
+	if ($AGILOG) {$agi_string = "exiting the VDAD app, transferring call to $voicemail_dump_exten$VMAIL_box";   &agi_output;}
+	print "SET CONTEXT $ext_context\n";
+		checkresult($result);
+	print "SET EXTENSION $voicemail_dump_exten$VMAIL_box\n";
+		checkresult($result);
+	print "SET PRIORITY 1\n";
+		checkresult($result);
+
+
+	}
+
+if ($pin == "2")	### mark call as a CALLBK
+	{
+	
+	# Thank you for your response, your agent will be contacting you shortly.
+	$stmtA = "DELETE from vicidial_auto_calls where callerid='$callerid';";
+	$affected_rows = $dbhA->do($stmtA);
+	if ($AGILOG) {$agi_string = "--    VDAD DONE : |$affected_rows|delete of vac table: $callerid\n|$stmtA|";   &agi_output;}
+	
+	$stmtA = "UPDATE vicidial_list set status='CALLBK' where lead_id = '$CIDlead_id';";
+		if ($AGILOG) {$agi_string = "|$stmtA|";   &agi_output;}
+	$affected_rows = $dbhA->do($stmtA);
+	if ($AGILOG) {$agi_string = "--    VDAD vicidial_list update: |$affected_rows|$CIDlead_id|XFER";   &agi_output;}
+
+		($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
+		$year = ($year + 1900);
+		$mon++;
+		if ($mon < 10) {$mon = "0$mon";}
+		if ($mday < 10) {$mday = "0$mday";}
+		if ($hour < 10) {$hour = "0$hour";}
+		if ($min < 10) {$min = "0$min";}
+		if ($sec < 10) {$sec = "0$sec";}
+
+		$end_date_epoch = time();
+		$length_in_sec = ($end_date_epoch - $now_date_epoch);
+		$now_date = "$year-$mon-$mday $hour:$min:$sec";
+	if ($AGILOG) {$agi_string = "XXXXXXXXXX VDAD transferred: start|stop      $start_time|$now_date";   &agi_output;}
+
+	$stmtA = "UPDATE vicidial_log set status='CALLBK', end_epoch='$end_date_epoch', length_in_sec='$length_in_sec' where uniqueid='$uniqueid' and lead_id='$CIDlead_id';";
+	$affected_rows = $dbhA->do($stmtA);
+	if ($AGILOG) {$agi_string = "--    VDAD vac record updated: |$affected_rows|$VDADcampaign|";   &agi_output;}
+
+	$AGI->stream_file("$callback_audio_file");
+
+	$VHqueryCID = "VHNGUP$tsSQLdate";
+	### insert a NEW record to the vicidial_manager table to be processed
+	$stmtA = "INSERT INTO vicidial_manager values('','','$SQLdate','NEW','N','$VARserver_ip','','Hangup','$VHqueryCID','Channel: $channel','','','','','','','','','')";
+	$affected_rows = $dbhA->do($stmtA);
+	if ($AGILOG) {$agi_string = "--    VDAD call_hungup timout: |$VHqueryCID|$VDADconf_exten|$channel|insert to vicidial_manager";   &agi_output;}
+
+	sleep(1);
+
+	exit;
+	}
+
+} ### end if pressed 1,2
+
+
+
+
+
+else	### user pressed digit other than 1 or 2
+{
+
+exit;
+}
+
+$dbhA->close;
+
+
+
+exit;
+
+
+
+
+
+
+
+
+
+
+
+sub reminder_choice
+{
+$digit='';
+undef $digit;
+$interrupt_digit='';
+undef $interrupt_digit;
+
+# Hello, this is a courtesy call from ACME Industries reminding you that the deadline for the submission of orders for the June 5th batch delivery is tomorrow, March 10th:
+	# second audio file
+#  If you would like to leave a message for your agent please press 1. 
+#  If you would like to have your agent call you back please press 2. 
+	# third audio file
+# Thank you, Goodbye
+
+
+######### PLAY THE MESSAGE FILE THEN WAIT 2 SECONDS FOR DIGITS ############
+$interrupt_digit = $AGI->stream_file("$message_audio_file",'12');
+	if ($AGILOG) {$agi_string = "interrupt_digit |$interrupt_digit|";   &agi_output;}
+$digits_being_entered=1;
+$digit_loop_counter=0;
+$totalDTMF='';
+if ($interrupt_digit > 1)
+	{
+	if ($interrupt_digit == 48) {$interrupt_digit=0;}
+	if ($interrupt_digit == 49) {$interrupt_digit=1;}
+	if ($interrupt_digit == 50) {$interrupt_digit=2;}
+	if ($interrupt_digit == 51) {$interrupt_digit=3;}
+	if ($interrupt_digit == 52) {$interrupt_digit=4;}
+	if ($interrupt_digit == 53) {$interrupt_digit=5;}
+	if ($interrupt_digit == 54) {$interrupt_digit=6;}
+	if ($interrupt_digit == 55) {$interrupt_digit=7;}
+	if ($interrupt_digit == 56) {$interrupt_digit=8;}
+	if ($interrupt_digit == 57) {$interrupt_digit=9;}
+	$totalDTMF=$interrupt_digit;
+	$digit_loop_counter++;
+	}
+
+$channel_status = $AGI->channel_status("$channel");
+	if ($AGILOG) {$agi_string = "SSSSSSSSSS     Channel Status: $channel_status";   &agi_output;}
+
+	if ($channel_status == 6)
+		{
+		$stmtA = "UPDATE vicidial_log set status='MP' where uniqueid = '$uniqueid' and lead_id='$CIDlead_id';";
+			if ($AGILOG) {$agi_string = "|$stmtA|";   &agi_output;}
+		$affected_rows = $dbhA->do($stmtA);
+		if ($AGILOG) {$agi_string = "--    VDAD vicidial_log update: N|$affected_rows|$uniqueid";   &agi_output;}
+
+		$stmtA = "UPDATE vicidial_list set status='MP' where lead_id = '$CIDlead_id';";
+			if ($AGILOG) {$agi_string = "|$stmtA|";   &agi_output;}
+		$affected_rows = $dbhA->do($stmtA);
+		if ($AGILOG) {$agi_string = "--    VDAD vicidial_list update: N|$affected_rows|$CIDlead_id";   &agi_output;}
+		}                
+
+while ($digit_loop_counter < 1)
+	{
+	$digit = chr($AGI->wait_for_digit('2000'));  # wait 2 seconds for input or until digit pressed
+	if ($digit =~ /\d/)
+		{
+		$totalDTMF = "$totalDTMF$digit";
+		if ($AGILOG) {$agi_string = "digit |$digit|     TotalDTMF |$totalDTMF|";   &agi_output;}
+#		$AGI->say_digits("$digit");
+		undef $digit;
+		}
+	else
+		{
+		$digit_loop_counter=1;
+		}
+	
+	$digit_loop_counter++;
+	}
+
+$totalDTMF =~ s/\D//gi;
+$pin = $totalDTMF;
+if ($totalDTMF) 
+	{
+	if ($AGILOG) {$agi_string = "digit |$digit|     TotalDTMF |$totalDTMF|";   &agi_output;}
+	return;
+	}
+
+
+
+######### PLAY THE OPTIONS FILE THEN WAIT 5 SECONDS FOR DIGITS ############
+$interrupt_digit = $AGI->stream_file("$options_audio_file",'12');
+	if ($AGILOG) {$agi_string = "interrupt_digit |$interrupt_digit|";   &agi_output;}
+$digits_being_entered=1;
+$digit_loop_counter=0;
+$totalDTMF='';
+if ($interrupt_digit > 1)
+	{
+	if ($interrupt_digit == 48) {$interrupt_digit=0;}
+	if ($interrupt_digit == 49) {$interrupt_digit=1;}
+	if ($interrupt_digit == 50) {$interrupt_digit=2;}
+	if ($interrupt_digit == 51) {$interrupt_digit=3;}
+	if ($interrupt_digit == 52) {$interrupt_digit=4;}
+	if ($interrupt_digit == 53) {$interrupt_digit=5;}
+	if ($interrupt_digit == 54) {$interrupt_digit=6;}
+	if ($interrupt_digit == 55) {$interrupt_digit=7;}
+	if ($interrupt_digit == 56) {$interrupt_digit=8;}
+	if ($interrupt_digit == 57) {$interrupt_digit=9;}
+	$totalDTMF=$interrupt_digit;
+	$digit_loop_counter++;
+	}
+
+while ($digit_loop_counter < 1)
+	{
+	$digit = chr($AGI->wait_for_digit('10000'));  # wait 10 seconds for input or until digit pressed
+	if ($digit =~ /\d/)
+		{
+		$totalDTMF = "$totalDTMF$digit";
+		if ($AGILOG) {$agi_string = "digit |$digit|     TotalDTMF |$totalDTMF|";   &agi_output;}
+#		$AGI->say_digits("$digit");
+		undef $digit;
+		}
+	else
+		{
+		$digit_loop_counter=1;
+		}
+	
+	$digit_loop_counter++;
+	}
+
+$totalDTMF =~ s/\D//gi;
+$pin = $totalDTMF;
+if ($totalDTMF) 
+	{
+	if ($AGILOG) {$agi_string = "digit |$digit|     TotalDTMF |$totalDTMF|";   &agi_output;}
+	return;
+	}
+}
+
+
+
+
+sub checkresult {
+	my ($res) = @_;
+	my $retval;
+	$tests++;
+	chomp $res;
+	if ($res =~ /^200/) {
+		$res =~ /result=(-?\d+)/;
+		if (!length($1)) {
+		#	print STDERR "FAIL ($res)\n";
+			$fail++;
+		} else {
+		#	print STDERR "PASS ($1)\n";
+			$pass++;
+		}
+	} else {
+	#	print STDERR "FAIL (unexpected result '$res')\n";
+		$fail++;
+	}
+}
+
+
+
+
+sub agi_output
+{
+if ($AGILOG >=2)
+	{
+	### open the log file for writing ###
+	open(Lout, ">>$AGILOGfile")
+			|| die "Can't open $AGILOGfile: $!\n";
+	print Lout "$now_date|$script|$agi_string\n";
+	close(Lout);
+	}
+	### send to STDERR writing ###
+if ( ($AGILOG == '1') || ($AGILOG == '3') )
+	{print STDERR "$now_date|$script|$agi_string\n";}
+$agi_string='';
+}

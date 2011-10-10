@@ -1,0 +1,139 @@
+#!/usr/bin/perl
+#
+# invalid_speak.agi version 2.0.5
+# 
+# runs during an invalid extension and speaks the extension sent to it while printing to STDERR
+# 
+# You need to put lines similar to those below in your extensions.conf file:
+# 
+# ;inbound errors with speaking of extension:
+#exten => _XXXX,1,AGI(invalid_speak.agi,${EXTEN})
+#exten => _XXXX,2,Playback(invalid)
+#exten => _XXXX,3,Hangup
+#
+#exten => _*XXXXXXXXXX*XXXX,1,AGI(invalid_speak.agi,${EXTEN})
+#exten => _*XXXXXXXXXX*XXXX,2,Playback(invalid)
+#exten => _*XXXXXXXXXX*XXXX,3,Hangup
+#
+#exten => _*XXXXXXXXXX*XXXX*,1,AGI(invalid_speak.agi,${EXTEN})
+#exten => _*XXXXXXXXXX*XXXX*,2,Playback(invalid)
+#exten => _*XXXXXXXXXX*XXXX*,3,Hangup
+#
+#exten => _**XXXX,1,AGI(invalid_speak.agi,${EXTEN})
+#exten => _**XXXX,2,Playback(invalid)
+#exten => _**XXXX,3,Hangup
+#
+#exten => _**XXXX*,1,AGI(invalid_speak.agi,${EXTEN})
+#exten => _**XXXX*,2,Playback(invalid)
+#exten => _**XXXX*,3,Hangup
+#
+#
+# Copyright (C) 2008  Matt Florell <vicidial@gmail.com>    LICENSE: AGPLv2
+#
+
+$V = 0;		# set to 1 for verbose mode
+$CLIOUT = 1;	# set to 1 for printing 1 line to STDERR
+$SPEAK = 1;	# set to 1 for saying invalid digits
+
+($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
+$year = ($year + 1900);
+$mon++;
+if ($mon < 10) {$mon = "0$mon";}
+if ($mday < 10) {$mday = "0$mday";}
+if ($hour < 10) {$hour = "0$hour";}
+if ($min < 10) {$min = "0$min";}
+if ($sec < 10) {$sec = "0$sec";}
+
+$now_date_epoch = time();
+$now_date = "$year-$mon-$mday $hour:$min:$sec";
+
+
+### begin parsing run-time options ###
+if (length($ARGV[0])>1)
+{
+if ($V) {print STDERR "Perl Environment Dump:\n";}
+	$i=0;
+	while ($#ARGV >= $i)
+	{
+	$args = "$args $ARGV[$i]";
+	if ($V) {print STDERR "$i|$ARGV[$i]|\n";}
+	$i++;
+	}
+
+	if ($args =~ /--help/i)
+	{
+	print "allowed run time options:\n  [-q] = quiet\n  [-t] = test\n  [-debug] = verbose debug messages\n\n";
+	}
+	else
+	{
+		if ($args =~ /-V/i)
+		{
+		$V=1;
+		}
+		if ($args =~ /-debug/i)
+		{
+		$DG=1;
+		}
+		if ($args =~ /-dbAVS/i)
+		{
+		$DGA=1;
+		}
+		if ($args =~ /-q/i)
+		{
+		$q=1;
+		$Q=1;
+		}
+		if ($args =~ /-t/i)
+		{
+		$TEST=1;
+		$T=1;
+		}
+	}
+}
+else
+{
+if ($V) {print "no command line options set\n";}
+}
+
+use Asterisk::AGI;
+$AGI = new Asterisk::AGI;
+
+$|=1;
+while(<STDIN>) {
+	chomp;
+	last unless length($_);
+	if ($V)
+	{
+		if (/^agi_(\w+)\:\s+(.*)$/)
+		{
+			$AGI{$1} = $2;
+		}
+	}
+
+	if (/^agi_uniqueid\:\s+(.*)$/)		{$unique_id = $1;}
+	if (/^agi_channel\:\s+(.*)$/)		{$channel = $1;}
+	if (/^agi_extension\:\s+(.*)$/)		{$extension = $1;}
+	if (/^agi_type\:\s+(.*)$/)		{$type = $1;}
+	if (/^agi_callerid\:\s+(.*)$/)		{$callerid = $1;}
+}
+
+	if ($V)
+	{
+
+		if ($V) {print STDERR "AGI Environment Dump:\n";}
+		foreach $i (sort keys %AGI) {
+			if ($V) {print STDERR " -- $i = $AGI{$i}\n";}
+		}
+	}
+
+if ($CLIOUT) {print STDERR "****** INVALID EXTENSION: |$unique_id|$channel|$extension|$type|$callerid|\n";}
+
+if ($SPEAK) 
+	{
+	$AGI->stream_file('beep');
+	sleep(1);
+	$AGI->say_digits("$extension");
+	}
+
+
+exit;

@@ -1,0 +1,127 @@
+?Drop Call Seconds -<\/B> The number of seconds from the time the customer line is picked up until the call is considered a DROP, only applies to outbound calls
+|Segundos de la llamada de la gota - el nΓΊmero de segundos a partir|
+Safe Harbor Message -<\/B> If set to Y will play a message to customer after the Drop Call Seconds timeout is reached without being transferred to an agent. This setting will override sending to a voicemail box if this is set to Y
+|Mensaje seguro del puerto - si el sistema a Y juega un mensaje al|
+Safe Harbor Exten -<\/B> This is the dialplan extension that the desired Safe Harbor audio file is located at on your server
+|Puerto seguro Exten - Γ©sta es la extensiΓ³n dialplan que el archivo|
+Drop Message -<\/B> If set to Y will play a message to customer after the Drop Call Seconds timeout is reached without being transferred to an agent. This setting will override sending to a voicemail box if this is set to Y
+|Mensaje de la gota - si el sistema a Y juega un mensaje al cliente|
+Drop Exten -<\/B> This is the dialplan extension that the desired Dropped call audio file is located at on your server
+|Gota Exten - Γ©sta es la extensiΓ³n dialplan que el archivo audio|
+Call Time ID -<\/B> This is the short name of a Vicidial Call Time Definition. This needs to be a unique identifier. Do not use any spaces or punctuation for this field. max 10 characters, minimum of 2 characters
+|IdentificaciΓ³n del tiempo de la llamada - Γ©ste es el nombre corto de|
+Call Time Name -<\/B> This is a more descriptive name of the Call Time Definition. This is a short summary of the Call Time definition. max 30 characters, minimum of 2 characters
+|Nombre del tiempo de la llamada - Γ©ste es un nombre mΓ‘s descriptivo|
+Call Time Comments -<\/B> This is where you can place comments for a Vicidial Call Time Definition such as -10am to 4pm with extra call state restrictions-.  max 255 characters
+|El tiempo de la llamada comenta - aquΓ­ es donde usted puede poner los|
+Default Start and Stop Times -<\/B> This is the default time that calling will be allowed to be started or stopped within this call time definition if the day-of-the-week start time is not defined. 0 is midnight. To prevent calling completely set this field to 2400 and set the Default Stop time to 2400. To allow calling 24 hours a day set the start time to 0 and the stop time to 2400
+|Tiempos del comienzo y de parada del defecto - Γ©ste es el tiempo de|
+Weekday Start and Stop Times -<\/B> These are the custom times per day that can be set for the call time definition. same rules apply as with the Default start and stop times
+|Tiempos del comienzo y de parada del dΓ­a laborable - Γ©stos son los|
+State Call Time Definitions -<\/B> This is the list of State specific call time definitions that are followed in this Call Time Definition
+|Definiciones del tiempo de la llamada del estado - Γ©sta es la lista|
+State Call Time State -<\/B> This is the two letter code for the state that this calling time definition is for. For this to be in effect the local call time that is set in the campaign must have this state call time record in it as well as all of the leads having two letter state codes in them
+|Estado del tiempo de la llamada del estado - Γ©ste es el cΓ³digo de|
+Delete Call Times -<\/B> This option allows the user to be able to delete vicidial call times records and vicidial state call times records from the system
+|Tiempos de la llamada de la cancelaciΓ³n - esta opciΓ³n permite que el|
+Modify Call Times -<\/B> This option allows the user to view and modify the call times and state call times records. A user doesn't need this option enabled if they only need to change the call times option on the campaigns screen
+|Modifique los tiempos de la llamada - esta opciΓ³n permite que el|
+Wrapup Seconds -<\/B> The number of seconds to force an agent to wait before allowing them to receive or dial another call. The timer begins as soon as an agent hangs up on their customer - or in the case of alternate number dialing when the agent finishes the lead - Default is 0 seconds. If the timer runs out before the agent has dispositioned the call, the agent still will NOT move on to the next call until they select a disposition
+|Segundos de Wrapup - el nΓΊmero de los segundos para forzar un agente|
+Wrapup Message -<\/B> This is a campaign-specific message to be displayed on the wrapup screen if wrapup seconds is set
+|Mensaje de Wrapup - esto es un mensaje campaΓ±a-especi'fico que se|
+You are not authorized to view this page. Please go back
+|Le no autorizan a visión esta página. Vaya por favor detrás|
+Day and time options will appear once you have created the Call Time Definition
+|Las opciones del dΓ­a y del tiempo aparecerΓ‘n una vez que usted haya|
+State Call Time ID, name and state must be at least 2 characters in length
+|Indique que identificaciΓ³n del tiempo de la llamada, nombre y estado|
+Call Time ID and name must be at least 2 characters in length
+|La identificaciΓ³n del tiempo de la llamada y el nombre deben ser por|
+Active State Call Time Definitions for this Record
+|Definiciones activas del tiempo de la llamada del estado para esto|
+there is already a call time entry with this ID
+|hay ya una entrada de tiempo de la llamada con esta identificación|
+CALL TIMES USING THIS STATE CALL TIME
+|TIEMPOS DE LA LLAMADA USANDO ESTE TIEMPO DE LA LLAMADA DEL ESTADO|
+STATE CALL TIME DEFINITION NOT ADDED|DEFINICIÓN DEL TIEMPO DE LA LLAMADA DEL ESTADO NO AGREGADA|
+DELETE THIS STATE CALL TIME DEFINITION|SUPRIMA ESTA DEFINICIÓN DEL TIEMPO DE LA LLAMADA DEL ESTADO|
+Modify Call Time State Definitions List|Modifique La Lista De las Definiciones Del Estado Del Tiempo De la|
+CALL TIME DEFINITION NOT ADDED|DEFINICIÓN DEL TIEMPO DE LA LLAMADA NO AGREGADA|
+DELETE THIS CALL TIME DEFINITION|SUPRIMA ESTA DEFINICIÓN DEL TIEMPO DE LA LLAMADA|
+short description of the call time|descripción corta del tiempo de la llamada|
+CAMPAIGNS USING THIS CALL TIME|CAMPAÑAS USANDO ESTE TIEMPO DE LA LLAMADA|
+STATE CALL TIME NOT MODIFIED|TIEMPO DE LA LLAMADA DEL ESTADO NO MODIFICADO|
+CALL TIME NOT MODIFIED|TIEMPO DE LA LLAMADA NO MODIFICADO|
+STATE CALL TIME MODIFIED|TIEMPO DE LA LLAMADA DEL ESTADO MODIFICADO|
+CALL TIME MODIFIED|EL TIEMPO DE LA LLAMADA SE MODIFICÓ|
+Default Start:|Comienzo Del Defecto:|
+Default Stop:|Parada Del Defecto:|
+Sunday Start:|Comienzo De Domingo:|
+Sunday Stop:|Parada De Domingo:|
+Monday Start:|Comienzo De Lunes:|
+Monday Stop:|Parada De Lunes:|
+Tuesday Start:|Comienzo De Martes:|
+Tuesday Stop:|Parada De Martes:|
+Wednesday Start:|Comienzo De Miércoles:|
+Wednesday Stop:|Parada De Miércoles:|
+Thursday Start:|Comienzo De Jueves:|
+Thursday Stop:|Parada De Jueves:|
+Friday Start:|Comienzo De Viernes:|
+Friday Stop:|Parada De Viernes:|
+Saturday Start:|Comienzo De Sábado:|
+Saturday Stop:|Parada De Sábado:|
+State Rule Added|Regla Del Estado Agregada|
+State Rule Removed|La Regla Del Estado Quitó|
+STATE CALL TIME LISTINGS|LISTADOS DEL TIEMPO DE LA LLAMADA DEL ESTADO|
+CALL TIME LISTINGS|LISTADOS DEL TIEMPO DE LA LLAMADA|
+STATE CALL TIME ADDED|EL TIEMPO DE LA LLAMADA DEL ESTADO AGREGÓ|
+CALL TIME ADDED|EL TIEMPO DE LA LLAMADA AGREGÓ|
+Drop Call Seconds|Segundos De la Llamada De la Gota|
+Use Safe Harbor Message|Utilice El Mensaje Seguro Del Puerto|
+Safe Harbor Exten|Puerto Seguro Exten|
+Use Drop Message|Utilice El Mensaje De la Gota|
+Drop Exten|Gota Exten|
+SIP Listen Version|El Sip Escucha Versión|
+Add New Call Time|Agregue El Nuevo Tiempo De la Llamada|
+Add New State Call Time|Agregue El Nuevo Tiempo De la Llamada Del Estado|
+New Call Time Addition|Nueva Adición Del Tiempo De la Llamada|
+New State Call Time Addition|Nueva Adición Del Tiempo De la Llamada Del Estado|
+Modify Call Time|Modifique El Tiempo De la Llamada|
+MODIFY A CALL TIME|MODIFIQUE Un RATO De la LLAMADA|
+Modify State Call Time|Modifique El Tiempo De la Llamada Del Estado|
+MODIFY A STATE CALL TIME|MODIFIQUE Un RATO De la LLAMADA Del ESTADO|
+Delete Call Time|Tiempo De la Llamada De la Cancelación|
+Delete State Call Time|Tiempo De la Llamada Del Estado De la Cancelación|
+State Call Times|Tiempos De la Llamada Del Estado|
+State Call Time ID|Identificación Del Tiempo De la Llamada Del Estado|
+State Call Time Name|Nombre Del Tiempo De la Llamada Del Estado|
+State Call Time Comments|Comentarios Del Tiempo De la Llamada Del Estado|
+STATE CALL TIME NOT DELETED|TIEMPO DE LA LLAMADA DEL ESTADO NO SUPRIMIDO|
+CALL TIME DELETION COMPLETED|CANCELADURA DEL TIEMPO DE LA LLAMADA TERMINADA|
+STATE CALL TIME DELETION COMPLETED|CANCELADURA DEL TIEMPO DE LA LLAMADA DEL ESTADO TERMINADA|
+CALL TIME NOT DELETED|TIEMPO DE LA LLAMADA NO SUPRIMIDO|
+Call Time ID must be at least 2 characters in length|La identificaciΓ³n del tiempo de la llamada debe ser por lo menos 2|
+STATE CALL TIME DELETION CONFIRMATION|CONFIRMACIÓN DE LA CANCELADURA DEL TIEMPO DE LA LLAMADA DEL ESTADO|
+CALL TIME DELETION CONFIRMATION|CONFIRMACIÓN DE LA CANCELADURA DEL TIEMPO DE LA LLAMADA|
+Call Times|Tiempos De la Llamada|
+CALL TIMES|TIEMPOS DE LA LLAMADA|
+SHOW CALL TIMES|DEMUESTRE LOS TIEMPOS DE LA LLAMADA|
+ADD NEW CALL TIME|AGREGUE EL NUEVO TIEMPO DE LA LLAMADA|
+SHOW STATE CALL TIMES|DEMUESTRE LOS TIEMPOS DE LA LLAMADA DEL ESTADO|
+ADD NEW STATE CALL TIME|AGREGUE EL NUEVO TIEMPO DE LA LLAMADA DEL ESTADO|
+Call Time ID|Identificación Del Tiempo De la Llamada|
+Call Time Name|Nombre Del Tiempo De la Llamada|
+Call Time Comments|Comentarios Del Tiempo De la Llamada|
+short description of the call time|descripción corta del tiempo de la llamada|
+HIDE|PIEL|
+SHOW|DEMOSTRACIÓN|
+Show Dialable Leads Count|Demuestre La Cuenta De los Plomos De Dialable|
+Dialable Lead Count|Cuenta Del Plomo De Dialable|
+TEST ON CAMPAIGN|PRUEBE EN CAMPAÑA|
+Wrapup Seconds:|Segundos De Wrapup:|
+Wrapup Message:|Mensaje De Wrapup:|
+Alt Number Dialing|El Marcar Del Número Del Alt|
+no active lists selected for this campaign|ningunas listas activas seleccionadas para esta campaña|
+Realtime Screen|Pantalla En tiempo real|
+

@@ -1,0 +1,402 @@
+﻿# language.txt - this file is for the internationalization of the astGUIclient 
+# client web pages. The associated install.pl file will take the language as an 
+# argument and alter the php scripts to the language typed in the command line:
+# example: ./install.pl --language=es
+# current languages in the file:
+# - English - (en) no alterations
+# - Spanish - (es) first column
+# - French - (fr) second column
+# - German - (de) third column
+# - Italian - (it) fourth column
+# - Portuguese - (pt) fifth column
+# - Greek - (el) sixth column
+***LANGUAGES***
+en-English|es-Español|fr-Français|de-Deutsch|it-Italiano|pt-Português|el-Ελληνικά|
+***FILES***
+agc|astguiclient.php|0
+agc|vicidial.php|0
+agc|vdc_db_query.php|0
+agc|manager_send.php|0
+agc|conf_exten_check.php|0
+agc|inbound_popup.php|0
+agc|active_list_refresh.php|0
+agc|park_calls_display.php|0
+agc|live_exten_check.php|0
+agc|call_log_display.php|0
+agc|voicemail_check.php|0
+agc|dbconnect.php|1
+agc|htglobalize.php|1
+***TRANSLATIONS***
+### special translations that should stay at the top of the file ###
+"JAN"|"ENE"|"JAN"|"JAN"|"GEN"|"JAN"|"ΙΑΝ"|""|""|
+"FEB"|"FEB"|"FÉV"|"FEB"|"FEB"|"FEV"|"ΦΕΒ"|""|""|
+"MAR"|"MAR"|"MAR"|"MÄR"|"MAR"|"MAR"|"ΜΑΡ"|""|""|
+"APR"|"ABR"|"AVR"|"APR"|"APR"|"ABR"|"ΑΠΡ"|""|""|
+"MAY"|"PUE"|"PEU"|"MÖG"|"POS"|"POS"|"ΜΆΙ"|""|""|
+"JUN"|"JUN"|"JUN"|"JUN"|"GIU"|"JUN"|"ΙΟΝ"|""|""|
+"JLY"|"JUL"|"JUL"|"JLY"|"LUG"|"JLY"|"ΙΟΛ"|""|""|
+"AUG"|"AGO"|"AOÛ"|"AUG"|"AGO"|"AGO"|"ΑΥΓ"|""|""|
+"SEP"|"SEP"|"SEP"|"SEP"|"SET"|"SET"|"ΣΕΠ"|""|""|
+"OCT"|"OCT"|"OCT"|"OKT"|"OTT"|"OUT"|"ΟΚΤ"|""|""|
+"NOV"|"NOV"|"NOV"|"NOV"|"NOV"|"NOV"|"ΝΟΕ"|""|""|
+"DEC"|"DIC"|"DÉC"|"DEZ"|"DIC"|"DEZ"|"ΔΕΚ"|""|""|
+\./images/|../agc/images/|
+BORDER|Border|
+VALUE=SUBMIT|VALUE=SUBMIT|
+TYPE=SUBMIT|TYPE=Submit|
+### BEGIN translation phrases through 1.1.11 release ###
+English|Inglés|Anglais|Englisch|Inglese|Inglês|Αγγλικά||
+Spanish|Español|Espagnol|Spanisch|Spagnolo|Espanhol|Ισπανικά||
+French|Francés|Français|Französisch|Francese|Francês|Γαλλικά||
+German|Alemán|Allemand|Deutsch|Tedesco|Alemão|Γερμανικά||
+Italian|Italiano|Italien|Italienisch|Italiano|Italiano|Ιταλικά||
+agc_check_voicemail_BLINK.gif|agc_check_voicemail_BLINK_es.gif|agc_check_voicemail_BLINK_fr.gif|agc_check_voicemail_BLINK_de.gif|agc_check_voicemail_BLINK_it.gif|agc_check_voicemail_BLINK_pt.gif|agc_check_voicemail_BLINK_el.gif||
+agc_check_voicemail_OFF.gif|agc_check_voicemail_OFF_es.gif|agc_check_voicemail_OFF_fr.gif|agc_check_voicemail_OFF_de.gif|agc_check_voicemail_OFF_it.gif|agc_check_voicemail_OFF_pt.gif|agc_check_voicemail_OFF_el.gif||
+agc_check_voicemail_ON.gif|agc_check_voicemail_ON_es.gif|agc_check_voicemail_ON_fr.gif|agc_check_voicemail_ON_de.gif|agc_check_voicemail_ON_it.gif|agc_check_voicemail_ON_pt.gif|agc_check_voicemail_ON_el.gif||
+agc_live_call_OFF.gif|agc_live_call_OFF_es.gif|agc_live_call_OFF_fr.gif|agc_live_call_OFF_de.gif|agc_live_call_OFF_it.gif|agc_live_call_OFF_pt.gif|agc_live_call_OFF_el.gif||
+agc_live_call_ON.gif|agc_live_call_ON_es.gif|agc_live_call_ON_fr.gif|agc_live_call_ON_de.gif|agc_live_call_ON_it.gif|agc_live_call_ON_pt.gif|agc_live_call_ON_el.gif||
+agc_tab_active_lines.gif|agc_tab_active_lines_es.gif|agc_tab_active_lines_fr.gif|agc_tab_active_lines_de.gif|agc_tab_active_lines_it.gif|agc_tab_active_lines_pt.gif|agc_tab_active_lines_el.gif||
+agc_tab_conferences.gif|agc_tab_conferences_es.gif|agc_tab_conferences_fr.gif|agc_tab_conferences_de.gif|agc_tab_conferences_it.gif|agc_tab_conferences_pt.gif|agc_tab_conferences_el.gif||
+agc_tab_main.gif|agc_tab_main_es.gif|agc_tab_main_fr.gif|agc_tab_main_de.gif|agc_tab_main_it.gif|agc_tab_main_pt.gif|agc_tab_main_el.gif||
+vdc_LB_dialnextnumber.gif|vdc_LB_dialnextnumber_es.gif|vdc_LB_dialnextnumber_fr.gif|vdc_LB_dialnextnumber_de.gif|vdc_LB_dialnextnumber_it.gif|vdc_LB_dialnextnumber_pt.gif|vdc_LB_dialnextnumber_el.gif||
+vdc_LB_dialnextnumber_OFF.gif|vdc_LB_dialnextnumber_OFF_es.gif|vdc_LB_dialnextnumber_OFF_fr.gif|vdc_LB_dialnextnumber_OFF_de.gif|vdc_LB_dialnextnumber_OFF_it.gif|vdc_LB_dialnextnumber_OFF_pt.gif|vdc_LB_dialnextnumber_OFF_el.gif||
+vdc_LB_grabparkedcall.gif|vdc_LB_grabparkedcall_es.gif|vdc_LB_grabparkedcall_fr.gif|vdc_LB_grabparkedcall_de.gif|vdc_LB_grabparkedcall_it.gif|vdc_LB_grabparkedcall_pt.gif|vdc_LB_grabparkedcall_el.gif||
+vdc_LB_hangupcustomer.gif|vdc_LB_hangupcustomer_es.gif|vdc_LB_hangupcustomer_fr.gif|vdc_LB_hangupcustomer_de.gif|vdc_LB_hangupcustomer_it.gif|vdc_LB_hangupcustomer_pt.gif|vdc_LB_hangupcustomer_el.gif||
+vdc_LB_hangupcustomer_OFF.gif|vdc_LB_hangupcustomer_OFF_es.gif|vdc_LB_hangupcustomer_OFF_fr.gif|vdc_LB_hangupcustomer_OFF_de.gif|vdc_LB_hangupcustomer_OFF_it.gif|vdc_LB_hangupcustomer_OFF_pt.gif|vdc_LB_hangupcustomer_OFF_el.gif||
+vdc_LB_parkcall.gif|vdc_LB_parkcall_es.gif|vdc_LB_parkcall_fr.gif|vdc_LB_parkcall_de.gif|vdc_LB_parkcall_it.gif|vdc_LB_parkcall_pt.gif|vdc_LB_parkcall_el.gif||
+vdc_LB_parkcall_OFF.gif|vdc_LB_parkcall_OFF_es.gif|vdc_LB_parkcall_OFF_fr.gif|vdc_LB_parkcall_OFF_de.gif|vdc_LB_parkcall_OFF_it.gif|vdc_LB_parkcall_OFF_pt.gif|vdc_LB_parkcall_OFF_el.gif||
+vdc_LB_pause.gif|vdc_LB_pause_es.gif|vdc_LB_pause_fr.gif|vdc_LB_pause_de.gif|vdc_LB_pause_it.gif|vdc_LB_pause_pt.gif|vdc_LB_pause_el.gif||
+vdc_LB_pause_OFF.gif|vdc_LB_pause_OFF_es.gif|vdc_LB_pause_OFF_fr.gif|vdc_LB_pause_OFF_de.gif|vdc_LB_pause_OFF_it.gif|vdc_LB_pause_OFF_pt.gif|vdc_LB_pause_OFF_el.gif||
+vdc_LB_resume.gif|vdc_LB_resume_es.gif|vdc_LB_resume_fr.gif|vdc_LB_resume_de.gif|vdc_LB_resume_it.gif|vdc_LB_resume_pt.gif|vdc_LB_resume_el.gif||
+vdc_LB_resume_OFF.gif|vdc_LB_resume_OFF_es.gif|vdc_LB_resume_OFF_fr.gif|vdc_LB_resume_OFF_de.gif|vdc_LB_resume_OFF_it.gif|vdc_LB_resume_OFF_pt.gif|vdc_LB_resume_OFF_el.gif||
+vdc_LB_startrecording.gif|vdc_LB_startrecording_es.gif|vdc_LB_startrecording_fr.gif|vdc_LB_startrecording_de.gif|vdc_LB_startrecording_it.gif|vdc_LB_startrecording_pt.gif|vdc_LB_startrecording_el.gif||
+vdc_LB_stoprecording.gif|vdc_LB_stoprecording_es.gif|vdc_LB_stoprecording_fr.gif|vdc_LB_stoprecording_de.gif|vdc_LB_stoprecording_it.gif|vdc_LB_stoprecording_pt.gif|vdc_LB_stoprecording_el.gif||
+vdc_LB_transferconf.gif|vdc_LB_transferconf_es.gif|vdc_LB_transferconf_fr.gif|vdc_LB_transferconf_de.gif|vdc_LB_transferconf_it.gif|vdc_LB_transferconf_pt.gif|vdc_LB_transferconf_el.gif||
+vdc_LB_transferconf_OFF.gif|vdc_LB_transferconf_OFF_es.gif|vdc_LB_transferconf_OFF_fr.gif|vdc_LB_transferconf_OFF_de.gif|vdc_LB_transferconf_OFF_it.gif|vdc_LB_transferconf_OFF_pt.gif|vdc_LB_transferconf_OFF_el.gif||
+vdc_LB_webform.gif|vdc_LB_webform_es.gif|vdc_LB_webform_fr.gif|vdc_LB_webform_de.gif|vdc_LB_webform_it.gif|vdc_LB_webform_pt.gif|vdc_LB_webform_el.gif||
+vdc_LB_webform_OFF.gif|vdc_LB_webform_OFF_es.gif|vdc_LB_webform_OFF_fr.gif|vdc_LB_webform_OFF_de.gif|vdc_LB_webform_OFF_it.gif|vdc_LB_webform_OFF_pt.gif|vdc_LB_webform_OFF_el.gif||
+vdc_XB_blindtransfer.gif|vdc_XB_blindtransfer_es.gif|vdc_XB_blindtransfer_fr.gif|vdc_XB_blindtransfer_de.gif|vdc_XB_blindtransfer_it.gif|vdc_XB_blindtransfer_pt.gif|vdc_XB_blindtransfer_el.gif||
+vdc_XB_blindtransfer_OFF.gif|vdc_XB_blindtransfer_OFF_es.gif|vdc_XB_blindtransfer_OFF_fr.gif|vdc_XB_blindtransfer_OFF_de.gif|vdc_XB_blindtransfer_OFF_it.gif|vdc_XB_blindtransfer_OFF_pt.gif|vdc_XB_blindtransfer_OFF_el.gif||
+vdc_XB_dialwithcustomer.gif|vdc_XB_dialwithcustomer_es.gif|vdc_XB_dialwithcustomer_fr.gif|vdc_XB_dialwithcustomer_de.gif|vdc_XB_dialwithcustomer_it.gif|vdc_XB_dialwithcustomer_pt.gif|vdc_XB_dialwithcustomer_el.gif||
+vdc_XB_dialwithcustomer_OFF.gif|vdc_XB_dialwithcustomer_OFF_es.gif|vdc_XB_dialwithcustomer_OFF_fr.gif|vdc_XB_dialwithcustomer_OFF_de.gif|vdc_XB_dialwithcustomer_OFF_it.gif|vdc_XB_dialwithcustomer_OFF_pt.gif|vdc_XB_dialwithcustomer_OFF_el.gif||
+vdc_XB_hangupbothlines.gif|vdc_XB_hangupbothlines_es.gif|vdc_XB_hangupbothlines_fr.gif|vdc_XB_hangupbothlines_de.gif|vdc_XB_hangupbothlines_it.gif|vdc_XB_hangupbothlines_pt.gif|vdc_XB_hangupbothlines_el.gif||
+vdc_XB_hangupbothlines_OFF.gif|vdc_XB_hangupbothlines_OFF_es.gif|vdc_XB_hangupbothlines_OFF_fr.gif|vdc_XB_hangupbothlines_OFF_de.gif|vdc_XB_hangupbothlines_OFF_it.gif|vdc_XB_hangupbothlines_OFF_pt.gif|vdc_XB_hangupbothlines_OFF_el.gif||
+vdc_XB_hangupxferline.gif|vdc_XB_hangupxferline_es.gif|vdc_XB_hangupxferline_fr.gif|vdc_XB_hangupxferline_de.gif|vdc_XB_hangupxferline_it.gif|vdc_XB_hangupxferline_pt.gif|vdc_XB_hangupxferline_el.gif||
+vdc_XB_hangupxferline_OFF.gif|vdc_XB_hangupxferline_OFF_es.gif|vdc_XB_hangupxferline_OFF_fr.gif|vdc_XB_hangupxferline_OFF_de.gif|vdc_XB_hangupxferline_OFF_it.gif|vdc_XB_hangupxferline_OFF_pt.gif|vdc_XB_hangupxferline_OFF_el.gif||
+vdc_XB_internalcloser.gif|vdc_XB_internalcloser_es.gif|vdc_XB_internalcloser_fr.gif|vdc_XB_internalcloser_de.gif|vdc_XB_internalcloser_it.gif|vdc_XB_internalcloser_pt.gif|vdc_XB_internalcloser_el.gif||
+vdc_XB_internalcloser_OFF.gif|vdc_XB_internalcloser_OFF_es.gif|vdc_XB_internalcloser_OFF_fr.gif|vdc_XB_internalcloser_OFF_de.gif|vdc_XB_internalcloser_OFF_it.gif|vdc_XB_internalcloser_OFF_pt.gif|vdc_XB_internalcloser_OFF_el.gif||
+vdc_XB_leave3waycall.gif|vdc_XB_leave3waycall_es.gif|vdc_XB_leave3waycall_fr.gif|vdc_XB_leave3waycall_de.gif|vdc_XB_leave3waycall_it.gif|vdc_XB_leave3waycall_pt.gif|vdc_XB_leave3waycall_el.gif||
+vdc_XB_leave3waycall_OFF.gif|vdc_XB_leave3waycall_OFF_es.gif|vdc_XB_leave3waycall_OFF_fr.gif|vdc_XB_leave3waycall_OFF_de.gif|vdc_XB_leave3waycall_OFF_it.gif|vdc_XB_leave3waycall_OFF_pt.gif|vdc_XB_leave3waycall_OFF_el.gif||
+vdc_XB_localcloser.gif|vdc_XB_localcloser_es.gif|vdc_XB_localcloser_fr.gif|vdc_XB_localcloser_de.gif|vdc_XB_localcloser_it.gif|vdc_XB_localcloser_pt.gif|vdc_XB_localcloser_el.gif||
+vdc_XB_localcloser_OFF.gif|vdc_XB_localcloser_OFF_es.gif|vdc_XB_localcloser_OFF_fr.gif|vdc_XB_localcloser_OFF_de.gif|vdc_XB_localcloser_OFF_it.gif|vdc_XB_localcloser_OFF_pt.gif|vdc_XB_localcloser_OFF_el.gif||
+vdc_XB_parkcustomerdial.gif|vdc_XB_parkcustomerdial_es.gif|vdc_XB_parkcustomerdial_fr.gif|vdc_XB_parkcustomerdial_de.gif|vdc_XB_parkcustomerdial_it.gif|vdc_XB_parkcustomerdial_pt.gif|vdc_XB_parkcustomerdial_el.gif||
+vdc_XB_parkcustomerdial_OFF.gif|vdc_XB_parkcustomerdial_OFF_es.gif|vdc_XB_parkcustomerdial_OFF_fr.gif|vdc_XB_parkcustomerdial_OFF_de.gif|vdc_XB_parkcustomerdial_OFF_it.gif|vdc_XB_parkcustomerdial_OFF_pt.gif|vdc_XB_parkcustomerdial_OFF_el.gif||
+vdc_XB_hotkeysactive.gif|vdc_XB_hotkeysactive_es.gif|vdc_XB_hotkeysactive_fr.gif|vdc_XB_hotkeysactive_de.gif|vdc_XB_hotkeysactive_it.gif|vdc_XB_hotkeysactive_pt.gif|vdc_XB_hotkeysactive_el.gif||
+vdc_XB_hotkeysactive_OFF.gif|vdc_XB_hotkeysactive_OFF_es.gif|vdc_XB_hotkeysactive_OFF_fr.gif|vdc_XB_hotkeysactive_OFF_de.gif|vdc_XB_hotkeysactive_OFF_it.gif|vdc_XB_hotkeysactive_OFF_pt.gif|vdc_XB_hotkeysactive_OFF_el.gif||
+vdc_LB_senddtmf.gif|vdc_LB_senddtmf_es.gif|vdc_LB_senddtmf_fr.gif|vdc_LB_senddtmf_de.gif|vdc_LB_senddtmf_it.gif|vdc_LB_senddtmf_pt.gif|vdc_LB_senddtmf_el.gif||
+vdc_LB_senddtmf_OFF.gif|vdc_LB_senddtmf_OFF_es.gif|vdc_LB_senddtmf_OFF_fr.gif|vdc_LB_senddtmf_OFF_de.gif|vdc_LB_senddtmf_OFF_it.gif|vdc_LB_senddtmf_OFF_pt.gif|vdc_LB_senddtmf_OFF_el.gif||
+vdc_XB_header.gif|vdc_XB_header_es.gif|vdc_XB_header_fr.gif|vdc_XB_header_de.gif|vdc_XB_header_it.gif|vdc_XB_header_pt.gif|vdc_XB_header_el.gif||
+vdc_XB_number.gif|vdc_XB_number_es.gif|vdc_XB_number_fr.gif|vdc_XB_number_de.gif|vdc_XB_number_it.gif|vdc_XB_number_pt.gif|vdc_XB_number_el.gif||
+vdc_XB_channel.gif|vdc_XB_channel_es.gif|vdc_XB_channel_fr.gif|vdc_XB_channel_de.gif|vdc_XB_channel_it.gif|vdc_XB_channel_pt.gif|vdc_XB_channel_el.gif||
+vdc_XB_seconds.gif|vdc_XB_seconds_es.gif|vdc_XB_seconds_fr.gif|vdc_XB_seconds_de.gif|vdc_XB_seconds_it.gif|vdc_XB_seconds_pt.gif|vdc_XB_seconds_el.gif||
+vdc_tab_script.gif|vdc_tab_script_es.gif|vdc_tab_script.gif|vdc_tab_script.gif|vdc_tab_script.gif|vdc_tab_script.gif|vdc_tab_script.gif||
+You have now logged out. Thank you|Usted ahora ha registrado hacia fuera. Gracias|Vous vous êtes maintenant déconnecté. Merci|Sie haben jetzt heraus geloggt. Danke|Ora avete annotato fuori. Grazie|Você tem registrado agora para fora. Obrigado|Έχετε αποσυνδεθεί. Σας ευχαριστούμε||
+astGUIclient web-client VERSION|versión astGUIclient del tela-cliente|VERSION astGUIclient d'enchaînement-client|astGUIclient Netz-Klient VERSION|VERSIONE astGUIclient del fotoricettore-cliente|VERSÃO astGUIclient do correia-cliente|ΈΚΔΟΣΗ astGUIclient||
+astGUIclient web client|web client astGUIclient|web client astGUIclient|astGUIclient web client|web client astGUIclient|web client astGUIclient|astGUIclient web client||
+VICIDIAL web client|web client VICIDIAL|Web client de VICIDIAL|VICIDIAL web client|Web client di VICIDIAL|Web client de VICIDIAL|VICIDIAL web client||
+VICIDIAL web-client version|versión web client VICIDIAL|Version d'enchaînement-client de VICIDIAL|VICIDIAL Netz-Klient Version|Versione del fotoricettore-cliente di VICIDIAL|Versão do correia-cliente de VICIDIAL|Έκδοση VICIDIAL||
+You can only monitor Zap channels|Usted puede supervisa solamente Zap los canales|Vous pouvez surveillez seulement zap des canaux |Sie können überwachen nur Zap Führungen|Potete soltanto controllate zap le scanalature|Você pode monitora somente zap as canaletas|Μπορείτε μόνο να ελέγξετε τα κανάλια Zap||
+Stop Record|Pare la grabación|Arrêtez Le Disque|Stoppen Sie Aufzeichnung|Arresti L'Annotazione|Pare O Registro|Τερματισμός Ηχογράφησης||
+you are logged into this phone|su teléfono|votre téléphone|Ihr Telefon|il vostro telefono|seu telefone|είσαστε σε σύνδεση με το τηλέφωνο ||
+Back to Main Window|Volver a la pantalla principal|De nouveau à la fenêtre principale|Zurück zu Hauptfenster|Di nuovo alla finestra principale|Para trás à janela principal|Επιστροφή στο κύριο παράθυρο||
+LIVE CALLS ON THIS PHONE|LLAMADAS ACTIVAS EN ESTE TELÉFONO|DE PHASE INVITE CE TÉLÉPHONE|PHASEN ERSUCHT UM DIESES TELEFON|IN TENSIONE INVITA QUESTO TELEFONO|VIVO CONVIDA ESTE TELEFONE|ΕΝΕΡΓΕΣ ΚΛΗΣΕΙΣ ΣΕ ΑΥΤΟ ΤΟ ΤΗΛΕΦΩΝΟ||
+LIVE CALLS IN THIS CONFERENCE|LLAMADAS ACTIVAS EN ESTA CONFERENCIA|VIVENT LES APPELS DANS CETTE CONFÉRENCE|LEBEN ANRUFE IN DIESER KONFERENZ|VIVONO LE CHIAMATE IN QUESTO CONGRESSO|VIVEM AS CHAMADAS NCESTA CONFERÊNCIA|ΕΝΕΡΓΕΣ ΚΛΗΣΕΙΣ ΣΕ ΑΥΤΗΝ ΤΗΝ ΔΙΑΣΚΕΨΗ||
+LIVE CALL TRANSFER|TRANSFERIR LLAMADA ACTIVA|TRANSFERT DE PHASE D'APPEL|PHASENANRUF-ÜBERTRAGUNG|TRASFERIMENTO IN TENSIONE DI CHIAMATA|TRANSFERÊNCIA VIVA DA CHAMADA|ΜΕΤΑΦΟΡΑ ΕΝΕΡΓΗΣ ΚΛΗΣΗΣ||
+CLIENT CHANNEL|CANAL CLIENTE|LA MANCHE DE CLIENT|KLIENT FÜHRUNG|MANICA DEL CLIENTE|CANALETA DO CLIENTE|ΚΑΝΑΛΙ ΠΕΛΑΤΩΝ||
+REMOTE CHANNEL|CANAL REMOTO|LA MANCHE À DISTANCE|REMOTEFÜHRUNG|MANICA A DISTANZA|CANALETA REMOTA|ΑΠΟΜΑΚΡΟ ΚΑΝΑΛΙ||
+CLICK HERE TO LOG IN AGAIN|PINCHA AQUÍ PARA ENTRAR OTRA VEZ|CLIC ICI À L'OUVERTURE ENCORE|KLICKEN SIE HIER, UM INNEN WIEDER ZU LOGGEN|SCATTISI QUI PER ENTRARE ANCORA|ESTALE AQUI PARA LOGON OUTRA VEZ|ΕΠΙΛΕΞΤΕ ΕΔΩ ΓΙΑ ΝΑ ΣΥΝΔΕΘΕΙΤΕ ΠΑΛΙ||
+ACTIVE DISPLAY PAUSED|DISPLAY ACTIVO PAUSADO|L'AFFICHAGE ACTIF A FAIT UNE PAUSE|AKTIVE ANZEIGE PAUSIERTE|L'ESPOSIZIONE ATTIVA HA FATTO UNA PAUSA|A EXPOSIÇÃO ATIVA PAUSOU|ΠΑΥΣΗ ΕΝΕΡΓΗΣ ΟΘΟΝΗΣ||
+Main Panel|Pantalla Principal|Panneau Principal|Hauptverkleidung|Pannello Principale|Painel Principal|Κύριος Πίνακας||
+Active Lines Panel|Pantalla Lineas Activas|Lignes Actives Panneau|Aktive Linien Verkleidung|Linee Attive Pannello|Linhas Ativas Painel|Πίνακας Ενεργών Γραμμών||
+Conferences Panel|Pantalla de Conferencias|Panneau De Conférences|Konferenz-Verkleidung|Pannello Di Congressi|Painel Das Conferências|Πίνακας διασκέψεων||
+Check Voicemail|Comprobar buzón de voz|Vérifiez Voicemail|Überprüfen Sie Voicemail|Controlli Voicemail|Verifique Voicemail|Ελεγχος Φωνητικού ταχυδρομείου||
+Live Call|Llamada Activa|Vivent L'Appel|Leben Anruf|Vive La Chiamata|Vive A Chamada|Ενεργή κλήση||
+Hangup Trunk|Colgar Trunk|Tronc De Décrochement|Hängezustand-Stamm|Tronco Di Hangup|Tronco Do Hangup|Κλείσιμο Trunk||
+Hijack Trunk|Capturar Trunk|Tronc De Détournement|Straßenräuber-Stamm|Tronco Di Dirottamento|Tronco Do Hijack|Κλέψιμο Trunk||
+Listen Trunk|Escuchar Trunk|Écoutent Le Tronc|Hören Stamm|Ascolta Il Tronco|Escuta O Tronco|Ακούστε Trunk||
+Active Local Menu|Menú Local Activa|Menu Local Actif|Aktives Lokales Menü|Menu Locale Attivo|Menu Local Ativo|Ενεργές Τοπικές Επιλογές||
+Hangup Local|Colgar Local|Gens du pays De Décrochement|Hängezustand-Einheimischer|Local Di Hangup|Local Do Hangup|Κλείσιμο τοπικού||
+Hijack Local|Capturar Local|Gens du pays De Détournement|Straßenräuber-Einheimischer|Local Di Dirottamento|Local Do Hijack|Κλέψιμο τοπικού||
+Listen Local|Escuchar Local|Écoutent Les Gens du pays|Hören Einheimischer|Ascolta Il Local|Escuta O Local|Ακούστε τοπικό||
+Channel to be transferred|Canal que va a ser transferido|La Manche à transférer|Gebracht zu werden Führung|Manica da trasferire|Canaleta a ser transferida|Κανάλι που μεταφέρεται||
+Extensions Menu|Menú Extensiones|Menu De Prolongements|Verlängerungen Menü|Menu Di Estensioni|Menu Das Extensões|Επιλογές τηλ. συνδέσεων||
+Send to selected extension|Envíe a la extensión seleccionada|Envoyez à la prolongation choisie|Senden Sie zu vorgewählter Verlängerung|Trasmetta all'estensione selezionata|Emita à extensão selecionada|Στείλε στην επιλεγμένη τηλ.σύνδεση||
+Send to selected vmail box|Enviar al buzón de voz seleccionada|Envoyez dans la boîte choisie de vmail|Senden Sie zu vorgewähltem vmail Kasten|Trasmetta alla scatola selezionata del vmail|Emita à caixa selecionada do vmail|Στείλε στο επιλεγμένο vmail||
+Send to this number|Envíe a este número|Envoyez à ce nombre|Senden Sie zu dieser Zahl|_ trasmett questo numero|Emita a este número|Στείλε σε αυτόν τον αριθμό||
+click on a number below to send to a conference|Pinchar en un número de abajo para enviar a una conferencia|cliquez sur un nombre ci-dessous pour envoyer à une|klicken Sie an eine Zahl unten, um zu einer Konferenz zu senden|scatti sopra un numero qui sotto per trasmettere ad un congresso|estale sobre um número abaixo para emitir a uma conferência|επιλέξτε έναν αριθμό κατωτέρω που θα σταλεί σε μια διάσκεψη||
+Send my channel too|Enviar mi canal también|Envoyez mon canal aussi|Senden Sie meine Führung auch|Trasmetta la mia scanalatura anche|Emita minha canaleta demasiado|Στείλε το κανάλι μου επίσης||
+Conferences Menu|Menú de Conferencias|Menu De Conférences|Konferenz-Menü|Menu Di Congressi|Menu Das Conferências|Επιλογές διασκέψεων||
+LOCAL Extensions Dial|Marcar a Extensiones LOCALES|Cadran LOCAL De Prolongements|LOKALER Verlängerungen Vorwahlknopf|Manopola LOCALE Di Estensioni|Seletor LOCAL Das Extensões|ΤΟΠΙΚΕΣ τηλ. συνδέσεις Κλήσεως||
+Phone calling from|Teléfono llamando desde|Téléphone appelant de|Telefon, das von benennt|Telefono che denomina da|Telefone que chama-se de|Τηλέφωνο που καλεί από||
+Call selected extension|Llamar extensión seleccionada|Prolongation choisie par appel|Anruf vorgewählte Verlängerung|Estensione selezionata chiamata|Extensão selecionada chamada|Επιλεγμένη κλήση τηλ. σύνδεσης||
+Call selected vmail box|Llamar buzón de voz seleccionado|Boîte de vmail choisie par appel|Anruf vorgewählter vmail Kasten|Scatola del vmail selezionata chiamata|Caixa selecionada chamada do vmail|Επιλεγμένη κλήση vmail||
+LOCAL DIAL EXTENSIONS|MARCAR EXTENSIONES LOCALES|PROLONGEMENTS LOCAUX DE CADRAN|LOKALE VORWAHLKNOPF-VERLÄNGERUNGEN|ESTENSIONI LOCALI DELLA MANOPOLA|EXTENSÕES LOCAIS DO SELETOR|ΤΗΛ. ΣΥΝΔΕΣΕΙΣ ΤΟΠΙΚΗΣ ΚΛΗΣΗΣ||
+OUTBOUND CALLS|LLAMADAS SALIENTES|APPELS EN PARTANCE|OUTBOUND ANRUFE|CHIAMATE OUTBOUND|CHAMADAS OUTBOUND |ΕΞΕΡΧΟΜΕΝΕΣ ΚΛΗΣΕΙΣ||
+INBOUND CALLS|LLAMADAS ENTRANTES|APPELS D'ARRIVÉE|INBOUND ANRUFE|CHIAMATE INBOUND|CHAMADAS INBOUND|ΕΙΣΕΡΧΟΜΕΝΕΣ ΚΛΗΣΕΙΣ||
+Refresh rate|Actualizar la tarifa|La vitesse de régénération|Erneuern Sie Rate|La velocità di rinfrescamento|Refresque a taxa|Ποσοστό ανανέωσης||
+MANUAL DIAL|MARCADO MANUAL|CADRAN MANUEL|MANUELLER VORWAHLKNOPF|MANOPOLA MANUALE|SELETOR MANUAL|ΧΕΙΡΩΝΑΚΤΙΚΗ ΚΛΗΣΗ||
+CALL DATE/TIME|FECHA/HORA DE LA LLAMADA|DATE/HEURE D'APPEL|ANRUFDATE/TIME|DATE/TIME DI CHIAMATA|DATE/TIME DA CHAMADA|ΗΜΕΡΟΜΗΝΙΑ/ΧΡΟΝΟΣ ΚΛΗΣΗΣ||
+LOCAL HANGUP|Colgar Local|DÉCROCHEMENT LOCAL|LOKALER HÄNGEZUSTAND|HANGUP LOCALE|HANGUP LOCAL|ΤΟΠΙΚΟ ΚΛΕΙΣΙΜΟ ΤΗΛΕΦΩΝΟΥ||
+PARKED CALLS|LLAMADAS  APARCADAS|APPELS GARÉS|GEPARKTE ANRUFE|CHIAMATE PARCHEGGIATE|CHAMADAS ESTACIONADAS|ΣΤΑΘΜΕΥΜΕΝΕΣ ΚΛΗΣΕΙΣ||
+PARKED BY|APARCAR POR|GARÉ PRÈS|VORBEI GEPARKT|PARCHEGGIATO VICINO|ESTACIONADO PERTO|ΣΤΑΘΜΕΥΜΕΝΕΣ ΑΠΟ||
+PARKED TIME|TIEMPO EN PARKING|TEMPS GARÉ|GEPARKTE ZEIT|TEMPO PARCHEGGIATO|TEMPO ESTACIONADO|ΧΡΟΝΟΣ ΣΤΑΘΜΕΥΣΗΣ||
+Registered to|Registrado a|Enregistré à|Registriert zu|Registrato a|Registado a|Καταχωρημένος||
+Enter Conference|Entrar en la conferencia|Écrivez La Conférence|Tragen Sie Konferenz Ein|Entri Nel Congresso|Incorpore A Conferência|Συμμετοχή στη διάσκεψη||
+Dial From Conf|Marcar desde la Conf|Cadran de conf |Vorwahlknopf Von Conf|Manopola Da Conf|Seletor De Conf|Κληση από τη διάσκεψη||
+Active Extensions|Extensiones Activas|Prolongements Actifs|Aktive Verlängerungen|Estensioni Attive|Extensões Ativas|Ενεργές τηλ. συνδέσεις||
+Outside Lines|Líneas de salida|Lignes Extérieures|Äußere Linien|Linee Esterne|Linhas Exteriores|Εξωτερικές γραμμές||
+Local Extensions|Extensiones Locales|Prolongements Locaux|Lokale Verlängerungen|Estensioni Locali|Extensões Locais|Τοπικές τηλ. συνδέσεις||
+Data Goes Here|Los Datos Van Aquí|Les Données Vont Ici|Daten Gehen Hier|I Dati Vanno Qui|Os Dados Vão Aqui|Τα δεδομένα πηγαίνουν εδώ||
+Trunk Action|Acciones en Trunk|Action De Tronc|Stamm-Tätigkeit|Azione Del Tronco|Ação Do Tronco|Κίνηση Trunk||
+Local Action|Acción Local|Action Locale|Lokale Tätigkeit|Azione Locale|Ação Local|Τοπική Κίνηση||
+Conferences List|Lista De las Conferencias|Liste De Conférences|Konferenz-Liste|Lista Di Congressi|Lista Das Conferências|Κατάλογος διασκέψεων||
+Click on a conference room number on the left for info on that conference|Pinchar a la izquierda del número de una sala de conferencias para obtener información|Cliquez sur un nombre de salle de conférence du côté gauche|Klicken Sie an Konferenzzimmernummer auf dem links für Info auf|Scatti sopra un numero di stanza di congresso a sinistra per l'Info su|Estale sobre um número de quarto da conferência na esquerda para o|Επιλέξτε έναν αριθμό δωματίου διάσκεψης στα αριτερά για τις πληροφορίες σε εκείνη την διάσκεψη||
+List Display|Mostrar Listas|Affichage De Liste|Liste Anzeige|Esposizione Della Lista|Exposição Da Lista|Κατάλογος Οθόνης||
+Live Extensions|Extensiones Activas|Prolongements De phase|Phasenverlängerungen|Estensioni In tensione|Extensões Vivas|Ενεργές τηλ. συνδέσεις||
+Busy Extensions|Extensiones Ocupadas|Prolongements Occupés|Beschäftigte Verlängerungen|Estensioni Occupate|Extensões Ocupadas|Απασχολημένες τηλ. συνδέσεις||
+Outside Lines|Extensiones Salientes|Lignes Extérieures|Äußere Linien|Linee Esterne|Linhas Exteriores|Εξωτερικές γραμμές||
+script runtime|tiempo de ejecución del Script|temps d'exécution de manuscrit|Indexlaufzeit|tempo di esecuzione dello scritto|runtime do certificado|χρόνος εκτέλεσης||
+Call Log Display|Motrar el registro de llamadas|Affichage De Notation D'Appel|Anruf-Maschinenbordbuch-Anzeige|Esposizione Del Ceppo Di Chiamata|Exposição Do Registro Da Chamada|Έμφάνιση Καταγραμμένων Κλήσεων||
+is not valid|No es válido|est inadmissible|ist unzulässig|è non valido|é inválido|δεν ισχύει||
+or protocol|o protocolo|ou protocole|oder Protokoll|o protocollo|ou protocolo|ή πρωτόκολλο||
+Conf Extension Check|Comprobar la Extensión de Conf|Contrôle De Prolongation De Conf|Conf Verlängerung Überprüfung|Controllo Di Estensione Di Conf|Verificação Da Extensão De Conf|Έλεγχος τηλ.σύνδεσης διάσκεψης||
+has been registered to|Ha sido registrado para|a été enregistré à|ist zu registriert worden|è stato registrato a|foi registado a|έχει καταχωρηθεί||
+LIVE INBOUND CALL|LLAMADA DE ENTRADA ACTIVA|APPEL D'ARRIVÉE DE PHASE|INBOUND LEBHAFTANRUF|CHIAMATA INBOUND IN TENSIONE|CHAMADA INBOUND VIVA|ΕΝΕΡΓΗ ΕΙΣΕΡΧΟΜΕΝΗ ΚΛΗΣΗ||
+Number Dialed|Número Marcado|Numéro Composé|Nummer Gewählt|Il Numero Ha composto|O Número Marcou|Αριθμός που καλέσατε||
+SEND TO MY VOICEMAIL|ENVIAR  A MI BUZÓN DE VOZ|ENVOYEZ À MON VOICEMAIL|SENDEN SIE ZU MEINEM VOICEMAIL|TRASMETTA AL MIO VOICEMAIL|EMITA A MEU VOICEMAIL|ΣΤΕΙΛΕ ΣΤΟ ΦΩΝΗΤΙΚΟ ΤΑΧΥΔΡΟΜΕΙΟ ΜΟΥ||
+Live Extension Check|Comprobar Extensión  Activa|Contrôle De phase De Prolongation|Phasenverlängerung Überprüfung|Controllo In tensione Di Estensione|Verificação Viva Da Extensão|Ελεγχος ενεργής τηλ.σύνδεσης||
+Manager Send|Enviar al Manager|Le Directeur Envoient|Manager Senden|Il Responsabile Trasmette|O Gerente Emite|Ο διευθυντής στέλνει||
+command not inserted|comando no insertado|commande non insérée|Befehl nicht eingesetzt|ordine non inserito|comando não introduzido|εντολή που δεν έγινε εισαγωγή||
+command sent for|comando enviado a|commande envoyée pour|Befehl gesendet für|ordine trasmesso per|comando emitido para|εντολή που στέλνεται για||
+One of these variables|Una de estas variables|Une de ces variables|Eine dieser Variablen|Una di queste variabili|Uma destas variáveis|Μία από αυτές τις μεταβλητές||
+must be greater than 2 characters|debe ser mayor de 2 caracteres|doivent être les 2 caractères plus grands que|muß als 2 Buchstaben grösser sein|deve essere più grande di 2 caratteri|deve ser mais grande de 2 caráteres|πρέπει να είναι μεγαλύτερος από 2 χαρακτήρες||
+must be greater than 14 characters|debe ser mayor de 14 caracteres|doivent être les 14 caractères plus grands que|muß als 14 Buchstaben grösser sein|deve essere più grande di 14 caratteri|deve ser mais grande de 14 caráteres|πρέπει να είναι μεγαλύτερος από 14 χαρακτήρες||
+must be set|debe ser fijado|doit être placé|muß eingestellt werden|deve essere regolato|deve ser ajustado|πρέπει να τεθεί||
+not sent|no enviado|non envoyé|nicht gesendet|non trasmesso|não emitido|μην σταλμένος||
+Cannot find empty conference|No puede encontrar conferencia vacía|Ne peut pas trouver la conférence vide|Kann nicht leere Konferenz finden|Non può trovare il congresso vuoto|Não pode encontrar a conferência vazia|Δεν υπάρχει κενή διάσκεψη||
+is not live|no está activo|n'est pas de phase|ist nicht Phasen|non è in tensione|não está vivo|δεν είναι ενεργό||
+RECORDING WILL LAST UP TO 60 MINUTES|LA GRABACIÓN DURARÁ HASTA 60 MINUTOS|L'ENREGISTREMENT DURERA JUSQU'À 60 MINUTES|AUFNAHME DAUERT BIS 60 MINUTEN|LA REGISTRAZIONE DURERÀ FINO A 60 MINUTI|A GRAVAÇÃO DURARÁ ATÉ 60 MINUTOS|Η ΚΑΤΑΓΡΑΦΗ ΘΑ ΔΙΑΡΚΕΣΕΙ ΜΕΧΡΙ 60 ΛΕΠΤΑ||
+Parked Calls Display|Mostrar Llamadas Aparcadas|Affichage Garé D'Appels|Geparkte Anruf-Anzeige|Esposizione Parcheggiata Di Chiamate|Exposição Estacionada Das Chamadas|Εμφάνιση Σταθμευμένων Κλήσεων||
+Database Query Script|Database Query Script|Manuscrit De Question De Base de données|Datenbank-Frage Index|Scritto Di Domanda Della Base di dati|Certificado Da Pergunta Da Base de dados|Κώδικας ερώτησης βάσεων δεδομένων||
+Group Choice|Opción Del Grupo|Choix De Groupe|Gruppe Wahl|Scelta Del Gruppo|Escolha Do Grupo|Επιλογή ομάδας||
+has been registered to user|se ha registrado al usuario|a été enregistré à l'utilisateur|ist zum Benutzer registriert worden|è stato registrato all'utente|foi registado ao usuário|έχει καταχωρηθεί στο χρήστη||
+HOPPER EMPTY|TOLVA VACÍA|DISTRIBUTEUR VIDE|ZUFUHRBEHÄLTER LEER|TRAMOGGIA VUOTA|FUNIL VAZIO|ΚΕΝΟΣ HOPPER||
+LOG NOT ENTERED|REGISTRO NO ENTRADO|NOTATION NON ENTRÉE|MASCHINENBORDBUCH NICHT BETRETEN|CEPPO NON INSERITO|REGISTRO NÃO ENTRADO|ΔΕΝ ΕΓΙΝΕ ΕΙΣΑΓΩΓΗ ΣΤΗΝ ΚΑΤΑΓΡΑΦΗ ΓΕΓΟΝΟΤΩΝ||
+has been changed to|se ha cambiado a|a été changé en|ist zu geändert worden|è stato cambiato a|foi mudado a|έχει αλλαχτεί||
+information has been updated|La información ha sido actualizada|l'information a été mise à jour|Informationen sind aktualisiert worden|le informazioni sono state aggiornate|a informação foi atualizada|οι πληροφορίες έχουν ενημερωθεί||
+is now in status|ahora está en estado|est maintenant dans le statut|ist jetzt im Status|è ora nella condizione|está agora no status|είναι τώρα στη κατάσταση||
+Voicemail Check|Comprobar el buzón de voz|Contrôle De Voicemail|Voicemail Überprüfung|Controllo Di Voicemail|Verificação De Voicemail|Έλεγχος φωνητικού ταχυδρομείου||
+voicemail box|caja del buzón de voz|boîte de voicemail|voicemail Kasten|scatola del voicemail|caixa do voicemail|Κουτί φωνητικού ταχυδρομείου||
+Re-Login|Conexión Otra Vez|Re-Ouverture|Re-LOGON|Re-Inizio attività|Re-Início de uma sessão|Επανασύνδεση||
+User Password|Contraseña Del Usuario|Mot de passe D'Utilisateur|Benutzer-Kennwort|Parola d'accesso Dell'Utente|Senha Do Usuário|Κωδικός πρόσβασης χρήστη||
+User Login|Conexión Del Usuario|Ouverture D'Utilisateur|Benutzer-LOGON|Inizio attività Dell'Utente|Início de uma sessão Do Usuário|Σύνδεση χρήστη||
+Phone Login|Conexión Del Teléfono|Ouverture De Téléphone|Telefon-LOGON|Inizio attività Del Telefono|Início de uma sessão Do Telefone|Σύνδεση Τηλεφώνου||
+Phone Password|Contraseña Del Teléfono|Mot de passe De Téléphone|Telefon-Kennwort|Parola d'accesso Del Telefono|Senha Do Telefone|Κωδικός πρόσβασης Τηλεφώνου||
+Campaign not active, please try again|La campaña no está activa, intentelo otra vez, por favor|La campagne non active, essayent svp encore|Die aktive Kampagne nicht, versuchen bitte noch einmal|La campagna non attiva, prova prego ancora|A campanha nao ativa, tenta por favor outra vez|Η εκστρατεία είναι μη ενεργή, παρακαλώ προσπαθήστε πάλι||
+Login incorrect, please try again|La conexión incorrecta, intentelo otra vez, por favor|L'ouverture incorrecte, essayent svp encore|Der falsche LOGON, versuchen bitte noch einmal|L'inizio attività errato, prova prego ancora|O início de uma sessão incorreto, tenta por favor outra vez|Η σύνδεση δεν είναι σωστή, παρακαλώ προσπαθήστε πάλι||
+Campaign Login|Conexión en la Campaña|Ouverture De Campagne|Kampagne LOGON|Inizio attività Di Campagna|Início de uma sessão Da Campanha|Σύνδεση εκστρατείας||
+Sorry, your phone login and password are not active in this system, please try again|Disculpe, la conexión del teléfono y contraseña no están activos en este sistema, intentelo otra vez por favor|Désolé, votre ouverture de téléphone et mot de passe ne soyez pas|Traurig, Ihr Telefon-LOGON und Kennwort seien Sie nicht in diesem|Spiacente, il vostri inizio attività del telefono e parola d'accesso|Pesaroso, seus início de uma sessão do telefone e senha não seja|Συγγνώμη, αλλά η τηλεφωνική σύνδεση και ο κωδικός πρόσβασής σας δεν είναι ενεργά σε αυτό το σύστημα, παρακαλώ προσπαθήστε πάλι||
+leads left to call in hopper|Leads a la izquierda para llamar en Hopper|mène à gauche à appeler dans le distributeur|führt nach links, um im Zufuhrbehälter zu benennen|conduce a sinistra per denominare in tramoggia|conduz à esquerda para chamar-se no funil|καθοδηγητές που απέμειναν για κλήση στον hopper||
+CAMPAIGN CUSTOM PARKING|PARKING PERSONALIZADO DE LA CAMPAÑA|STATIONNEMENT FAIT SUR COMMANDE DE CAMPAGNE|KAMPAGNE KUNDENSPEZIFISCHES PARKEN|PARCHEGGIO SU ORDINAZIONE DI CAMPAGNA|ESTACIONAMENTO FEITO SOB ENCOMENDA DA CAMPANHA|ΠΡΟΣΑΡΜΟΣΜΕΝΟΣ ΧΩΡΟΣ ΣΤΑΘΜΕΥΣΗΣ ΕΚΣΤΡΑΤΕΙΑΣ||
+CAMPAIGN DEFAULT PARKING|PARKING POR DEFECTO DE LA CAMPAñA|STATIONNEMENT DE DÉFAUT DE CAMPAGNE|KAMPAGNE RÜCKSTELLUNG PARKEN|PARCHEGGIO DI DIFETTO DI CAMPAGNA|ESTACIONAMENTO DO DEFEITO DA CAMPANHA|ΠΡΟΕΠΙΛΟΓΗ ΧΩΡΟΥ ΣΤΑΘΜΕΥΣΗΣ ΕΚΣΤΡΑΤΕΙΑΣ||
+CAMPAIGN CUSTOM WEB FORM|FORMULARIO WEB PERSONALIZADO DE LA CAMPAÑA|FORME FAITE SUR COMMANDE DE WEB DE CAMPAGNE|KAMPAGNE KUNDENSPEZIFISCHE NETZ-FORM|FORMA SU ORDINAZIONE DI FOTORICETTORE DI CAMPAGNA|FORMULÁRIO FEITO SOB ENCOMENDA DA CORREIA FOTORRECEPTORA DA CAMPANHA|ΠΡΟΣΑΡΜΟΣΜΕΝΗ ΙΣΤΟΣΕΛΙΔΑ ΕΚΣΤΡΑΤΕΙΑΣ||
+CAMPAIGN DEFAULT WEB FORM|FORMULARIO WEB POR DEFECTO DE LA CAMPAÑA|FORME DE WEB DE DÉFAUT DE CAMPAGNE|KAMPAGNE RÜCKSTELLUNG NETZ-FORM|FORMA DI FOTORICETTORE DI DIFETTO DI CAMPAGNA|FORMULÁRIO DA CORREIA FOTORRECEPTORA DO DEFEITO DA CAMPANHA|ΠΡΟΕΠΙΛΟΓΗ ΙΣΤΟΣΕΛΙΔΑΣ ΕΚΣΤΡΑΤΕΙΑΣ||
+CAMPAIGN ALLOWS CLOSERS|LA CAMPAÑA PERMITE CLOSERS|LA CAMPAGNE PERMET CLOSERS|KAMPAGNE ERLAUBT CLOSERS|LA CAMPAGNA PERMETTE CLOSERS|A CAMPANHA PERMITE CLOSERS|Η ΕΚΣΤΡΑΤΕΙΑ ΕΠΙΤΡΕΠΕΙ CLOSERS||
+CAMPAIGN ALLOWS NO CLOSERS|LA CAMPAÑA NO PERMITE CLOSERS|LA CAMPAGNE NE PERMET AUCUN CLOSERS|KAMPAGNE ERLAUBT KEIN CLOSERS|LA CAMPAGNA NON PERMETTE CLOSERS|A CAMPANHA NÃO PERMITE NENHUM CLOSERS|Η ΕΚΣΤΡΑΤΕΙΑ ΔΕΝ ΕΠΙΤΡΕΠΕΙ ΚΑΝΕΝΑ CLOSERS||
+USING PREVIOUS MEETME ROOM|USAR EL SITIO ANTERIOR DE MEETME|EMPLOYER LA PIÈCE PRÉCÉDENTE DE MEETME|VERWENDEN DES VORHERGEHENDEN MEETME RAUMES|USANDO LA STANZA PRECEDENTE DI MEETME|USANDO O QUARTO PRECEDENTE DE MEETME|ΧΡΗΣΙΜΟΠΟΙΗΣΗ ΠΡΟΗΓΟΥΜΕΝΟΥ ΔΩΜΑΤΙΟΥ MEETME||
+USING NEW MEETME ROOM|USAR EL NUEVO SITIO DE MEETME|EMPLOYER LA NOUVELLE PIÈCE DE MEETME|VERWENDEN DES NEUEN MEETME RAUMES|USANDO LA NUOVA STANZA DI MEETME|USANDO O QUARTO NOVO DE MEETME|ΧΡΗΣΙΜΟΠΟΙΗΣΗ ΝΕΟΥ ΔΩΜΑΤΟΥ MEETME||
+old QUEUE and INCALL reverted list|vieja COLA y lista invertida INCALL|vieille FILE D'ATTENTE et liste retournée par INCALL|alte WARTESCHLANGE und INCALL umgeschaltete Liste|vecchia CODA e lista ritornata INCALL|FILA velha e lista reverted INCALL|παλιά ΣΕΙΡΑ ΑΝΑΜΟΝΗΣ και σε-κλήση κλήσεις επαναστρέφουν την Λίστα||
+old QUEUE and INCALL reverted hopper|vieja COLA y tolva invertida INCALL|vieille FILE D'ATTENTE et distributeur retourné par INCALL|alte WARTESCHLANGE und INCALL umgeschalteter Zufuhrbehälter|vecchia CODA e tramoggia ritornata INCALL|FILA velha e funil reverted INCALL|παλιά ΣΕΙΡΑ ΑΝΑΜΟΝΗΣ και σε-κλήση κλήσεις επαναστρέφουν τον hopper||
+old vicidial_live_agents records cleared|viejos expedientes de los vicidial_live_agents despejados|vieux disques de vicidial_live_agents dégagés|alte vicidial_live_agents Aufzeichnungen löschten|vecchie annotazioni dei vicidial_live_agents eliminate|os registros velhos dos vicidial_live_agents cancelaram|καθαρισμός παλαιών εγγραφών vicidial_live_agents||
+campaign is set to auto_dial_level|la campaña se fija al auto_dial_level|la campagne est placée à l'auto_dial_level|Kampagne wird auf auto_dial_level eingestellt|la campagna è regolata a auto_dial_level|a campanha é ajustada ao auto_dial_level|η εκστρατεία τίθεται στην αυτόματη κλήση||
+new vicidial_live_agents record inserted|Insertadas las grabaciones nueva de los vicidial_live_agents|nouveau disque de vicidial_live_agents inséré|neue vicidial_live_agents Aufzeichnung eingesetzt|la nuova annotazione dei vicidial_live_agents ha inserito|o registro novo dos vicidial_live_agents introduziu|νέο εισαγωγή εγγραφής vicidial_live_agents||
+campaign is set to manual dial|la campaña está configurada con marcaje manual|la campagne est placée au cadran manuel|Kampagne wird auf manuellen Vorwahlknopf eingestellt|la campagna è regolata alla manopola manuale|a campanha é ajustada ao seletor manual|η εκστρατεία τίθεται στη χειρωνακτική κλήση||
+Sorry, there are no leads in the hopper for this campaign|Lo siento, no hay leads en el hopper de esta campaña|Désolé, il n'y a aucun fil dans le distributeur pour cette campagne|Traurig, gibt es keine Leitungen im Zufuhrbehälter für diese|Spiacenti, non ci sono cavi nella tramoggia per questa campagna|Pesaroso, não há nenhuma ligação no funil para esta campanha|Συγγνώμη, δεν υπάρχουν καθοδηγητές στον hopper για αυτήν την εκστρατεία||
+Dial Next Number|Marcar el Siguiente Número|Prochain Nombre De Cadran|Vorwahlknopf-Folgende Zahl|Numero Seguente Della Manopola|Número Seguinte Do Seletor|Κλήση επόμενου αριθμού||
+LIVE CALLS IN YOUR SESSION|LLAMADAS ACTIVAS EN SU SESIÓN|VIVENT LES APPELS EN VOTRE SESSION|LEBEN ANRUFE IN IHREM LERNABSCHNITT|VIVONO LE CHIAMATE NELLA VOSTRA SESSIONE|VIVEM AS CHAMADAS EM SUA SESSÃO|ΕΝΕΡΓΕΣ ΚΛΗΣΕΙΣ ΣΤΗ ΣΥΝΟΔΟ ΣΑΣ||
+Stop Recording|Parar La Grabación|Cessez L'Enregistrement|Stoppen Sie Zu notieren|Smetta Di registrare|Pare de Gravar|Στάση καταγραφής||
+Start Recording|Comenzar La Grabación|Commencez À enregistrer|Fangen Sie an Zu notieren|Inizi A registrare|Comece Gravar|Εναρξη καταγραφής||
+Transfer number must have more than 1 digit|El número de la transferencia debe tener más de 1 dígito|Le nombre de transfert doit avoir plus de 1 chiffre|Übergangszahl muß mehr als 1 Stelle haben|Il numero di trasferimento deve avere più di 1 cifra|O número de transferência deve ter mais de 1 dígito|Ο αριθμός σε μεταφορά πρέπει να έχει περισσότερο από 1 ψηφίο||
+Grab Parked Call|Capturar llamada en Parking|Appel Garé Par Encavateur|Zupacken Geparkter Anruf|Chiamata Parcheggiata Gru a benna|Chamada Estacionada Garra|Αρπαγμα σταθμευμένης κλήσης||
+Park Call|Aparcar llamada|Appel De Parc|Park-Anruf|Chiamata Del Parco|Chamada Do Parque|Στάθμευση Κλήσης||
+Waiting for Ring|Espeerar al Ring|Anneau d'attente|Wartering|Anello attendente|Anel de espera|Αναμονή για κουδούνισμα||
+Called 3rd party|Terceros llamados|Tiers appelé|Angerufene 3. Partei|Terzi denominati|Ó partido chamado|Κλήση 3 συμβαλλόμενου μέρους||
+LEAVE 3-WAY CALL|ABANDONAR LLAMADA 3-WAY|APPEL DU CONGÉ 3-WAY|ANRUF DES URLAUB-3-WAY|CHIAMATA DI PERMESSO 3-WAY|CHAMADA DA LICENÇA 3-WAY|ΑΠΟΧΩΡΗΣΗ 3WAY ΚΛΗΣΗΣ||
+Dial With Customer|Marcar Con El Cliente|Cadran Avec Le Client|Vorwahlknopf Mit Kunden|Manopola Con Il Cliente|Seletor Com Cliente|Κλήση με τον πελάτη||
+Park Customer Dial|Dial Del Cliente Del Parque|Cadran De Client De Parc|Park-Kunde Vorwahlknopf|Manopola Del Cliente Del Parco|Seletor Do Cliente Do Parque|Στάθμευση κλήσης πελάτη||
+Hangup Xfer Line|Colgar Línea Xfer |Ligne De Xfer De Décrochement|Hängezustand Xfer Linie|Linea Di Xfer Di Hangup|Linha De Xfer Do Hangup|Κλείσιμο Γραμμής Xfer||
+Hangup Both Lines|Colgar Ambas Líneas|Décrochement Les deux Lignes|Hängezustand Beide Linien|Hangup Entrambe le Linee|Hangup Ambas as Linhas|Κλείσιμο και τις δύο γραμμές||
+Hangup Customer|Colgar al Cliente|Client De Décrochement|Hängezustand-Kunde|Cliente Di Hangup|Cliente Do Hangup|΄Κλείσιμο Πελάτη||
+Transfer - Conference|Transferencia - Conferencia|Transfert - Conférence|Übertragung - Konferenz|Trasferimento - Congresso|Transferência - Conferência|Μεταφορά - διάσκεψη||
+LOCAL CLOSER|CLOSER LOCAL|GENS DU PAYS PLUS ÉTROITS|EINHEIMISCHER GENAUER|LOCAL PIÙ VICINO|LOCAL MAIS PRÓXIMO|ΤΟΠΙΚΟΣ CLOSER||
+INTERNAL CLOSER|CLOSER INTERNO|PLUS ÉTROIT INTERNE|INTERNES GENAUERES|PIÙ VICINO INTERNO|MAIS PRÓXIMO INTERNO|ΕΣΩΤΕΡΙΚΟΣ CLOSER||
+Dial Blind Transfer|Marcar Blind Transfer|Transfert D'Aveugle De Cadran|Vorwahlknopf-Vorhang-Übertragung|Trasferimento Dei Ciechi Della Manopola|Transferência Da Cortina Do Seletor|Τυφλή μεταφορά κλήσης||
+Dial timed out, contact your system administrator|Tiempo de espera superado, pongase en contacto con su administrador de sistema|Le cadran chronométré dehors, contactent votre interface|Zeit Vorwahlknopf, der heraus festgesetzt wird, treten mit Ihrem|La manopola cronometrata fuori, si mette in contatto con il vostro|O seletor cronometrado para fora, contata seu administrador de|Τέλος χρόνος της κλήσης, να έρθετε σε επαφή με το διαχειριστή||
+No more leads in the hopper for campaign|No más Leads en el hopper de la campaña|Pas plus ne mène dans le distributeur pour la campagne|Kein mehr führt im Zufuhrbehälter für Kampagne|Nient'altro conduce nella tramoggia per la campagna|Não mais conduz no funil para a campanha|Δεν υπάρχουν άλλοι καθοδηγητές στον hopper για την εκστρατεία||
+Web Form|Formulario Web|Forme de Web|Netz-Form|Forma Di Fotoricettore|Formulário Da Correia fotorreceptora|Σελίδα Διαδικτύου||
+You Must Select a Disposition|Usted debe seleccionar una disposición|Vous devez choisir une disposition|Sie müssen eine Einteilung vorwählen|Dovete selezionare una disposizione|Você deve selecionar uma disposição|Πρέπει να επιλέξετε ένα τερματισμό||
+GROUPS NOT SELECTED|GRUPOS NO SELECCIONADOS|GROUPES NON CHOISIS|GRUPPEN NICHT VORGEWÄHLT|GRUPPI NON SELEZIONATI|GRUPOS NÃO SELECIONADOS|ΟΜΑΔΕΣ ΠΟΥ ΔΕΝ ΕΧΟΥΝ ΕΠΙΛΕΓΕΙ||
+SELECTED GROUPS|GRUPOS SELECCIONADOS|GROUPES CHOISIS|VORGEWÄHLTE GRUPPEN|GRUPPI SELEZIONATI|GRUPOS SELECIONADOS|ΕΠΙΛΕΓΜΕΝΕΣ ΟΜΑΔΕΣ||
+You cannot log out during a Dial attempt|Usted no puede salir durante un intento de marcado|Vous ne pouvez pas vous déconnecter pendant une tentative de|Sie können nicht heraus während eines Vorwahlknopfversuchs loggen|Non potete annotare fuori durante il tentativo della manopola|Você não pode registrar para fora durante uma tentativa do seletor|Δεν μπορείτε να αποσυνδεθείτε κατά τη διάρκεια μιας προσπάθειας κλήσεως||
+Wait 50 seconds for the dial to fail out if it is not answered|Esperar 50 segundos para que el marcado falle si no es respondido|Attendez 50 secondes le cadran pour échouer dehors si on ne lui|Warten Sie, daß 50 Sekunden auf den Vorwahlknopf heraus ausfallen,|Aspetti 50 secondi la manopola per venire a mancare fuori se non è|Espere 50 segundos pelo seletor para falhar para fora se não se|Περιμένετε 50 δευτερόλεπτα την κλήση για να αποτύχει εάν δεν απαντέται||
+STILL A LIVE CALL! Hang it up then you can log out|TODAVÍA UNA LLAMADA ACTIVA! Colgar y luego salir|Un APPEL TOUJOURS DE PHASE ! Accrochez-le vers le haut alors que vous|NOCH Ein PHASENANRUF! Hängen Sie ihn, oben dann, das Sie heraus|ANCORA Una CHIAMATA IN TENSIONE! Appendala in su allora che potete|AINDA Uma CHAMADA VIVA! Pendure-a acima então que você pode|Υπάρχει ΑΚΟΜΑ μια ΚΛΗΣΗ ΕΝΕΡΓΗ! Τερματίστε την κλήση και μετά μπορείτε να αποσυνδεθείτε||
+Hide conference call channel information|Ocultar la información del canal Conferencia|L'information de canal de conférence téléphonique de peau|Fellkonferenzanruf-Führung Informationen|Le informazioni della scanalatura di chiamata di congresso del|Informação da canaleta da chamada de conferência do hide|Απόκρυψη πηροφοριών κλήσης καναλιού διασκέψης||
+Show conference call channel information|Mostrar la información del canal Conferencia|Montrez l'information de canal de conférence téléphonique|Zeigen Sie Konferenzanruf-Führung Informationen|Mostri le informazioni della scanalatura di chiamata di congresso|Mostre a informação da canaleta da chamada de conferência|Παρουσίαση πληροφοριών κλήσης καναλιού διασκέψης||
+Logged in as User|Usuario|Utilisateur|Benutzer|Utente|Usuário|Σύνδεση ως χρήστης ||
+Noone is in your session|Nadie está en su sesión|Aucun n'est en votre session|Noone ist in Ihrem Lernabschnitt|Nessuno è nella vostra sessione|Noone está em sua sessão|Κανένας δεν είναι στη σύνοδό σας||
+Customer has hung up|El cliente ha colgado|Le client a raccroché|Kunde hat oben gehangen|Il cliente ha appeso in su|O cliente pendurou acima|Ο πελάτης έχει κλείσει το τηλέφωνο||
+End-of-call Disposition Selection|selección de la disposición del End-of-call|Extrémité-de-appelez Le Choix De Disposition|Ende-von-benennen Sie Einteilung Vorwähler|Estremità-de-denomini La Selezione Di Disposizione|Extremidade-$$$-CHAME A Seleção Da Disposição|Επιλογή τερματισμού της κλήσης||
+CLOSER INBOUND GROUP SELECTION|SELECCIÓN DEL GRUPO DE ENTRANTES CLOSER|UN CHOIX DE GROUPE D'ARRIVÉE PLUS ÉTROIT|GENAUERE INBOUND GRUPPENWAHL|SELEZIONE DI GRUPPO INBOUND PIÙ VICINA|SELEÇÃO DE GRUPO INBOUND MAIS PRÓXIMA|CLOSER ΕΙΣΕΡΧΟΜΕΝΗ ΕΠΙΛΟΓΗ ΟΜΑΔΑΣ||
+Closer Inbound Group Selection|SELECCIÓN DEL GRUPO DE ENTRANTES CLOSER|Un Choix De Groupe D'arrivée Plus étroit|Genauere Inbound Gruppenwahl|Selezione Di Gruppo Inbound Più vicina|Seleção De Grupo Inbound Mais próxima|Επιλογή Closer εισερχόμενης ομάδας||
+BLENDED CALLING|BLENDED CALLING|APPELER MÉLANGÉ|GEMISCHTES BENENNEN|CHIAMATA MESCOLATA|CHAMADA MISTURADA|ΣΥΝΔΥΑΣΜΕΝΗ ΚΛΗΣΗ||
+outbound activated|Salientes activdas|en partance activé|outbound aktiviert|outbound attivato|outbound ativado|εξερχόμενες ενεργοποιημένες||
+Preview the Lead then|Mostrar el Lead entonces|Visionnez le fil alors|Sehen Sie die Leitung dann vorher|Allora veda in anteprima il cavo|Inspecione a ligação então|Προβολή καθοδήγησης μετά||
+Lead was not reverted, there was an error|El Lead no fue invertido, hubo un error|Le fil n'a pas été retourné, il n'y avait pas une erreur|Leitung wurde nicht umgeschaltet, es gab eine Störung|Il cavo non è stato ritornato, ci non era un errore|A ligação não reverted, não havia um erro|Η καθοδήγηση δεν επανήλθε, υπήρξε ένα λάθος||
+call was not placed, there was an error|la llamada no fue atendida, hubo un error|l'appel n'a pas été placé, il n'y avait pas une erreur|Anruf wurde nicht gesetzt, es gab eine Störung|la chiamata non è stata disposta, ci non era un errore|a chamada não foi colocada, não havia um erro|η κλήση δεν τοποθετήθηκε, υπήρξε ένα λάθος||
+Number to call|Número a llamar|Nombre à appeler|Zahl zum zu benennen|Numero da denominare|Número a chamar-se|Αριθμός για κλήση||
+Customer Information|Información Del Cliente|L'Information De Client|Kunde Informationen|Le Informazioni Del Cliente|Informação Do Cliente|Πληροφορίες πελατών||
+Lead Dispositioned As|Lead Dispositioned Como|Fil Dispositioned As|Leitung Dispositioned Wie|Cavo Dispositioned As|Ligação Dispositioned Como|Τερματισμό Καθοδήγησης όπως||
+Any changes made to the customer information below at this time will not be comitted, You must change customer information before you Hangup the call|Cualquier cambio realizado al cliente que no será la información abajo en este tiempo comitted, usted debe cambiar la información del cliente antes de usted retraso la llamada|Tous les changements faits au client que l'information ci-dessous actuellement ne sera pas comitted, vous doivent changer l'information de client avant vous décrochement l'appel|Alle mögliche Änderungen, die am Kunden vorgenommen wurden, den, Informationen unten diesmal nicht sind, comitted, Sie müssen Kunde Informationen vor Ihnen ändern Hängezustand der Anruf|Tutti i cambiamenti fatti al cliente che le informazioni qui sotto attualmente non saranno comitted, voi devono cambiare le informazioni del cliente prima di voi hangup la chiamata|Todas as mudanças feitas ao cliente que a informação abaixo neste tempo não será comitted, você devem mudar a informação do cliente antes de você hangup a chamada|Οποιεσδήποτε αλλαγές που γίνονται στις πληροφορίες πελατών κατωτέρω αυτή τη στιγμή δεν θα είναι, πρέπει να αλλάξετε τις πληροφορίες πελατών ενώπιον σας Hangup η κλήση||
+When active, simply press the keyboard key for the desired disposition for this call. The call will then be hungup and dispositioned automatically|Cuando esté activo, presione simplemente la tecla para la disposición deseada para esta llamada. La llamada después será colgada y dispositioned automáticamente|Si actif, appuyez sur simplement la touche de clavier pour la|Wenn aktiv, betätigen Sie einfach die Taste für die gewünschte|Una volta attivo, premi semplicemente la chiave di tastiera per la|Quando ativo, pressione simplesmente a chave de teclado para a|Όταν είναι ενεργό, πιέστε απλά το πλήκτρο κλειδί για τον επιθυμητό τερματισμό της κλήσης. Η κλήση θα τρεματίσει αυτόματα||
+Disposition Hot Keys|Teclas de acceso rápido a la Disposición|Touches Directes De Disposition|Einteilung Heiße Schlüssel|Chiavi Calde Di Disposizione|Chaves Quentes Da Disposição|Πλήκτρα κλειδιά Τερματισμού||
+Cust Time|Tiempo|Temps De Cust|Cust Zeit|Tempo Di Cust|Tempo De Cust|Χρόνος Πελάτη||
+RECORD ID|GRABACIÓN ID|IDENTIFICATION RECORD|SATZ IDENTIFIKATION|IDENTIFICAZIONE RECORD|ID RECORD|ΤΑΥΤΟΤΗΤΑ ΕΓΓΡΑΦΗΣ||
+RECORDING FILE|GRABANDO ARCHIVO|DOSSIER D'ENREGISTREMENT|REGISTERAKTE|LIMA DI REGISTRAZIONE|LIMA DE GRAVAÇÃO|ΑΡΧΕΙΟ ΚΑΤΑΓΡΑΦΗΣ||
+HOT KEYS ACTIVE|TECLAS ACCESO RÁPIDO ACTIVAS|TOUCHES DIRECTES ACTIVES|HEISSE SCHLÜSSEL AKTIV|CHIAVI CALDE ATTIVE|CHAVES QUENTES ATIVAS|ΠΛΗΚΤΡΑ ΚΛΕΙΔΙΑ ΕΝΕΡΓΑ||
+HOT KEYS INACTIVE|TECLAS ACCESO RÁPIDO INACTIVAS|TOUCHES DIRECTES INACTIVES|HEISSE SCHLÜSSEL UNAKTIVIERT|CHIAVI CALDE INATTIVE|CHAVES QUENTES INATIVAS|ΠΛΗΚΤΡΑ ΚΛΕΙΔΙΑ ΑΝΕΝΕΡΓΑ||
+DIAL OVERRIDE|INVALIDACIÓN DEL MARCADO|DÉPASSEMENT DE CADRAN|VORWAHLKNOPF-ÜBERSTEUERUNG|SOVRAPPOSIZIONE DI UN COMANDO MANUALE DELLA MANOPOLA|ULTRAPASSAGEM DO SELETOR|Υπέρβαση Κλήσης||
+SKIP LEAD|SALTAR LEAD|FIL DE SAUT|ZEILENSPRUNG-LEITUNG|CAVO DI SALTO|LIGAÇÃO DA FAIXA CLARA|Παράλειψη Καθοδήγησης||
+DIAL LEAD|MARCAR LEAD|FIL DE CADRAN|VORWAHLKNOPF-LEITUNG|CAVO DELLA MANOPOLA|LIGAÇÃO DO SELETOR|ΚΛΗΣΗ ΚΑΘΟΔΗΓΗΣΗΣ||
+LEAD PREVIEW|MOSTRAR LEAD|PRÉVISION DE FIL|LEITUNG VORBETRACHTUNG|PREVISIONE DEL CAVO|INSPECÇÃO PRÉVIA DA LIGAÇÃO|ΠΡΟΒΟΛΗ ΚΑΘΟΔΗΓΗΣΗΣ||
+PAUSE AGENT DIALING|PARAR LA LLAMADA|CESSEZ D'APPELER|STOPPEN SIE ZU BENENNEN|SMETTA DI DENOMINARE|PARE DE CHAMAR-SE|ΤΕΡΜΑΤΙΣΜΟΣ ΚΛΗΣΗΣ||
+DISPOSITION CALL|DISPOSITION CALL|APPEL DE DISPOSITION|EINTEILUNG ANRUF|CHIAMATA DI DISPOSIZIONE|CHAMADA DA DISPOSIÇÃO|Τερματισμός Κλήσης||
+ session ID| sesión ID| ID de session| Lernabschnitt ID| ID di sessione| sessão ID| Ταυτότητα εργασίας||
+ to campaign| a la campaña| à la campagne| zur Kampagne| alla campagna| à campanha| στην εκστρατεία||
+Select a CallBack Date|Seleccione una fecha del servicio repetido|Choisissez une date de rappel de service|Wählen Sie ein Wiederholungsbesuch Datum vor|Selezioni una data di chiamata ripetuta|Selecione uma data da rechamada|Επιλέξτε μια ημερομηνία CallBack||
+maximize|maximice|maximisez|maximieren Sie|elevi|maximize|μεγιστοποιήστε||
+minimize|reduzca al mínimo|réduisez au minimum|setzen Sie herab|minimizzi|minimize|ελαχιστοποιήστε||
+You must choose a date|Usted debe elegir una fecha|Vous devez choisir une date|Sie müssen ein Datum wählen|Dovete scegliere una data|Você deve escolher uma data|Πρέπει να επιλέξετε μια ημερομηνία||
+Select a Date Below|Seleccione una fecha abajo|Choisissez une date ci-dessous|Wählen Sie ein Datum unten vor|Selezioni una data qui sotto|Selecione uma data abaixo|Επιλέξτε μια ημερομηνία κατωτέρω||
+Click on a callback below to call the customer back now. If you click on a record below to call it, it will be removed from the list|Chasque encendido un servicio repetido abajo ahora para llamar la parte posteriora del cliente. Si usted chasca encendido un expediente abajo para llamarlo, será quitado de la lista|Cliquez sur un rappel de service ci-dessous pour appeler le dos de client maintenant. Si vous cliquez sur un disque ci-dessous pour l'appeler, il sera enlevé de la liste|Klicken Sie an einen Wiederholungsbesuch unten, um die Kunde Rückseite jetzt zu benennen. Wenn Sie an eine Aufzeichnung unten klicken, um sie zu benennen, wird sie von der Liste entfernt|Scatti sopra una chiamata ripetuta qui sotto ora per denominare la parte posteriore del cliente. Se scattate sopra un'annotazione qui sotto per denominarli, sarà rimossa dalla lista|Estale sobre uma rechamada abaixo para chamar agora a parte traseira do cliente. Se você estalar sobre um registro abaixo para o chamar, estará removido da lista|Χτυπήστε σε μια επανάκληση για να καλέσετε κατωτέρω την πλάτη πελατών τώρα. Εάν χτυπήσετε σε ένα αρχείο για να τον καλέσετε κατωτέρω, θα αφαιρεθεί από τον κατάλογο||
+If you want to dial a number and have it NOT be added as a new lead, enter in the exact dialstring that you want to call in the Dial Override field below. To hangup this call you will have to open the CALLS IN THIS SESSION link at the bottom of the screen and hang it up by clicking on its channel link there|Si usted desea marcar un número y hacerlo no agregar como nuevo plomo, entre en dialstring exacto ese usted desean llamar en el campo de la invalidación del dial abajo. Al retraso esta llamada usted tendrá que abrir las LLAMADAS EN ESTE acoplamiento de la SESIÓN en el fondo de la pantalla y colgarlas para arriba chascando en su acoplamiento del canal allí|Si vous voulez composer un numéro et le faire ne pas ajouter comme nouvelle avance, entrez dans dialstring exact ce vous veulent appeler dans le domaine de priorité de cadran ci-dessous. Au décrochement cet appel vous devrez ouvrir les APPELS DANS CE lien de SESSION au fond de l'écran et les accrocher vers le haut en cliquant sur son lien de canal là|Wenn Sie eine Nummer wählen und sie NICHT als neue Leitung hinzufügen lassen möchten, kommen Sie im genauen Dialstring diesem Sie möchten in der Vorwahlknopf-Übersteuerung benennen auffangen unten herein. Zum Hängezustand dieser Anruf müssen Sie die ANRUFE IN DIESER LERNABSCHNITT-Verbindung am unteren Bildschirmrand öffnen und ihn oben hängen, indem Sie dort auf seiner Führung Verbindung klicken|Se desiderate comporre un numero e farli non aggiungere come nuovo cavo, entri nel dialstring esatto quel voi desiderano denominare nel giacimento della sovrapposizione di un comando manuale della manopola qui sotto. Al hangup questa chiamata dovrete aprire le CHIAMATE in QUESTO collegamento di SESSIONE alla parte inferiore dello schermo ed appenderli in su scattandosi sul relativo collegamento della scanalatura là|Se você quiser marcar um número e o ter não adicionado como uma ligação nova, entre no dialstring exato esse você querem chamar-se abaixo no campo da ultrapassagem do seletor. Ao hangup esta chamada você terá que abrir as CHAMADAS ncEsta ligação da SESSÃO no fundo da tela e pendurá-las acima estalando em sua ligação da canaleta lá|Εάν θέλετε να σχηματίσετε έναν αριθμό και να τον έχετε να μην προστεθεί ως νέος μόλυβδος, εισάγετε ακριβές που θέλετε να καλέσετε μέσα τομέα συμπληρωματικής προμήθειας πινάκων κατωτέρω. Στο hangup αυτή η κλήση εσείς θα πρέπει να ανοίξει τις ΚΛΗΣΕΙΣ σε ΑΥΤΗΝ ΤΗΝ σύνδεση ΣΥΝΟΔΟΥ στο κατώτατο σημείο της οθόνης και να τον κλείσει το τηλέφωνο με να χτυπήσει στη σύνδεση καναλιών της εκεί||
+YOU CANNOT SKIP A CALLBACK OR MANUAL DIAL, YOU MUST DIAL THE LEAD|USTED NO PUEDE SALTAR Un SERVICIO REPETIDO O DIAL MANUAL, USTED DEBE MARCAR EL PLOMO|VOUS NE POUVEZ PAS SAUTER Un RAPPEL DE SERVICE OU CADRAN MANUEL, VOUS DEVEZ COMPOSER LE FIL|SIE KÖNNEN Nicht Einen WIEDERHOLUNGSBESUCH ÜBERSPRINGEN, ODER MANUELLER VORWAHLKNOPF, MÜSSEN SIE DIE LEITUNG WÄHLEN|NON POTETE SALTARE Una CHIAMATA RIPETUTA O MANOPOLA MANUALE, DOVETE COMPORRE IL CAVO|VOCÊ NÃO PODE SALTAR Uma RECHAMADA OU SELETOR MANUAL, VOCÊ DEVE MARCAR A LIGAÇÃO|ΔΕΝ ΜΠΟΡΕΙΤΕ ΝΑ ΠΗΔΗΣΕΤΕ μια ΕΠΑΝΑΚΛΗΣΗ Η ο ΧΕΙΡΩΝΑΚΤΙΚΟΣ ΠΙΝΑΚΑΣ, ΕΣΕΙΣ ΠΡΕΠΕΙ ΝΑ ΣΧΗΜΑΤΙΣΕΙ το ΜΟΛΥΒΔΟ||
+YOU MUST BE PAUSED TO MANUAL DIAL A NEW LEAD IN AUTO-DIAL MODE|USTED DEBE SER DETENIDO BREVEMENTE Al DIAL MANUAL Un NUEVO PLOMO EN MODO De AUTO-DIAL|VOUS DEVEZ ÊTRE FAIT UNE PAUSE Au CADRAN MANUEL Une NOUVELLE AVANCE EN MODE D'AUTO-DIAL|SIE MÜSSEN Zum MANUELLEN VORWAHLKNOPF PAUSIERT WERDEN Eine NEUE LEITUNG Im AUTO-DIAL MODUS|DOVETE ESSERE FATTI UNA PAUSA Alla MANOPOLA MANUALE Un NUOVO CAVO Nel MODO Di AUTO-DIAL|VOCÊ DEVE SER PAUSADO Ao SELETOR MANUAL Uma LIGAÇÃO NOVA Na MODALIDADE De AUTO-DIAL|ΠΡΕΠΕΙ ΝΑ ΣΤΑΜΑΤΗΘΕΙΤΕ στο ΧΕΙΡΩΝΑΚΤΙΚΟ ΠΙΝΑΚΑ ένας ΝΕΟΣ ΜΟΛΥΒΔΟΣ στον ΤΡΟΠΟ αυτόματος-ΠΙΝΑΚΩΝ||
+Enter information below for the new lead you wish to call|Incorpore la información abajo para el nuevo plomo que usted desea llamar|Écrivez l'information ci-dessous pour le nouveau fil que vous souhaitez appeler|Tragen Sie Informationen unten für die neue Leitung ein, die Sie benennen möchten|Fornisca le informazioni qui sotto per il nuovo cavo che desiderate denominare|Incorpore a informação abaixo para a ligação que nova você deseja se chamar|Εισάγετε τις πληροφορίες κατωτέρω για το νέο μόλυβδο που επιθυμείτε να καλέσετε||
+YOU MUST BE PAUSED TO CHECK CALLBACKS IN AUTO-DIAL MODE|USTED DEBE SER DETENIDO BREVEMENTE PARA COMPROBAR SERVICIOS REPETIDOS EN MODO DE AUTO-DIAL|VOUS DEVEZ ÊTRE FAIT UNE PAUSE POUR VÉRIFIER DES RAPPELS DE SERVICE EN MODE D'AUTO-DIAL|SIE MÜSSEN PAUSIERT WERDEN, UM WIEDERHOLUNGSBESUCHE IM AUTO-DIAL MODUS ZU ÜBERPRÜFEN|DOVETE ESSERE FATTI UNA PAUSA PER CONTROLLARE LE CHIAMATE RIPETUTE NEL MODO DI AUTO-DIAL|VOCÊ DEVE SER PAUSADO PARA VERIFICAR RECHAMADAS NA MODALIDADE DE AUTO-DIAL|ΠΡΕΠΕΙ ΝΑ ΣΤΑΜΑΤΗΘΕΙΤΕ ΓΙΑ ΝΑ ΕΛΕΓΧΕΤΕ ΤΙΣ ΕΠΑΝΑΚΛΗΣΕΙΣ ΣΤΟΝ ΤΡΟΠΟ ΑΥΤΌΜΑΤΟΣ-ΠΙΝΑΚΩΝ||
+Note: all new manual dial leads will go into list 999|Nota: todos los nuevos plomos manuales del dial entrarán la lista 999|Note : tous les nouveaux fils manuels de cadran entreront dans la liste 999|Anmerkung: alle neuen manuellen Vorwahlknopfleitungen steigen in Liste 999 ein|Nota: tutti i nuovi cavi manuali della manopola entreranno nella lista 999|Nota: todas as ligações manuais novas do seletor entrarão na lista 999|Σημείωση: όλοι οι νέοι χειρωνακτικοί μόλυβδοι πινάκων θα πάνε στον κατάλογο 999||
+YOU DO NOT HAVE PERMISSIONS TO TRANSFER CALLS|USTED NO TIENE PERMISOS DE TRANSFERIR LLAMADAS|VOUS N'AVEZ PAS DES PERMISSIONS DE TRANSFÉRER DES APPELS|SIE HABEN NICHT ERLAUBNIS, ANRUFE ZU BRINGEN|NON AVETE PERMESSI TRASFERIRE LE CHIAMATE|VOCÊ NÃO TEM PERMISSÕES TRANSFERIR CHAMADAS|ΔΕΝ ΕΧΕΤΕ ΤΙΣ ΑΔΕΙΕΣ ΝΑ ΜΕΤΑΦΕΡΕΤΕ ΤΙΣ ΚΛΗΣΕΙΣ||
+will be added to the beginning of this number|será agregado al principio de este número|sera ajouté au commencement de ce nombre|wird dem Anfang dieser Zahl hinzugefügt|sarà aggiunto all'inizio di questo numero|será adicionado ao começo deste número|θα προστεθεί στην αρχή αυτού του αριθμού||
+This is usually a 1 in the USA-Canada|Éste es generalmente un 1 en los U.S.A. y el Canadá|C'est habituellement un 1 aux Etats-Unis et au Canada|Dieses ist normalerweise 1 in den USA und im Kanada|Ciò è solitamente un 1 negli S.U.A. e nel Canada|Este é geralmente um 1 nos EUA e no Canadá|Αυτό είναι συνήθως ένα 1 στις ΗΠΑ και τον Καναδά||
+NEW MANUAL DIAL LEAD FOR|NUEVO PLOMO MANUAL DEL DIAL PARA|NOUVEAU FIL MANUEL DE CADRAN POUR|NEUE MANUELLE VORWAHLKNOPF-LEITUNG FÜR|NUOVO CAVO MANUALE DELLA MANOPOLA PER|LIGAÇÃO MANUAL NOVA DO SELETOR PARA|ΝΕΟΣ ΧΕΙΡΩΝΑΚΤΙΚΟΣ ΜΟΛΥΒΔΟΣ ΠΙΝΑΚΩΝ ΓΙΑ||
+Finish and Disposition Call|Final y llamada de la disposición|Finition et appel de disposition|Ende und Einteilung Anruf|Rivestimento e chiamata di disposizione|Revestimento e chamada da disposição|Τελειώστε και κλήση διάθεσης||
+10 digits max - digits only|máximo de 10 dígitos - dígitos solamente|maximum de 10 chiffres - chiffres seulement|10 Stellen Maximum - nur Stellen|un massimo delle 10 cifre - cifre soltanto|máximo de 10 dígitos - dígitos somente|μέγιστο 10 ψηφίων - ψηφία μόνο||
+Note: a dial prefix of|Nota: un prefijo del dial de|Note : un préfixe de cadran de|Anmerkung: ein Vorwahlknopfpräfix von|Nota: un prefisso della manopola di|Nota: um prefixo do seletor de|Σημείωση: ένα πρόθεμα πινάκων||
+Hangup Again|Retraso Otra vez|Décrochement Encore|Hängezustand Wieder|Hangup Ancora|Hangup Outra vez|Κλείστε το τηλέφωνο πάλι||
+Go Back|Vaya Detrás|Retournez|Gehen Sie Zurück|Vada Indietro|Vá Para trás|Επιστρέψτε||
+Call Agent Again|Agente De la Llamada Otra vez|Agent D'Appel Encore|Anruf-Mittel Wieder|Agente Di Chiamata Ancora|Agente Da Chamada Outra vez|Πράκτορας κλήσης πάλι||
+MY CALLBACK ONLY|MI SERVICIO REPETIDO SOLAMENTE|MON RAPPEL DE SERVICE SEULEMENT|NUR MEIN WIEDERHOLUNGSBESUCH|LA MIA CHIAMATA RIPETUTA SOLTANTO|MINHA RECHAMADA SOMENTE|Η ΕΠΑΝΑΚΛΗΣΗ ΜΟΥ ΜΟΝΟ||
+NO ACTIVE CALLBACKS|NO SERVICIOS REPETIDOS ACTIVOS|NON RAPPELS DE SERVICE ACTIFS|NINE AKTIVE WIEDERHOLUNGSBESUCHE|NO CHIAMATE RIPETUTE ATTIVE|NO RECHAMADAS ATIVAS|Αριθ ΕΝΕΡΓΕΣ ΕΠΑΝΑΚΛΗΣΕΙΣ||
+ACTIVE CALLBACKS|SERVICIOS REPETIDOS ACTIVOS|RAPPELS DE SERVICE ACTIFS|AKTIVE WIEDERHOLUNGSBESUCHE|CHIAMATE RIPETUTE ATTIVE|RECHAMADAS ATIVAS|ΕΝΕΡΓΕΣ ΕΠΑΝΑΚΛΗΣΕΙΣ||
+CALLBACKS FOR AGENT|SERVICIOS REPETIDOS PARA EL AGENTE|RAPPELS DE SERVICE POUR L'AGENT|WIEDERHOLUNGSBESUCHE FÜR MITTEL|CHIAMATE RIPETUTE PER L'AGENTE|RECHAMADAS PARA O AGENTE|ΕΠΑΝΑΚΛΗΣΕΙΣ ΓΙΑ ΤΟΝ ΠΡΑΚΤΟΡΑ||
+Dial Code:|Dial Código:|Cadran Code:|Vorwahlknopf-Code:|Codice Della Manopola:|Código Do Seletor:|Κώδικας πινάκων:||
+Dial Override|Invalidación Del Dial|Dépassement De Cadran|Vorwahlknopf-Übersteuerung|Sovrapposizione di un comando manuale Della Manopola|Ultrapassagem Do Seletor|Συμπληρωματική προμήθεια πινάκων||
+digits only please|los dígitos satisfacen solamente|les chiffres satisfont seulement|Stellen gefallen nur|le cifre soddisfano soltanto|os dígitos satisfazem somente|ψηφία μόνο παρακαλώ||
+Dial Now|Dial Ahora|Cadran Maintenant|Vorwahlknopf Jetzt|Manopola Ora|Seletor Agora|Πίνακας τώρα||
+CB Comments|Comentarios de los CBES|Commentaires de CB|COLUMBIUM Anmerkungen|Osservazioni dei CB|Comentários dos CB|Σχόλια CB||
+Title|Título|Titre|Titel|Titolo|Título|Τίτλος||
+Your Status|Su Estado|Votre Statut|Ihr Status|La Vostra Condizione|Seu Status|Η θέση σας||
+STATUS|ESTADO|STATUT|STATUS|CONDIZIONE|STATUS|ΚΑΤΑΣΤΑΣΗ||
+RESET|REINICIAR|REMISE|ZURÜCKSTELLEN|RISISTEMAZIONE|RESTAURAÇÃO|ΕΠΑΝΑΦΟΡΑ||
+CLEAR FORM|REINICIAR|REMISE|ZURÜCKSTELLEN|RISISTEMAZIONE|RESTAURAÇÃO|ΕΠΑΝΑΦΟΡΑ||
+SUBMIT|ENVIAR|SOUMETTEZ|SUBMITSie|PRESENTI|SUBMETA|ΥΠΟΒΑΛΕΤΕ||
+Incoming|Entrante|Entrant|Ankommend|Ricevuto|Entrante|Εισερχόμενο||
+Calling|Llamando|Appeler|Benennen|Chiamata|Chamada|Κλήση||
+Called|Llamado|Appelé|Benannt|Denominato|Chamado|Αποκαλούμενος||
+Campaign|Campaña|Campagne|Kampagne|Campagna|Campanha|Εκστρατεία||
+Status|Estado|Statut|Status|Condizione|Status|Κατάσταση||
+Inserted|Insertado|Inséré|Eingesetzt|Inserito|Introduzido|Εισαγωγή ||
+seconds|segundos|secondes|Sekunden|secondi|segundos|δευτερόλεπτα||
+HELP|AYUDA|AIDE|HILFE|AIUTO|AJUDA|ΒΟΗΘΕΙΑ||
+Login|Conexión|Ouverture|LOGON|Inizio attività|Início de uma sessão|Σύνδεση||
+User|Usuario|Utilisateur|Benutzer|Utente|Usuário|Χρήστης||
+Password|Contraseña|Mot de passe|Kennwort|Parola d'accesso|Senha|Κωδικός πρόσβασης||
+VERSION|VERSIÓN|VERSION|VERSION|VERSIONE|VERSÃO|ΕΚΔΟΣΗ||
+BUILD|CONSTRUCCION|CONSTRUCTION|BAU|CONFIGURAZIONE|CONFIGURAÇÃO|ΔΗΜΙΟΥΡΓΙΑ||
+Server|Servidor|Serveur|Bediener|Assistente|Usuário|Κεντρικός υπολογιστής||
+RECORD|GRABACIÓN|DISQUE|SATZ|ANNOTAZIONE|REGISTRO|ΕΓΓΡΑΦΗ||
+HANGUP|COLGAR|DÉCROCHEMENT|HÄNGEZUSTAND|HANGUP|HANGUP|ΚΛΕΙΣΙΜΟ||
+XFER|TRANSFERENCIA|XFER|XFER|XFER|XFER|XFER||
+PARK|PARKING|PARC|PARK|PARCO|PARQUE|ΣΤΑΘΜΕΥΣΗ||
+IN-NUMBER|NÚMERO-ENTRANTE|IN-NUMBER|IN-NUMBER|IN-NUMBER|IN-NUMBER|ΣΕ-ΑΡΙΘΜΟ||
+NUMBER|NÚMERO|NOMBRE|ZAHL|NUMERO|NÚMERO|ΑΡΙΘΜΟΣ||
+MAXLENGTH|maxlength|MAXLENGTH|MAXLENGTH|MAXLENGTH|MAXLENGTH|MAXLENGTH||
+LENGTH|LONGITUD|LONGUEUR|LÄNGE|LUNGHEZZA|COMPRIMENTO|ΜΗΚΟΣ||
+CALLERID|LLAMADORID|CALLERID|CALLERID|CALLERID|CALLERID|CALLERID||
+CallerID|LlamadorID|CallerID|CallerID|CallerID|CallerID|CallerID||
+CALL|LLAMADA|APPEL|ANRUF|CHIAMATA|CHAMADA|ΚΛΗΣΗ||
+PICKUP|CAPTURAR|COLLECTE|AUFNAHME|RACCOLTA|COLETOR|ΕΠΑΝΑΛΕΙΨΗ||
+CONFERENCE|CONFERENCIA|CONFÉRENCE|KONFERENZ|CONGRESSO|CONFERÊNCIA|ΔΙΑΣΚΕΨΗ||
+Refresh|Recarga|Régénérez|ErneuernSie|Rinfreschi|Refresque|Ανανέωση||
+Send DTMF|Enviar DTMF|Envoyez DTMF|Senden Sie DTMF|Trasmetta DTMF|Emita DTMF|Στείλε DTMF||
+ORDER|ORDEN|ORDRE|AUFTRAG|ORDINE|ORDEM|ΔΙΑΤΑΓΗ||
+ on | en | sur | auf | su | em | Στην ||
+LOGOUT|SALIR|DÉCONNEXION|LOGOUT|TERMINE|LOGOUT|ΑΠΟΣΥΝΔΕΣΗ||
+Channel|Canal|LaManche|Führung|Manica|Canaleta|Κανάλι||
+Extensions|Extensiones|Prolongements|Verlängerungen|Estensioni|Extensões|Τηλ.συνδέσεις||
+Conferences|Conferencias|Conférences|Konferenzen|Congressi|Conferências|Διασκέψεις||
+Conference|Conferencia|Conférence|Konferenz|Congresso|Conferência|Διάσκεψη||
+Recording|GRABANDO|Enregistrement|Aufnahme|Registrazione|Gravação|Καταγραφή||
+Record|Grabar|Disque|Aufzeichnung|Annotazione|Registro|Εγγραφή||
+Welcome|Bienvenido|Bienvenue|Willkommen|Benvenuto|Boa vinda|Καλωσόρισμα||
+VOICEMAIL|BUZÓN DE VOZ|VOICEMAIL|VOICEMAIL|VOICEMAIL|VOICEMAIL|ΦΩΝΗΤΙΚΟ ΤΑΧΥΔΡΟΜΕΙΟ||
+NEW|NUEVO|NOUVEAU|NEU|NUOVO|NOVO|ΝΕΟ||
+OLD|VIEJO|VIEUX|ALT|VECCHIO|VELHO|ΠΑΛΑΙΟ||
+PAUSE|PAUSA|PAUSE|PAUSE|PAUSA|PAUSA|ΠΑΥΣΗ||
+START|COMIENZO|DÉBUT|ANFANG|INIZIO|COMEÇO|ΕΝΑΡΞΗ||
+Pause|Pausa|Pause|Pause|Pausa|Pausa|Παύση||
+Resume|Comienzo|Résumé|Zusammenfassung|Resume|Resumo|Επανάληψη||
+Faster|Más rápido|Plus rapidement|Schneller|Più velocemente|Mais rapidamente|Γρηγορότερα||
+Slower|Más lento|Plus lent|Langsamer|Più lento|Mais lento|Πιό αργά||
+Initializing|Inizializando|Initialisation|Initialisierung|Inizializzazione|Inicializar|Αρχή||
+Invalid|Inválido|Inadmissible|Unzulässig|Non valido|Inválido|Ακυρο||
+Username|Nombre del usuario|Username|Username|Username|Username|Όνομα χρήστη||
+CUSTOM|A MEDIDA|COUTUME|GEWOHNHEIT|ABITUDINE|COSTUME|ΣΥΝΗΘΕΙΑ||
+Notes|Notas|Notes|Anmerkungen|Note|Notas|Σημειώσεις||
+First|Primero|D'abord|Zuerst|In primo luogo|Primeiramente|Πρώτο||
+MI: |IM: |MI :|MI:|Mi:|Mi:|MI:||
+Last|Último|Bout|Letztes|Ultimo|Último|Διάρκεια||
+Address|Dirección|Adresse|Adresse|Indirizzo|Endereço|Διεύθυνση||
+City|Ciudad|Ville|Stadt|Città|Cidade|Πόλη||
+State|Estado|État|Zustand|Dichiari|Estado|Κράτος||
+PostCode|Código Postal|Code postal|PostCode|PostCode|PostCode|Ταχ.Κωδ.||
+Province|Provincia|Province|Provinz|Provincia|Província|Επαρχία||
+Vendor ID|Vendedor ID|Identification De Fournisseur|Verkäufer Identifikation|Identificazione Del Fornitore|Vendedor Id|Ταυτότητα προμηθευτού||
+DialCode|Código Del Dial|DialCode|DialCode|DialCode|DialCode|Κωδικός Κλήσης||
+Alt. Phone|Teléfono Alt|Alt. Téléphone|Wech Telefon|Alt. Telefono|Alt. Telefone|Εναλ/κό Τηλέφωνο||
+Show|Demostración|Exposition|Erscheinen|Esposizione|Mostra|Παρουσίαση||
+Email|Email|Email|Email|Email|Email|Ηλεκτρονικό ταχυδρομείο||
+Comments|Comentarios|Commentaires|Anmerkungen|Osservazioni|Comentários|Σχόλια||
+REFRESH|ACTUALIZAR|RÉGÉNÉREZ|ERNEUERNSie|RINFRESCHI|REFRESQUE|ΑΝΑΝΕΩΣΗ||
+ALT PHONE DIAL|TELÉFONO DEL ALT|TÉLÉPHONE D'ALT|WECH TELEFON|ALT DEL TELEFONO|ALT DO TELEFONE|ΚΛΗΣΗ ENAΛ/ΚΟΥ ΤΗΛΕΦΩΝΟΥ||
+MAIN PHONE|TELÉFONO PRINCIPAL|TÉLÉPHONE PRINCIPAL|MAIN TELEFON|TELEFONO PRINCIPALE|TELEFONE PRINCIPAL|ΚΥΡΙΟ ΤΗΛΕΦΩΝΟ||
+ALT PHONE|TELÉFONO ALT|TELÉFONO DEL ALT|TÉLÉPHONE D'ALT|WECH TELEFON|ALT DEL TELEFONO|ΕΝΑΛΛΑΚΤΙΚΟ ΤΗΛΕΦΩΝΟ||
+ADDRESS3|DIRECCIÓN3|ADRESSE3|ADRESSE3|INDIRIZZO3|ENDEREÇO3|3ΔΙΕΥΘΥΝΣΗ||
+FINISH LEAD|ACABAR LEAD|FINITION|ENDE|RIVESTIMENTO|REVESTIMENTO|ΤΕΛΕΙΩΣΤΕ||
+Dial Alt Phone Number|Marcar Número de teléfono Alt|Nombre Alt De Cadran|Vorwahlknopf-Wech Zahl|Numero Alt Della Manopola|Número Alt Do Seletor|Κλήση εναλλακτικού αριθμού τηλεφώνου||
+Phone|Teléfono|Téléphone|Telefon|Telefono|Telefone|Τηλέφωνο||
+DIAL|DIAL|CADRAN|VORWAHLKNOPF|MANOPOLA|SELETOR|ΚΛΗΣΗ||
+SUBMIT FAVORITES CHANGES - requires logout|SOMETA LOS CAMBIOS de los FAVORITOS - requiere registro de estado de la máquina|SOUMETTEZ LES CHANGEMENTS de FAVORIS - exige la déconnexion|SUBMIT Sie LIEBLINGE ÄNDERUNGEN - erfordert Logout|PRESENTI I CAMBIAMENTI dei FAVORITI - richiede il termine attività|SUBMETA MUDANÇAS dos FAVORITOS - requer o logout|ΥΠΟΒΑΛΤΕ τις ΑΛΛΑΓΕΣ ΣΥΜΠΑΘΕΙΩΝ - απαιτεί την αποσύνδεση||
+BACK TO MAIN WINDOW - ignore changes made|DE NUEVO A VENTANA PRINCIPAL - no haga caso de los cambios realizados|DE NOUVEAU À LA FENÊTRE PRINCIPALE - ignorez les changements faits|ZURÜCK ZU MAIN FENSTER - ignorieren Sie die vorgenommenen Änderungen|DI NUOVO ALLA FINESTRA PRINCIPALE - ignori i cambiamenti fatti|PARA TRÁS À JANELA PRINCIPAL - ignore as mudanças feitas|ΠΙΣΩ στο ΚΥΡΙΟ ΠΑΡΑΘΥΡΟ - αγνοήστε τις αλλαγές που γίνονται||
+AVAILABLE EXTENSIONS|EXTENSIONES DISPONIBLES|PROLONGEMENTS DISPONIBLES|VORHANDENE VERLÄNGERUNGEN|ESTENSIONI DISPONIBILI|EXTENSÕES DISPONÍVEIS|ΔΙΑΘΕΣΙΜΕΣ ΕΠΕΚΤΑΣΕΙΣ||
+ edit| corrija| éditez| redigieren sie| pubblichi| edite| εκδώστε||
+ FAVORITES| FAVORITOS| FAVORIS| LIEBLINGE| FAVORITI| FAVORITOS| ΣΥΜΠΑΘΕΙΕΣ||

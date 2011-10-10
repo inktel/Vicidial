@@ -1,0 +1,26 @@
+<!ENTITY vicidial_webdial_plugin.label "Your localized menuitem">
+<!ENTITY vicidial_webdial_pluginContext.label "Dial: ">
+<!ENTITY vicidial_webdial_pluginContext.accesskey "D">
+<!ENTITY vicidial_webdial_pluginPreferences.label "Change ViciDial-Web-Dial Preferences: ">
+<!ENTITY vicidial_webdial_pluginPreferences.accesskey "P">
+<!ENTITY vicidial_webdial_pluginAbout.label "About ViciDial-Web-Dial...">
+<!ENTITY vicidial_webdial_pluginToolbarButton.label "Your Toolbar Button">
+<!ENTITY vicidial_webdial_pluginToolbarButton.tooltip "This is your toolbar button!">
+<!ENTITY vicidial_webdial_pluginSidebar.label "Your Sidebar">
+<!ENTITY vicidial_webdial_pluginPhoneField.label "Phone Number">
+<!ENTITY vicidial_webdial_pluginStatusbar.label "ViciDialWebDial - put fields here">
+<!ENTITY vicidial_webdial_pluginToolbar.name  "This should not be seen">
+<!ENTITY vicidial_webdial_pluginToolbar.label "This is an example toolbar. You can hide it under View &gt; toolbars &gt; &vicidial_webdial_pluginToolbar.name;">
+
+<!-- Context Menu -->
+
+<!ENTITY vwdmenu.call			"Call: ">
+<!ENTITY vwdmenu.editcall		"Edit&amp;Call: ">
+<!ENTITY vwdmenu.callKey		"c">
+<!ENTITY vwdmenu.editcallKey	"e">
+
+<!ENTITY vwdmenu.connect		"Connect to Vicidial">
+<!ENTITY vwdmenu.disconnect	"Disconnect">
+<!ENTITY vwdmenu.about			"About">
+<!ENTITY vwdmenu.options		"Options">
+<!ENTITY vwdmenu.optionsLong	"Open options window">

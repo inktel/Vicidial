@@ -1,0 +1,688 @@
+############################################################  ADMIN
+
+QC Enabled -<\/B> This option allows the user to log in to the Quality Control agent screen||
+QC User Level -<\/B> This setting defines what the agent Quality Control user level is. This will dictate the level of functionality for the agent in the QC section||
+QC Record Pass -<\/B> This option allows the agent to specify that a record has passed the first round of QC after reviewing the record||
+QC Record Finish -<\/B> This option allows the agent to specify that a record has finished the second round of QC after reviewing the passed record||
+QC Record Commit -<\/B> This option allows the agent to specify that a record has been committed in QC. It can no longer be modified by anyone||
+QC Allowed Campaigns -<\/B> This is a selectable list of Campaigns which members of this user group will be able to QC. The ALL-CAMPAIGNS option allows the users in this group to QC any campaign on the system||
+QC Allowed Inbound Groups -<\/B> This is a selectable list of Inbound Groups which members of this user group will be able to QC. The ALL-GROUPS option allows the users in this user group to QC any inbound group on the system||
+QC Enabled: ||
+QC User Level: ||
+QC Pass: ||
+QC Finish: ||
+QC Commit: ||
+Modify Nothing||
+Modify Nothing Except Status||
+Modify All Fields||
+Verify First Round of QC||
+View QC Statistics||
+Ability to Modify FINISHed records||
+Manager Level||
+USERS CAN VIEW ANY CAMPAIGN||
+USERS CAN QC ANY CAMPAIGN||
+USERS CAN QC ANY INBOUND GROUP||
+QC Allowed Campaigns: ||
+QC Allowed Inbound Groups: ||
+Queue Priority -<\/B> This setting is used to define the order in which the calls from this outbound campaign should be answered in relation to the inbound calls if this campaign is in blended mode||
+Queue Priority: ||
+Drop Action: ||
+Drop Transfer Group: ||
+Drop Action -<\/B> This menu allows you to choose what happens to a call when it has been waiting for longer than what is set in the Drop Call Seconds field. HANGUP will simply hang up the call, MESSAGE will send the call the Drop Exten that you have defined below, VOICEMAIL will send the call to the voicemail box that you have defined below and IN_GROUP will send the call to the Inbound Group that is defined below||
+Drop Exten -<\/B> If Drop Action is set to MESSAGE, this is the dial plan extension that the call will be sent to if it reaches Drop Call Seconds||
+Drop Call Seconds -<\/B> The number of seconds a call will stay in queue before being considered a DROP||
+Drop Transfer Group -<\/B> If Drop Action is set to IN_GROUP, the call will be sent to this inbound group if it reaches Drop Call Seconds||
+QC SETTINGS FOR THIS CAMPAIGN||
+QC Enabled: ||
+QC Statuses: ||
+Modify Campaign QC Settings||
+QC Enabled -<\/B> Setting this field to Y allows for the agent Quality Control features to work. Default is N||
+QC Statuses -<\/B> This area is where you select which statuses of leads should be gone over by the QC system. Place a check next to the status that you want QC to review||
+QC SETTINGS NOT MODIFIED||
+QC SETTINGS MODIFIED||
+QC WebForm Address -<\/B> This is the website address that a QC agent can go to when clicking on the WEBFORM link in the QC screen||
+QC Script -<\/B> This is the script that can be used by QC agents in the SCRIPT tab in the QC screen||
+QC WebForm: ||
+QC Script||
+In-Group Recording Override -<\/B> This field allows for the overriding of the campaign call recording setting. This setting can be overridden by the vicidial_user recording override setting. DISABLED will not override the campaign recording setting. NEVER will disable recording on the client. ONDEMAND is the default and allows the agent to start and stop recording as needed. ALLCALLS will start recording on the client whenever a call is sent to an agent. ALLFORCE will start recording on the client whenever a call is sent to an agent giving the agent no option to stop recording||
+In-Group Recording Filename -<\/B> This field will override the Campaign Recording Filenaming Scheme unless it is set to NONE. The allowed variables are CAMPAIGN CUSTPHONE FULLDATE TINYDATE EPOCH AGENT. The default is FULLDATE_AGENT and would look like this 20051020-103108_6666. Another example is CAMPAIGN_TINYDATE_CUSTPHONE which would look like this TESTCAMP_51020103108_3125551212. 50 char max. Default is NONE||
+In-Group Recording Override: ||
+In-Group Recording Filename: ||
+ADDING VICIDIAL QC STATUS CODE||
+MODIFY VICIDIAL QC STATUS CODE||
+VICIDIAL QC STATUS CODES||
+The Quality Control-QC system within VICIDIAL has its own set of status codes separate from those within the call handling functions of VICIDIAL. QC statuse codes must be between 2 and 8 characters in length and contain no special characters like a space or colon. The QC status code description must be between 2 and 30 characters in length.||
+ QC Status Codes ||
+VICIDIAL QC STATUS CODES WITHIN THIS SYSTEM: ||
+ADD NEW QC STATUS CODE||
+QC STATUS CODE NOT DELETED||
+QC STATUS CODE DELETED: ||
+QC STATUS CODE NOT MODIFIED ||
+QC STATUS CODE MODIFIED: ||
+the qc status code needs to be at least 1 characters in length||
+the qc status code name needs to be at least 1 characters in length||
+QC STATUS CODE NOT ADDED ||
+there is already a qc status code in the system with this name:||
+QC STATUS CODE ADDED: ||
+code must be between 1 and 8 characters in length
+code name must be between 2 and 30 characters in length||
+CALL HANGUP REASON STATS||
+After Hours Action -<\/B> The action to perform if it is after hours as defined in the call time for this inbound group. HANGUP will immediately hangup the call, MESSASGE will play the file in the After Hours Message Filenam field, EXTENSION will send the call to the After Hours Extension in the dialplan and VOICEMAIL will send the call to the voicemail box listed in the After Hours Voicemail field, IN_GROUP will send the call to the inbound group selected in the After Hours Transfer Group select list. Default is MESSAGE||
+After Hours Transfer Group -<\/B> If After Hours Action is set to IN_GROUP, the call will be sent to this inbound group if it enters the in-group outside of the call time scheme defined for the in-group||
+After Hours Transfer Group: ||
+Total calls taken in to this In-Group:||
+CALL HOLD TIME BREAKDOWN IN SECONDS||
+Date Range:||
+ADDING NEW PHONE ALIAS||
+ADD NEW PHONE ALIAS||
+MODIFY PHONE ALIAS||
+DELETE PHONE ALIAS||
+PHONE ALIAS LIST||
+Phone Alias List||
+Add A New Phone Alias||
+ADD A NEW PHONE ALIAS||
+Alias ID: ||
+Alias Name: ||
+Phone Logins List: ||
+PHONE ALIAS NOT ADDED||
+there is already a Phone Alias in the system with this ID||
+there is already a Phone Login in the system with this ID||
+PHONE ALIAS ADDED||
+PHONE ALIAS NOT MODIFIED||
+PHONE ALIAS MODIFIED||
+PHONE ALIAS NOT DELETED||
+PHONE ALIAS DELETION CONFIRMATION||
+Click here to delete phone alias||
+PHONE ALIAS DELETION COMPLETED||
+PHONE ALIAS LISTINGS||
+there is already a Phone alias in the system with this login||
+there is already a Phone in the system with this login||
+DELETE THIS PHONE ALIAS||
+MODIFY A PHONE ALIAS RECORD||
+Alias ID -<\/B> The ID of the alias used to allow for phone load balanced logins. no spaces or other special characters allowed. Must be between 2 and 20 characters in length||
+Alias Name -<\/B> The name used to describe a phones alias, Must be between 2 and 50 characters in length||
+Phones Logins List -<\/B> The comma separated list of phone logins used when an agent logs in using phone load balanced logins. The Agent application will find the active server with the fewest agents logged into it and place a call from that server to the agent upon login||
+PHONES WITHIN THIS PHONES ALIAS||
+Add New Shift||
+New Shift Addition||
+Modify Shift||
+Delete Shift||
+Shifts||
+Shift ID -<\/B> This is the short name of a Vicidial Shift Definition. This needs to be a unique identifier. Do not use any spaces or punctuation for this field. max 20 characters, minimum of 2 characters||
+Shift Name -<\/B> This is a more descriptive name of the Shift Definition. This is a short summary of the Shift definition. max 50 characters, minimum of 2 characters||
+Shift Start Time -<\/B> This is the time that the campaign shift begins. Must only be numbers, 9:30 AM would be 0930 and 5:00 PM would be 1700||
+Shift Length -<\/B> This is the time in Hours and Minutes that the campaign shift lasts. 8 hours would be 08:00 and 7 hours and 30 minutes would be 07:30||
+Shift Weekdays -<\/B> In this section you should choose the days of the week that this shift is active||
+Show Shifts||
+Add A New Shift||
+Shift ID: ||
+Shift Name: ||
+Shift Start Time: ||
+Shift End Time: ||
+SHIFT DEFINITION NOT ADDED||
+there is already a shift entry with this ID||
+Shift ID and name must be at least 2 characters in length||
+Shift Start Time must be 4 digits in length and be a valid time||
+Shift Length must be 5 characters in length and be 24 hours or less||
+SHIFT ADDED: ||
+MODIFY A SHIFT||
+USER GROUPS USING THIS SHIFT:||
+DELETE THIS SHIFT DEFINITION||
+MODIFY A SHIFT||
+SHIFT NOT DELETED||
+SHIFT DELETION CONFIRMATION: ||
+Click here to delete shift||
+SHIFT DELETION COMPLETED:||
+SHIFT MODIFIED||
+SHIFT LISTINGS:||
+Shift Weekdays: ||
+Sunday||
+Monday||
+Tuesday||
+Wednesday||
+Thursday||
+Friday||
+Saturday||
+Group Shifts: ||
+Group Shifts -<\/B> This is a selectable list of shifts that can restrict the agents login time on the system||
+ Timeclock||
+Timeclock End Of Day -<\/B> This setting defines when all users are to be auto logged out of the timeclock system. Only runs once a day. must be only 4 digits 2 digit hour and 2 digit minutes in 24 hour time. Default is 0000||
+Timeclock Last Auto Logout -<\/B> This field displays the date of the last auto-logout||
+Timeclock Last Auto Logout: ||
+Timeclock End Of Day: ||
+SURVEY SETTINGS FOR THIS CAMPAIGN:||
+Modify Campaign Survey||
+Survey First Audio File -<\/B> This is the audio filename that is played as soon as the customer picks up the phone when running a survey campaign.||
+Survey DTMF Digits -<\/B> This field is where you define the digits that a customer can press as an option on a survey campaign. valid dtmf digits are ||
+Survey Not Interested Digit -<\/B> This field is where you define the customer digit pressed that will show they are Not Interested.||
+Survey Not Interested Status -<\/B> This field is where you select the status to be used for Not Interested. If DNC is used and the campaign is set to use DNC then the phone number will be automatically added to the VICIDIAL internal DNC list.||
+Survey Opt-in Audio File -<\/B> This is the audio filename that is played when the customer has opted-in to the survey, not opted-out or not responded if the no-response-action is set to OPTOUT. After this audio file is played, the Survey Method action is taken.||
+Survey Not Interested Audio File -<\/B> This is the audio filename that is played when the customer has opted-out of the survey, not opted-in or not responded if the no-response-action is set to OPTIN. After this audio file is played, the call will be hung up||
+Survey Method -<\/B> This option defines what happens to a call after the customer has opted-in. AGENT_XFER will send the call to the next available agent. VOICEMAIL will send the call to the voicemail box that is specified in the Voicemail field. EXTENSION will send the customer to the extension defined in the Survey Xfer Extension field. HANGUP will hang up the customer. CAMPREC_60_WAV will send the customer to have a recording made with their response, this recording will be placed in a folder named as the campaign inside of the Survey Campaign Recording Directory.||
+Survey No-Response Action -<\/B> This is where you define what will happen if there is no response to the survey question. OPTIN will only send the call on to the Survey Method if the customer presses a dtmf digit. OPTOUT will send the customer on to the Survey Method even if they do not press a dtmf digit.||
+Survey Response Digit Map -<\/B> This is the section where you can define a description to go with each dtmf digit option that the customer may select.||
+Survey Xfer Extension -<\/B> If the Survey Method of EXTENSION is selected then the customer call would be directed to this dialplan extension||
+Survey Campaign Recording Directory -<\/B> If the Survey Method of CAMPREC_60_WAV is selected then the customer response will be recorded and placed in a directory named after the campaign inside of this directory.||
+SURVEY SETTINGS NOT MODIFIED||
+SURVEY SETTINGS MODIFIED||
+Survey First Audio File||
+Survey DTMF Digits||
+Survey Not Interested Digit||
+Survey Not Interested Status||
+Survey Opt-in Audio File||
+Survey Not Interested Audio File||
+Survey Method||
+Survey No-Response Action||
+Survey Response Digit Map||
+Survey Xfer Extension||
+Survey Campaign Recording Directory||
+Add Timeclock Log Record -<\/B> This option allows the user to add records to the timeclock log||
+Modify Timeclock Log Record -<\/B> This option allows the user to modify records in the timeclock log||
+Delete Timeclock Log Record -<\/B> This option allows the user to delete records in the timeclock log||
+Add Timeclock Log Record||
+Modify Timeclock Log Record||
+Delete Timeclock Log Record||
+USER GROUP TIMECLOCK STATUS REPORT||
+Click here to see the Timeclock Status for this user group||
+ADD NUMBERS TO THE DNC LIST||
+Phone Numbers: ||
+one phone number per line only||
+VICIDIAL DNC List -<\/B> This Do Not Call list contains every lead that has been set to a status of DNC in the system. Through the LISTS - ADD NUMBER TO DNC page you are able to manually add numbers to this list so that they will not be called by campaigns that use the internal DNC list||
+ Time Sheet ||
+Timeclock Record Edit||
+Default date format with year month day||
+USA date format with month day year||
+European date format with day month year||
+Text date format with abbreviated month day||
+followed by 24 hour time||
+followed by 12 hour time||
+Agent Screen Header Date Format -<\/B> This menu allows you to choose the format of the date that shows up at the top of the VICIDIAL agent screen. The options for this setting are: default is||
+Agent Screen Customer Date Format -<\/B> This menu allows you to choose the format of the customer time zone date that shows up at the top of the Customer Information section of the VICIDIAL agent screen. The options for this setting are: default is||
+Agent Screen Customer Phone Format -<\/B> This menu allows you to choose the format of the customer phone number that shows up in the status section of the VICIDIAL agent screen. The options for this setting are: default is||
+dash separated phone number||
+dash separated number with area code in parenthesis||
+No formatting||
+with space after city code||
+space separated phone number||
+Agent Screen Header Date Format||
+Agent Screen Customer Date Format||
+Agent Screen Customer Phone Format||
+ERROR- There is a problem with the data that you entered, please go back||
+A timeclock session cannot overlap another timeclock session||
+Disable Alter Customer Phone -<\/B> If set to Y, does not change the customer phone number when an agent dispositions the call. Default is Y||
+Agent API Access -<\/B> This option allows the account to be used with the vicidial agent API commands||
+Agent Alter Customer Phone Override -<\/B> This option will override whatever the option is in the campaign for altering of customer phone number. NOT_ACTIVE will use whatever setting is present for the campaign. ALLOW_ALTER will always allow for the agent to alter the customer phone number, no matter what the campaign setting is. Default is NOT_ACTIVE||
+Agent API Active -<\/B> If set to 1, this will allow the Agent API interface to function. Default is 0||
+Agent Alter Customer Phone Override: ||
+Agent API Access: ||
+Disable Alter Customer Phone: ||
+Agent API Active: ||
+Agent Display Queue Count -<\/B> If set to Y, when a customer is waiting for an agent, the Queue Calls display at the top of the agent screen will turn red and show the number of waiting calls. Default is Y||
+Agent Display Queue Count: ||
+agents in dead calls||
+QC Last Pull Time: ||
+and less than 43200 seconds or 12 hours||
+LEADS AT LIMIT||
+Lead counts taken from active lists in the campaign only||
+QC Get Record Launch-<\/B> This allows one of the following actions to be triggered upon a QC agent receiving a new record||
+QC Show Recording -<\/B> This allows for a recording that may be linked with the QC record to be display in the QC agent screen||
+QC Shift -<\/B> This is the shift timeframe used to pull QC records for a campaign. The days of the week are ignored for these functions||
+QC Get Record Launch||
+QC Show Recording||
+QC Shift||
+Inbound Group QC Settings||
+QC Shift -<\/B> This is the shift timeframe used to pull QC records for an inbound_group. The days of the week are ignored for these functions||
+The Sale Category and Dead Lead Category are both used by the List Suggestion system when analyzing list statistics.||
+Sale Category: ||
+Dead Lead Category: ||
+Manual Dial Filter -<\/B> This allows you to filter the calls that agents make in manual dial mode for this campaign by any combination of the following: DNC - to kick out, CAMPAIGNLISTS - the number must be within the lists for the campaign, NONE - no filter on manual dial or fast dial lists||
+Manual Dial Filter: ||
+Agent Screen Clipboard Copy -<\/B> THIS FEATURE IS CURRENTLY ONLY ENABLED FOR INTERNET EXPLORER. This feature allows you to select a field that will be copied to the computer clipboard of the agent computer upon a call being sent to an agent. Common uses for this are to allow for easy pasting of account numbers or phone numbers into legacy client applications on the agent computer||
+Agent Screen Clipboard Copy||
+EXTENDED alternate numbers are numbers loaded into the system outside of the standard lead information screen. Using EXTENDED you can have hundreds of phone numbers for a single customer record.||
+Agent Screen Extended Alt Dial -<\/B> This feature allows for agents to access extended alternate phone numbers for leads beyond the standard Alt Phone and Address3 fields that can be used in VICIDIAL for phone numbers beyond the main phone number. The Extended phone numbers can be dialed automatically using the Auto-Alt-Dial feature in VICIDIAL Campaign settings, but enabling this Agent Screen feature will also allow for the agent to call these numbers from their agent screen as well as edit their information||
+Agent Screen Extended Alt Dial:||
+Use Campaign DNC List -<\/B> This defines whether this campaign is to filter leads against a DNC list that is specific to that campaign only. If it is set to Y, the hopper will look for each phone number in the campaign-specific DNC list before placing it in the hopper. If it is in the campaign-specific DNC list then it will change that lead status to DNCC so it cannot be dialed. Default is N.||
+Use Campaign DNC List||
+and possibly the campaign-specific DNC list||
+There is also the option to add leads to the campaign-specific DNC lists for those campaigns that have them||
+NOTE: Copying a campaign will copy all settings from the master campaign you select, but it will not copy a campaign-specific DNC list if there was one on the selected master campaign||
+Add New ||
+Copy ||
+New DID Addition||
+New Copied DID Addition||
+Modify ||
+Delete ||
+Play Place in Line -<\/B> This defines whether the caller will hear their place in line when they enter the queue as well as when they hear the announcemend. Default is N||
+Play Estimated Hold Time -<\/B> This defines whether the caller will hear the estimated hold time before they are transferred to an agent. Default is N||
+Hold Time Option -<\/B> This allows you to specify the routing of the call if the estimated hold time is over the amount of seconds specified below. Default is NONE||
+Hold Time Option Seconds -<\/B> If Hold Time Option is set to anything but NONE, this is the number of seconds of estimated hold time that will trigger the hold time option. Default is 360 seconds||
+Hold Time Option Extension -<\/B> If Hold Time Option is set to EXTENSION, this is the dialplan extension that the call will be sent to if the estimated hold time exceeds the Hold Time Option Seconds||
+Hold Time Option Voicemail -<\/B> If Hold Time Option is set to VOICEMAIL, this is the voicemail box that the call will be sent to if the estimated hold time exceeds the Hold Time Option Seconds||
+Hold Time Option Transfer In-Group -<\/B> If Hold Time Option is set to IN_GROUP, this is the inbound group that the call will be sent to if the estimated hold time exceeds the Hold Time Option Seconds||
+Hold Time Option Callback Filename -<\/B> If Hold Time Option is set to CALLERID_CALLBACK, this is the filename prompt that is played before the call is logged as a new lead to the list ID specified below if the estimated hold time exceeds the Hold Time Option Seconds||
+Hold Time Option Callback List ID -<\/B> If Hold Time Option is set to CALLERID_CALLBACK, this is the List ID the call is added to as a new lead if the estimated hold time exceeds the Hold Time Option Seconds||
+Hold Recall Transfer In-Group -<\/B> If a customer calls back to this in-group more than once and this is not set to NONE, then the call will automatically be sent on to the In-Group selected in this field. Default is NONE||
+No Delay Call Route -<\/B> Setting this to Y will remove all wait times and audio prompts and attempt to send the call right to an agent. Does not override welcome message or on hold prompt settings. Default is N||
+Play Welcome Message -<\/B> These settings select when to play the defined welcome message, ALWAYS will play it every time, NEVER will never play it, IF_WAIT_ONLY will only play the welcome message if the call does not immediately go to an agent, and YES_UNLESS_NODELAY will always play the welcome message unless the NO_DELAY setting is enabled. Default is ALWAYS||
+Play Place in Line: ||
+Play Estimated Hold Time: ||
+Hold Time Option: ||
+Hold Time Option Seconds: ||
+Hold Time Option Extension: ||
+Hold Time Option Voicemail: ||
+Hold Time Option Transfer In-Group: ||
+Hold Time Option Callback Filename: ||
+Hold Time Option Callback List ID: ||
+Hold Recall Transfer In-Group: ||
+No Delay Call Route: ||
+Play Welcome Message: ||
+DID Extension -<\/B> This is the number, extension or DID that will trigger this entry and that you will route within the system using this function||
+DID Description -<\/B> This is the description of the DID routing entry||
+DID Active -<\/B> This the field where you set the DID entry to active or not. Default is Y||
+DID Route -<\/B> This the type of route that you set the DID to use. EXTEN will send calls to the extension entered below, VOICEMAIL will send calls directly to the voicemail box entered below, AGENT will send calls to a VICIDIAL agent if they are logged in, PHONE will send the call to a phones entry selected below, IN_GROUP will send calls directly to the specified inbound group. Default is EXTEN||
+Extension -<\/B> If EXTEN is selected as the DID Route, then this is the dialplan extension that calls will be sent to. Default is 9998811112, no-service||
+Extension Context -<\/B> If EXTEN is selected as the DID Route, then this is the dialplan context that calls will be sent to. Default is default||
+Voicemail Box -<\/B> If VOICEMAIL is selected as the DID Route, then this is the voicemail box that calls will be sent to. Default is empty||
+Phone Extension -<\/B> If PHONE is selected as the DID Route, then this is the phone extension that calls will be sent to.||
+Phone Server IP -<\/B> If PHONE is selected as the DID Route, then this is the server IP for the phone extension that calls will be sent to||
+User Agent -<\/B> If AGENT is selected as the DID Route, then this is the VICIDIAL Agent that calls will be sent to||
+User Unavailable Action -<\/B> If AGENT is selected as the DID Route, and the user is not logged in or available, then this is the route that the calls will take||
+User Route Settings In-Group -</B> If AGENT is selected as the DID Route, then this is the In-Group that will be used for the queue settings as the caller is waiting to be sent to the agent. Default is AGENTDIRECT||
+In-Group ID -<\/B> If IN_GROUP is selected as the DID Route, then this is the In-Group that calls will be sent to||
+In-Group Call Handle Method -<\/B> If IN_GROUP is selected as the DID Route, then this is the call handling method used for these calls. CID will add a new lead record with every call using the CallerID as the phone number, CIDLOOKUP will attempt to lookup the phone number by the CallerID in the entire system, CIDLOOKUPRL will attampt to lookup the phone number by the CallerID in only one specified list, CIDLOOKUPRC will attampt to lookup the phone number by the CallerID in all of the lists that belong to the specified campaign, CLOSER is specified for VICIDIAL Closer calls, ANI will add a new lead record with every call using the ANI as the phone number, ANILOOKUP will attempt to lookup the phone number by the ANI in the entire system, ANILOOKUPRL will attampt to lookup the phone number by the ANI in only one specified list, XDIGITID will prompt the caller for an X digit code before the call will be put into the queue. Default is CID||
+In-Group Agent Search Method -<\/B> If IN_GROUP is selected as the DID Route, then this is the agent search method to be used by the inbound group, LO is Load-Balanced-Overflow and will try to send the call to an agent on the local server before trying to send it to an agent on another server, LB is Load-Balanced and will try to send the call to the next agent no matter what server they are on, SO is Server-Only and will only try to send the calls to agents on the server that the call came in on. Default is LB||
+In-Group List ID -<\/B> If IN_GROUP is selected as the DID Route, then this is the List ID that leads may be searched through and that leads will be inserted into if necessary||
+In-Group Campaign ID -<\/B> If IN_GROUP is selected as the DID Route, then this is the Campaign ID that leads may be searched for in if the call handle method is CIDLOOKUPRC||
+In-Group Phone Code -<\/B> If IN_GROUP is selected as the DID Route, then this is the Phone Code used if a new lead is created||
+Phones Email -<\/B> The email address associated with this phone entry. This is used for voicemail settings||
+ADD A NEW DID||
+DID Extension: ||
+DID Description: ||
+COPY DID||
+Source DID: ||
+DID NOT ADDED||
+there is already a DID in the system with this ID||
+there is already a DID in the system with this extension||
+DID NOT MODIFIED||
+DID MODIFIED||
+MODIFY A DID RECORD: ||
+DID Route: ||
+Extension: ||
+Extension Context: ||
+Voicemail Box: ||
+Phone Extension: ||
+User Agent: ||
+User Unavailable Action: ||
+User Route Settings In-Group: ||
+In-Group ID: ||
+In-Group Call Handle Method: ||
+In-Group Agent Search Method: ||
+In-Group List ID: ||
+In-Group Campaign ID: ||
+In-Group Phone Code: ||
+DELETE THIS DID||
+Email: ||
+DID NOT DELETED||
+DID DELETION CONFIRMATION||
+Click here to delete ||
+DID DELETION COMPLETED||
+Delete DIDs: ||
+Modify DIDs: ||
+To disable the On Hold Prompt, set the interval to 0||
+3-Way Call Outbound CallerID -<\/B> This defines what is sent out as the outbound callerID number from 3-way calls placed by the agent, CAMPAIGN uses the custom campaign callerID, CUSTOMER uses the number of the customer that is active on the agents screen and AGENT_PHONE uses the callerID for the phone that the agent is logged into||
+3-Way Call Outbound CallerID:||
+INBOUND_MAN allows the agent to place manual dial calls from a campaign list while being able to take inbound calls between manual dial calls||
+FORCE will force the agents to choose a PAUSE code if they click on the PAUSE button||
+3-Way Call Dial Prefix -<\/B> This defines what is used as the dial prefix for 3-way calls, default is empty so the campaign dial prefix is used, passthru so you can hear ringing is 88||
+3-Way Call Dial Prefix||
+Force Timeclock Login -<\/B> This option allows you to not let an agent log in to the VICIDIAL agent interface if they have not logged into the timeclock. Default is N. There is an option to exempt admin users, levels 8 and 9||
+Force Timeclock Login||
+Stats Percent of Calls Answered Within X seconds -</B> This field allows you to set the number of hold seconds that the realtime stats display will use to calculate the percentage of answered calls that were answered within X number of seconds on hold||
+Stats Percent of Calls Answered Within X seconds||
+Web Form Target-<\/B> This is where you can set the custom web page frame that the web form will be opened in when the user clicks on the WEB FORM button. Default is _blank.||
+Web Form Target||
+To customize the query string after the web form, simply begin the web form with VAR and then the URL that you want to use, replacing the variables with the variable names that you want to use --A--phone_number--B-- just like in the SCRIPTS tab section||
+Recording Web Link -<\/B> This setting allows you to override the default of the display of the recording link in the admin web pages. Default is SERVER_IP||
+Alternate Recording Server IP -<\/B> This setting is where you can put a server IP or other machine name that can be used in place of the server_ip in the links to recordings within the admin web pages. Default is empty||
+Recording Web Link||
+Enable Vtiger Integration -<\/B> This setting allows you to enable Vtiger integration with VICIDIAL. Currently links to Vtiger admin and search as well as user replication are the only integration features available. Default is 0||
+Vtiger DB Server IP -<\/B> This is the IP address of the database for your Vtiger installation||
+Vtiger Database Name -<\/B> This is the database name for your Vtiger database||
+Vtiger Database Login -<\/B> This is the user name used to log in to your Vtiger database||
+Vtiger Database Password -<\/B> This is the password used to log in to your Vtiger database||
+Vtiger URL -<\/B> This is the URL or web site address used to get to your Vtiger installation||
+Enable Vtiger Integration:||
+Vtiger DB Server IP||
+Vtiger Database Name||
+Vtiger Database Login||
+Vtiger Database Password||
+Vtiger URL||
+VTIGER HOME||
+Active -<\/B> This field defines whether the user is active in the system and can use VICIDIAL resources. Default is Y||
+show only active users||
+show all users||
+Vtiger Search Category -<\/B> If Vtiger integration is enabled in the system settings then this setting will define where the vtiger_search.php page will search for the phone number that was entered. There are 4 options that can be used in this field: LEAD- This option will search through the Vtiger leads only, ACCOUNT- This option will search through the Vtiger accounts and all contacts and sub-contacts for the phone number, VENDOR- This option will only search through the Vtiger vendors, ACCTID- This option works only for accounts and it will take the vicidial vendor_lead_code field and try to search for the Vtiger account ID. If unsuccessful it will try any other methods listed that you have selected. Multiple options can be used for each search, but on large databases this is not recommended. Default is LEAD||
+Vtiger Search Category:||
+ACTIVE LISTS CHANGED||
+SUBMIT ACTIVE LIST CHANGES||
+LAST CALL DATE||
+User Group Bulk Change||
+Bulk Group Change||
+Vtiger Create Call Record -<\/B> If Vtiger integration is enabled in the system settings then this setting will define whether a new Vtiger activity record is created for the call when the agent goes to the vtiger_search page. Default is Y||
+Vtiger Create Call Record:||
+Vtiger Create Lead Record -<\/B> If Vtiger integration is enabled in the system settings and Vtiger Search Category includes LEAD then this setting will define whether a new Vtiger lead record is created when the agent goes to the vtiger_search page and no record is found to have the call phone number. Default is Y||
+Vtiger Create Lead Record:||
+Vtiger Screen Login -<\/B> If Vtiger integration is enabled in the system settings then this setting will define whether the user is logged into the Vtiger interface automatically when they login to VICIDIAL. Default is Y||
+Vtiger Screen Login:||
+Alert Enabled -<\/B> This field shows whether the agent has web browser alerts enabled for when calls come into their vicidial.php session. Default is 0 for NO||
+Alert Enabled:||
+QC Features Active -<\/B> This option allows you to enable or disable the QC or Quality Control features. Default is 0 for inactive||
+Outbound Auto-Dial Active -<\/B> This option allows you to enable or disable outbound auto-dialing within VICIDIAL, setting this field to 0 will remove the LISTS and FILTERS sections and many fields from the Campaign Modification screens. Manual entry dialing will still be allowable from within the agent screen, but no list dialing will be possible. Default is 1 for active||
+QC Features Active:||
+Outbound Auto-Dial Active:||
+Close Panel||
+Choose Report Display Options||
+To select more than 1 campaign, hold down the Ctrl key and click||
+CPD AMD Action -<\/B> If you are using the Sangoma ParaXip Call Progress Detection software then you will want to enable this setting either setting it to DISPO which will disposition the call as AA and hang it up if the call is being processed and has not been sent to an agent yet or MESSAGE which will send the call to the defined Answering Machine Message for this campaign. Default is DISABLED||
+CPD AMD Action:||
+Click here for user multiple day status detail report||
+Click here to download this list||
+Download Lists:||
+Active Asterisk Server -<\/B> If Asterisk is not running on this server, or if VICIDIAL should not be using this server, or if are only using this server for other scripts like the hopper loading script you would want to set this to N. Default is Y||
+Generate conf files -<\/B> If you would like the system to auto-generate asterisk conf files based upon the phones entries, carrier entries and load balancing setup within VICIDIAL then set this to Y. Default is Y||
+Rebuild conf files -<\/B> If you want to force a rebuilding of the Asterisk conf files or if any of the phones or carrier entries have changed then this should be set to Y. After the conf files have been generated and Asterisk has been reloaded then this will be changed to N. Default is Y||
+Active Asterisk Server:||
+Generate conf files:||
+Rebuild conf files:||
+Show Templates||
+Add A New Template||
+ADD NEW CONF TEMPLATE||
+ADD NEW CARRIER||
+ADDING NEW CONF TEMPLATE||
+ADDING NEW CARRIER||
+MODIFY CONF TEMPLATE||
+MODIFY CARRIER||
+DELETE CONF TEMPLATE||
+DELETE CARRIER||
+CONF TEMPLATE LIST||
+CARRIER LIST||
+Template ID:||
+Template Name:||
+Template Contents:||
+Carrier ID:||
+Carrier Name:||
+Registration String:||
+Account Entry:||
+Protocol:||
+Globals String:||
+Dialplan Entry:||
+CONF TEMPLATE NOT ADDED||
+there is already a template in the system with this ID||
+CONF TEMPLATE ADDED||
+CARRIER NOT ADDED||
+there is already a carrier in the system with this ID||
+CONF TEMPLATE NOT MODIFIED||
+CARRIER NOT MODIFIED||
+CARRIER MODIFIED||
+CONF TEMPLATE NOT DELETED||
+Template ID be at least 2 characters in length||
+CONF TEMPLATE DELETION CONFIRMATION||
+Click here to delete conf template||
+CARRIER NOT DELETED||
+Carrier ID be at least 2 characters in length||
+CARRIER DELETION CONFIRMATION||
+Click here to delete carrier||
+CONF TEMPLATE DELETION COMPLETED||
+CARRIER DELETION COMPLETED||
+MODIFY A CONF TEMPLATE RECORD||
+DELETE THIS CONF TEMPLATE||
+MODIFY A CARRIER RECORD||
+DELETE THIS CARRIER||
+CARRIERS WITHIN THIS SERVER||
+CONF TEMPLATE LISTINGS||
+CARRIER LISTINGS||
+PHONES USING THIS CONF TEMPLATE||
+CARRIERS USING THIS CONF TEMPLATE||
+Conf Override:||
+Template ID -<\/B> This field needs to be at least 2 characters in length and no more than 15 characters in length, no spaces. This is the ID that will be used to identify the conf template throughout the system||
+Template Name -<\/B> This is the descriptive name of the conf file template entry||
+Template Contents -<\/B> This field is where you can enter in the specific settings to be used by all phones and-or carriers that are set to use this conf template. Fields that should NOT be included in this box are: secret, accountcode, account, username and mailbox||
+Carrier ID -<\/B> This field needs to be at least 2 characters in length and no more than 15 characters in length, no spaces. This is the ID that will be used to identify the carrier for this specific entry throughout the system||
+Carrier Name -<\/B> This is the descriptive name of the carrier entry||
+Registration String -<\/B> This field is where you can enter in the exact string needed in the IAX or SIP configuration file to register to the provider. Optional but highly recommended if your carrier allows registration||
+Template ID -<\/B> This optional field allows you to choose a conf file template for this carrier entry||
+Account Entry -<\/B> This field is used if you have not selected a template to use, and it is where you can enter in the specific account settings to be used for this carrier||
+Protocol -<\/B> This field allows you to define the protocol to use for the carrier entry. Currently only IAX and SIP are supported||
+Globals String -<\/B> This optional field allows you to define a global variable to use for the carrier in the dialplan||
+Dialplan Entry -<\/B> This optional field allows you to define a set of dialplan entries to use for this carrier||
+Server IP -<\/B> This is the server that this specific carrier record is associated with||
+Active -<\/B> This defines whether the carrier will be included in the auto-generated conf files or not||
+Conf Override Settings -<\/B> If populated, and the Template ID is set to --NONE-- then the contents of this field are used as the conf file entries for this phone. generate_vicidial_conf for this phones server must be set to Y for this to work. This field should NOT contain the [extension] line, that will be automatically generated||
+Template ID -<\/B> This is the conf file template ID that this phone entry will use for its Asterisk settings. Default is --NONE--||
+If you will be taking in inbound calls from this carrier trunk you might want to set the context=trunkinbound within this field so that you can use the DID handling process within VICIDIAL||
+There is a reserved default DID that you can use which is just the word -default- without the dashes, that will allos you to send any call that does not match any other existing patterns to the default DID||
+Campaign VDAD extension||
+This field allows for a custom VDAD transfer extension. This allows you to use different call handling methods depending upon your campaign.||
+  - 8364 - same as 8368||
+  - 8365 - Will send the call only to an agent on the same server as the call is on||
+  - 8366 - Used for press-1 and survey campaigns||
+  - 8367 - Will try to first send the call to an agent on the local server, then it will look on other servers||
+  - 8368 - DEFAULT – Will send the call to the next available agent no matter what server they are on||
+  - 8369 - Used for Answering Machine Detection after that, same behavior as 8368||
+  - 8373 - Used for Answering Machine Detection after that same behavior as 8366||
+Also in this section are the WEB VARs for each campaign. These allow each agent to have a different variable string that can be added to the WEB FORM or SCRIPT tab URLs by simply putting --A--web_vars--B-- as you would put any other field.||
+Group Alias List||
+Add A New Group Alias||
+ADD NEW GROUP ALIAS||
+ADDING NEW GROUP ALIAS||
+MODIFY GROUP ALIAS||
+DELETE GROUP ALIAS||
+GROUP ALIAS LIST||
+GROUP ALIAS LISTINGS||
+MODIFY A GROUP ALIAS RECORD||
+Group Alias ID||
+Group Alias Name||
+CallerID Number||
+CallerID Name||
+DELETE THIS GROUP ALIAS||
+GROUP ALIAS NOT MODIFIED||
+GROUP ALIAS MODIFIED||
+ADD A NEW GROUP ALIAS||
+MODIFY A GROUP ALIAS RECORD||
+GROUP ALIAS NOT ADDED||
+GROUP ALIAS ADDED||
+GROUP ALIAS NOT DELETED||
+GROUP ALIAS DELETION CONFIRMATION||
+Click here to delete group alias||
+GROUP ALIAS DELETION COMPLETED||
+Group Alias ID -<\/B> The ID of the group alias used by agents to dial out calls from the VICIDIAL agent interface with different Caller IDs. no spaces or other special characters allowed. Must be between 2 and 20 characters in length||
+Group Alias Name -<\/B> The name used to describe a group alias, Must be between 2 and 50 characters in length||
+Caller ID Number -<\/B> The Caller ID number used in this Group Alias. Must be digits only||
+Caller ID Name -<\/B> The Caller ID name that can be sent out with this Group Alias. As far as we know this will only work in Canada on PRI circuits and using an IAX loop trunk through Asterisk||
+Group Alias Allowed -<\/B> If you want to allow your agents to use group aliases then you need to set this to Y. Group Aliases are explained more in the Admin section, they allow agents to select different callerIDs for outbound manual calls that they may place. Default is N||
+Default Group Alias -<\/B> If you have allowed Group Aliases then this is the group alias that is selected first by default when the agent chooses to use a Group Alias for an outbound manual call. Default is NONE or empty||
+Default Group Alias -<\/B> If you have allowed Group Aliases for the campaign that the agent is logged into then this is the group alias that is selected first by default on a call coming in from this inbound group when the agent chooses to use a Group Alias for an outbound manual call. Default is NONE or empty||
+Group Alias Allowed||
+Default Group Alias||
+AGENT_CHOOSE allows the agent to choose which callerID to use for 3-way calls from a list of choices.||
+you cannot use reserved words in group aliases||
+Agent Shift Enforcement Override||
+Manager Shift Enforcement Override||
+Shift Enforcement||
+Max Calls per Second||
+Max FILL Calls per Second||
+This setting will override whatever the users user group has set for Shift Enforcement. DISABLED will use the user group setting. OFF will not enforce shifts at all. START will only enforce the login time but will not affect an agent that is running over their shift time if they are already logged in. ALL will enforce shift start time and will log an agent out after they run over the end of their shift time. Default is DISABLED.||
+This setting if set to 1 will allow a manager to enter their user and password on an agent screen to override the shift restrictions on an agent session if the agent is trying to log in outside of their shift. Default is 0.||
+This setting allows you to restrict agent logins based upon the shifts that are selected below. OFF will not enforce shifts at all. START will only enforce the login time but will not affect an agent that is running over their shift time if they are already logged in. ALL will enforce shift start time and will log an agent out after they run over the end of their shift time. Default is OFF.||
+This setting determines the maximum number of calls that can be placed by the outbound auto-dialing script on this server per second. Must be from 1 to 100. Default is 20.||
+This setting determines the maximum number of calls that can be placed by the auto-FILL outbound auto-dialing script on for all servers, per second. Must be from 1 to 200. Default is 40.||
+System Load||
+Live Channels||
+Disk Usage||
+These two statistics show the loadavg of a system times 100 and the CPU usage percentage of the server and is updated every minute. The loadavg should on average be below 100 multiplied by the number of CPU cores your system has, for optimal performance. The CPU usage percentage should stay below 50 for optimal performance.||
+This field shows the current number of Asterisk channels that are live on the system right now. It is important to note that the number of Asterisk channels is usually much higher than the number of actual calls on a system. This field is updated once every minute.||
+This field will show the disk usage for every partition on this server. This field is updated once every minute.||
+ADMIN CHANGE LOG||
+USER ADMIN CHANGE LOG||
+SECTION ADMIN CHANGE LOG||
+DETAIL ADMIN CHANGE LOG||
+Last 10000 records||
+Changes made by||
+Record Detail||
+Section Records||
+Click here to see Admin chages to this record||
+Click here to see Admin chages to this campaign||
+Click here to see Admin chages to this list||
+Click here to see Admin chages to this In-Group||
+Click here to see Admin chages to this DID||
+Click here to see Admin chages to this remote agent||
+Click here to see Admin chages to this user group||
+Click here to see Admin chages to this script||
+Click here to see Admin chages to this filter||
+Click here to see Admin chages to this call time||
+Click here to see Admin chages to this shift||
+Click here to see Admin chages to this phone alias||
+Click here to see Admin chages to this group alias||
+Click here to see Admin chages to this server||
+Click here to see Admin chages to this conf template||
+Click here to see Admin chages to this carrier||
+Click here to see Admin chages to the system settings||
+Export Reports||
+This setting if set to 1 will allow a manager to access the export call reports on the REPORTS screen. Default is 0.||
+This setting if set to 1 will allow a manager to click on the download list link at the bottom of a list modification screen to export the entire contents of a list to a flat data file. Default is 0.||
+Export Calls Report||
+EXPORT CALLS REPORT||
+For the Export Calls Report, the following field order is used for exports||
+Timeclock||
+Logout||
+Show Users||
+Add A New User||
+Search For A User||
+User Stats||
+User Status||
+Time Sheet||
+Days Status||
+Campaigns Main||
+Statuses||
+HotKeys||
+Lead Recycle||
+Auto Alt-Dial||
+Auto Alt Dial||
+List Mix||
+Pause Codes||
+Basic||
+Detail||
+Survey||
+Real-Time||
+CAMPAIGN ID||
+DIAL PLAN||
+DIAL METHOD||
+LEADS COUNT||
+LEAD ORDER||
+DIAL STATUSES||
+SCRIPT ID||
+SCRIPT NAME||
+USER GROUP||
+GROUP NAME||
+PRIORITY||
+FORCE TIMECLOCK||
+CALLTIME ID||
+CALLTIME NAME||
+DEFAULT START||
+DEFAULT STOP||
+SHIFT ID||
+SHIFT NAME||
+SHIFT START||
+SHIFT LENGTH||
+WEEKDAYS||
+Template ID||
+Template Name||
+Carrier ID||
+Carrier Name||
+Registration||
+Active||
+USER ID||
+FULL NAME||
+LEVEL||
+LINKS||
+TRUNKS||
+HUMAN||
+ANSWER||
+CATEGORY||
+STATUSES IN THIS CATEGORY||
+Display||
+Dates||
+PLEASE SELECT A CAMPAIGN OR USER GROUP AND DATE-TIME ABOVE AND CLICK||
+PLEASE SELECT A USER AND DATE-TIME ABOVE AND CLICK||
+PLEASE SELECT A CAMPAIGN AND DATE-TIME ABOVE AND CLICK||
+PLEASE SELECT AN IN-GROUP AND DATE RANGE ABOVE AND CLICK SUBMIT||
+DOWNLOAD||
+Users||
+User||
+Reports||
+OUTBOUND||
+INBOUND||
+Server Stats and Reports||
+Click here to see a VDAD report for this campaign||
+Show DIDs||
+Add A New DID||
+Templates||
+Carriers||
+Carrier Name||
+
+
+############################################################ CLIENT
+
+Gender: ||
+Date of Birth: ||
+YOU MUST BE PAUSED TO CHANGE GROUPS||
+Calls in Queue:||
+ Timeclock||
+The user and password you entered are not active in the system||
+Please try again||
+You cannot log in or out within 30 seconds of your last login or logout||
+You have now logged-out||
+You logged out at ||
+Amount of time you were logged-in: ||
+ERROR: timeclock log entry already made: ||
+BACK to Agent Login Screen||
+BACK to Administration||
+BACK to Welcome Screen||
+Time since you were last logged-in: ||
+You last logged-out at: ||
+Click LOGIN below to log-in||
+Amount of time you have been logged-in: ||
+You logged-in at:||
+Click LOGOUT below to log-out||
+Undefined||
+This phone number is not in the campaign lists||
+Unspecified error||
+Extended Alt Phone Information: ||
+ALT DIAL NUMBER:||
+Phone Code and Number:||
+Notes: ||
+Active: ||
+Alt Count: ||
+Change this phone number to INACTIVE||
+Change this phone number to ACTIVE||
+YOU MUST LOG IN TO THE TIMECLOCK FIRST||
+There is a time synchronization problem with your system, please tell your system administrator||
+Preview Call||
+SELECT A GROUP ALIAS||
+Group Alias Selection||
+Click Here to Choose a Group Alias||
+Group Alias||
+ERROR: There are no Shifts enabled for your user group||
+ERROR: You are not allowed to log in outside of your shift||
+MANAGER OVERRIDE||
+Your Shift is over or has changed, you have been logged out of your session||
+
+
+############################################################  MANAGER Manual
+
+
+Add agc/timeclock.php to all agent definitions files
+
+############################################################  AGENT Manual
+

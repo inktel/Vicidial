@@ -1,0 +1,474 @@
+#!/usr/bin/perl
+#
+# agi-AGENT_route.agi version 2.4
+# 
+# for use with a Call Menu in the custom dialplan section or as an AGI route.
+#
+# ; settings for this script:
+# ; 1. DID pattern to use for In-group initiation settings ('default' is default)
+# ; 2. the agentdirect in-group to send the calls to ('AGENTDIRECT' is default)
+# ; 3. transfer only to ACTIVE in the system agent or vicidial LOGGED_IN agent
+# ;		('ACTIVE' is default)
+# ; 4. prompt for user ID, if this is filled in with a filename it will ask, 
+# ;		otherwise it will assume $extension is the user ID
+# ; 5. number of digits required for user ID validation, X will allow anything,
+# ;		this will only be enforced if "prompt for user ID" prompt is populated
+# ; 6. audio filename for invalid selection, agent not available ('invalid' is default)
+# ; 7. audio filename for invalid user id re-enter prompt, agent not available
+# ; 8. number of retry attempts to enter a valid user ID
+# ;		this will only be enforced if "prompt for user ID" prompt is populated
+# ; 9. in-group to send the call to if there is no valid agent, if none is
+# ;		defined, then the call will be directed to 's' exten
+# ; 10. audio filename before sending call to no-agent route
+# ; 11. audio filename before sending call to no-agent route if agent active but
+# ;		not logged-in to vicidial
+#
+#; example in CallMenu AGI route with all options
+# "agi-AGENT_route.agi,default---AGENTDIRECT---LOGGED_IN---if-u-know-ext-dial---X---invalid---please-try-again---3---TEST_IN3---pbxtransfer---outside-transfer"
+#; example with 4-digit agent IDs
+# exten => _XXXX,1,AGI(agi-AGENT_route.agi,default---AGENTDIRECT---ACTIVE)
+#
+# Copyright (C) 2010  Matt Florell <vicidial@gmail.com>    LICENSE: AGPLv2
+#
+# changes:
+# 100321-0108 - First Build
+# 100704-2128 - Added several options
+#
+
+$script = 'agi-AGENT_route.agi';
+$S='*';
+$US='_';
+
+
+($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
+$year = ($year + 1900);
+$mon++;
+if ($mon < 10) {$mon = "0$mon";}
+if ($mday < 10) {$mday = "0$mday";}
+if ($hour < 10) {$hour = "0$hour";}
+if ($min < 10) {$min = "0$min";}
+if ($sec < 10) {$sec = "0$sec";}
+
+$hm = "$hour$min";
+$hm = ($hm + 0);
+
+$now_date_epoch = time();
+$now_date = "$year-$mon-$mday $hour:$min:$sec";
+$CLInow_date = "$year-$mon-$mday\\ $hour:$min:$sec";
+$start_time=$now_date;
+$CIDdate = "$mon$mday$hour$min$sec";
+$tsSQLdate = "$year$mon$mday$hour$min$sec";
+$SQLdate = "$year-$mon-$mday $hour:$min:$sec";
+$SQLdateBEGIN = $SQLdate;
+
+# default path to astguiclient configuration file:
+$PATHconf =		'/etc/astguiclient.conf';
+
+open(conf, "$PATHconf") || die "can't open $PATHconf: $!\n";
+@conf = <conf>;
+close(conf);
+$i=0;
+foreach(@conf)
+	{
+	$line = $conf[$i];
+	$line =~ s/ |>|\n|\r|\t|\#.*|;.*//gi;
+	if ( ($line =~ /^PATHhome/) && ($CLIhome < 1) )
+		{$PATHhome = $line;   $PATHhome =~ s/.*=//gi;}
+	if ( ($line =~ /^PATHlogs/) && ($CLIlogs < 1) )
+		{$PATHlogs = $line;   $PATHlogs =~ s/.*=//gi;}
+	if ( ($line =~ /^PATHagi/) && ($CLIagi < 1) )
+		{$PATHagi = $line;   $PATHagi =~ s/.*=//gi;}
+	if ( ($line =~ /^PATHweb/) && ($CLIweb < 1) )
+		{$PATHweb = $line;   $PATHweb =~ s/.*=//gi;}
+	if ( ($line =~ /^PATHsounds/) && ($CLIsounds < 1) )
+		{$PATHsounds = $line;   $PATHsounds =~ s/.*=//gi;}
+	if ( ($line =~ /^PATHmonitor/) && ($CLImonitor < 1) )
+		{$PATHmonitor = $line;   $PATHmonitor =~ s/.*=//gi;}
+	if ( ($line =~ /^VARserver_ip/) && ($CLIserver_ip < 1) )
+		{$VARserver_ip = $line;   $VARserver_ip =~ s/.*=//gi;}
+	if ( ($line =~ /^VARDB_server/) && ($CLIDB_server < 1) )
+		{$VARDB_server = $line;   $VARDB_server =~ s/.*=//gi;}
+	if ( ($line =~ /^VARDB_database/) && ($CLIDB_database < 1) )
+		{$VARDB_database = $line;   $VARDB_database =~ s/.*=//gi;}
+	if ( ($line =~ /^VARDB_user/) && ($CLIDB_user < 1) )
+		{$VARDB_user = $line;   $VARDB_user =~ s/.*=//gi;}
+	if ( ($line =~ /^VARDB_pass/) && ($CLIDB_pass < 1) )
+		{$VARDB_pass = $line;   $VARDB_pass =~ s/.*=//gi;}
+	if ( ($line =~ /^VARDB_port/) && ($CLIDB_port < 1) )
+		{$VARDB_port = $line;   $VARDB_port =~ s/.*=//gi;}
+	$i++;
+	}
+
+if (!$VARDB_port) {$VARDB_port='3306';}
+if (!$AGILOGfile) {$AGILOGfile = "$PATHlogs/agiout.$year-$mon-$mday";}
+
+use DBI;
+use Time::HiRes ('gettimeofday','usleep','sleep');  # necessary to have perl sleep command of less than one second
+use Asterisk::AGI;
+$AGI = new Asterisk::AGI;
+
+$dbhA = DBI->connect("DBI:mysql:$VARDB_database:$VARDB_server:$VARDB_port", "$VARDB_user", "$VARDB_pass")
+    or die "Couldn't connect to database: " . DBI->errstr;
+
+### Grab Server values from the database
+$stmtA = "SELECT agi_output,local_gmt FROM servers where server_ip = '$VARserver_ip';";
+$sthA = $dbhA->prepare($stmtA) or die "preparing: ",$dbhA->errstr;
+$sthA->execute or die "executing: $stmtA ", $dbhA->errstr;
+$sthArows=$sthA->rows;
+if ($sthArows > 0)
+	{
+	$AGILOG = '0';
+	@aryA = $sthA->fetchrow_array;
+	$DBagi_output =		$aryA[0];
+	$local_gmt =		$aryA[1];
+	if ($DBagi_output =~ /STDERR/)	{$AGILOG = '1';}
+	if ($DBagi_output =~ /FILE/)	{$AGILOG = '2';}
+	if ($DBagi_output =~ /BOTH/)	{$AGILOG = '3';}
+	}
+$sthA->finish();
+
+### begin parsing run-time options ###
+if (length($ARGV[0])>1)
+	{
+	if ($AGILOG) {$agi_string = "Perl Environment Dump:";   &agi_output;}
+	$i=0;
+	while ($#ARGV >= $i)
+		{
+		$args = "$args $ARGV[$i]";
+		if ($AGILOG) {$agi_string = "$i|$ARGV[$i]";   &agi_output;}
+		$i++;
+		}
+	
+	### list of command-line array arguments:
+	@ARGV_vars = split(/---/, $ARGV[0]);
+
+	$did_settings =				$ARGV_vars[0];
+	$in_group = 				$ARGV_vars[1];
+	$agent_active_filter =		$ARGV_vars[2];
+	$user_id_prompt =			$ARGV_vars[3];
+	$minimum_user_digits =		$ARGV_vars[4];
+	$invalid_prompt =			$ARGV_vars[5];
+	$invalid_reenter_prompt = 	$ARGV_vars[6];
+	$retry_attempts =			$ARGV_vars[7];
+	$invalid_ingroup =			$ARGV_vars[8];
+	$transfer_prompt =			$ARGV_vars[9];
+	$transfer_logout_prompt =	$ARGV_vars[10];
+	}
+if (length($did_settings) < 1)
+	{$did_settings = 'default';}
+if (length($in_group) < 1)
+	{$in_group = 'AGENTDIRECT';}
+if (length($agent_active_filter) < 1)
+	{$agent_active_filter = 'ACTIVE';}
+if (length($invalid_prompt) < 1)
+	{$invalid_prompt = 'invalid';}
+if (length($retry_attempts) < 1)
+	{$retry_attempts = '3';}
+if (length($minimum_user_digits) < 1)
+	{$minimum_user_digits = 'X';}
+$pound_finish =	0;
+if ($minimum_user_digits =~ /X/)
+	{
+	$minimum_user_digits = '20';
+	$pound_finish =	1;
+	}
+
+$|=1;
+while(<STDIN>) 
+	{
+	chomp;
+	last unless length($_);
+	if ($AGILOG)
+		{
+		if (/^agi_(\w+)\:\s+(.*)$/)
+			{
+			$AGI{$1} = $2;
+			}
+		}
+
+	if (/^agi_context\:\s+(.*)$/)		{$context = $1;}
+	if (/^agi_priority\:\s+(.*)$/)		{$priority = $1;}
+	if (/^agi_uniqueid\:\s+(.*)$/)		{$unique_id = $1; $uniqueid = $unique_id;}
+	if (/^agi_channel\:\s+(.*)$/)		{$channel = $1;}
+	if (/^agi_extension\:\s+(.*)$/)		{$extension = $1;}
+	if (/^agi_type\:\s+(.*)$/)			{$type = $1;}
+	if (/^agi_callerid\:\s+(.*)$/)		{$callerid = $1;}
+	if (/^agi_calleridname\:\s+(.*)$/)	{$calleridname = $1;}
+	}
+
+
+if ( ($callerid =~ /\".*\"/) && ( (!$calleridname) or ($calleridname =~ /unknown/) ) )
+	{
+	$calleridname = $callerid;
+	$calleridname =~ s/\<\d\d\d\d\d\d\d\d\d\d\>//gi;
+	$calleridname =~ s/\"|\" //gi;
+	}
+
+$callerid =~ s/\D|\'//gi;
+$calleridname =~ s/unknown|\'//gi;
+if ( (!$callerid) or ($callerid =~ /unknown/) )
+	{$callerid = $calleridname;}
+
+
+### Grab DID values from the database
+$DIDs_in_system=0;
+$stmtA = "SELECT did_id FROM vicidial_inbound_dids where did_pattern = '$did_settings' and did_active='Y';";
+$sthA = $dbhA->prepare($stmtA) or die "preparing: ",$dbhA->errstr;
+$sthA->execute or die "executing: $stmtA ", $dbhA->errstr;
+$sthArows=$sthA->rows;
+if ($sthArows > 0)
+	{
+	@aryA = $sthA->fetchrow_array;
+	$did_id =		$aryA[0];
+	$DIDs_in_system++;
+	}
+$sthA->finish();
+
+if ($sthArows < 1)
+	{
+	### Grab DID values from the database for a default DID pattern if there is one
+	$stmtA = "SELECT did_id FROM vicidial_inbound_dids where did_pattern = 'default' and did_active='Y';";
+	$sthA = $dbhA->prepare($stmtA) or die "preparing: ",$dbhA->errstr;
+	$sthA->execute or die "executing: $stmtA ", $dbhA->errstr;
+	$DIDs_in_system=$sthA->rows;
+	if ($DIDs_in_system > 0)
+		{
+		@aryA = $sthA->fetchrow_array;
+		$did_id =						$aryA[0];
+		}
+	$sthA->finish();
+	}
+
+### Grab Server values from the database
+$cbc=0;
+$stmtA = "SELECT ext_context FROM servers where server_ip = '$VARserver_ip';";
+$sthA = $dbhA->prepare($stmtA) or die "preparing: ",$dbhA->errstr;
+$sthA->execute or die "executing: $stmtA ", $dbhA->errstr;
+$sthArows=$sthA->rows;
+while ($sthArows > $cbc)
+	{
+	@aryA = $sthA->fetchrow_array;
+	$DBext_context		=			$aryA[0];
+	if ($DBext_context)				{$ext_context = $DBext_context;}
+	$cbc++;
+	}
+$sthA->finish();
+
+
+
+$active_user=0;
+$logged_in_user=0;
+if (length($user_id_prompt) > 0)
+	{
+	$attempts=0;
+	while ( ($retry_attempts > $attempts) && ($active_user < 1) )
+		{
+		$attempts++;
+		$AGI->stream_file('sip-silence');
+		$AGI->stream_file('sip-silence');
+		$AGI->stream_file('sip-silence');
+
+		&user_id_gather;
+
+		&find_if_active_user;
+
+		if (length($invalid_reenter_prompt) > 0)
+			{
+			$user_id_prompt = $invalid_reenter_prompt;
+			}
+		}
+	}
+else
+	{
+	&find_if_active_user;
+	}
+
+if ( ($agent_active_filter =~ /LOGGED_IN/) && ($logged_in_user < 1) && ($active_user > 0) )
+	{
+	$transfer_prompt = $transfer_logout_prompt;
+	$active_user=0;
+	}
+
+
+### Route call to a logged-in VICIDIAL agent
+if ($active_user > 0)
+	{
+	$did_extension = "99909$S$did_id$S$in_group$S$extension$S";
+	}
+else
+	{
+	$AGI->stream_file('sip-silence');
+	$AGI->stream_file('sip-silence');
+	$AGI->stream_file('sip-silence');
+	$AGI->stream_file("$invalid_prompt");
+
+	if (length($invalid_ingroup) > 1)
+		{
+		$did_extension = "99909$S$did_id$S$invalid_ingroup$S$S";
+		}
+	else
+		{
+		$did_extension = "s";
+		$ext_context = $context;
+		}
+	}
+
+if (length($transfer_prompt) > 1)
+	{
+	$AGI->stream_file('sip-silence');
+	$AGI->stream_file('sip-silence');
+	$AGI->stream_file('sip-silence');
+	$AGI->stream_file("$transfer_prompt");
+	}
+
+
+
+if ($AGILOG) {$agi_string = "exiting the AGENT app, transferring call to $did_extension @ $ext_context";   &agi_output;}
+print "SET CONTEXT $ext_context\n";
+	checkresult($result);
+print "SET EXTENSION $did_extension\n";
+	checkresult($result);
+print "SET PRIORITY 1\n";
+	checkresult($result);
+
+exit;
+
+
+
+
+
+######### SUBROUTINES #################
+
+sub find_if_active_user
+	{
+	### find out if user exists and is active in system
+	$stmtA = "SELECT count(*) FROM vicidial_users where user='$extension' and active='Y';";
+	$sthA = $dbhA->prepare($stmtA) or die "preparing: ",$dbhA->errstr;
+	$sthA->execute or die "executing: $stmtA ", $dbhA->errstr;
+	$sthArows=$sthA->rows;
+	if ($sthArows > 0)
+		{
+		@aryA = $sthA->fetchrow_array;
+		$active_user = $aryA[0];
+		}
+	$sthA->finish();
+
+	if ($agent_active_filter =~ /LOGGED_IN/)
+		{
+		$stmtA = "SELECT count(*) FROM vicidial_live_agents where user='$extension';";
+		$sthA = $dbhA->prepare($stmtA) or die "preparing: ",$dbhA->errstr;
+		$sthA->execute or die "executing: $stmtA ", $dbhA->errstr;
+		$sthArows=$sthA->rows;
+		if ($sthArows > 0)
+			{
+			@aryA = $sthA->fetchrow_array;
+			$logged_in_user = $aryA[0];
+			}
+		$sthA->finish();
+		}
+	}
+
+
+##### BEGIN collect the user id number ######################################
+sub user_id_gather
+	{
+	################################################################################
+	# please enter the agent id followed by the pound key
+
+	$interrupt_digit='';
+
+	$interrupt_digit = $AGI->stream_file("$user_id_prompt",'0123456789');   
+
+		print STDERR "interrupt_digit |$interrupt_digit|\n";
+
+	$digits_being_entered=1;
+	$extension='';
+	if ($interrupt_digit > 0)
+		{
+	#	if ($interrupt_digit == 35) {$interrupt_digit='#';}
+	#	if ($interrupt_digit == 42) {$interrupt_digit='*';}
+		if ($interrupt_digit == 48) {$interrupt_digit=0;}
+		if ($interrupt_digit == 49) {$interrupt_digit=1;}
+		if ($interrupt_digit == 50) {$interrupt_digit=2;}
+		if ($interrupt_digit == 51) {$interrupt_digit=3;}
+		if ($interrupt_digit == 52) {$interrupt_digit=4;}
+		if ($interrupt_digit == 53) {$interrupt_digit=5;}
+		if ($interrupt_digit == 54) {$interrupt_digit=6;}
+		if ($interrupt_digit == 55) {$interrupt_digit=7;}
+		if ($interrupt_digit == 56) {$interrupt_digit=8;}
+		if ($interrupt_digit == 57) {$interrupt_digit=9;}
+		
+		$extension=$interrupt_digit;
+		}
+
+	$digit_loop_counter=0;
+	while ( ($digits_being_entered > 0) && ($digit_loop_counter < $minimum_user_digits) )
+		{
+		$digit = chr($AGI->wait_for_digit('10000'));  # wait 10 seconds for input, until the pound key is pressed or X digits
+		if ($digit =~ /\d/)
+			{
+			$extension = "$extension$digit";
+			print STDERR "digit |$digit|     extension |$extension|\n";
+	#		$AGI->say_digits("$digit");
+			undef $digit;
+			}
+		else
+			{
+			if ($pound_finish > 0)
+				{$digits_being_entered=0;}
+			}
+		
+		$digit_loop_counter++;
+		}
+
+	$extension =~ s/\D//gi;
+	if ($extension > 0) {print STDERR "digit collection done|$digit|     extension |$extension|\n";}
+	}
+	##### END collect the user id number ###############################################
+
+
+sub checkresult 
+	{
+	$pass=0;   $fail=0;
+	my ($res) = @_;
+	my $retval;
+	$tests++;
+	chomp $res;
+	if ($res =~ /^200/) 
+		{
+		$res =~ /result=(-?\d+)/;
+		if (!length($1)) 
+			{
+		#	print STDERR "FAIL ($res)\n";
+			$fail++;
+			} 
+		else 
+			{
+		#	print STDERR "PASS ($1)\n";
+			$pass++;
+			}
+		} 
+	else 
+		{
+	#	print STDERR "FAIL (unexpected result '$res')\n";
+		$fail++;
+		}
+	}
+
+
+sub agi_output
+	{
+	if ($AGILOG >=2)
+		{
+		### open the log file for writing ###
+		open(Lout, ">>$AGILOGfile")
+				|| die "Can't open $AGILOGfile: $!\n";
+		print Lout "$now_date|$script|$agi_string\n";
+		close(Lout);
+		}
+		### send to STDERR writing ###
+	if ( ($AGILOG == '1') || ($AGILOG == '3') )
+		{print STDERR "$now_date|$script|$agi_string\n";}
+	$agi_string='';
+	}
+

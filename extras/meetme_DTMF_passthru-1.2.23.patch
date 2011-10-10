@@ -1,0 +1,79 @@
+--- app_meetme-orig.c	2007-08-13 12:34:41.000000000 -0400
++++ app_meetme.c	2007-08-13 13:18:21.000000000 -0400
+@@ -85,6 +85,7 @@
+ "      'D' -- dynamically add conference, prompting for a PIN\n"
+ "      'e' -- select an empty conference\n"
+ "      'E' -- select an empty pinless conference\n"
++"      'F' -- Pass DTMF through the conference.\n"
+ "      'i' -- announce user join/leave\n"
+ "      'm' -- set monitor only mode (Listen only, no talking)\n"
+ "      'M' -- enable music on hold when the conference has a single caller\n"
+@@ -229,6 +230,7 @@
+ #define CONFFLAG_EMPTY (1 << 19)
+ #define CONFFLAG_EMPTYNOPIN (1 << 20)
+ #define CONFFLAG_ALWAYSPROMPT (1 << 21)
++#define CONFFLAG_PASS_DTMF (1 << 22)
+ 
+ enum {
+ 	OPT_ARG_WAITMARKED = 0,
+@@ -257,6 +259,7 @@
+ 	AST_APP_OPTION('e', CONFFLAG_EMPTY ),
+ 	AST_APP_OPTION('E', CONFFLAG_EMPTYNOPIN ),
+ 	AST_APP_OPTION('P', CONFFLAG_ALWAYSPROMPT ),
++	AST_APP_OPTION('F', CONFFLAG_PASS_DTMF ),
+ });
+ 
+ static char *istalking(int x)
+@@ -797,6 +800,18 @@
+ 	return 0;
+ }
+ 
++static void conf_queue_dtmf(const struct ast_conference *conf,
++	const struct ast_conf_user *sender, struct ast_frame *f)
++{
++	struct ast_conf_user *user;
++
++	AST_LIST_TRAVERSE(&conf->userlist, user, list) {
++		if (user == sender)
++			continue;
++		if (ast_write(user->chan, f) < 0)
++			ast_log(LOG_WARNING, "Error writing frame to channel %s\n", user->chan->name);
++	}
++}
+ /* Decrement reference counts, as incremented by find_conf() */
+ static int dispose_conf(struct ast_conference *conf)
+ {
+@@ -1363,6 +1378,9 @@
+ 				} else if ((f->frametype == AST_FRAME_DTMF) && (confflags & CONFFLAG_EXIT_CONTEXT)) {
+ 					char tmp[2];
+ 
++					if (confflags & CONFFLAG_PASS_DTMF)
++						conf_queue_dtmf(conf, user, f);
++
+ 					tmp[0] = f->subclass;
+ 					tmp[1] = '\0';
+ 					if (!ast_goto_if_exists(chan, exitcontext, tmp, 1)) {
+@@ -1372,10 +1390,14 @@
+ 					} else if (option_debug > 1)
+ 						ast_log(LOG_DEBUG, "Exit by single digit did not work in meetme. Extension %s does not exist in context %s\n", tmp, exitcontext);
+ 				} else if ((f->frametype == AST_FRAME_DTMF) && (f->subclass == '#') && (confflags & CONFFLAG_POUNDEXIT)) {
++					if (confflags & CONFFLAG_PASS_DTMF)
++						conf_queue_dtmf(conf, user, f);
+ 					ret = 0;
+ 					ast_frfree(f);
+ 					break;
+ 				} else if (((f->frametype == AST_FRAME_DTMF) && (f->subclass == '*') && (confflags & CONFFLAG_STARMENU)) || ((f->frametype == AST_FRAME_DTMF) && menu_active)) {
++					if (confflags & CONFFLAG_PASS_DTMF)
++						conf_queue_dtmf(conf, user, f);
+ 					if (ioctl(fd, ZT_SETCONF, &ztc_empty)) {
+ 						ast_log(LOG_WARNING, "Error setting conference\n");
+ 						close(fd);
+@@ -1542,6 +1564,8 @@
+ 					}
+ 
+ 					conf_flush(fd, chan);
++				} else if ((f->frametype == AST_FRAME_DTMF) && confflags & CONFFLAG_PASS_DTMF) {
++					conf_queue_dtmf(conf, user, f);
+ 				} else if (option_debug) {
+ 					ast_log(LOG_DEBUG,
+ 						"Got unrecognized frame on channel %s, f->frametype=%d,f->subclass=%d\n",

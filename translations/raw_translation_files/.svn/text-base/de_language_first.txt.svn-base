@@ -1,0 +1,422 @@
+﻿# de_language.txt - this file is for the internationalization of the astGUIclient 
+# client web pages. The associated install.pl file will take the language as an 
+# argument and alter the php scripts to the language typed in the command line:
+# example: ./install.pl --language=de
+# current languages in the file:
+# - English - (en) no alterations
+# - German - (de) second column
+***LANGUAGES***
+en-English|de-Deutsch|
+***FILES***
+agc|astguiclient.php|0
+agc|vicidial.php|0
+agc|vdc_db_query.php|0
+agc|manager_send.php|0
+agc|conf_exten_check.php|0
+agc|inbound_popup.php|0
+agc|active_list_refresh.php|0
+agc|park_calls_display.php|0
+agc|live_exten_check.php|0
+agc|call_log_display.php|0
+agc|voicemail_check.php|0
+agc|dbconnect.php|1
+agc|htglobalize.php|1
+***TRANSLATIONS***
+### special translations that should stay at the top of the file ###
+"JAN"|"JAN"|
+"FEB"|"FEB"|
+"MAR"|"MÄR"|
+"APR"|"APR"|
+"MAY"|"MÖG"|
+"JUN"|"JUN"|
+"JLY"|"JLY"|
+"AUG"|"AUG"|
+"SEP"|"SEP"|
+"OCT"|"OKT"|
+"NOV"|"NOV"|
+"DEC"|"DEZ"|
+\./images/|../agc/images/|
+BORDER|Border|
+VALUE=SUBMIT|VALUE=SUBMIT|
+TYPE=SUBMIT|TYPE=Submit|
+MAXLENGTH|maxlength|
+### BEGIN translation phrases through 1.1.11 release ###
+English|Englisch|
+Spanish|Spanisch|
+French|Französisch|
+German|Deutsch|
+Italian|Italienisch|
+agc_check_voicemail_BLINK.gif|agc_check_voicemail_BLINK.gif|
+agc_check_voicemail_OFF.gif|agc_check_voicemail_OFF.gif|
+agc_check_voicemail_ON.gif|agc_check_voicemail_ON.gif|
+agc_live_call_OFF.gif|agc_live_call_OFF.gif|
+agc_live_call_ON.gif|agc_live_call_ON.gif|
+agc_tab_active_lines.gif|agc_tab_active_lines.gif|
+agc_tab_conferences.gif|agc_tab_conferences.gif|
+agc_tab_main.gif|agc_tab_main.gif|
+vdc_LB_dialnextnumber.gif|vdc_LB_dialnextnumber.gif|
+vdc_LB_dialnextnumber_OFF.gif|vdc_LB_dialnextnumber_OFF.gif|
+vdc_LB_grabparkedcall.gif|vdc_LB_grabparkedcall.gif|
+vdc_LB_hangupcustomer.gif|vdc_LB_hangupcustomer.gif|
+vdc_LB_hangupcustomer_OFF.gif|vdc_LB_hangupcustomer_OFF.gif|
+vdc_LB_parkcall.gif|vdc_LB_parkcall.gif|
+vdc_LB_parkcall_OFF.gif|vdc_LB_parkcall_OFF.gif|
+vdc_LB_pause.gif|vdc_LB_pause.gif|
+vdc_LB_pause_OFF.gif|vdc_LB_pause_OFF.gif|
+vdc_LB_resume.gif|vdc_LB_resume.gif|
+vdc_LB_resume_OFF.gif|vdc_LB_resume_OFF.gif|
+vdc_LB_startrecording.gif|vdc_LB_startrecording.gif|
+vdc_LB_stoprecording.gif|vdc_LB_stoprecording.gif|
+vdc_LB_transferconf.gif|vdc_LB_transferconf.gif|
+vdc_LB_transferconf_OFF.gif|vdc_LB_transferconf_OFF.gif|
+vdc_LB_webform.gif|vdc_LB_webform.gif|
+vdc_LB_webform_OFF.gif|vdc_LB_webform_OFF.gif|
+vdc_XB_blindtransfer.gif|vdc_XB_blindtransfer.gif|
+vdc_XB_blindtransfer_OFF.gif|vdc_XB_blindtransfer_OFF.gif|
+vdc_XB_dialwithcustomer.gif|vdc_XB_dialwithcustomer.gif|
+vdc_XB_dialwithcustomer_OFF.gif|vdc_XB_dialwithcustomer_OFF.gif|
+vdc_XB_hangupbothlines.gif|vdc_XB_hangupbothlines.gif|
+vdc_XB_hangupbothlines_OFF.gif|vdc_XB_hangupbothlines_OFF.gif|
+vdc_XB_hangupxferline.gif|vdc_XB_hangupxferline.gif|
+vdc_XB_hangupxferline_OFF.gif|vdc_XB_hangupxferline_OFF.gif|
+vdc_XB_internalcloser.gif|vdc_XB_internalcloser.gif|
+vdc_XB_internalcloser_OFF.gif|vdc_XB_internalcloser_OFF.gif|
+vdc_XB_leave3waycall.gif|vdc_XB_leave3waycall.gif|
+vdc_XB_leave3waycall_OFF.gif|vdc_XB_leave3waycall_OFF.gif|
+vdc_XB_localcloser.gif|vdc_XB_localcloser.gif|
+vdc_XB_localcloser_OFF.gif|vdc_XB_localcloser_OFF.gif|
+vdc_XB_parkcustomerdial.gif|vdc_XB_parkcustomerdial.gif|
+vdc_XB_parkcustomerdial_OFF.gif|vdc_XB_parkcustomerdial_OFF.gif|
+vdc_XB_hotkeysactive.gif|vdc_XB_hotkeysactive.gif|
+vdc_XB_hotkeysactive_OFF.gif|vdc_XB_hotkeysactive_OFF.gif|
+vdc_LB_senddtmf.gif|vdc_LB_senddtmf.gif|
+vdc_LB_senddtmf_OFF.gif|vdc_LB_senddtmf_OFF.gif|
+vdc_XB_header.gif|vdc_XB_header.gif|
+vdc_XB_number.gif|vdc_XB_number.gif|
+vdc_XB_channel.gif|vdc_XB_channel.gif|
+vdc_XB_seconds.gif|vdc_XB_seconds.gif|
+vdc_tab_script.gif|vdc_tab_script.gif|
+You have now logged out. Thank you|Sie haben jetzt heraus geloggt. Danke|
+astGUIclient web-client VERSION|astGUIclient Netz-Klient VERSION|
+astGUIclient web client|astGUIclient web client|
+VICIDIAL web client|VICIDIAL web client|
+VICIDIAL web-client version|VICIDIAL Netz-Klient Version|
+You can only monitor Zap channels|Sie können überwachen nur Zap Führungen|
+Stop Record|Stoppen Sie Aufzeichnung|
+you are logged into this phone|Ihr Telefon|
+Back to Main Window|Zurück zu Hauptfenster|
+LIVE CALLS ON THIS PHONE|PHASEN ERSUCHT UM DIESES TELEFON|
+LIVE CALLS IN THIS CONFERENCE|LEBEN ANRUFE IN DIESER KONFERENZ|
+LIVE CALL TRANSFER|PHASENANRUF-ÜBERTRAGUNG|
+CLIENT CHANNEL|KLIENT FÜHRUNG|
+REMOTE CHANNEL|REMOTEFÜHRUNG|
+CLICK HERE TO LOG IN AGAIN|KLICKEN SIE HIER, UM INNEN WIEDER ZU LOGGEN|
+ACTIVE DISPLAY PAUSED|AKTIVE ANZEIGE PAUSIERTE|
+Main Panel|Hauptverkleidung|
+Active Lines Panel|Aktive Linien Verkleidung|
+Conferences Panel|Konferenz-Verkleidung|
+Check Voicemail|Überprüfen Sie Voicemail|
+Live Call|Leben Anruf|
+Hangup Trunk|Hängezustand-Stamm|
+Hijack Trunk|Straßenräuber-Stamm|
+Listen Trunk|Hören Stamm|
+Active Local Menu|Aktives Lokales Menü|
+Hangup Local|Hängezustand-Einheimischer|
+Hijack Local|Straßenräuber-Einheimischer|
+Listen Local|Hören Einheimischer|
+Channel to be transferred|Gebracht zu werden Führung|
+Extensions Menu|Verlängerungen Menü|
+Send to selected extension|Senden Sie zu vorgewählter Verlängerung|
+Send to selected vmail box|Senden Sie zu vorgewähltem vmail Kasten|
+Send to this number|Senden Sie zu dieser Zahl|
+click on a number below to send to a conference|klicken Sie an eine Zahl unten, um zu einer Konferenz zu senden|
+Send my channel too|Senden Sie meine Führung auch|
+Conferences Menu|Konferenz-Menü|
+LOCAL Extensions Dial|LOKALER Verlängerungen Vorwahlknopf|
+Phone calling from|Telefon, das von benennt|
+Call selected extension|Anruf vorgewählte Verlängerung|
+Call selected vmail box|Anruf vorgewählter vmail Kasten|
+LOCAL DIAL EXTENSIONS|LOKALE VORWAHLKNOPF-VERLÄNGERUNGEN|
+OUTBOUND CALLS|OUTBOUND ANRUFE|
+INBOUND CALLS|INBOUND ANRUFE|
+Refresh rate|Erneuern Sie Rate|
+MANUAL DIAL|MANUELLER VORWAHLKNOPF|
+CALL DATE\/TIME|ANRUFDATE/TIME|
+LOCAL HANGUP|LOKALER HÄNGEZUSTAND|
+PARKED CALLS|GEPARKTE ANRUFE|
+PARKED BY|VORBEI GEPARKT|
+PARKED TIME|GEPARKTE ZEIT|
+Registered to|Registriert zu|
+Enter Conference|Tragen Sie Konferenz Ein|
+Dial From Conf|Vorwahlknopf Von Conf|
+Active Extensions|Aktive Verlängerungen|
+Outside Lines|Äußere Linien|
+Local Extensions|Lokale Verlängerungen|
+Data Goes Here|Daten Gehen Hier|
+Trunk Action|Stamm-Tätigkeit|
+Local Action|Lokale Tätigkeit|
+Conferences List|Konferenz-Liste|
+Click on a conference room number on the left for info on that conference|Klicken Sie an Konferenzzimmernummer auf dem links für Info auf|
+List Display|Liste Anzeige|
+Live Extensions|Phasenverlängerungen|
+Busy Extensions|Beschäftigte Verlängerungen|
+Outside Lines|Äußere Linien|
+script runtime|Indexlaufzeit|
+Call Log Display|Anruf-Maschinenbordbuch-Anzeige|
+is not valid|ist unzulässig|
+or protocol|oder Protokoll|
+Conf Extension Check|Conf Verlängerung Überprüfung|
+has been registered to|ist zu registriert worden|
+LIVE INBOUND CALL|INBOUND LEBHAFTANRUF|
+Number Dialed|Nummer Gewählt|
+SEND TO MY VOICEMAIL|SENDEN SIE ZU MEINEM VOICEMAIL|
+Live Extension Check|Phasenverlängerung Überprüfung|
+Manager Send|Manager Senden|
+command not inserted|Befehl nicht eingesetzt|
+command sent for|Befehl gesendet für|
+One of these variables|Eine dieser Variablen|
+must be greater than 2 characters|muß als 2 Buchstaben grösser sein|
+must be greater than 14 characters|muß als 14 Buchstaben grösser sein|
+must be set|muß eingestellt werden|
+not sent|nicht gesendet|
+Cannot find empty conference|Kann nicht leere Konferenz finden|
+is not live|ist nicht Phasen|
+RECORDING WILL LAST UP TO 60 MINUTES|AUFNAHME DAUERT BIS 60 MINUTEN|
+Parked Calls Display|Geparkte Anruf-Anzeige|
+Database Query Script|Datenbank-Frage Index|
+Group Choice|Gruppe Wahl|
+has been registered to user|ist zum Benutzer registriert worden|
+HOPPER EMPTY|ZUFUHRBEHÄLTER LEER|
+LOG NOT ENTERED|MASCHINENBORDBUCH NICHT BETRETEN|
+has been changed to|ist zu geändert worden|
+information has been updated|Informationen sind aktualisiert worden|
+is now in status|ist jetzt im Status|
+Voicemail Check|Voicemail Überprüfung|
+voicemail box|voicemail Kasten|
+Re-Login|Re-LOGON|
+User Password|Benutzer-Kennwort|
+User Login|Benutzer-LOGON|
+Phone Login|Telefon-LOGON|
+Phone Password|Telefon-Kennwort|
+Campaign not active, please try again|Die aktive Kampagne nicht, versuchen bitte noch einmal|
+Login incorrect, please try again|Der falsche LOGON, versuchen bitte noch einmal|
+Campaign Login|Kampagne LOGON|
+Sorry, your phone login and password are not active in this system, please try again|Traurig, Ihr Telefon-LOGON und Kennwort seien Sie nicht in diesem|
+leads left to call in hopper|führt nach links, um im Zufuhrbehälter zu benennen|
+CAMPAIGN CUSTOM PARKING|KAMPAGNE KUNDENSPEZIFISCHES PARKEN|
+CAMPAIGN DEFAULT PARKING|KAMPAGNE RÜCKSTELLUNG PARKEN|
+CAMPAIGN CUSTOM WEB FORM|KAMPAGNE KUNDENSPEZIFISCHE NETZ-FORM|
+CAMPAIGN DEFAULT WEB FORM|KAMPAGNE RÜCKSTELLUNG NETZ-FORM|
+CAMPAIGN ALLOWS CLOSERS|KAMPAGNE ERLAUBT CLOSERS|
+CAMPAIGN ALLOWS NO CLOSERS|KAMPAGNE ERLAUBT KEIN CLOSERS|
+USING PREVIOUS MEETME ROOM|VERWENDEN DES VORHERGEHENDEN MEETME RAUMES|
+USING NEW MEETME ROOM|VERWENDEN DES NEUEN MEETME RAUMES|
+old QUEUE and INCALL reverted list|alte WARTESCHLANGE und INCALL umgeschaltete Liste|
+old QUEUE and INCALL reverted hopper|alte WARTESCHLANGE und INCALL umgeschalteter Zufuhrbehälter|
+old vicidial_live_agents records cleared|alte vicidial_live_agents Aufzeichnungen löschten|
+campaign is set to auto_dial_level|Kampagne wird auf auto_dial_level eingestellt|
+new vicidial_live_agents record inserted|neue vicidial_live_agents Aufzeichnung eingesetzt|
+campaign is set to manual dial|Kampagne wird auf manuellen Vorwahlknopf eingestellt|
+Sorry, there are no leads in the hopper for this campaign|Traurig, gibt es keine Leitungen im Zufuhrbehälter für diese|
+Dial Next Number|Vorwahlknopf-Folgende Zahl|
+LIVE CALLS IN YOUR SESSION|LEBEN ANRUFE IN IHREM LERNABSCHNITT|
+Stop Recording|Stoppen Sie Zu notieren|
+Start Recording|Fangen Sie an Zu notieren|
+Transfer number must have more than 1 digit|Übergangszahl muß mehr als 1 Stelle haben|
+Grab Parked Call|Zupacken Geparkter Anruf|
+Park Call|Park-Anruf|
+Waiting for Ring|Wartering|
+Called 3rd party|Angerufene 3. Partei|
+LEAVE 3-WAY CALL|ANRUF DES URLAUB-3-WAY|
+Dial With Customer|Vorwahlknopf Mit Kunden|
+Park Customer Dial|Park-Kunde Vorwahlknopf|
+Hangup Xfer Line|Hängezustand Xfer Linie|
+Hangup Both Lines|Hängezustand Beide Linien|
+Hangup Customer|Hängezustand-Kunde|
+Transfer - Conference|Übertragung - Konferenz|
+LOCAL CLOSER|EINHEIMISCHER GENAUER|
+INTERNAL CLOSER|INTERNES GENAUERES|
+Dial Blind Transfer|Vorwahlknopf-Vorhang-Übertragung|
+Dial timed out, contact your system administrator|Zeit Vorwahlknopf, der heraus festgesetzt wird, treten mit Ihrem|
+No more leads in the hopper for campaign|Kein mehr führt im Zufuhrbehälter für Kampagne|
+Web Form|Netz-Form|
+You Must Select a Disposition|Sie müssen eine Einteilung vorwählen|
+GROUPS NOT SELECTED|GRUPPEN NICHT VORGEWÄHLT|
+SELECTED GROUPS|VORGEWÄHLTE GRUPPEN|
+You cannot log out during a Dial attempt|Sie können nicht heraus während eines Vorwahlknopfversuchs loggen|
+Wait 50 seconds for the dial to fail out if it is not answered|Warten Sie, daß 50 Sekunden auf den Vorwahlknopf heraus ausfallen,|
+STILL A LIVE CALL! Hang it up then you can log out|NOCH Ein PHASENANRUF! Hängen Sie ihn, oben dann, das Sie heraus|
+Hide conference call channel information|Fellkonferenzanruf-Führung Informationen|
+Show conference call channel information|Zeigen Sie Konferenzanruf-Führung Informationen|
+Logged in as User|Benutzer|
+Noone is in your session|Noone ist in Ihrem Lernabschnitt|
+Customer has hung up|Kunde hat oben gehangen|
+End-of-call Disposition Selection|Ende-von-benennen Sie Einteilung Vorwähler|
+CLOSER INBOUND GROUP SELECTION|GENAUERE INBOUND GRUPPENWAHL|
+Closer Inbound Group Selection|Genauere Inbound Gruppenwahl|
+BLENDED CALLING|GEMISCHTES BENENNEN|
+outbound activated|outbound aktiviert|
+Preview the Lead then|Sehen Sie die Leitung dann vorher|
+Lead was not reverted, there was an error|Leitung wurde nicht umgeschaltet, es gab eine Störung|
+call was not placed, there was an error|Anruf wurde nicht gesetzt, es gab eine Störung|
+Number to call|Zahl zum zu benennen|
+Customer Information|Kunde Informationen|
+Lead Dispositioned As|Leitung Dispositioned Wie|
+Any changes made to the customer information below at this time will not be comitted, You must change customer information before you Hangup the call|Alle mögliche Änderungen, die am Kunden vorgenommen wurden, den, Informationen unten diesmal nicht sind, comitted, Sie müssen Kunde Informationen vor Ihnen ändern Hängezustand der Anruf|
+When active, simply press the keyboard key for the desired disposition for this call. The call will then be hungup and dispositioned automatically|Wenn aktiv, betätigen Sie einfach die Taste für die gewünschte|
+Disposition Hot Keys|Einteilung Heiße Schlüssel|
+Cust Time|Cust Zeit|
+RECORD ID|SATZ IDENTIFIKATION|
+RECORDING FILE|REGISTERAKTE|
+HOT KEYS ACTIVE|HEISSE SCHLÜSSEL AKTIV|
+HOT KEYS INACTIVE|HEISSE SCHLÜSSEL UNAKTIVIERT|
+DIAL OVERRIDE|VORWAHLKNOPF-ÜBERSTEUERUNG|
+SKIP LEAD|ZEILENSPRUNG-LEITUNG|
+DIAL LEAD|VORWAHLKNOPF-LEITUNG|
+LEAD PREVIEW|LEITUNG VORBETRACHTUNG|
+PAUSE AGENT DIALING|STOPPEN SIE ZU BENENNEN|
+DISPOSITION CALL|EINTEILUNG ANRUF|
+ session ID| Lernabschnitt ID|
+ to campaign| zur Kampagne|
+Select a CallBack Date|Wählen Sie ein Wiederholungsbesuch Datum vor|
+maximize|maximieren Sie|
+minimize|setzen Sie herab|
+You must choose a date|Sie müssen ein Datum wählen|
+Select a Date Below|Wählen Sie ein Datum unten vor|
+Click on a callback below to call the customer back now. If you click on a record below to call it, it will be removed from the list|Klicken Sie an einen Wiederholungsbesuch unten, um die Kunde Rückseite jetzt zu benennen. Wenn Sie an eine Aufzeichnung unten klicken, um sie zu benennen, wird sie von der Liste entfernt|
+If you want to dial a number and have it NOT be added as a new lead, enter in the exact dialstring that you want to call in the Dial Override field below. To hangup this call you will have to open the CALLS IN THIS SESSION link at the bottom of the screen and hang it up by clicking on its channel link there|Wenn Sie eine Nummer wählen und sie NICHT als neue Leitung hinzufügen lassen möchten, kommen Sie im genauen Dialstring diesem Sie möchten in der Vorwahlknopf-Übersteuerung benennen auffangen unten herein. Zum Hängezustand dieser Anruf müssen Sie die ANRUFE IN DIESER LERNABSCHNITT-Verbindung am unteren Bildschirmrand öffnen und ihn oben hängen, indem Sie dort auf seiner Führung Verbindung klicken|
+YOU CANNOT SKIP A CALLBACK OR MANUAL DIAL, YOU MUST DIAL THE LEAD|SIE KÖNNEN Nicht Einen WIEDERHOLUNGSBESUCH ÜBERSPRINGEN, ODER MANUELLER VORWAHLKNOPF, MÜSSEN SIE DIE LEITUNG WÄHLEN|
+YOU MUST BE PAUSED TO MANUAL DIAL A NEW LEAD IN AUTO-DIAL MODE|SIE MÜSSEN Zum MANUELLEN VORWAHLKNOPF PAUSIERT WERDEN Eine NEUE LEITUNG Im AUTO-DIAL MODUS|
+Enter information below for the new lead you wish to call|Tragen Sie Informationen unten für die neue Leitung ein, die Sie benennen möchten|
+YOU MUST BE PAUSED TO CHECK CALLBACKS IN AUTO-DIAL MODE|SIE MÜSSEN PAUSIERT WERDEN, UM WIEDERHOLUNGSBESUCHE IM AUTO-DIAL MODUS ZU ÜBERPRÜFEN|
+Note: all new manual dial leads will go into list 999|Anmerkung: alle neuen manuellen Vorwahlknopfleitungen steigen in Liste 999 ein|
+YOU DO NOT HAVE PERMISSIONS TO TRANSFER CALLS|SIE HABEN NICHT ERLAUBNIS, ANRUFE ZU BRINGEN|
+will be added to the beginning of this number|wird dem Anfang dieser Zahl hinzugefügt|
+This is usually a 1 in the USA-Canada|Dieses ist normalerweise 1 in den USA und im Kanada|
+NEW MANUAL DIAL LEAD FOR|NEUE MANUELLE VORWAHLKNOPF-LEITUNG FÜR|
+Finish and Disposition Call|Ende und Einteilung Anruf|
+10 digits max - digits only|10 Stellen Maximum - nur Stellen|
+Note: a dial prefix of|Anmerkung: ein Vorwahlknopfpräfix von|
+Hangup Again|Hängezustand Wieder|
+Go Back|Gehen Sie Zurück|
+Call Agent Again|Anruf-Mittel Wieder|
+MY CALLBACK ONLY|NUR MEIN WIEDERHOLUNGSBESUCH|
+NO ACTIVE CALLBACKS|NINE AKTIVE WIEDERHOLUNGSBESUCHE|
+ACTIVE CALLBACKS|AKTIVE WIEDERHOLUNGSBESUCHE|
+CALLBACKS FOR AGENT|WIEDERHOLUNGSBESUCHE FÜR MITTEL|
+Dial Code:|Vorwahlknopf-Code:|
+Dial Override|Vorwahlknopf-Übersteuerung|
+digits only please|Stellen gefallen nur|
+Dial Now|Vorwahlknopf Jetzt|
+CB Comments|COLUMBIUM Anmerkungen|
+Title|Titel|
+Your Status|Ihr Status|
+STATUS|STATUS|
+RESET|ZURÜCKSTELLEN|
+CLEAR FORM|ZURÜCKSTELLEN|
+SUBMIT|SUBMITSie|
+Incoming|Ankommend|
+Calling|Benennen|
+Called|Benannt|
+Campaign|Kampagne|
+Status|Status|
+Inserted|Eingesetzt|
+seconds|Sekunden|
+HELP|HILFE|
+Login|LOGON|
+User|Benutzer|
+Password|Kennwort|
+VERSION|VERSION|
+BUILD|BAU|
+Server|Bediener|
+RECORD|SATZ|
+HANGUP|HÄNGEZUSTAND|
+>XFER|>XFER|
+PARK|PARK|
+IN-NUMBER|IN-NUMBER|
+NUMBER|ZAHL|
+LENGTH|LÄNGE|
+CALLERID|CALLERID|
+CallerID|CallerID|
+ CALL| ANRUF|
+PICKUP|AUFNAHME|
+CONFERENCE|KONFERENZ|
+Refresh|ErneuernSie|
+Send DTMF|Senden Sie DTMF|
+ORDER|AUFTRAG|
+ on | auf |
+LOGOUT|LOGOUT|
+Channel|Führung|
+Extensions|Verlängerungen|
+Conferences|Konferenzen|
+Conference|Konferenz|
+Recording|Aufnahme|
+Record|Aufzeichnung|
+Welcome|Willkommen|
+VOICEMAIL|VOICEMAIL|
+ NEW| NEU|
+ OLD| ALT|
+PAUSE|PAUSE|
+START|ANFANG|
+Pause|Pause|
+Resume|Zusammenfassung|
+Faster|Schneller|
+Slower|Langsamer|
+Initializing|Initialisierung|
+Invalid|Unzulässig|
+Username|Username|
+CUSTOM|GEWOHNHEIT|
+Notes|Anmerkungen|
+First|Zuerst|
+MI: |MI:|
+Last|Letztes|
+Address|Adresse|
+City|Stadt|
+State|Zustand|
+PostCode|PostCode|
+Province|Provinz|
+Vendor ID|Verkäufer Identifikation|
+DialCode|DialCode|
+Alt. Phone|Wech Telefon|
+Show|Erscheinen|
+Email|Email|
+Comments|Anmerkungen|
+REFRESH|ERNEUERNSie|
+ALT PHONE DIAL|WECH TELEFON|
+MAIN PHONE|MAIN TELEFON|
+ALT PHONE|TÉLÉPHONE D'ALT|
+ADDRESS3|ADRESSE3|
+FINISH LEAD|ENDE|
+Dial Alt Phone Number|Vorwahlknopf-Wech Zahl|
+Phone|Telefon|
+DIAL|VORWAHLKNOPF|
+SUBMIT FAVORITES CHANGES - requires logout|SUBMIT Sie LIEBLINGE ÄNDERUNGEN - erfordert Logout|
+BACK TO MAIN WINDOW - ignore changes made|ZURÜCK ZU MAIN FENSTER - ignorieren Sie die vorgenommenen Änderungen|
+AVAILABLE EXTENSIONS|VORHANDENE VERLÄNGERUNGEN|
+ edit| redigieren sie|
+ FAVORITES| LIEBLINGE|
+### END translation phrases through 1.1.11 release ###
+Search Existing Leads|Suche existierende Anschlüsse|
+This option if checked will attempt to find the phone number in the system before inserting it as a new lead|Wenn diese Option gesetzt ist wird versucht, die Telefonnummer im System zu finden, bevor sie als neuer Anschluss eingefügt wird|
+Finish Wrapup and Move On|Beende Nachbereitung und mache weiter|
+seconds remaining in wrapup|Verbleibende Sekunden der Nachbereitung|
+Call Wrapup:|Anruf Nachbereitung|
+### months of the year for CallBack date select screen ###
+January|Januar|
+Frebruary|Februar|
+March|März|
+April|April|
+May|Mag|
+June|Juni|
+July|Juli|
+August|August|
+September|September|
+October|Oktober|
+November|November|
+December|Dezember|
+### BEGIN translation phrases for 2.0.1 release ###
+Previous Callback Information|Vorhergehende Wiederholungsbesuch Informationen|
+Last Call: |Letzter Anruf:|
+CallBack: |Wiederholungsbesuch:|
+Agent: |Mittel:|
+Comments: |Anmerkungen:|

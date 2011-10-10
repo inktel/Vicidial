@@ -1,0 +1,58 @@
+LIME SURVEY and ViciDial
+
+We've been asked about Lime Survey(http://www.limesurvey.org) integration with ViciDial several times so here is a little summary of how you install it as well as how you can get it to work with Vicidial.
+
+We recommend creating a LimeSurvey Survey for each campaign and adding a "question" that will store the lead ID or phone number. For example, we will use the code LEADID to the survey and then we will send those variables using the web form in the agent interface using the following for the web form address:
+VARhttp://SERVER/limesurvey/index.php?sid=37487&lang=en&37487X1X5=--A--phone_number--B--
+   (example: http://SERVER/limesurvey/index.php?sid=37487&lang=en&37487X1X5=3125551212)
+	37487 is the survey ID
+	1 is the question group ID
+	5 is the question ID (phone number)
+	3125551212 is a phone number
+
+More information here:
+http://docs.limesurvey.org/tiki-index.php?page=Workarounds#Prefilling_survey_answers_using_the_survey_URL
+
+
+
+
+INSTALLATION INSTRUCTIONS:
+
+cd /usr/local/apache2/htdocs/
+wget http://softlayer.dl.sourceforge.net/project/limesurvey/1._LimeSurvey_stable/1.85%2B/limesurvey185plus-build7593-20090907.tar.gz
+gunzip limesurvey185plus-build7593-20090907.tar.gz
+tar xvf limesurvey185plus-build7593-20090907.tar
+rm -f limesurvey185plus-build7593-20090907.tar
+
+vi config.php
+* change variable to fit
+	database = limedb
+	user = limedbuser
+	password = limedbpw
+
+mysql
+create database limedb;
+create user limedbuser;
+create user limedbuser@localhost;
+set password for limedbuser = PASSWORD('limedbpw');
+set password for limedbuser@localhost = PASSWORD('limedbpw');
+grant all on limedb.* to 'limedbuser';
+grant all on limedb.* to 'limedbuser'@'localhost';
+
+*IN A WEB BROWSER, GO TO THIS ADDRESS TO POPULATE THE ADDRESS:
+http://SERVER/limesurvey/admin/install/
+
+* delete the admin install directory
+rm -fr admin/install/
+
+Go to adm web page:
+http://SERVER/limesurvey/admin/admin.php
+
+Add a user: (vicidial/1234/ViciDial User)
+Add a group: (ViciDial agent group)
+Add a survey: ViciDial test Survey
+Add question group: ViciDial general questions
+Add a question: 
+
+For more information read the online manual:
+http://docs.limesurvey.org/tiki-index.php?page=English+Instructions+for+LimeSurvey

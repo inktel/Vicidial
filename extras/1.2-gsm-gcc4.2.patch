@@ -1,0 +1,18 @@
+diff -Naur asterisk-1.2.26.orig/codecs/gsm/Makefile asterisk-1.2.26/codecs/gsm/Makefile
+--- asterisk-1.2.26.orig/codecs/gsm/Makefile	2006-07-24 13:05:56.000000000 -0400
++++ asterisk-1.2.26/codecs/gsm/Makefile	2008-01-15 13:21:38.000000000 -0500
+@@ -37,6 +37,14 @@
+ ######### ppro's, etc, as well as the AMD K6 and K7.  The compile will
+ ######### probably require gcc. 
+ 
++# Due to the gsm codec beeing broken when compiled with gcc version 4.2 
++# and optimization higher than -O2 we are checking for that version and
++# set the optimization to -O2 in this case.
++
++ifeq ($(shell gcc -v 2>&1 | grep "gcc version" | cut -c 13-16 ),4.2.)
++OPTIMIZE=-O2
++endif
++
+ ifneq (${OSARCH},Darwin)
+  ifneq (${OSARCH},SunOS)
+   ifneq (${PROC},x86_64)

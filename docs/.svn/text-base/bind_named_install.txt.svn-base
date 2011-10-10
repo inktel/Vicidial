@@ -1,0 +1,108 @@
+wget http://ftp.isc.org/isc/bind9/9.3.2/bind-9.3.2.tar.gz
+gunzip bind-9.3.2.tar.gz
+tar xvf bind-9.3.2.tar
+cd bind-9.3.2
+./configure
+make
+make install
+locate -u
+vi /etc/named.conf
+vi /var/named/vicimarketing.zone
+/usr/sbin/named-checkconf
+/usr/sbin/named-checkzone
+/usr/sbin/named-checkzone vicimarketing.com /var/named/vicimarketing.zone
+vi /etc/named.conf
+vi /etc/resolv.conf
+/usr/sbin/named -d 9
+
+To kill named:
+killall -15 named
+
+To run testing in foreground:
+/usr/sbin/named -f -d 9
+
+
+
+root@ftp:/# cat /var/named/vicimarketing.zone
+;
+; Zone file for vicimarketing.com
+;
+; The full zone file
+;
+$TTL 1H
+@       IN      SOA     ftp.vicimarketing.com. sip.vicimarketing.com. (
+                        200607101       ; serial#
+                        3600            ; refresh, seconds
+                        3600            ; retry, seconds
+                        3600            ; expire, seconds
+                        3600 )          ; minimum, seconds
+;
+                NS      ftp             ; Inet Address of nameserver
+vicimarketing.com.    MX      10 email  ; Primary Mail Exchanger
+vicimarketing.com.    MX      70 email2 ; Primary Mail Exchanger
+;
+localhost       A       127.0.0.1
+@       A       64.31.159.154
+www     A       64.31.159.154
+www2    A       205.201.151.24
+email   A       205.201.151.23
+email2  A       68.143.231.202
+ftp     A       205.201.151.22
+rsc1    A       205.201.151.21
+annex   A       205.201.151.26
+telcove A       64.31.159.154
+tc2     A       64.31.159.155
+codygate        A       67.79.161.170
+viciDB3 A       205.201.151.26
+exchange        A       10.10.10.5
+ICIast20        CNAME   www2
+VICIast1        CNAME   www2
+app2    CNAME   www2
+cody    CNAME   codygate
+sip     CNAME   ftp
+gate3   CNAME   www2
+gate2   CNAME   www
+
+
+
+
+
+root@ftp:/# cat /etc/named.conf
+options {
+        directory "/var/named";
+        forwarders { 209.84.253.11; 209.84.253.12; };
+        /*
+         * If there is a firewall between you and nameservers you want
+         * to talk to, you might need to uncomment the query-source
+         * directive below.  Previous versions of BIND always asked
+         * questions using port 53, but BIND 8.1 uses an unprivileged
+         * port by default.
+         */
+        // query-source address * port 53;
+};
+
+//
+// a caching only nameserver config
+//
+zone "." IN {
+        type hint;
+        file "caching-example/named.ca";
+};
+
+zone "localhost" IN {
+        type master;
+        file "caching-example/localhost.zone";
+        allow-update { none; };
+};
+
+zone "0.0.127.in-addr.arpa" IN {
+        type master;
+        file "caching-example/named.local";
+        allow-update { none; };
+};
+zone "vicimarketing.com" {
+        type master;
+        notify no;
+        allow-query { any; };
+        file "vicimarketing.zone";
+};

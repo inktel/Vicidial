@@ -1,0 +1,256 @@
+QC(Quality Control) process flow					  2008-01-03
+
+** THIS QC FUNCTIONALITY PROSESS IS PLANNED FOR THE 2.0.5 RELEASE AND IS CURRENTLY IN DEVELOPMENT **
+
+This will outline the process I have thought through for adding a Quality Assurance(QA) or Quality Control(QC) process to the VICIDIAL system. As the needs have changed for sponsor client and VICIDIAL has evolved since this functionality was first put into the planning stages, there have been several changes to how the QC process is going to be built. The objective is to add the following QC features to make VICIDIAL a more well-rounded product:
+- ability to define which statuses are to be able to be QCd per campaign and inbound group(queue)
+- ability to give agents permission to QC records for their allowable campaigns/inbound groups
+- ability to log all access and changes to QCd records
+- creation of some basic reports on QC activity
+
+
+
+The back-end process will work like this:
+- ADMIN_keepalive_ALL.pl script will look for the 'Q' in the keepalive definition in /etc/astguiclient.conf file. If it is set, it will trigger a script (QC_gather_records.pl) to gather the QC records every five minutes(with a 15 second delay) since the last QC gathering as defined in the system_settings table qc_last_pull_time field(which is populated with four-hours-before the START time of the last QC-pull run to make sure to catch all potential long calls that may have ended). The time interval for this might be made configurable.
+- There will also be an optional method of pulling QC records available to the QC managers that enables them to specify a date range to pull and insert records
+- Selected records from the vicidial_list table (keyed on the the vicidial_log and vicidial_closer_log tables) will be taken and inserted into the vicidial_qc_list table.
+- QC agents are then able to run their process starting with the earliest records for their selected campaign/inbound groups
+- After QC agents have PASSed, FINISHed and COMMITted the QC records, then they can be exported
+
+
+
+Agent-side scripts:
+ - qc.php - the screen that agents log in to 
+ - qc_query.php - the data processing script that handles most of the AJAX queries and IFRAME displays from qc.php
+
+
+The QC agent will login to the new qc.php screen within the agc web directory. They will then have a screen very similar to the vicidial.php login screen(but in a different color) that will have a user/pass to fill in. Then when they login the QC agents with level of 1-3 will see a green screen similar to the vicidial.php inbound(CLOSER-type) screen that will show them their allowable qc inbound-groups and campaigns. The agent will then choose which in-groups and campaigns that they want to QC the records for and then they will submit and they will be logged-in to the QC system. QC agents with a qc_level of 4-5 can select to review first level reccords, review all 2nd level records, review only 2nd level changed-status or review 2nd level same-status records. QC agents with 6-7 qc_level can also have the option of entering a management screen showing more information on the QC system including committing QC records and links to QC reports.
+
+Upon login, they will be able to see the count of QC-able records and they can click on a link to bring up the next record to be QCd. 
+
+Upon clicking on a link, the qc.php application will insert a record into the vicidial_qc_log to keep track of changes and other information on the qc record session. The customer and original call data will remain unaltered in the vicidial_qc_list table.
+
+The SCRIPTS tab and web form will both function exactly as they do in the vicidial.php application, with the exception that there will be added qc_web_form_address and qc_script options for both campaigns and inbound groups. There will also be an option to have any of these launched upon a new record appearing on the QC agent's screen.
+
+The qc.php user interface will be using AJAX as a method to bring up records and keep track of QC-agent activity and performance.
+
+An optional element is for a small audio frame be opened with each new customer record that will have an audio recording of the call that the QC agent can listen to. At this point in time, the best candidate for this is the Flourish Flash-based application(http://flourishplayer.sourceforge.net/) It is open source under a BSD-like license and is based on Adobe Flash, which currently seems to be much more lightweight and provides a much lower barrier to entry on most platforms than JAVA does.
+
+
+
+Each qc_user_level will have different permissions for the qc system:
+1- modify nothing
+2- modify nothing but status
+3- modify everything
+4- can check records of other QC agents
+5- can view stats on qc system and unlock locked records from first level QC agents
+6- can view finished and non-committed records and alter them and unlock locked records from first and second level QC agents
+7- Manager level (can do anything including delete QC records)
+
+The the QC agent roles:
+FIRST - first level review
+SECOND_ALL - second level review all records
+SECOND_CHANGED - second level review only changed-status records
+SECOND_PASSED - second level review only unchanged-status records
+THIRD - third level review and commit/clear
+MANAGER - manager level actions
+
+The qc_stage is a record status within QC that tells what is going on with the record:
+NEW - record has never been QCd
+LOCK_1 - a QC agent is reviewing the record
+PASS - QC agent has passed the record
+LOCK_2 - a QC agent is reviewing the record for possible finishing
+FINISH - record is ready to be processed
+COMMIT - QC record is committed to the system and cannot be modified by anyone
+DEAD - QC record is old and present for logs only, newer record has taken it's place
+
+
+The Database Changes:
+!!! IMPORTANT !!! 
+THESE ARE FOR REFERENCE ONLY, DO NOT RUN THEM!!!
+
+# This table contains the live session information for qc_agents
+ CREATE TABLE qc_agent_sessions (
+qc_session_id INT(9) UNSIGNED PRIMARY KEY NOT NULL,
+user VARCHAR(20),
+qc_user_level INT(2) default '0',
+qc_role VARCHAR(20),
+status ENUM('READY','INQC','PAUSED') default 'PAUSED',
+qc_id INT(9) UNSIGNED NOT NULL,
+lead_id INT(9) UNSIGNED NOT NULL,
+selected_campaigns_groups TEXT,
+qc_records_today SMALLINT(5) UNSIGNED default '0',
+login_time DATETIME,
+last_action_time DATETIME,
+index (user),
+index (last_action_time)
+);
+
+# This table contains the stats information for qc_agents for today
+ CREATE TABLE qc_agent_stats (
+user VARCHAR(20),
+campaign_group_id VARCHAR(20),
+qc_records_today SMALLINT(5) UNSIGNED default '0',
+last_record_time DATETIME,
+last_record_finish DATETIME,
+index (user),
+index (campaign_group_id)
+);
+
+# This table contains the log information for qc_agent logins
+CREATE TABLE vicidial_user_qc_log (
+user VARCHAR(20),
+event_date DATETIME,
+selected_campaigns_groups TEXT,
+index (user),
+index (event_date)
+);
+
+# For ability to restrict statuses by user_level per campaign/in-group
+ CREATE TABLE qc_allowed_statuses (
+status VARCHAR(6) PRIMARY KEY NOT NULL,
+qc_user_level INT(2) default '0',
+campaign_group_id VARCHAR(20)
+);
+
+# This table contains the original lead and log information before changes
+ CREATE TABLE vicidial_qc_list (
+qc_id INT(9) UNSIGNED AUTO_INCREMENT PRIMARY KEY NOT NULL,
+qc_import_date DATETIME,
+qc_stage VARCHAR(6) default 'NEW',
+call_date DATETIME,
+vicidial_id VARCHAR(20) UNIQUE NOT NULL,
+campaign_group_id VARCHAR(20),
+lead_id INT(9) UNSIGNED NOT NULL,
+list_id BIGINT(14) UNSIGNED,
+length_in_sec SMALLINT(5) UNSIGNED default '0',
+status VARCHAR(6),
+call_type VARCHAR(20),
+term_reason ENUM('CALLER','AGENT','QUEUETIMEOUT','ABANDON','AFTERHOURS','NONE') default 'NONE',
+modify_date TIMESTAMP,
+qc_user VARCHAR(20),
+user VARCHAR(20),
+user_group VARCHAR(20),
+fronter VARCHAR(20),
+vendor_lead_code VARCHAR(20),
+source_id VARCHAR(50),
+phone_code VARCHAR(10),	
+phone_number VARCHAR(12),
+title VARCHAR(4),
+first_name VARCHAR(30),
+middle_initial VARCHAR(1),
+last_name VARCHAR(30),
+address1 VARCHAR(100),
+address2 VARCHAR(100),
+address3 VARCHAR(100),
+city VARCHAR(50),
+state VARCHAR(2),
+province VARCHAR(50),
+postal_code VARCHAR(10),
+country_code VARCHAR(3),
+gender ENUM('M','F','U') default 'U',
+date_of_birth DATE,
+alt_phone VARCHAR(12),
+email VARCHAR(70),
+security_phrase VARCHAR(100),
+comments VARCHAR(255),
+index (vicidial_id),
+index (lead_id),
+index (phone_number)
+);
+
+# This table contains the updated QC records
+ CREATE TABLE vicidial_qc_log (
+qc_log_id INT(9) UNSIGNED AUTO_INCREMENT PRIMARY KEY NOT NULL,
+qc_id INT(9) UNSIGNED NOT NULL,
+qc_stage VARCHAR(6),
+modify_date TIMESTAMP,
+qc_user VARCHAR(20),
+qc_status VARCHAR(6),
+qc_code VARCHAR(8),
+qc_date DATETIME,
+qc_length_in_sec SMALLINT(5) UNSIGNED default '0',
+qc_comments TEXT,
+qc_altered ENUM('0','1') default '0',
+status VARCHAR(6),
+vendor_lead_code VARCHAR(20),
+phone_code VARCHAR(10),	
+phone_number VARCHAR(12),
+title VARCHAR(4),
+first_name VARCHAR(30),
+middle_initial VARCHAR(1),
+last_name VARCHAR(30),
+address1 VARCHAR(100),
+address2 VARCHAR(100),
+address3 VARCHAR(100),
+city VARCHAR(50),
+state VARCHAR(2),
+province VARCHAR(50),
+postal_code VARCHAR(10),
+country_code VARCHAR(3),
+gender ENUM('M','F','U') default 'U',
+date_of_birth DATE,
+alt_phone VARCHAR(12),
+email VARCHAR(70),
+security_phrase VARCHAR(100),
+comments VARCHAR(255),
+index (qc_id),
+index (phone_number),
+index (qc_stage)
+);
+
+
+
+
+
+
+
+
+
+# Changes committed to upgrade sql file:
+
+# For the inbound groups table, some fields will need to be added to the vicidial_campaigns table:
+ALTER TABLE vicidial_inbound_groups ADD qc_enabled ENUM('Y','N') default 'N';
+ALTER TABLE vicidial_inbound_groups ADD qc_statuses TEXT;
+ALTER TABLE vicidial_inbound_groups ADD qc_shift_id VARCHAR(20) default '24HRMIDNIGHT';
+ALTER TABLE vicidial_inbound_groups ADD qc_get_record_launch ENUM('NONE','SCRIPT','WEBFORM','QCSCRIPT','QCWEBFORM') default 'NONE';
+ALTER TABLE vicidial_inbound_groups ADD qc_show_recording ENUM('Y','N') default 'Y';
+ALTER TABLE vicidial_inbound_groups ADD qc_web_form_address VARCHAR(255);
+ALTER TABLE vicidial_inbound_groups ADD qc_script VARCHAR(10);
+
+# Alter some earlier defined fields and populate with default values
+ALTER TABLE vicidial_campaigns CHANGE campaign_shift_start_time qc_shift_id VARCHAR(20) default '24HRMIDNIGHT';
+ALTER TABLE vicidial_campaigns CHANGE campaign_shift_length qc_get_record_launch ENUM('NONE','SCRIPT','WEBFORM','QCSCRIPT','QCWEBFORM') default 'NONE';
+ALTER TABLE vicidial_campaigns CHANGE campaign_day_start_time qc_show_recording ENUM('Y','N') default 'Y';
+UPDATE vicidial_campaigns SET qc_shift_id='24HRMIDNIGHT';
+UPDATE vicidial_campaigns SET qc_get_record_launch='NONE';
+UPDATE vicidial_campaigns SET qc_show_recording='Y';
+
+ALTER TABLE system_settings ADD qc_last_pull_time DATETIME;
+
+# qc codes to be used for statistics
+ CREATE TABLE vicidial_qc_codes (
+code VARCHAR(8) PRIMARY KEY NOT NULL,
+code_name VARCHAR(30)
+);
+
+# For the campaigns table, some fields will need to be added to the vicidial_campaigns table:
+ALTER TABLE vicidial_campaigns ADD qc_enabled ENUM('Y','N') default 'N';
+ALTER TABLE vicidial_campaigns ADD qc_statuses TEXT;
+ALTER TABLE vicidial_campaigns ADD qc_lists TEXT;
+ALTER TABLE vicidial_campaigns ADD campaign_shift_start_time VARCHAR(4) default '0900';
+ALTER TABLE vicidial_campaigns ADD campaign_shift_length VARCHAR(5) default '16:00';
+ALTER TABLE vicidial_campaigns ADD campaign_day_start_time VARCHAR(4) default '0100';
+ALTER TABLE vicidial_campaigns ADD qc_web_form_address VARCHAR(255);
+ALTER TABLE vicidial_campaigns ADD qc_script VARCHAR(10);
+
+# For the in-groups/campaigns QC permissions, some fields will need to be added to the vicidial_user_groups table:
+ALTER TABLE vicidial_user_groups ADD qc_allowed_campaigns TEXT;
+ALTER TABLE vicidial_user_groups ADD qc_allowed_inbound_groups TEXT;
+
+# For the user QC permissions, some fields will need to be added to the vicidial_users table:
+ALTER TABLE vicidial_users ADD qc_enabled ENUM('1','0') default '0';
+ALTER TABLE vicidial_users ADD qc_user_level INT(2) default '1';
+ALTER TABLE vicidial_users ADD qc_pass ENUM('1','0') default '0';
+ALTER TABLE vicidial_users ADD qc_finish ENUM('1','0') default '0';
+ALTER TABLE vicidial_users ADD qc_commit ENUM('1','0') default '0';

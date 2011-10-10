@@ -1,0 +1,46 @@
+# /etc/asterisk/zapata.conf:
+# Digium/Clone T100P EXAMPLE:
+# Here is an example of a configuration where an T100P single T1 card is used 
+# for connecting a single T1 PRI circuit with 23 voice channels
+
+[channels]
+language=it
+rxgain=1.0
+txgain=1.0
+usecallerid=yes
+callerid=asreceived
+busydetect=no
+context=default
+echotraining=no
+echocancel=yes
+echocancelwhenbridged=no
+usecallingpres=yes
+callprogress = no
+prilocaldialplan=unknown
+pridialplan=unknown
+overlapdial=yes
+switchtype=euroisdn
+immediate=no
+
+group=0
+signalling=pri_cpe
+
+#PRI 1
+channel => 1-15
+channel => 17-31
+
+#PRI 2
+channel => 32-46
+channel => 48-62
+
+#PRI 3
+channel => 63-77
+channel => 79-93
+
+group=1
+signalling=pri_net
+
+#PRI 4
+channel => 94-108
+channel => 110-124
+

@@ -1,0 +1,136 @@
+PERFORMANCE TESTING OF A VICIDIAL SERVER			2008-03-31
+
+
+OVERVIEW:
+
+This document goes over the setup of a VICIDIAL/Asterisk server that you are testing, and the control Asterisk server that will be taking the calls from the serer being tested.
+
+It is very difficult to realistically performance test a VICIDIAL server not in production because of the random-ness of call center operations.
+
+How this process works is that multiple remote agents are activated and calls are placed from the server being tested to a control server that will take those calls and send various signals and play various audio files so that the randomness of outbound dialing is simulated.
+
+The test server and the control server(s) need to be connected through either crossover T1 cables, SIP trunks or IAX trunks.
+
+It is important that there are no live VICIDIAL agents or calls happening on this server when performance testing is enabled.
+
+If you want pretty server performance graphics you need to make sure the server record has performance logging enabled.
+
+  NOTE: as of release 2.0.4.1 Performance testing extensions are loaded in the default extensions.conf and the "loop" IAX trunk is enabled for the server to send calls back to itself, making performance testing on a default install of VICIDIAL much easier.
+
+EXAMPLE TESTING SCENARIO:
+
+For this test below we will be placing calls out over crossover T1 cables to other Asterisk servers and we will be attempting to simulate agents logging in over SIP phones to meetme rooms on the test server. The agent connections will actually be a six(6) hour loop of on-hold-music to simulate voice(the conf.gsm file). This will be on one of the control servers so simulate true SIP phone agent connections to meetme rooms on the test server.
+
+When setting up the remote agents record we will use 999999999999(twelve nines) as the dialplan number. This is a special flag in the remote agents handling script that will give a different session_id to each remote agent and will place a call from each of those sessions(meetme rooms) to the 999999999999 extension that should be setup to call the on-hold-music on the control server over SIP trunk.
+
+We will also be using a special list of phone numbers to call so that we are sure that we do not place any real phone calls. The special list is available in the extras directory and is called: performance_test_leads.txt
+
+In the control server you will need the following in your extensions.conf:
+
+exten => _999XXXXXX1,1,Answer
+exten => _999XXXXXX1,2,Wait(2)
+exten => _999XXXXXX1,3,Playback(beep)
+exten => _999XXXXXX1,4,Hangup
+
+exten => _999XXXX112,1,Wait(8)
+exten => _999XXXX112,2,Answer
+exten => _999XXXX112,3,Playback(demo-instruct)
+exten => _999XXXX112,4,Playback(demo-instruct)
+exten => _999XXXX112,5,Hangup
+
+exten => _999XXXXXX2,1,Wait(8)
+exten => _999XXXXXX2,2,Answer
+exten => _999XXXXXX2,3,Playback(demo-instruct)
+exten => _999XXXXXX2,4,Hangup
+
+exten => _999XXXXXX3,1,SetVar(PRI_CAUSE=1)
+exten => _999XXXXXX3,2,Hangup
+
+exten => _999XXXXXX4,1,SetVar(PRI_CAUSE=27)
+exten => _999XXXXXX4,2,Hangup
+
+exten => _999XXXXXX5,1,Wait(60)
+exten => _999XXXXXX5,2,Hangup
+
+exten => _999XXXXXX6,1,Wait(10)
+exten => _999XXXXXX6,2,Answer
+exten => _999XXXXXX6,3,Playback(demo-instruct)
+exten => _999XXXXXX6,4,Hangup
+
+exten => _999XXXXXX7,1,Wait(12)
+exten => _999XXXXXX7,2,Answer
+exten => _999XXXXXX7,3,Playback(demo-enterkeywords)
+exten => _999XXXXXX7,4,Hangup
+
+exten => _999XXXXXX8,1,SetVar(PRI_CAUSE=17)
+exten => _999XXXXXX8,2,Hangup
+
+exten => _999XXXXXX9,1,Wait(6)
+exten => _999XXXXXX9,2,Answer
+exten => _999XXXXXX9,3,Playback(demo-abouttotry)
+exten => _999XXXXXX9,4,Hangup
+
+exten => _999XXXXXX0,1,Wait(5)
+exten => _999XXXXXX0,2,Answer
+exten => _999XXXXXX0,3,Playback(vm-goodbye)
+exten => _999XXXXXX0,4,Hangup
+
+exten => 99999999999,1,Answer
+exten => 99999999999,2,Playback(conf)
+exten => 99999999999,3,Playback(conf)
+exten => 99999999999,4,Playback(conf)
+exten => 99999999999,5,Playback(conf)
+exten => 99999999999,6,Playback(conf)
+exten => 99999999999,7,Playback(conf)
+exten => 99999999999,8,Playback(conf)
+exten => 99999999999,9,Playback(conf)
+exten => 99999999999,10,Playback(conf)
+exten => 99999999999,11,Playback(conf)
+exten => 99999999999,12,Playback(conf)
+exten => 99999999999,13,Playback(conf)
+exten => 99999999999,14,Hangup
+
+
+In the test server you will need the following in your extensions.conf:
+
+[globals]
+TESTTRUNK = Zap/g2
+TESTSIPTRUNK = SIP/VICItest:test@10.10.10.16:5060
+
+[default]
+exten => _91999NXXXXXX,1,AGI(agi://127.0.0.1:4577/call_log)
+exten => _91999NXXXXXX,2,Dial(${TESTTRUNK}/${EXTEN:2},,tTo)
+exten => _91999NXXXXXX,3,Hangup
+
+exten => 999999999999,1,Answer
+exten => 999999999999,2,Dial(${TESTSIPTRUNK}/${EXTEN:1},,tTo)
+exten => 999999999999,2,Hangup
+
+
+In the sip.conf file of the test server:
+register => ASTtest2:test@10.10.10.16:5060
+
+[VICItest]
+disallow=all
+allow=ulaw
+type=friend
+username=VICItest
+secret=test
+host=dynamic
+dtmfmode=inband
+defaultip=10.10.10.16
+qualify=1000
+
+
+In the sip.conf file of the control server:
+
+[VICItest]
+disallow=all
+allow=ulaw
+type=friend
+username=VICItest
+secret=test
+host=dynamic
+dtmfmode=inband
+defaultip=10.10.10.16
+qualify=1000

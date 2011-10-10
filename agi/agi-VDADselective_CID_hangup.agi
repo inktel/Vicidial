@@ -1,0 +1,227 @@
+#!/usr/bin/perl
+#
+# agi-VDADselective_CID_hangup.agi version 2.0.5   *NO DB Connection*
+# 
+# Will hangup a call if it is not within the specified area codes
+#
+# You need to put lines similar to those below in your extensions.conf file:
+#
+# ;outbound VICIDIAL calls:
+#exten => 8352,1,AGI(agi-VDADselective_CID_hangup.agi,${EXTEN})
+#exten => 8352,2,Playback(85100001)
+#exten => 8352,3,Hangup
+#
+# Copyright (C) 2010  Matt Florell <vicidial@gmail.com>    LICENSE: AGPLv2
+#
+# changes:
+# 60918-1151 - First build
+# 100903-0041 - Changed lead_id max length to 10 digits
+#
+
+$script = 'agi-VDADselective_CID_hangup.agi';
+
+$AGILOG=1;
+
+# CLEAR AREA CODE LISTINGS:
+# Florida: 239|305|321|352|386|407|561|689|727|754|772|786|813|836|850|861|863|904|941|954
+
+$clear_area_codes = '239|305|321|352|386|407|561|689|727|754|772|786|813|836|850|861|863|904|941|954';
+
+
+($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
+$year = ($year + 1900);
+$mon++;
+if ($mon < 10) {$mon = "0$mon";}
+if ($mday < 10) {$mday = "0$mday";}
+if ($hour < 10) {$hour = "0$hour";}
+if ($min < 10) {$min = "0$min";}
+if ($sec < 10) {$sec = "0$sec";}
+
+$now_date_epoch = time();
+$now_date = "$year-$mon-$mday $hour:$min:$sec";
+
+# default path to astguiclient configuration file:
+$PATHconf =		'/etc/astguiclient.conf';
+
+open(conf, "$PATHconf") || die "can't open $PATHconf: $!\n";
+@conf = <conf>;
+close(conf);
+$i=0;
+foreach(@conf)
+	{
+	$line = $conf[$i];
+	$line =~ s/ |>|\n|\r|\t|\#.*|;.*//gi;
+	if ( ($line =~ /^PATHhome/) && ($CLIhome < 1) )
+		{$PATHhome = $line;   $PATHhome =~ s/.*=//gi;}
+	if ( ($line =~ /^PATHlogs/) && ($CLIlogs < 1) )
+		{$PATHlogs = $line;   $PATHlogs =~ s/.*=//gi;}
+	if ( ($line =~ /^PATHagi/) && ($CLIagi < 1) )
+		{$PATHagi = $line;   $PATHagi =~ s/.*=//gi;}
+	if ( ($line =~ /^PATHweb/) && ($CLIweb < 1) )
+		{$PATHweb = $line;   $PATHweb =~ s/.*=//gi;}
+	if ( ($line =~ /^PATHsounds/) && ($CLIsounds < 1) )
+		{$PATHsounds = $line;   $PATHsounds =~ s/.*=//gi;}
+	if ( ($line =~ /^PATHmonitor/) && ($CLImonitor < 1) )
+		{$PATHmonitor = $line;   $PATHmonitor =~ s/.*=//gi;}
+	if ( ($line =~ /^VARserver_ip/) && ($CLIserver_ip < 1) )
+		{$VARserver_ip = $line;   $VARserver_ip =~ s/.*=//gi;}
+	if ( ($line =~ /^VARDB_server/) && ($CLIDB_server < 1) )
+		{$VARDB_server = $line;   $VARDB_server =~ s/.*=//gi;}
+	if ( ($line =~ /^VARDB_database/) && ($CLIDB_database < 1) )
+		{$VARDB_database = $line;   $VARDB_database =~ s/.*=//gi;}
+	if ( ($line =~ /^VARDB_user/) && ($CLIDB_user < 1) )
+		{$VARDB_user = $line;   $VARDB_user =~ s/.*=//gi;}
+	if ( ($line =~ /^VARDB_pass/) && ($CLIDB_pass < 1) )
+		{$VARDB_pass = $line;   $VARDB_pass =~ s/.*=//gi;}
+	if ( ($line =~ /^VARDB_port/) && ($CLIDB_port < 1) )
+		{$VARDB_port = $line;   $VARDB_port =~ s/.*=//gi;}
+	$i++;
+	}
+
+if (!$VARDB_port) {$VARDB_port='3306';}
+if (!$AGILOGfile) {$AGILOGfile = "$PATHlogs/agiout.$year-$mon-$mday";}
+
+use DBI;
+use Asterisk::AGI;
+$AGI = new Asterisk::AGI;
+
+$dbhA = DBI->connect("DBI:mysql:$VARDB_database:$VARDB_server:$VARDB_port", "$VARDB_user", "$VARDB_pass")
+    or die "Couldn't connect to database: " . DBI->errstr;
+
+### begin parsing run-time options ###
+if (length($ARGV[0])>1)
+{
+	if ($AGILOG) {$agi_string = "Perl Environment Dump:";   &agi_output;}
+	$i=0;
+	while ($#ARGV >= $i)
+	{
+	$args = "$args $ARGV[$i]";
+	if ($AGILOG) {$agi_string = "$i|$ARGV[$i]";   &agi_output;}
+	$i++;
+	}
+}
+
+$|=1;
+while(<STDIN>) 
+{
+	chomp;
+	last unless length($_);
+	if ($AGILOG)
+	{
+		if (/^agi_(\w+)\:\s+(.*)$/)
+		{
+			$AGI{$1} = $2;
+		}
+	}
+
+	if (/^agi_channel\:\s+(.*)$/)		{$channel = $1;}
+	if (/^agi_extension\:\s+(.*)$/)		{$extension = $1;}
+	if (/^agi_callerid\:\s+(.*)$/)		{$callerid = $1;}
+	if (/^agi_calleridname\:\s+(.*)$/)	{$calleridname = $1;}
+
+	if ( ($callerid =~ /\".*\"/) && ( (!$calleridname) or ($calleridname =~ /unknown/) ) )
+		{
+		$calleridname = $callerid;
+		$calleridname =~ s/\<\d\d\d\d\d\d\d\d\d\d\>//gi;
+		$calleridname =~ s/\"|\" //gi;
+		}
+
+		$callerid =~ s/\D//gi;
+		$calleridname =~ s/unknown//gi;
+	if ( (!$callerid) or ($callerid =~ /unknown/) )
+		{$callerid = $calleridname;}
+
+	if (length($callerid)>0) {$phone_number = $callerid;}
+	   else {$phone_number = '';}
+}
+
+$CIDlead_id = $calleridname;
+$CIDlead_id = substr($CIDlead_id, 10, 10);
+$CIDlead_id = ($CIDlead_id + 0);
+
+$stmtA = "SELECT phone_number FROM vicidial_list where lead_id = '$CIDlead_id' limit 1;";
+	if ($AGILOG) {$agi_string = "|$stmtA|";   &agi_output;}
+$sthA = $dbhA->prepare($stmtA) or die "preparing: ",$dbhA->errstr;
+$sthA->execute or die "executing: $stmtA ", $dbhA->errstr;
+$sthArows=$sthA->rows;
+ $rec_count=0;
+while ($sthArows > $rec_count)
+	{
+	@aryA = $sthA->fetchrow_array;
+	$phone_number	= "$aryA[0]";
+	 $rec_count++;
+	}
+$sthA->finish();
+
+$areacode = $phone_number;
+if (length($areacode) > 10)
+	{
+	$areacode =~ s/^91|^991|^981|^971|^961|^951//gi;
+	$areacode =~ s/^1//gi;
+	}
+$areacode =~ s/\d\d\d\d\d\d\d$//gi;
+
+
+foreach $i (sort keys %AGI) 
+{
+	if ($AGILOG) {$agi_string = " -- $i = $AGI{$i}";   &agi_output;}
+}
+
+
+if ($areacode !~ /$clear_area_codes/)
+{
+	print "SET HANGUP $channel\n";
+	checkresult($result);
+	if ($AGILOG) {$agi_string = "channel Hungup: $channel";   &agi_output;}
+	print "SET EXTENSION $extension\n";
+	checkresult($result);
+	print "SET PRIORITY 3\n";
+	checkresult($result);
+
+}
+
+if ($AGILOG) {$agi_string = "AGI Variables: |$extension|$areacode|$phone_number|$callerid|$calleridname|$channel|";   &agi_output;}
+
+exit;
+
+
+
+
+
+sub checkresult {
+	my ($res) = @_;
+	my $retval;
+	$tests++;
+	chomp $res;
+	if ($res =~ /^200/) {
+		$res =~ /result=(-?\d+)/;
+		if (!length($1)) {
+		#	print STDERR "FAIL ($res)\n";
+			$fail++;
+		} else {
+		#	print STDERR "PASS ($1)\n";
+			$pass++;
+		}
+	} else {
+	#	print STDERR "FAIL (unexpected result '$res')\n";
+		$fail++;
+	}
+}
+
+
+
+sub agi_output
+{
+if ($AGILOG >=2)
+	{
+	### open the log file for writing ###
+	open(Lout, ">>$AGILOGfile")
+			|| die "Can't open $AGILOGfile: $!\n";
+	print Lout "$now_date|$script|$agi_string\n";
+	close(Lout);
+	}
+	### send to STDERR writing ###
+if ( ($AGILOG == '1') || ($AGILOG == '3') )
+	{print STDERR "$now_date|$script|$agi_string\n";}
+$agi_string='';
+}

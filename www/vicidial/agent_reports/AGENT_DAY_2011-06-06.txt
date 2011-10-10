@@ -1,0 +1,5 @@
+TODAY:     Monday        2011-06-06
+
+AGENT                USER     CALLS  TALK     PAUSE    WAIT     DISPO    ACTIVE   LOGTIME  FIRST                LAST                    
+Eddie Gako          60084         1  0:00:00  0:00:00  0:00:00  0:00:00  0:00:00  0:00:00  2011-06-06 00:16:26  2011-06-06 00:16:26
+Tanesha Thompson    61619         2  0:00:00  0:00:04  0:00:00  0:00:00  0:00:04  0:01:47  2011-06-06 00:00:07  2011-06-06 00:01:54

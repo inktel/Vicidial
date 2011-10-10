@@ -1,0 +1,452 @@
+VICIDIAL and QueueMetrics
+
+queue_log logging was added to VICIDIAL outbound auto calling as an option in the 2.0.3 release, and for inbound in the 2.0.4 release.
+
+This document goes over the features and needed changes made to VICIDIAL to enable it to insert activity records into the queue_log and other tables in MySQL that QueueMetrics uses for it's statistical analysis and reports. This document should not be taken as a HOWTO for proper installation steps to get QueueMetrics working.
+
+QueueMetrics is a closed-source, commercial product written by Loway Research in Italy/Switzerland. The writers of VICIDIAL do not support or warranty QueueMetrics or it's functionality with VICIDIAL in any way.
+
+This feature was added to the package at the request of several users of VICIDIAL and was achieved with some help from the creators of QueueMetrics(although all VICIDIAL code changes were done entirely by Matt Florell).
+
+This feature is functional on outbound manual dialing, auto dialing and inbound call handling as of 2008-06-30(SVN trunk 2.0.5).
+
+Another very important issue to note is that just like with VICIDIAL on multi-server systems, if QueueMetrics data is being generated on a multi-server system the data will be corrupted if all of the servers are not on the same time. I strongly recommend getting ntp working properly on all servers in a VICIDIAL or QueueMetrics server cluster.
+
+To be able to view stats for inbound and outbound calls properly you need to add each one individually in QueueMetrics "queues" and properly set whether each one is inbound or outbound. After that you can create a combined queue-alias with all of the campaigns and in-groups in it and it will tell you correctly the number of inbound and outbound calls.
+
+As of 2008-10-30, several validation and correction functions were added to the AST_cleanup_agent_log.pl script that is supposed to run every hour. These functions should clean up any queue_log errors that appear and cause QueueMetrics to display incorrect call totals.
+	
+
+As of 2009-05-30, live montoring and playback of archived recordings through the QueueMetrics interface was added. To use this you must have the audio.server, audio.liveserver and default.audioRpcServer variables set properly in the configuration.properties file as specified toward the bottom of this document. The live monitoring asks for an extension to send the call to, this is an extension dialed on the active voicemail server as defined in the system settings. If there is no active voicemail defined then the live monitor will place the call to the extension on the server that the agent is on.
+
+As of 2009-11-23, DID and IVR logging through QueueMetrics queue_log is now part of the code. DID entries for the queue will be counted only for calls that actually enter the queue or are sent to an agent through a ViciDial in-group. For IVR entries, only the last Call Menu will be counted in the QueueMetrics reports.
+
+As of 2010-03-09, queuemetrics_loginout system settings option was added to allow for slightly different logging of logins and logouts. STANDARD will use standard AGENTLOGIN AGENTLOGOFF, CALLBACK will use AGENTCALLBACKLOGIN and AGENTCALLBACKLOGOFF that QM will parse differently.
+
+
+Entries you should have in your crontab on one server:
+### fix the vicidial_agent_log once every hour and the full day run at night
+33 * * * * /usr/share/astguiclient/AST_cleanup_agent_log.pl
+50 0 * * * /usr/share/astguiclient/AST_cleanup_agent_log.pl --last-24hours
+*/5 * * * * /usr/share/astguiclient/AST_cleanup_agent_log.pl --only-qm-live-call-check
+1 1 * * * /usr/share/astguiclient/Vtiger_optimize_all_tables.pl --quiet
+
+
+Here is a short summary of the needed steps to install QueueMetrics on your system:
+
+NOTE: further down in this document are updated installation instructions and instructions for installing on OpenSuSE 11.1.
+
+First, get Sun Java SDK/JRE and install on your system.
+NOTE: the GCJ java JRE available on most RedHat/Feroda/CentOS systems WILL NOT WORK
+
+download and install the Java jdk-1_5_0_11-linux-i586-rpm.bin from:
+http://www.sun.com/software/communitysource/j2se/java2/index.xml
+
+
+cd /usr/local
+chmod 0777 jdk-1_5_0_11-linux-i586-rpm.bin
+./jdk-1_5_0_11-linux-i586-rpm.bin
+ls -l
+rpm -i jdk-1_5_0_11-linux-i586.rpm
+wget http://www.mirrorgeek.com/apache.org/tomcat/tomcat-5/v5.5.20/bin/apache-tomcat-5.5.20.tar.gz
+gunzip apache-tomcat-5.5.20.tar.gz
+tar xvf apache-tomcat-5.5.20.tar
+ln -s apache-tomcat-5.5.20 tomcat
+cd apache-tomcat-5.5.20
+
+* You may need to change all permissions to jar and sh files on /usr/local/apache-tomcat-6.0.18/bin to 0777
+
+
+JAVA_HOME=/usr/java/jdk1.5.0_11/
+JAVA_OPTS="-Xms256M -Xmx512M"
+JRE_HOME=/usr/java/jdk1.5.0_11/jre
+
+or
+
+JRE_HOME=/usr/java/jre1.6.0/
+JAVA_HOME=/usr/java/
+JAVA_OPTS="-Xms256M -Xmx512M"
+
+
+export JAVA_HOME
+export JAVA_OPTS
+export JRE_HOME
+/usr/local/tomcat/bin/startup.sh
+
+At this point you should go here on your web browser to see if the tomcat installation went well:
+http://ip-address:8080/
+
+If it did, then you want to add the following lines to your /etc/rc.d/rc.local file so that tomcat will start up on boot:
+	JAVA_HOME=/usr/java/jdk1.5.0_11/
+	JAVA_OPTS="-Xms256M -Xmx512M"
+	JRE_HOME=/usr/java/jdk1.5.0_11/jre
+	export JAVA_HOME
+	export JAVA_OPTS
+	export JRE_HOME
+	/usr/local/tomcat/bin/startup.sh
+
+
+
+cd /usr/local
+*** download QueueMetrics and place it in /usr/local ***
+gunzip QueueMetrics-1.1.tar.gz
+tar xvf QueueMetrics-1.1.tar
+mv queuemetrics-1.1 /usr/local/tomcat/webapps/qm
+cd /usr/local/tomcat/webapps/qm/WEB_INF
+wget http://mysql.mirrors.pair.com/Downloads/Connector-J/mysql-connector-java-3.0.10-stable.tar.gz
+gunzip mysql-connector-java-3.0.10-stable.tar.gz
+tar xvf mysql-connector-java-3.0.10-stable.tar
+cp mysql-connector-java-3.0.10-stable/mysql-connector-java-3.0.10-stable-bin.jar ./lib/
+
+At this point you should go here on your web browser to see if the tomcat installation went well:
+http://ip-address:8080/qm
+
+If you see a QueueMetrics page(probably with many errors), then installation went well up to this point.
+
+You now need to add the database tables, configure the web.xml file and configuration.properties file for your system.
+
+
+
+
+
+Now to the database side of things. 
+First, give permissions to your user:
+
+GRANT ALL PRIVILEGES ON queuemetrics.* TO qm@'localhost' IDENTIFIED BY 'qm'; 
+GRANT ALL PRIVILEGES ON queuemetrics.* TO qm@'%' IDENTIFIED BY 'qm'; 
+
+Second, the queue_log table:
+
+mysql> describe queue_log;
++------------------+------------------+------+-----+---------+-------+
+| Field            | Type             | Null | Key | Default | Extra |
++------------------+------------------+------+-----+---------+-------+
+| partition        | char(20)         | NO   | MUL | NULL    |       |
+| time_id          | int(11) unsigned | NO   | MUL | 0       |       |
+| call_id          | char(30)         | NO   | MUL | NULL    |       |
+| queue            | char(30)         | NO   |     | NULL    |       |
+| agent            | char(30)         | NO   |     | NULL    |       |
+| verb             | char(30)         | NO   |     | NULL    |       |
+| data1            | char(30)         | NO   |     | NULL    |       |
+| data2            | char(30)         | NO   |     | NULL    |       |
+| data3            | char(30)         | NO   |     | NULL    |       |
+| data4            | char(30)         | NO   |     | NULL    |       |
+| serverid         | varchar(10)      | NO   |     | 0       |       |
+| fileid           | int(10) unsigned | NO   |     | NULL    |       |
+| recordid         | int(10) unsigned | NO   |     | NULL    |       |
+| unique_row_count | int(11)          | NO   |     | NULL    |       |
++------------------+------------------+------+-----+---------+-------+
+
+Use the following query to create a queue_log table in your asterisk database
+to gather queue_log entries without doing a full QueueMetrics install:
+
+ CREATE TABLE queue_log (
+partition VARCHAR(20) NOT NULL,
+time_id INT(11) UNSIGNED  NOT NULL default '0',
+call_id VARCHAR(30) NOT NULL,
+queue VARCHAR(30) NOT NULL,
+agent VARCHAR(30) NOT NULL,
+verb VARCHAR(30) NOT NULL,
+data1 VARCHAR(30) NOT NULL,
+data2 VARCHAR(30) NOT NULL,
+data3 VARCHAR(30) NOT NULL,
+data4 VARCHAR(30) NOT NULL,
+serverid VARCHAR(10) NOT NULL default '0',
+fileid INT(10) UNSIGNED,
+recordid INT(10) UNSIGNED,
+unique_row_count INT(10) UNSIGNED NOT NULL,
+index(time_id),
+index(call_id)
+ );
+
+
+
+# NOTE: by default QueueMetrics does not index the time_id and call_id field. We strongly recommend you add these indexes:
+
+CREATE INDEX time_id on queue_log(time_id);
+CREATE INDEX call_id on queue_log(call_id);
+
+
+
+
+partition: set to "P01" for the first partition, should match up with configuration.properties presets
+
+time_id: epoch, unixtime (seconds since 1970-01-01 00:00:00) [1170345603]
+
+call_id: Asterisk unique prepended with server_id field [1-1170345497.30369]
+	For VICIDIAL we will use the CallerIDname of the call to 
+
+queue: the queue that call came into (we will use the campaign_id here)
+
+agent: we will use the user ID prepended by "agent/" [agent/6666]
+
+verbs:
+
+system actions - used by the AST_VDadapt.pl script when starting up
+	QUEUESTART
+
+agent actions - used by vicidial.php, vdc_db_query.php and AST_VDremote_agents.pl
+	AGENTLOGIN(agent phone channel)
+	AGENTLOGOFF(agent phone channel|logintime)
+	AGENTCALLBACKLOGIN(agent phone channel)
+	AGENTCALLBACKLOGOFF(agent phone channel|logintime)
+	PAUSEALL
+	PAUSE
+	UNPAUSEALL
+	UNPAUSE
+	PAUSEREASON
+	ADDMEMBER2
+	REMOVEMEMBER
+	CALLERONHOLD
+	CALLEROFFHOLD
+
+call actions before going to agent - used by agi-VDAD_ALL_inbound/outbound scripts
+	ENTERQUEUE(url|callerid)
+	CALLOUTBOUND(url|callerid)
+	CONNECT(holdtime)
+	EXITWITHTIMEOUT(position) 
+	EXITWITHKEY(key|position)
+	TRANSFER(extension|context|holdtime|calltime)
+	INFO([IVR or DID]|[context or DID])
+
+call actions before going to agent - used by AST_VDauto_dial.pl
+	ABANDON(position|origposition|waittime) 
+
+call actions after going to agent - used by vicidial.php, vdc_db_query.php and FastAGI_log.pl
+	COMPLETEAGENT(holdtime|calltime|origposition)
+	COMPLETECALLER(holdtime|calltime|origposition) 
+	CALLSTATUS(status)
+
+
+not used in vicidial - 
+	EXITEMPTY(position|origposition|waittime)
+	AGENTDUMP
+
+
+
+
+data1: call termination codes, DID, IVR context, hold reason, on-hold length in seconds, addmember2 extension
+
+data2: callerID or number called(sometimes prepended by DNIS) [3101-9015556189], off-hold reason
+	NOTE: the queuemetrics_eq_prepend field allows you to specify what
+	vicidial_list field you would like to prefend to the phone number on
+	ENTERQUEUE/CALLOUTBOUND events
+
+data3: ??
+
+data4: ??
+
+serverid: number of the server the call came from [for VICIDIAL use the database system_settings.queuemetrics_log_id field]
+
+
+
+
+
+
+
+
+
+
+### For documentation ONLY, these fields should already exist:
+On the vicidial database side of things, we will add the following columns to the system_settings table:
+enable_queuemetrics_logging ENUM('0','1') default '0',
+queuemetrics_server_ip VARCHAR(15),
+queuemetrics_dbname VARCHAR(50),
+queuemetrics_login VARCHAR(50),
+queuemetrics_pass VARCHAR(50),
+queuemetrics_url VARCHAR(255),
+queuemetrics_log_id VARCHAR(10) default 'VIC'
+queuemetrics_eq_prepend VARCHAR(255) default 'NONE'
+
+
+
+
+
+
+
+Instructions for setting up the XML RPC recording lookup php script:
+
+Install PEAR XML_RPC libraries:
+pear install XML_RPC-1.5.1
+
+
+
+
+
+updated install instructions (2009-05-25):
+
+
+wget http://www.mirrorgeek.com/apache.org/tomcat/tomcat-6/v6.0.18/bin/apache-tomcat-6.0.18.tar.gz
+gunzip apache-tomcat-6.0.18.tar.gz
+tar xvf apache-tomcat-6.0.18.tar
+ln -s apache-tomcat-6.0.18 tomcat
+cd apache-tomcat-6.0.18
+/usr/local/tomcat/bin/startup.sh
+
+At this point you should go here on your web browser to see if the tomcat installation went well:
+http://192.168.1.100:8080/
+
+If it did, then you want to add the following lines to your /etc/rc.d/rc.local file so that tomcat will start up on boot:
+	/usr/local/tomcat/bin/startup.sh
+
+cd /usr/local
+wget http://queuemetrics.com/download/QueueMetrics-1.5.3-trial.tar.gz
+gunzip QueueMetrics-1.5.3-trial.tar.gz
+tar xvf QueueMetrics-1.5.3-trial.tar
+mv queuemetrics-1.5.3 /usr/local/tomcat/webapps/QM
+cd /usr/local/tomcat/webapps/QM/WEB-INF
+wget http://mirror.services.wisc.edu/mysql/Downloads/Connector-J/mysql-connector-java-3.0.10-stable.tar.gz
+gunzip mysql-connector-java-3.0.10-stable.tar.gz
+tar xvf mysql-connector-java-3.0.10-stable.tar
+cp mysql-connector-java-3.0.10-stable/mysql-connector-java-3.0.10-stable-bin.jar ./lib/
+
+At this point you should go here on your web browser to see if the tomcat installation went well:
+http://ip-address:8080/QM
+
+If you see a QueueMetrics page(probably with many errors), then installation went well up to this point.
+
+You now need to add the database tables, configure the web.xml file and configuration.properties file for your system.
+
+mysql
+CREATE DATABASE queuemetrics;
+GRANT ALL PRIVILEGES ON queuemetrics.* TO 'queuemetrics'@'localhost' IDENTIFIED BY 'javadude'; 
+GRANT ALL PRIVILEGES ON queuemetrics.* TO queuemetrics@localhost IDENTIFIED BY 'javadude'; 
+GRANT ALL PRIVILEGES ON queuemetrics.* TO queuemetrics@'%' IDENTIFIED BY 'javadude'; 
+
+mysql --user=queuemetrics --password=javadude queuemetrics < /usr/local/apache-tomcat-6.0.18/webapps/QM/WEB-INF/README/queuemetrics_sample.sql
+
+
+change the following in the configuration.properties file:
+
+# This is the default queue log file.
+default.queue_log_file=sql:P01
+
+# audio recording lookup link, change the audioRpcServer to point to your server
+audio.server=it.loway.app.queuemetrics.callListen.listeners.ClassicXmlRpcRecordings
+audio.liveserver=it.loway.app.queuemetrics.callListen.RTlisteners.ClassicXmlRpcListenerRT
+default.audioRpcServer=http://10.0.0.4/vicidial/xml_rpc_audio_server_vicidial.php
+
+
+
+change the following in the web.xml file(change server IP):
+
+            <param-value>jdbc:mysql://10.0.0.4/queuemetrics?autoReconnect=true&amp;zeroDateTimeBehavior=convertToNull&amp;jdbcCompliantTruncation=false&amp;us
+er=queuemetrics&amp;password=javadude</param-value>
+        </init-param>
+
+
+
+# NOTE: by default QueueMetrics does not index the time_id and call_id field. We strongly recommend you add these indexes:
+mysql queuemetrics
+CREATE INDEX time_id on queue_log(time_id);
+CREATE INDEX call_id on queue_log(call_id);
+
+
+
+
+
+
+
+
+
+
+OpenSuSE 11.1 installation instructions:
+
+How to install Queue Metrics on OpenSuSE v.11.1 (32 or 64 bit) with a system that was installed with the ViciDial Group install script. Run them in this order to avoid funky java script bugs :D
+
+1) Type: zypper in tomcat6 tomcat6-webapps
+- Say yes to install, and say yes to license
+
+2) Type: zypper in java-1_6_0-sun
+- Say yes to install, and say yes to license
+
+3) cd /usr/src
+4) wget http://queuemetrics.com/download/QueueMetrics-1.6.0.1-trial.tar.gz
+5) mkdir tars (incase it doesn't exist)
+6) tar xvfz QueueMetrics-1.6.0.1-trial.tar.gz
+7) mv QueueMetrics-1.6.0.1-trial.tar.gz ./tars/
+8) mkdir /srv/tomcat6/webapps/QM
+9) cp -r queuemetrics-1.6.0.1/* /srv/tomcat6/webapps/QM/
+10) zypper in mysql-connector-java
+11) cp /usr/share/java/mysql-connector-java.jar /srv/tomcat6/webapps/QM/WEB-INF/lib/
+12) chkconfig tomcat6 on
+13) mysql --execute="CREATE DATABASE queuemetrics;"
+14) mysql queuemetrics --execute="GRANT ALL PRIVILEGES ON queuemetrics.* TO 'queuemetrics'@'localhost' IDENTIFIED BY 'javadude';"
+15) mysql queuemetrics --execute="GRANT ALL PRIVILEGES ON queuemetrics.* TO queuemetrics@localhost IDENTIFIED BY 'javadude';"
+16) mysql queuemetrics --execute="GRANT ALL PRIVILEGES ON queuemetrics.* TO queuemetrics@'%' IDENTIFIED BY 'javadude';"
+17) mysql queuemetrics --user=queuemetrics --password=javadude < /srv/tomcat6/webapps/QM/WEB-INF/README/queuemetrics_sample.sql
+18) mysql queuemetrics --execute="CREATE INDEX time_id on queue_log(time_id);"
+19) mysql queuemetrics --execute="CREATE INDEX call_id on queue_log(call_id);"
+20) rctomcat6 start
+
+21) Edit /srv/tomcat6/webapps/QM/WEB-INF/configuration.properties and change the entry to the following:
+- # This is the default queue log file.
+- default.queue_log_file=sql:P01
+
+22) Edit /srv/tomcat6/webapps/QM/WEB-INF/web.xml and change the IP address of the following entry:
+- <param-value>jdbc:mysql://10.0.0.4/queuemetrics?autoReconnect=true&amp;zeroDateTimeBehavior=convertToNull&amp;jdbcCompliantTruncation=false&amp;user=queuemetrics&amp;password=javadude</param-value>
+
+23) Go to http://<ip-addr>:8080/QM and it should tell you the schema is old, just click next or yes to everything and have fun
+
+24) If nothing shows up, you may need to go into 'yast' and change the firewall settings:
+      Security --> Firewall settings, go to allowed services, type "alt-d" and add 8080 as a new port, then save and exit
+
+
+
+
+
+
+If you want to use the ADMIN_archive_log_tables.pl script with the --queue-log option you will need to run the following query in the QM database:
+
+CREATE TABLE queue_log_archive LIKE queue_log; 
+
+
+
+
+Example queue_log output generated by ViciDial:
+
++-----------+------------+----------------------+----------+------------+-----------------+-------------+------------+-------+-------+----------+------------------+
+| partition | time_id    | call_id              | queue    | agent      | verb            | data1       | data2      | data3 | data4 | serverid | unique_row_count |
++-----------+------------+----------------------+----------+------------+-----------------+-------------+------------+-------+-------+----------+------------------+
+| P01       | 1243280596 | NONE                 | NONE     | Agent/6666 | AGENTLOGIN      | 6666@agents |            |       |       | VIC      |                1 |
+| P01       | 1243280596 | NONE                 | NONE     | Agent/6666 | PAUSEALL        | NULL        |            |       |       | VIC      |                2 |
+| P01       | 1243280603 | NONE                 | NONE     | Agent/6666 | UNPAUSEALL      | NULL        |            |       |       | VIC      |                1 |
+| P01       | 1243280614 | V0525154325000035377 | TESTCAMP | NONE       | ENTERQUEUE      | NULL        | 9998888112 |       |       | VIC      |                1 |
+| P01       | 1243280614 | V0525154325000035377 | TESTCAMP | Agent/6666 | CONNECT         | 0           |            |       |       | VIC      |                2 |
+| P01       | 1243280619 | V0525154328000213841 | TESTCAMP | NONE       | ENTERQUEUE      | NULL        | 9999000016 |       |       | VIC      |                1 |
+| P01       | 1243280625 | V0525154328000213841 | TESTCAMP | NONE       | EXITWITHTIMEOUT | 1           |            |       |       | VIC      |                1 |
+| P01       | 1243280625 | V0525154328000213841 | TESTCAMP | NONE       | CALLSTATUS      | DROP        |            |       |       | VIC      |                2 |
+| P01       | 1243280626 | Y0525154346000213841 | TEST_IN  | NONE       | ENTERQUEUE      | NULL        | 9999000016 |       |       | VIC      |                1 |
+| P01       | 1243280631 | V0525154325000035377 | TESTCAMP | Agent/6666 | COMPLETEAGENT   | 0           | 17         | 1     |       | VIC      |                1 |
+| P01       | 1243280631 | NONE                 | NONE     | Agent/6666 | PAUSEALL        | NULL        |            |       |       | VIC      |                2 |
+| P01       | 1243280633 | NONE                 | NONE     | Agent/6666 | UNPAUSEALL      | NULL        |            |       |       | VIC      |                1 |
+| P01       | 1243280633 | V0525154325000035377 | TESTCAMP | Agent/6666 | CALLSTATUS      | N           |            |       |       | VIC      |                2 |
+| P01       | 1243280646 | V0525154353000213842 | TESTCAMP | NONE       | ENTERQUEUE      | NULL        | 9999000017 |       |       | VIC      |                1 |
+| P01       | 1243280646 | V0525154353000213842 | TESTCAMP | Agent/6666 | CONNECT         | 0           |            |       |       | VIC      |                2 |
+| P01       | 1243280650 | V0525154353000213842 | TESTCAMP | Agent/6666 | COMPLETEAGENT   | 0           | 4          | 1     |       | VIC      |                1 |
+| P01       | 1243280650 | NONE                 | NONE     | Agent/6666 | PAUSEALL        | NULL        |            |       |       | VIC      |                2 |
+| P01       | 1243280659 | V0525154353000213842 | TESTCAMP | Agent/6666 | CALLSTATUS      | NP          |            |       |       | VIC      |                1 |
+| P01       | 1243280672 | Y0525154346000213841 | TEST_IN  | NONE       | EXITWITHTIMEOUT | 1           |            |       |       | VIC      |                1 |
+| P01       | 1243280672 | Y0525154346000213841 | TEST_IN  | NONE       | CALLSTATUS      | DROP        |            |       |       | VIC      |                2 |
+| P01       | 1243280673 | Y0525154433000213841 | TEST_IN2 | NONE       | ENTERQUEUE      | NULL        | 9999000016 |       |       | VIC      |                1 |
+| P01       | 1243280686 | Y0525154433000213841 | TEST_IN2 | NONE       | ABANDON         | 1           | 1          | 3     |       | VIC      |                1 |
+| P01       | 1243280940 | NONE                 | NONE     | Agent/6666 | UNPAUSEALL      | NULL        |            |       |       | VIC      |                1 |
+| P01       | 1243280940 | M0525154900000194239 | TESTCAMP | NONE       | ENTERQUEUE      | NULL        | 9998888112 |       |       | VIC      |                2 |
+| P01       | 1243280940 | M0525154900000194239 | TESTCAMP | Agent/6666 | CONNECT         | 0           |            |       |       | VIC      |                3 |
+| P01       | 1243280965 | M0525154900000194239 | TESTCAMP | Agent/6666 | COMPLETEAGENT   | 0           | 17         | 1     |       | VIC      |                1 |
+| P01       | 1243280965 | NONE                 | NONE     | Agent/6666 | PAUSEALL        | NULL        |            |       |       | VIC      |                2 |
+| P01       | 1243280973 | M0525154900000194239 | TESTCAMP | Agent/6666 | CALLSTATUS      | N           |            |       |       | VIC      |                1 |
+| P01       | 1243281049 | Y0525155049000194239 | TEST_IN2 | NONE       | ENTERQUEUE      | NULL        | 9998888112 |       |       | VIC      |                1 |
+| P01       | 1243281052 | NONE                 | NONE     | Agent/6666 | UNPAUSEALL      | NULL        |            |       |       | VIC      |                1 |
+| P01       | 1243281057 | Y0525155049000194239 | TEST_IN2 | Agent/6666 | CONNECT         | 3           |            |       |       | VIC      |                1 |
+| P01       | 1243281073 | Y0525155049000194239 | TEST_IN2 | Agent/6666 | COMPLETEAGENT   | 3           | 24         | 1     |       | VIC      |                1 |
+| P01       | 1243281073 | NONE                 | NONE     | Agent/6666 | PAUSEALL        | NULL        |            |       |       | VIC      |                2 |
+| P01       | 1243281079 | Y0525155049000194239 | TEST_IN2 | Agent/6666 | CALLSTATUS      | WN          |            |       |       | VIC      |                1 |
+| P01       | 1243281088 | NONE                 | NONE     | Agent/6666 | UNPAUSEALL      | NULL        |            |       |       | VIC      |                1 |
+| P01       | 1243281088 | M0525155128000194239 | TESTCAMP | NONE       | ENTERQUEUE      | NULL        | 9998888112 |       |       | VIC      |                2 |
+| P01       | 1243281088 | M0525155128000194239 | TESTCAMP | Agent/6666 | CONNECT         | 0           |            |       |       | VIC      |                3 |
+| P01       | 1243281105 | M0525155128000194239 | TESTCAMP | Agent/6666 | COMPLETEAGENT   | 0           | 7          | 1     |       | VIC      |                1 |
+| P01       | 1243281105 | NONE                 | NONE     | Agent/6666 | PAUSEALL        | NULL        |            |       |       | VIC      |                2 |
+| P01       | 1243281111 | M0525155128000194239 | TESTCAMP | Agent/6666 | CALLSTATUS      | NP          |            |       |       | VIC      |                1 |
+| P01       | 1243281112 | NONE                 | NONE     | Agent/6666 | AGENTLOGOFF     | 6666@agents | 516        |       |       | VIC      |                1 |
++-----------+------------+----------------------+----------+------------+-----------------+-------------+------------+-------+-------+----------+------------------+

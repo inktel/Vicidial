@@ -1,0 +1,3 @@
+TODAY:     Friday        2010-10-15
+
+AGENT                USER     CALLS  TALK     PAUSE    WAIT     DISPO    ACTIVE   LOGTIME  FIRST                LAST                    

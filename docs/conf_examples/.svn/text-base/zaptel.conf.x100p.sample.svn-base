@@ -1,0 +1,10 @@
+# /etc/zaptel.conf:
+# Digium/Clone X100P EXAMPLE:
+# Here is an example of a configuration where an X100P single FXO card is used 
+# for zaptel timing and not used for calling:
+# 
+# NOTE: you can get an X100P on ebay for $10-30 that will work with Asterisk
+
+loadzone=us
+defaultzone=us
+fxsks=1

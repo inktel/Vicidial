@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<!DOCTYPE prefwindow SYSTEM "chrome://vicidial_webdial_plugin/locale/options.dtd">
+<prefwindow id="vicidial_webdial_plugin-preferences" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" title="&prefwindow.title;" onload="ShowWarning();">
+<script type="application/javascript" src="options.js"/>
+
+  <prefpane id="pane1" label="&pane1.title;" image="chrome://vicidial_webdial_plugin/skin/connection_icon.jpg">
+
+    <preferences>
+      <preference id="vicidial_webdial_plugin_autoconnect1" name="extensions.vicidial_webdial_plugin.vicidial_webdial_plugin_autoconnect" type="bool"/>
+      <preference id="vicidial_webdial_plugin_URL1" name="extensions.vicidial_webdial_plugin.vicidial_webdial_plugin_URL" type="string"/>
+      <preference id="vicidial_webdial_plugin_AGC1" name="extensions.vicidial_webdial_plugin.vicidial_webdial_plugin_AGC" type="string"/>
+      <preference id="stringpref1" name="extensions.vicidial_webdial_plugin.stringpref" type="string"/> <!-- note that this is only an ASCII string - use unichar for unicode strings -->
+    </preferences>
+ 
+    <groupbox align="start">
+	    <grid>
+	      <rows>
+		<row>
+		  <separator class="thin"/>
+		</row>
+		<row align="start">
+		  <label control="textvicidial_webdial_plugin_URL">&vicidial_webdial_plugin_URL.label;</label><textbox id="textvicidial_webdial_plugin_URL" preference="vicidial_webdial_plugin_URL1" size="30" maxlength="100"/>
+		</row>
+		<row align="start">
+		  <label control="textvicidial_webdial_plugin_AGC">&vicidial_webdial_plugin_AGC.label;</label><textbox id="textvicidial_webdial_plugin_AGC" preference="vicidial_webdial_plugin_AGC1" size="30" maxlength="100"/>
+		</row>
+		<row align="start">
+		  <checkbox id="vicidial_webdial_plugin_autoconnect" preference="vicidial_webdial_plugin_autoconnect1" label="&vicidial_webdial_plugin_autoconnect.label;"/>
+		</row>
+		<row align="start">
+		  <label control="textvicidial_webdial_plugin_warning">&vicidial_webdial_plugin_acwarning.label;</label>
+		</row>
+	      </rows>
+	    </grid>
+    </groupbox>
+  </prefpane>
+
+  <prefpane id="vicidial_webdial_plugin_call_pane" label="&vicidial_webdial_plugin_call_pane.title;" image="chrome://vicidial_webdial_plugin/skin/phone_icon.jpg">
+    <preferences>
+      <preference id="vicidial_webdial_plugin_campaign1" name="extensions.vicidial_webdial_plugin.vicidial_webdial_plugin_campaign" type="string"/>
+      <preference id="vicidial_webdial_plugin_phonelogin1" name="extensions.vicidial_webdial_plugin.vicidial_webdial_plugin_phonelogin" type="string"/>
+      <preference id="vicidial_webdial_plugin_phonepwd1" name="extensions.vicidial_webdial_plugin.vicidial_webdial_plugin_phonepwd" type="string"/>
+      <preference id="vicidial_webdial_plugin_user1" name="extensions.vicidial_webdial_plugin.vicidial_webdial_plugin_user" type="string"/>
+      <preference id="vicidial_webdial_plugin_pwd1" name="extensions.vicidial_webdial_plugin.vicidial_webdial_plugin_pwd" type="string"/>
+    </preferences>
+
+    <groupbox align="start">
+	    <grid>
+	      <rows>
+		<row>
+		  <separator class="thin"/>
+		</row>
+		<row align="start">
+		  <label control="textvicidial_webdial_plugin_campaign">&vicidial_webdial_plugin_campaign.label;</label><textbox id="textvicidial_webdial_plugin_campaign" preference="vicidial_webdial_plugin_campaign1" size="15" maxlength="100"/>
+		</row>
+		<row align="start">
+		  <label control="textvicidial_webdial_plugin_phonelogin">&vicidial_webdial_plugin_phonelogin.label;</label><textbox id="textvicidial_webdial_plugin_phonelogin" preference="vicidial_webdial_plugin_phonelogin1" size="15"/>
+		</row>
+		<row align="start">
+		  <label control="textvicidial_webdial_plugin_phonepwd">&vicidial_webdial_plugin_phonepwd.label;</label><textbox id="textvicidial_webdial_plugin_phonepwd" preference="vicidial_webdial_plugin_phonepwd1" size="5" maxlength="10" type="password"/>
+		</row>
+		<row align="start">
+		  <label control="textvicidial_webdial_plugin_user">&vicidial_webdial_plugin_user.label;</label><textbox id="textvicidial_webdial_plugin_user" preference="vicidial_webdial_plugin_user1" size="10" maxlength="20"/>
+		</row>
+		<row align="start">
+		  <label control="textvicidial_webdial_plugin_pwd">&vicidial_webdial_plugin_pwd.label;</label><textbox id="textvicidial_webdial_plugin_pwd" preference="vicidial_webdial_plugin_pwd1" size="10" maxlength="20" type="password"/>
+		</row>
+	      </rows>
+	    </grid>
+    </groupbox>
+  </prefpane>
+
+</prefwindow>

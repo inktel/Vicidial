@@ -1,0 +1,86 @@
+VICIDIAL and app_conference
+(1.2 tree) EXPERIMENTAL!!! 
+
+app_conference offers the plusses of being able to do conferencing
+without any zaptel hardware or timers as well as doing native codec
+streaming, meaning no manditory downsampling to slin like meetme.
+These two features alone mean a rather significant performance boost
+to companies who only use VOIP for agents and trunks as well as not
+requiring the cost of zaptel hardware or the nightmare of getting
+ztdummy to work on some systems.
+
+As of right now, I have a test system fully up and running using
+app_conference with VICIDIAL on Asterisk 1.2.8. I have made several
+modifications to the app_conference code to make it more of a drop-in
+replacement for meetme so that it does not require any changes to the
+VICIDIAL codebase. I have added entry and exit sounds(slightly
+different from meetme's) as well as "only one in this conference"
+message in addition to changing the default member type to speaker(S).
+So far I have tested with IAX and SIP channels only and everything
+works just like on meetme but I have not done any capacity testing or
+tested it in production yet.
+
+If you want to use app_conference instead of meetme for VICIDIAL then follow these instructions:
+
+cd /usr/src/asterisk
+wget http://www.eflo.net/files/VD_app_conference_0.6.zip
+unzip VD_app_conference_0.6.zip
+cd app_conference
+make clean
+make
+make install
+
+
+In your extensions.conf file you would replace these lines:
+exten => 8600051,1,Meetme,8600051
+exten => 8600052,1,Meetme,8600052
+...continue through 8600100...
+exten => 78600051,1,Meetme,8600051|q
+exten => 78600052,1,Meetme,8600052|q
+...continue through 78600100...
+exten => 68600051,1,Meetme,8600051|mq
+exten => 68600052,1,Meetme,8600052|mq
+...continue through 68600100...
+
+
+with these lines:
+exten => 8600051,1,Conference(8600051)
+exten => 8600052,1,Conference(8600052)
+...continue through 8600100...
+exten => 78600051,1,Conference(8600051|q)
+exten => 78600052,1,Conference(8600052|q)
+...continue through 78600100...
+exten => 68600051,1,Conference(8600051|Lq)
+exten => 68600052,1,Conference(8600052|Lq)
+...continue through 68600100...
+
+NOTES:
+Here are the possible feature flags for this version of app_conference:
+          o M: Moderator (presently same as speaker) [default]
+          o S: Speaker
+          o L: Listener
+          o T: "Telephone caller" (just for stats?).
+          o V: Do VAD on this caller
+          o D: Use Denoise filter on this caller. 
+          o d: Send manager events when DTMF is received.
+          o q: Do not play enter or exit sounds.
+          o i: use inband dtmf broadcast.
+          o t: use rfc dtmf signal broadcast.
+
+COMPILE NOTES:
+
+Some Makefile alterations may be necessary for your system:
+
+From Alek Barkley:
+I am running FC4 with latest updates ( 2.6.16 kernel )
+My CPU is AMD K6 and GCC 4.0.2.
+
+I edited Makefile in app_conference distribution.
+To enter CPU architecture in my case -march=k6
+========================================================
+PROC = k6
+# this is fun for x86
+#CFLAGS += -march=pentium3 -msse -mfpmath=sse,387
+CFLAGS += -march=k6
+===========================================================
+

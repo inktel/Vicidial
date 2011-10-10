@@ -1,0 +1,77 @@
+--- asterisk-1.4.21.2/channels/chan_sip.c	2008-06-03 10:46:24.000000000 -0400
++++ asterisk-1.4.21.2-new/channels/chan_sip.c	2009-07-07 13:46:04.000000000 -0400
+@@ -1454,6 +1454,7 @@
+ static void sip_send_all_registers(void);
+ 
+ /*--- Parsing SIP requests and responses */
++static int check_cpd_results(struct sip_pvt *p, struct sip_request *req);
+ static void append_date(struct sip_request *req);	/* Append date to SIP packet */
+ static int determine_firstline_parts(struct sip_request *req);
+ static const struct cfsubscription_types *find_subscription_type(enum subscriptiontype subtype);
+@@ -4247,6 +4248,37 @@
+ 
+ 	return _default;
+ }
++/*! \brief Check for a CPD-Result
++		This looks for a CPD-Result in the sip_request 
++		and throws a manager event if it finds one
++ */
++static int check_cpd_results(struct sip_pvt *p, struct sip_request *req) {
++	const char *cpdr = get_header(req, "CPD-Result");\
++	/* See if NetBorder had anything to say */
++	if (!(ast_strlen_zero(cpdr))) {
++		if (p->owner) {
++			/* If so throw a manager event with the result */
++			manager_event(
++				EVENT_FLAG_SYSTEM, 
++				"CPD-Result", 
++				"ChannelDriver: SIP\r\nChannel: %s\r\nCallerIDName: %s\r\nUniqueid: %s\r\nResult: %s\r\n",
++				p->owner->name,
++				p->owner->cid.cid_name,
++				p->owner->uniqueid,
++				cpdr
++			);
++		} else {  
++			/* Apparently we can have a CPD-Result and no owner, better not crash it though */
++			manager_event(
++				EVENT_FLAG_SYSTEM,
++				"CPD-Result",
++				"ChannelDriver: SIP\r\nChannel: UNKNOWN\r\nCallerIDName: UNKNOWN\r\nUniqueid: UNKNOWN\r\nResult: %s\r\n",
++				cpdr
++                        );
++		}
++	} 
++	return 0;
++}
+ 
+ static const char *__get_header(const struct sip_request *req, const char *name, int *start)
+ {
+@@ -6964,6 +6996,7 @@
+ 	char tmp2[SIPBUFSIZE/2];
+ 	const char *l = NULL, *n = NULL;
+ 	const char *urioptions = "";
++	const char *netbordercpd = ";cpd=on";  /* string used to enable NetBorder's CPD */
+ 
+ 	if (ast_test_flag(&p->flags[0], SIP_USEREQPHONE)) {
+ 	 	const char *s = p->username;	/* being a string field, cannot be NULL */
+@@ -7050,6 +7083,9 @@
+ 	if (p->options && !ast_strlen_zero(p->options->uri_options))
+ 		ast_build_string(&invite, &invite_max, ";%s", p->options->uri_options);
+ 	
++	/* Tell NetBorder to enable CPD */
++	ast_build_string(&invite, &invite_max, "%s", netbordercpd);
++	
+ 	ast_string_field_set(p, uri, invite_buf);
+ 
+ 	if (sipmethod == SIP_NOTIFY && !ast_strlen_zero(p->theirtag)) { 
+@@ -12740,6 +12776,10 @@
+ 		gettag(req, "To", tag, sizeof(tag));
+ 		ast_string_field_set(p, theirtag, tag);
+ 	}
++
++	/* Check if NetBorder had anything to say */
++	check_cpd_results(p, req);
++
+ 	if (p->relatedpeer && p->method == SIP_OPTIONS) {
+ 		/* We don't really care what the response is, just that it replied back. 
+ 		   Well, as long as it's not a 100 response...  since we might

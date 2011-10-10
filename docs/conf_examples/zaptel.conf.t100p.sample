@@ -1,0 +1,23 @@
+# /etc/zaptel.conf:
+# Digium/Clone T100P EXAMPLE:
+# Here is an example of a configuration where an T100P single T1 card is used 
+# for connecting a single T1 PRI circuit with 23 voice channels
+
+span=1,1,0,esf,b8zs
+bchan=1-23
+dchan=24
+loadzone = us
+defaultzone=us
+
+# FOR A RBS WinkStart T1 YOU WOULD USE SOMETHING LIKE THIS:
+# span=1,1,0,esf,b8zs
+# e&m=1-24
+# loadzone = us
+# defaultzone=us
+# 
+# FOR AN ANALOG T1 ChannelBank YOU WOULD USE SOMETHING LIKE THIS:
+# span=1,1,0,esf,b8zs
+# fxoks=1-24
+# loadzone = us
+# defaultzone=us
+# 

@@ -1,0 +1,493 @@
+﻿# pt_language.txt - this file is for the internationalization of the astGUIclient 
+# client web pages. The associated install.pl file will take the language as an 
+# argument and alter the php scripts to the language typed in the command line:
+# example: ./install.pl --language=pt
+# current languages in the file:
+# - English - (en) no alterations
+# - Portuguese - (pt) second column
+***LANGUAGES***
+en-English|pt-Português|
+***FILES***
+agc|astguiclient.php|0
+agc|vicidial.php|0
+agc|vdc_db_query.php|0
+agc|manager_send.php|0
+agc|conf_exten_check.php|0
+agc|inbound_popup.php|0
+agc|active_list_refresh.php|0
+agc|park_calls_display.php|0
+agc|live_exten_check.php|0
+agc|call_log_display.php|0
+agc|voicemail_check.php|0
+agc|dbconnect.php|1
+agc|timeclock.php|0
+agc|vdc_script_display.php|1
+agc|vdc_script_notes.php|0
+agc|functions.php|1
+agc|vdc_form_display.php|1
+agc|calendar.css|1
+agc|calendar_db.js|0
+***TRANSLATIONS***
+### special translations that should stay at the top of the file ###
+"JAN"|"JAN"|
+"FEB"|"FEV"|
+"MAR"|"MAR"|
+"APR"|"ABR"|
+"MAY"|"POS"|
+"JUN"|"JUN"|
+"JLY"|"JLY"|
+"AUG"|"AGO"|
+"SEP"|"SET"|
+"OCT"|"OUT"|
+"NOV"|"NOV"|
+"DEC"|"DEZ"|
+\./images/|../agc/images/|
+BORDER|Border|
+VALUE=SUBMIT|VALUE=SUBMIT|
+TYPE=SUBMIT|TYPE=Submit|
+MAXLENGTH|maxlength|
+### BEGIN translation phrases through 1.1.11 release ###
+English|Inglês|
+Spanish|Espanhol|
+French|Francês|
+German|Alemão|
+Italian|Italiano|
+agc_check_voicemail_BLINK.gif|agc_check_voicemail_BLINK.gif|
+agc_check_voicemail_OFF.gif|agc_check_voicemail_OFF.gif|
+agc_check_voicemail_ON.gif|agc_check_voicemail_ON.gif|
+agc_live_call_OFF.gif|agc_live_call_OFF.gif|
+agc_live_call_ON.gif|agc_live_call_ON.gif|
+agc_tab_active_lines.gif|agc_tab_active_lines.gif|
+agc_tab_conferences.gif|agc_tab_conferences.gif|
+agc_tab_main.gif|agc_tab_main.gif|
+vdc_LB_dialnextnumber.gif|vdc_LB_dialnextnumber.gif|
+vdc_LB_dialnextnumber_OFF.gif|vdc_LB_dialnextnumber_OFF.gif|
+vdc_LB_grabparkedcall.gif|vdc_LB_grabparkedcall.gif|
+vdc_LB_hangupcustomer.gif|vdc_LB_hangupcustomer.gif|
+vdc_LB_hangupcustomer_OFF.gif|vdc_LB_hangupcustomer_OFF.gif|
+vdc_LB_parkcall.gif|vdc_LB_parkcall.gif|
+vdc_LB_parkcall_OFF.gif|vdc_LB_parkcall_OFF.gif|
+vdc_LB_pause.gif|vdc_LB_pause.gif|
+vdc_LB_pause_OFF.gif|vdc_LB_pause_OFF.gif|
+vdc_LB_resume.gif|vdc_LB_resume.gif|
+vdc_LB_resume_OFF.gif|vdc_LB_resume_OFF.gif|
+vdc_LB_startrecording.gif|vdc_LB_startrecording.gif|
+vdc_LB_stoprecording.gif|vdc_LB_stoprecording.gif|
+vdc_LB_transferconf.gif|vdc_LB_transferconf.gif|
+vdc_LB_transferconf_OFF.gif|vdc_LB_transferconf_OFF.gif|
+vdc_LB_webform.gif|vdc_LB_webform.gif|
+vdc_LB_webform_OFF.gif|vdc_LB_webform_OFF.gif|
+vdc_XB_blindtransfer.gif|vdc_XB_blindtransfer.gif|
+vdc_XB_blindtransfer_OFF.gif|vdc_XB_blindtransfer_OFF.gif|
+vdc_XB_dialwithcustomer.gif|vdc_XB_dialwithcustomer.gif|
+vdc_XB_dialwithcustomer_OFF.gif|vdc_XB_dialwithcustomer_OFF.gif|
+vdc_XB_hangupbothlines.gif|vdc_XB_hangupbothlines.gif|
+vdc_XB_hangupbothlines_OFF.gif|vdc_XB_hangupbothlines_OFF.gif|
+vdc_XB_hangupxferline.gif|vdc_XB_hangupxferline.gif|
+vdc_XB_hangupxferline_OFF.gif|vdc_XB_hangupxferline_OFF.gif|
+vdc_XB_internalcloser.gif|vdc_XB_internalcloser.gif|
+vdc_XB_internalcloser_OFF.gif|vdc_XB_internalcloser_OFF.gif|
+vdc_XB_leave3waycall.gif|vdc_XB_leave3waycall.gif|
+vdc_XB_leave3waycall_OFF.gif|vdc_XB_leave3waycall_OFF.gif|
+vdc_XB_localcloser.gif|vdc_XB_localcloser.gif|
+vdc_XB_localcloser_OFF.gif|vdc_XB_localcloser_OFF.gif|
+vdc_XB_parkcustomerdial.gif|vdc_XB_parkcustomerdial.gif|
+vdc_XB_parkcustomerdial_OFF.gif|vdc_XB_parkcustomerdial_OFF.gif|
+vdc_XB_hotkeysactive.gif|vdc_XB_hotkeysactive.gif|
+vdc_XB_hotkeysactive_OFF.gif|vdc_XB_hotkeysactive_OFF.gif|
+vdc_LB_senddtmf.gif|vdc_LB_senddtmf.gif|
+vdc_LB_senddtmf_OFF.gif|vdc_LB_senddtmf_OFF.gif|
+vdc_XB_header.gif|vdc_XB_header.gif|
+vdc_XB_number.gif|vdc_XB_number.gif|
+vdc_XB_channel.gif|vdc_XB_channel.gif|
+vdc_XB_seconds.gif|vdc_XB_seconds.gif|
+vdc_tab_script.gif|vdc_tab_script.gif|
+You have now logged out. Thank you|Você tem registrado agora para fora. Obrigado|
+astGUIclient web-client VERSION|VERSÃO astGUIclient do correia-cliente|
+astGUIclient web client|web client astGUIclient|
+VICIDIAL web client|Web client de VICIDIAL|
+VICIDIAL web-client version|Versão do correia-cliente de VICIDIAL|
+You can only monitor Zap channels|Você pode monitora somente zap as canaletas|
+Stop Record|Pare O Registro|
+you are logged into this phone|seu telefone|
+Back to Main Window|Para trás à janela principal|
+LIVE CALLS ON THIS PHONE|VIVO CONVIDA ESTE TELEFONE|
+LIVE CALLS IN THIS CONFERENCE|VIVEM AS CHAMADAS NCESTA CONFERÊNCIA|
+LIVE CALL TRANSFER|TRANSFERÊNCIA VIVA DA CHAMADA|
+CLIENT CHANNEL|CANALETA DO CLIENTE|
+REMOTE CHANNEL|CANALETA REMOTA|
+CLICK HERE TO LOG IN AGAIN|ESTALE AQUI PARA LOGON OUTRA VEZ|
+ACTIVE DISPLAY PAUSED|A EXPOSIÇÃO ATIVA PAUSOU|
+Main Panel|Painel Principal|
+Active Lines Panel|Linhas Ativas Painel|
+Conferences Panel|Painel Das Conferências|
+Check Voicemail|Verifique Voicemail|
+Live Call|Vive A Chamada|
+Hangup Trunk|Tronco Do Hangup|
+Hijack Trunk|Tronco Do Hijack|
+Listen Trunk|Escuta O Tronco|
+Active Local Menu|Menu Local Ativo|
+Hangup Local|Local Do Hangup|
+Hijack Local|Local Do Hijack|
+Listen Local|Escuta O Local|
+Channel to be transferred|Canaleta a ser transferida|
+Extensions Menu|Menu Das Extensões|
+Send to selected extension|Emita à extensão selecionada|
+Send to selected vmail box|Emita à caixa selecionada do vmail|
+Send to this number|Emita a este número|
+click on a number below to send to a conference|estale sobre um número abaixo para emitir a uma conferência|
+Send my channel too|Emita minha canaleta demasiado|
+Conferences Menu|Menu Das Conferências|
+LOCAL Extensions Dial|Seletor LOCAL Das Extensões|
+Phone calling from|Telefone que chama-se de|
+Call selected extension|Extensão selecionada chamada|
+Call selected vmail box|Caixa selecionada chamada do vmail|
+LOCAL DIAL EXTENSIONS|EXTENSÕES LOCAIS DO SELETOR|
+OUTBOUND CALLS|CHAMADAS OUTBOUND |
+INBOUND CALLS|CHAMADAS INBOUND|
+Refresh rate|Refresque a taxa|
+MANUAL DIAL|SELETOR MANUAL|
+CALL DATE\/TIME|DATE/TIME DA CHAMADA|
+LOCAL HANGUP|HANGUP LOCAL|
+PARKED CALLS|CHAMADAS ESTACIONADAS|
+PARKED BY|ESTACIONADO PERTO|
+PARKED TIME|TEMPO ESTACIONADO|
+Registered to|Registado a|
+Enter Conference|Incorpore A Conferência|
+Dial From Conf|Seletor De Conf|
+Active Extensions|Extensões Ativas|
+Outside Lines|Linhas Exteriores|
+Local Extensions|Extensões Locais|
+Data Goes Here|Os Dados Vão Aqui|
+Trunk Action|Ação Do Tronco|
+Local Action|Ação Local|
+Conferences List|Lista Das Conferências|
+Click on a conference room number on the left for info on that conference|Estale sobre um número de quarto da conferência na esquerda para o|
+List Display|Exposição Da Lista|
+Live Extensions|Extensões Vivas|
+Busy Extensions|Extensões Ocupadas|
+Outside Lines|Linhas Exteriores|
+script runtime|runtime do certificado|
+Call Log Display|Exposição Do Registro Da Chamada|
+is not valid|é inválido|
+or protocol|ou protocolo|
+Conf Extension Check|Verificação Da Extensão De Conf|
+has been registered to|foi registado a|
+LIVE INBOUND CALL|CHAMADA INBOUND VIVA|
+Number Dialed|O Número Marcou|
+SEND TO MY VOICEMAIL|EMITA A MEU VOICEMAIL|
+Live Extension Check|Verificação Viva Da Extensão|
+Manager Send|O Gerente Emite|
+command not inserted|comando não introduzido|
+command sent for|comando emitido para|
+One of these variables|Uma destas variáveis|
+must be greater than 2 characters|deve ser mais grande de 2 caráteres|
+must be greater than 14 characters|deve ser mais grande de 14 caráteres|
+must be set|deve ser ajustado|
+not sent|não emitido|
+Cannot find empty conference|Não pode encontrar a conferência vazia|
+is not live|não está vivo|
+RECORDING WILL LAST UP TO 60 MINUTES|A GRAVAÇÃO DURARÁ ATÉ 60 MINUTOS|
+Parked Calls Display|Exposição Estacionada Das Chamadas|
+Database Query Script|Certificado Da Pergunta Da Base de dados|
+Group Choice|Escolha Do Grupo|
+has been registered to user|foi registado ao usuário|
+HOPPER EMPTY|FUNIL VAZIO|
+LOG NOT ENTERED|REGISTRO NÃO ENTRADO|
+has been changed to|foi mudado a|
+information has been updated|a informação foi atualizada|
+is now in status|está agora no status|
+Voicemail Check|Verificação De Voicemail|
+voicemail box|caixa do voicemail|
+Re-Login|Re-Início de uma sessão|
+User Password|Senha Do Usuário|
+User Login|Início de uma sessão Do Usuário|
+Phone Login|Início de uma sessão Do Telefone|
+Phone Password|Senha Do Telefone|
+Campaign not active, please try again|A campanha nao ativa, tenta por favor outra vez|
+Login incorrect, please try again|O início de uma sessão incorreto, tenta por favor outra vez|
+Campaign Login|Início de uma sessão Da Campanha|
+Sorry, your phone login and password are not active in this system, please try again|Pesaroso, seus início de uma sessão do telefone e senha não seja|
+leads left to call in hopper|conduz à esquerda para chamar-se no funil|
+CAMPAIGN CUSTOM PARKING|ESTACIONAMENTO FEITO SOB ENCOMENDA DA CAMPANHA|
+CAMPAIGN DEFAULT PARKING|ESTACIONAMENTO DO DEFEITO DA CAMPANHA|
+CAMPAIGN CUSTOM WEB FORM|FORMULÁRIO FEITO SOB ENCOMENDA DA CORREIA FOTORRECEPTORA DA CAMPANHA|
+CAMPAIGN DEFAULT WEB FORM|FORMULÁRIO DA CORREIA FOTORRECEPTORA DO DEFEITO DA CAMPANHA|
+CAMPAIGN ALLOWS CLOSERS|A CAMPANHA PERMITE CLOSERS|
+CAMPAIGN ALLOWS NO CLOSERS|A CAMPANHA NÃO PERMITE NENHUM CLOSERS|
+USING PREVIOUS MEETME ROOM|USANDO O QUARTO PRECEDENTE DE MEETME|
+USING NEW MEETME ROOM|USANDO O QUARTO NOVO DE MEETME|
+old QUEUE and INCALL reverted list|FILA velha e lista reverted INCALL|
+old QUEUE and INCALL reverted hopper|FILA velha e funil reverted INCALL|
+old vicidial_live_agents records cleared|os registros velhos dos vicidial_live_agents cancelaram|
+campaign is set to auto_dial_level|a campanha é ajustada ao auto_dial_level|
+new vicidial_live_agents record inserted|o registro novo dos vicidial_live_agents introduziu|
+campaign is set to manual dial|a campanha é ajustada ao seletor manual|
+Sorry, there are no leads in the hopper for this campaign|Pesaroso, não há nenhuma ligação no funil para esta campanha|
+Dial Next Number|Número Seguinte Do Seletor|
+LIVE CALLS IN YOUR SESSION|VIVEM AS CHAMADAS EM SUA SESSÃO|
+Stop Recording|Pare de Gravar|
+Start Recording|Comece Gravar|
+Transfer number must have more than 1 digit|O número de transferência deve ter mais de 1 dígito|
+Grab Parked Call|Chamada Estacionada Garra|
+Park Call|Chamada Do Parque|
+Waiting for Ring|Anel de espera|
+Called 3rd party|Ó partido chamado|
+LEAVE 3-WAY CALL|CHAMADA DA LICENÇA 3-WAY|
+Dial With Customer|Seletor Com Cliente|
+Park Customer Dial|Seletor Do Cliente Do Parque|
+Hangup Xfer Line|Linha De Xfer Do Hangup|
+Hangup Both Lines|Hangup Ambas as Linhas|
+Hangup Customer|Cliente Do Hangup|
+Transfer - Conference|Transferência - Conferência|
+LOCAL CLOSER|LOCAL MAIS PRÓXIMO|
+INTERNAL CLOSER|MAIS PRÓXIMO INTERNO|
+Dial Blind Transfer|Transferência Da Cortina Do Seletor|
+Dial timed out, contact your system administrator|O seletor cronometrado para fora, contata seu administrador de|
+No more leads in the hopper for campaign|Não mais conduz no funil para a campanha|
+Web Form|Formulário Da Correia fotorreceptora|
+You Must Select a Disposition|Você deve selecionar uma disposição|
+GROUPS NOT SELECTED|GRUPOS NÃO SELECIONADOS|
+SELECTED GROUPS|GRUPOS SELECIONADOS|
+You cannot log out during a Dial attempt|Você não pode registrar para fora durante uma tentativa do seletor|
+Wait 50 seconds for the dial to fail out if it is not answered|Espere 50 segundos pelo seletor para falhar para fora se não se|
+STILL A LIVE CALL! Hang it up then you can log out|AINDA Uma CHAMADA VIVA! Pendure-a acima então que você pode|
+Hide conference call channel information|Informação da canaleta da chamada de conferência do hide|
+Show conference call channel information|Mostre a informação da canaleta da chamada de conferência|
+Logged in as User|Usuário|
+No one is in your session|Ninguém está na sua sessão|
+Customer has hung up|O cliente pendurou acima|
+End-of-call Disposition Selection|Extremidade-$$$-CHAME A Seleção Da Disposição|
+CLOSER INBOUND GROUP SELECTION|SELEÇÃO DE GRUPO INBOUND MAIS PRÓXIMA|
+Closer Inbound Group Selection|Seleção De Grupo Inbound Mais próxima|
+BLENDED CALLING|CHAMADA MISTURADA|
+outbound activated|outbound ativado|
+Preview the Lead then|Inspecione a ligação então|
+Lead was not reverted, there was an error|A ligação não reverted, não havia um erro|
+call was not placed, there was an error|a chamada não foi colocada, não havia um erro|
+Number to call|Número a chamar-se|
+Customer Information|Informação Do Cliente|
+Lead Dispositioned As|Ligação Dispositioned Como|
+Any changes made to the customer information below at this time will not be comitted, You must change customer information before you Hangup the call|Todas as mudanças feitas ao cliente que a informação abaixo neste tempo não será comitted, você devem mudar a informação do cliente antes de você hangup a chamada|
+When active, simply press the keyboard key for the desired disposition for this call. The call will then be hungup and dispositioned automatically|Quando ativo, pressione simplesmente a chave de teclado para a|
+Disposition Hot Keys|Chaves Quentes Da Disposição|
+Cust Time|Tempo De Cust|
+RECORD ID|ID RECORD|
+RECORDING FILE|LIMA DE GRAVAÇÃO|
+HOT KEYS ACTIVE|CHAVES QUENTES ATIVAS|
+HOT KEYS INACTIVE|CHAVES QUENTES INATIVAS|
+DIAL OVERRIDE|ULTRAPASSAGEM DO SELETOR|
+SKIP LEAD|LIGAÇÃO DA FAIXA CLARA|
+DIAL LEAD|LIGAÇÃO DO SELETOR|
+LEAD PREVIEW|INSPECÇÃO PRÉVIA DA LIGAÇÃO|
+PAUSE AGENT DIALING|PARE DE CHAMAR-SE|
+DISPOSITION CALL|CHAMADA DA DISPOSIÇÃO|
+ session ID| sessão ID|
+ to campaign| à campanha|
+Select a CallBack Date|Selecione uma data da rechamada|
+ maximize | maximize |
+ minimize | minimize |
+You must choose a date|Você deve escolher uma data|
+Select a Date Below|Selecione uma data abaixo|
+Click on a callback below to call the customer back now. If you click on a record below to call it, it will be removed from the list|Estale sobre uma rechamada abaixo para chamar agora a parte traseira do cliente. Se você estalar sobre um registro abaixo para o chamar, estará removido da lista|
+If you want to dial a number and have it NOT be added as a new lead, enter in the exact dialstring that you want to call in the Dial Override field below. To hangup this call you will have to open the CALLS IN THIS SESSION link at the bottom of the screen and hang it up by clicking on its channel link there|Se você quiser marcar um número e o ter não adicionado como uma ligação nova, entre no dialstring exato esse você querem chamar-se abaixo no campo da ultrapassagem do seletor. Ao hangup esta chamada você terá que abrir as CHAMADAS ncEsta ligação da SESSÃO no fundo da tela e pendurá-las acima estalando em sua ligação da canaleta lá|
+YOU CANNOT SKIP A CALLBACK OR MANUAL DIAL, YOU MUST DIAL THE LEAD|VOCÊ NÃO PODE SALTAR Uma RECHAMADA OU SELETOR MANUAL, VOCÊ DEVE MARCAR A LIGAÇÃO|
+YOU MUST BE PAUSED TO MANUAL DIAL A NEW LEAD IN AUTO-DIAL MODE|VOCÊ DEVE SER PAUSADO Ao SELETOR MANUAL Uma LIGAÇÃO NOVA Na MODALIDADE De AUTO-DIAL|
+Enter information below for the new lead you wish to call|Incorpore a informação abaixo para a ligação que nova você deseja se chamar|
+YOU MUST BE PAUSED TO CHECK CALLBACKS IN AUTO-DIAL MODE|VOCÊ DEVE SER PAUSADO PARA VERIFICAR RECHAMADAS NA MODALIDADE DE AUTO-DIAL|
+Note: all new manual dial leads will go into list 999|Nota: todas as ligações manuais novas do seletor entrarão na lista 999|
+YOU DO NOT HAVE PERMISSIONS TO TRANSFER CALLS|VOCÊ NÃO TEM PERMISSÕES TRANSFERIR CHAMADAS|
+will be added to the beginning of this number|será adicionado ao começo deste número|
+This is usually a 1 in the USA-Canada|Este é geralmente um 1 nos EUA e no Canadá|
+NEW MANUAL DIAL LEAD FOR|LIGAÇÃO MANUAL NOVA DO SELETOR PARA|
+Finish and Disposition Call|Revestimento e chamada da disposição|
+10 digits max - digits only|máximo de 10 dígitos - dígitos somente|
+Note: a dial prefix of|Nota: um prefixo do seletor de|
+Hangup Again|Hangup Outra vez|
+Go Back|Vá Para trás|
+Call Agent Again|Agente Da Chamada Outra vez|
+MY CALLBACK ONLY|MINHA RECHAMADA SOMENTE|
+NO ACTIVE CALLBACKS|NO RECHAMADAS ATIVAS|
+ACTIVE CALLBACKS|RECHAMADAS ATIVAS|
+CALLBACKS FOR AGENT|RECHAMADAS PARA O AGENTE|
+Dial Code:|Código Do Seletor:|
+Dial Override|Ultrapassagem Do Seletor|
+digits only please|os dígitos satisfazem somente|
+Dial Now|Seletor Agora|
+CB Comments|Comentários dos CB|
+Title|Título|
+Your Status|Seu Status|
+ STATUS| STATUS|
+ RESET| RESTAURAÇÃO|
+CLEAR FORM|RESTAURAÇÃO|
+SUBMIT|SUBMETA|
+Incoming|Entrante|
+Calling|Chamada|
+Called|Chamado|
+Campaign|Campanha|
+Status|Status|
+Inserted|Introduzido|
+ seconds| segundos|
+HELP|AJUDA|
+ Login | Início de uma sessão |
+Login:|Início de uma sessão:|
+User |Usuário |
+Password|Senha|
+VERSION|VERSÃO|
+BUILD|CONFIGURAÇÃO|
+Server|Usuário|
+RECORD |REGISTRO |
+>HANGUP|>HANGUP|
+>XFER|>XFER|
+PARK|PARQUE|
+IN-NUMBER|IN-NUMBER|
+NUMBER|NÚMERO|
+CALLERID|CALLERID|
+ CALL| CHAMADA|
+PICKUP|COLETOR|
+CONFERENCE|CONFERÊNCIA|
+Refresh|Refresque|
+Send DTMF|Emita DTMF|
+ORDER|ORDEM|
+ on | em |
+>LOGOUT|>LOGOUT|
+ Channel| Canaleta|
+Extensions|Extensões|
+Conferences|Conferências|
+Conference|Conferência|
+Recording|Gravação|
+Record|Registro|
+Welcome|Boa vinda|
+VOICEMAIL|VOICEMAIL|
+ NEW| NOVO|
+ OLD| VELHO|
+ Pause | Pausa |
+Resume|Resumo|
+Faster|Mais rapidamente|
+Slower|Mais lento|
+Initializing|Inicializar|
+Invalid|Inválido|
+Username|Username|
+Notes|Notas|
+First|Prime|
+MI: |Mi:|
+Last|Último|
+Address|Endereço|
+City|Cidade|
+State|Estado|
+PostCode|PostCode|
+Province|Província|
+Vendor ID|Vendedor Id|
+DialCode|DialCode|
+Alt. Phone|Alt. Telefone|
+Show|Mostra|
+Email|Email|
+Comments|Comentários|
+REFRESH|REFRESQUE|
+ALT PHONE DIAL|ALT DO TELEFONE|
+MAIN PHONE|TELEFONE PRINCIPAL|
+ALT PHONE|ALT DEL TELEFONO|
+ADDRESS3|ENDEREÇO3|
+FINISH LEAD|REVESTIMENTO|
+Dial Alt Phone Number|Número Alt Do Seletor|
+Phone|Telefone|
+ DIAL| SELETOR|
+SUBMIT FAVORITES CHANGES - requires logout|SUBMETA MUDANÇAS dos FAVORITOS - requer o logout|
+BACK TO MAIN WINDOW - ignore changes made|PARA TRÁS À JANELA PRINCIPAL - ignore as mudanças feitas|
+AVAILABLE EXTENSIONS|EXTENSÕES DISPONÍVEIS|
+ edit| edite|
+ FAVORITES| FAVORITOS|
+### END translation phrases through 1.1.11 release ###
+Search Existing Leads|Ligações Existentes Da Busca|
+This option if checked will attempt to find the phone number in the system before inserting it as a new lead|Esta opção se verificado tentará encontrar o número de telefone no sistema antes de introduzi-lo como uma ligação nova|
+Finish Wrapup and Move On|Revestimento Wrapup e movimento sobre|
+seconds remaining in wrapup|segundos restantes no wrapup|
+Call Wrapup:|Chamada Wrapup:|
+### months of the year for CallBack date select screen ###
+January|Janeiro|
+Frebruary|Fevereiro|
+March|Março|
+April|Abril|
+May|Pode|
+June|Junho|
+July|Julho|
+August|Agosto|
+September|Setembro|
+October|Outubro|
+November|Novembro|
+December|Dezembro|
+### BEGIN translation phrases for 2.0.1 release ###
+Previous Callback Information|Informação Precedente Da Rechamada|
+Last Call: |Última Chamada:|
+CallBack: |Rechamada:|
+Agent: |Agente:|
+Comments: |Comentários:|
+### BEGIN translation phrases for 2.0.2 release ###
+VOLUME|VOLUME|
+### BEGIN translation phrases for 2.0.3 release ###
+FAST DIAL|SELETOR RÁPIDO|
+YOU MUST ENTER A PHONE NUMBER AND DIAL CODE TO USE FAST DIAL|VOCÊ DEVE DAR ENTRADA A um NÚMERO De TELEFONE E A um CÓDIGO DoSELETOR PARA USAR O SELETOR RÁPIDO|
+ SELECT A PAUSE CODE :| SELECIONE Um CÓDIGO Da PAUSA :|
+ENTER A PAUSE CODE|DÊ ENTRADA A um CÓDIGO Da PAUSA|
+YOU MUST BE PAUSED TO ENTER A PAUSE CODE IN AUTO-DIAL MODE|VOCÊ DEVE SER PAUSADO PARA DAR ENTRADA A um CÓDIGO Da PAUSA NaMODALIDADE De AUTO-DIAL|
+Your session has been disabled|Sua sessão foi incapacitada|
+### BEGIN translation phrases for 2.0.5 release ###
+Gender: |Sexo:|
+Date of Birth: |Data de Nascimento:|
+YOU MUST BE PAUSED TO CHANGE GROUPS|Você deve estar PAUSED PARA ALTERAR GRUPOS|
+Calls in Queue:|Solicita, em fila:|
+ Timeclock|Timeclock|
+The user and password you entered are not active in the system|O usuário ea senha que você digitou não são ativos no sistema|
+Please try again|Por favor, tente novamente|
+You cannot log in or out within 30 seconds of your last login or logout|Você não pode efetuar login ou para fora dentro de 30 segundos do seu último login ou logout|
+You have now logged-out|Você tem agora autenticado-out|
+You logged out at |Você saiu em|
+Amount of time you were logged-in: |Quantidade de tempo que foram registradas em:|
+ERROR: timeclock log entry already made: |ERRO: timeclock entrada do log já realizados:|
+BACK to Agent Login Screen|BACK TO Agent Login Screen|
+BACK to Administration|Retornar para Administração|
+BACK to Welcome Screen|ANTERIOR a tela Bem-vindo|
+Time since you were last logged-in: |Vez desde que foi registrado em:|
+You last logged-out at: |Você última autenticado-out em:|
+Click LOGIN below to log-in|LOGIN Clique abaixo para log-in|
+Amount of time you have been logged-in: |Quantidade de tempo que tem sido registrado em:|
+You logged-in at:|Você autenticado-nos em:|
+Click LOGOUT below to log-out|LOGOUT Clique abaixo para log-out|
+Undefined|Undefined|
+This phone number is not in the campaign lists|Esse número de telefone não está na campanha listas|
+Unspecified error|Unspecified error|
+Extended Alt Phone Information: |Extensão Alt Telefone Informação:|
+ALT DIAL NUMBER:|ALT PROGR.SELEC NÚMERO:|
+Phone Code and Number:|Telefone Código e Número:|
+Notes: |Notas:|
+Active: |Ativa:|
+Alt Count: |Alt Count:|
+Change this phone number to INACTIVE|Altere este número de telefone para INATIVO|
+Change this phone number to ACTIVE|Altere este número de telefone para ACTIVAS|
+YOU MUST LOG IN TO THE TIMECLOCK FIRST|É necessário efetuar login AO PRIMEIRO TIMECLOCK|
+There is a time synchronization problem with your system, please tell your system administrator|Há um tempo sincronização problema com o seu sistema, por favor informe o seu administrador de sistema|
+Preview Call|Preview Call|
+SELECT A GROUP ALIAS|Selecionar um grupo ALIÁS|
+Group Alias Selection|Grupo Alias Selecção|
+Click Here to Choose a Group Alias|Clique aqui para escolher um grupo Alias|
+Group Alias|Grupo Alias|
+ERROR: There are no Shifts enabled for your user group|ERRO: Não existem Shifts activado para o Grupo de Usuários|
+ERROR: You are not allowed to log in outside of your shift|ERRO: Você não tem permissão para iniciar sessão no para fora do seu turno|
+MANAGER OVERRIDE|GERENTE Override|
+Your Shift is over or has changed, you have been logged out of your session|Seu Shift é mais ou mudou, você foi desconectado da sua sessão|
+### START translations for 2.2.0 release ###
+You are not allowed to dial into other agent sessions|Você não tem permissão para discar para sessões de outro agente|
+QUICK TRANSFER|RÁPIDA TRANSFERÊNCIA|
+Other Agents Status|Outros agentes Status|
+Available Agents Transfer|Agentes de transferência disponíveis|
+Show Calls In Queue|Solicita Show Em Fila|
+Calls In Queue|Solicita, em fila|
+Hide Calls In Queue|Solicita Hide Na fila|
+Calls in Queue View Disabled for this campaign|Chamadas na fila Ver condicionada para esta campanha|
+YOU MUST BE PAUSED TO GRAB CALLS IN QUEUE|VOCÊ DEVE SER PAUSA PARA GRAB APELA EM FILA|
+Manager |Gerente|
+has selected your in-group choices|foi selecionado o grupo de escolhas|
+CONSULTATIVE|CONSULTIVO|
+Close Message|Fechar Mensagem|
+TIMER NOTIFICATION|NOTIFICAÇÃO TIMER|
+>AGENTS<|>AGENTES<|

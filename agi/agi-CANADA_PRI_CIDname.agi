@@ -1,0 +1,261 @@
+#!/usr/bin/perl
+#
+# agi-CANADA_PRI_CIDname.agi version 0.1 
+# 
+# Runs after call goes through IAX loop to send out custom CallerIDname on
+# Canadian PRIs that allow dynamic setting of CIDname with call initiation
+#
+# You need to have lines similar to those below in your extensions.conf file:
+#
+# ;outbound VICIDIAL calls:
+#exten => _91NXXNXXXXXX,1,AGI(call_log.agi,${EXTEN})
+#exten => _91NXXNXXXXXX,2,AGI(agi-CANADA_PRI_CIDname.agi,${EXTEN})
+#exten => _91NXXNXXXXXX,3,Dial(${TRUNKX}/${EXTEN:1},55,tTo)
+#exten => _91NXXNXXXXXX,4,Hangup
+#
+# Copyright (C) 2009  Matt Florell <vicidial@gmail.com>    LICENSE: AGPLv2
+#
+# changes:
+# 90305-2136 - First build
+#
+
+$script = 'agi-CANADA_PRI_CIDname.agi';
+
+$AGILOG=0;
+$FD=0; # force debug for testing
+
+($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
+$year = ($year + 1900);
+$mon++;
+if ($mon < 10) {$mon = "0$mon";}
+if ($mday < 10) {$mday = "0$mday";}
+if ($hour < 10) {$hour = "0$hour";}
+if ($min < 10) {$min = "0$min";}
+if ($sec < 10) {$sec = "0$sec";}
+
+$now_date_epoch = time();
+$now_date = "$year-$mon-$mday $hour:$min:$sec";
+
+use Asterisk::AGI;
+$AGI = new Asterisk::AGI;
+
+### begin parsing run-time options ###
+if (length($ARGV[0])>1)
+	{
+	if ($AGILOG) {$agi_string = "Perl Environment Dump:";   &agi_output;}
+	$i=0;
+	while ($#ARGV >= $i)
+		{
+		$args = "$args $ARGV[$i]";
+		if ($AGILOG) {$agi_string = "$i|$ARGV[$i]";   &agi_output;}
+		$i++;
+		}
+	}
+
+
+# default path to astguiclient configuration file:
+$PATHconf =		'/etc/astguiclient.conf';
+
+open(conf, "$PATHconf") || die "can't open $PATHconf: $!\n";
+@conf = <conf>;
+close(conf);
+$i=0;
+foreach(@conf)
+	{
+	$line = $conf[$i];
+	$line =~ s/ |>|\n|\r|\t|\#.*|;.*//gi;
+	if ( ($line =~ /^PATHhome/) && ($CLIhome < 1) )
+		{$PATHhome = $line;   $PATHhome =~ s/.*=//gi;}
+	if ( ($line =~ /^PATHlogs/) && ($CLIlogs < 1) )
+		{$PATHlogs = $line;   $PATHlogs =~ s/.*=//gi;}
+	if ( ($line =~ /^PATHagi/) && ($CLIagi < 1) )
+		{$PATHagi = $line;   $PATHagi =~ s/.*=//gi;}
+	if ( ($line =~ /^PATHweb/) && ($CLIweb < 1) )
+		{$PATHweb = $line;   $PATHweb =~ s/.*=//gi;}
+	if ( ($line =~ /^PATHsounds/) && ($CLIsounds < 1) )
+		{$PATHsounds = $line;   $PATHsounds =~ s/.*=//gi;}
+	if ( ($line =~ /^PATHmonitor/) && ($CLImonitor < 1) )
+		{$PATHmonitor = $line;   $PATHmonitor =~ s/.*=//gi;}
+	if ( ($line =~ /^VARserver_ip/) && ($CLIserver_ip < 1) )
+		{$VARserver_ip = $line;   $VARserver_ip =~ s/.*=//gi;}
+	if ( ($line =~ /^VARDB_server/) && ($CLIDB_server < 1) )
+		{$VARDB_server = $line;   $VARDB_server =~ s/.*=//gi;}
+	if ( ($line =~ /^VARDB_database/) && ($CLIDB_database < 1) )
+		{$VARDB_database = $line;   $VARDB_database =~ s/.*=//gi;}
+	if ( ($line =~ /^VARDB_user/) && ($CLIDB_user < 1) )
+		{$VARDB_user = $line;   $VARDB_user =~ s/.*=//gi;}
+	if ( ($line =~ /^VARDB_pass/) && ($CLIDB_pass < 1) )
+		{$VARDB_pass = $line;   $VARDB_pass =~ s/.*=//gi;}
+	if ( ($line =~ /^VARDB_port/) && ($CLIDB_port < 1) )
+		{$VARDB_port = $line;   $VARDB_port =~ s/.*=//gi;}
+	$i++;
+	}
+
+if (!$VARDB_port) {$VARDB_port='3306';}
+if (!$AGILOGfile) {$AGILOGfile = "$PATHlogs/agiout.$year-$mon-$mday";}
+if (!$DIDLOGfile) {$DIDLOGfile = "$PATHlogs/didin.$year-$mon-$mday";}
+
+
+$|=1;
+while(<STDIN>) 
+	{
+	chomp;
+	last unless length($_);
+	if ($AGILOG)
+		{
+		if (/^agi_(\w+)\:\s+(.*)$/)
+			{
+			$AGI{$1} = $2;
+			}
+		}
+
+	if (/^agi_extension\:\s+(.*)$/)		{$extension = $1;}
+	if (/^agi_callerid\:\s+(.*)$/)		{$callerid = $1;}
+	if (/^agi_calleridname\:\s+(.*)$/)	{$calleridname = $1;}
+	}
+
+if ( ($callerid =~ /\".*\"/) && ( (!$calleridname) or ($calleridname =~ /unknown/) ) )
+	{
+	$calleridname = $callerid;
+	$calleridname =~ s/\<\d\d\d\d\d\d\d\d\d\d\>//gi;
+	$calleridname =~ s/\"|\" //gi;
+	}
+
+	$callerid =~ s/\D//gi;
+	$calleridname =~ s/unknown//gi;
+if ( (!$callerid) or ($callerid =~ /unknown/) )
+	{$callerid = $calleridname;}
+
+if (length($callerid)>0) {$phone_number = $callerid;}
+   else {$phone_number = '';}
+if (length($calleridname)>0) {$VLcomments = $calleridname;}
+   else {$VLcomments = '';}
+
+foreach $i (sort keys %AGI) 
+	{
+	if ($AGILOG) {$agi_string = " -- $i = $AGI{$i}";   &agi_output;}
+	}
+
+if ( (length($callerid)>20) && ($callerid =~ /\"\S\S\S\S\S\S\S\S\S\S\S\S\S\S\S\S\S\S/) )
+	{
+	$calleridname =~ s/^\"//gi;
+	$calleridname =~ s/\".*$//gi;
+	}
+
+use DBI;
+use Time::HiRes ('gettimeofday','usleep','sleep');  # necessary to have perl sleep command of less than one second
+
+$dbhA = DBI->connect("DBI:mysql:$VARDB_database:$VARDB_server:$VARDB_port", "$VARDB_user", "$VARDB_pass")
+    or die "Couldn't connect to database: " . DBI->errstr;
+
+### Grab Server values from the database
+$stmtA = "SELECT agi_output,local_gmt FROM servers where server_ip = '$VARserver_ip';";
+$sthA = $dbhA->prepare($stmtA) or die "preparing: ",$dbhA->errstr;
+$sthA->execute or die "executing: $stmtA ", $dbhA->errstr;
+$sthArows=$sthA->rows;
+$rec_count=0;
+while ($sthArows > $rec_count)
+	{
+	$AGILOG = '0';
+	 @aryA = $sthA->fetchrow_array;
+		$DBagi_output =		"$aryA[0]";
+		$local_gmt =		"$aryA[1]";
+		if ($DBagi_output =~ /STDERR/)	{$AGILOG = '1';}
+		if ($DBagi_output =~ /FILE/)	{$AGILOG = '2';}
+		if ($DBagi_output =~ /BOTH/)	{$AGILOG = '3';}
+	 $rec_count++;
+	}
+$sthA->finish();
+
+
+### Grab Server values from the database
+$stmtA = "SELECT cmd_line_g,cmd_line_h,cmd_line_i,cmd_line_j FROM vicidial_manager where callerid = '$calleridname' limit 1;";
+$sthA = $dbhA->prepare($stmtA) or die "preparing: ",$dbhA->errstr;
+$sthA->execute or die "executing: $stmtA ", $dbhA->errstr;
+$sthArows=$sthA->rows;
+if ($sthArows > 0)
+	{
+	@aryA = $sthA->fetchrow_array;
+	$sthA->finish();
+	$account_check = "|$aryA[0]|$aryA[1]|$aryA[2]|$aryA[3]";
+	if ($account_check =~ /usegroupalias=1/)
+		{
+		@data = split(/Account: /,$account_check);
+		$data[1] =~ s/\|.*//gi;
+		$account = $data[1];
+
+		### Grab callerIDname and number from the database
+		$stmtA = "SELECT caller_id_name,caller_id_number FROM groups_alias where group_alias_id = '$account' limit 1;";
+		$sthA = $dbhA->prepare($stmtA) or die "preparing: ",$dbhA->errstr;
+		$sthA->execute or die "executing: $stmtA ", $dbhA->errstr;
+		$sthArows=$sthA->rows;
+		if ($sthArows > 0)
+			{
+			@aryA = $sthA->fetchrow_array;
+			$sthA->finish();
+			$caller_id_name =	"$aryA[0]";
+			$caller_id_number = "$aryA[1]";
+			
+			### set the callerid to the ACQS value(calleridname)
+			## use these two lines for Asterisk 1.2 tree
+			$newcallerid = "\"$caller_id_name <$caller_id_number>\"";
+			$AGI->set_callerid($newcallerid);
+			## use these two lines for Asterisk 1.0 tree
+			#	print "SET CALLERID \"$calleridname\" <0000000000>\n";
+			#	print "SET CALLERIDNAME \"$calleridname\"\n";
+
+			print STDERR "Setting CID \"$newcallerid\"\n";
+			checkresult($result);
+			if ($AGILOG) {$agi_string = "callerID changed: newcallerid;   &agi_output";}
+
+			if ($FD > 0) {print STDERR "callerID changed:     newcallerid\n";}
+
+
+			if ($AGILOG) {$agi_string = "AGI Variables: |$extension|$areacode|$callerid|$calleridname|newcallerid|";   &agi_output;}
+			}
+		}
+	}
+
+
+exit;
+
+
+
+
+sub checkresult {
+	my ($res) = @_;
+	my $retval;
+	$tests++;
+	chomp $res;
+	if ($res =~ /^200/) {
+		$res =~ /result=(-?\d+)/;
+		if (!length($1)) {
+		#	print STDERR "FAIL ($res)\n";
+			$fail++;
+		} else {
+		#	print STDERR "PASS ($1)\n";
+			$pass++;
+		}
+	} else {
+	#	print STDERR "FAIL (unexpected result '$res')\n";
+		$fail++;
+	}
+}
+
+
+
+sub agi_output
+{
+if ($AGILOG >=2)
+	{
+	### open the log file for writing ###
+	open(Lout, ">>$AGILOGfile")
+			|| die "Can't open $AGILOGfile: $!\n";
+	print Lout "$now_date|$script|$agi_string\n";
+	close(Lout);
+	}
+	### send to STDERR writing ###
+if ( ($AGILOG == '1') || ($AGILOG == '3') )
+	{print STDERR "$now_date|$script|$agi_string\n";}
+$agi_string='';
+}

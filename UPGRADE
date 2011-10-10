@@ -1,0 +1,1754 @@
+################ UPGRADE
+
+NOTE: Upgrading from 2.0.5 to 2.2.0 is below the first section
+NOTE: Upgrading from 2.0.4 to 2.0.5 is below the second section
+NOTE: Upgrading from 2.0.3 to 2.0.4 is below the third section
+NOTE: Upgrading from 2.0.2 to 2.0.3 is below the fourth section
+NOTE: Upgrading from 2.0.1 to 2.0.2 is in the next section
+NOTE: Upgrading from 1.1.12-3 to 2.0.1 is at the bottom
+
+########## UPGRADING FROM 2.2.0 TO 2.4 ##########
+
+OPTIONAL STEPS(But highly recommended) - Backup existing system:
+
+1.  Run this for a 1-server system or server with database on it:  
+  (this may take hours on large system)
+   /usr/share/astguiclient/ADMIN_backup.pl --debugX
+
+2. Run this on dialer/Asterisk-only servers:
+  (do not run this if you only have one server):
+   /usr/share/astguiclient/ADMIN_backup.pl --debugX --without-db --without-web
+
+
+REQUIRED STEPS!!!
+
+1. upgrade the MySQL asterisk database(you have two options):
+    A. Running the upgrade file directly from Linux:
+	mysql -f --database=asterisk < /path/from/root/extras/upgrade_2.4.sql
+
+    B. Going into mysql and executing the upgrade sql file:
+	mysql
+	use asterisk
+	\. /path/from/root/extras/upgrade_2.4.sql
+	quit
+
+2. install new files:
+	perl ./install.pl
+	NOTES: If you have customized any scripts in the bin or agi folders, 
+	then make sure you back them up before running the install.pl script. 
+	This script will replace existing files in the astguiclient installation.
+
+3. For each of your ViciDial servers, go the Admin -> Servers -> Modify Server
+	page and set each one to "Rebuild conf files = Y" and click submit.
+	This will rebuild the conf files to ensure any changes are updated.
+
+4. On one server only, update your phone codes data:
+       /usr/share/astguiclient/ADMIN_area_code_populate.pl --purge-table --debug
+
+
+OTHER CHANGES:
+
+1. Changed "After hours", "No agent no queue" and "drop timeout reached" DROPs
+	to use AFTHRS/NANQUE/TIMEOT statuses respectively
+
+2. Added an option to record calls that enter through a DID until they end or
+	enter an in-group queue. MUST ENABLE --MIX CRONTAB ENTRY!!!
+
+3. Added ability to have AGENTDIRECT calls that drop go to user's defined
+	voicemail box
+
+4. Added ability to use a webphone added in an IFRAME in the agent screen.
+	Tested with Zoiper webphone and sample code included
+
+5. Added vdc_script_notes.php for call notes and appointment taking, read 
+	comments for more information.
+
+6. Added Call Log View options to the Agent screen, can be enabled in the 
+	User Group screen or the User screen in Administration
+
+7. Added custom dialplan entries fields for System Settings and Servers
+
+8. Added ability to use security_phrase field in the vicidial_list table as a 
+	Custom CallerID, must enable in Campaign settings
+
+9. Changed voicemail auto-config to use voicemail.conf directly because include
+	files are not fully supported in voicemail.conf. If you have any custom
+	voicemail boxes that are NOT defined in ViciDial then you need to put
+	them in a custom context above the [default] context in voicemail.conf
+	in order to keep them. This change will update the ViciDial database if 
+	the user changes their voicemail password through their phone. If that
+	user also uses that phone entry to login to vicidial.php that password
+	will be changed as well
+
+10. Changed AGENTDIRECT selection to be triggered by clicking on AGENTS link
+	instead of number-to-dial field
+
+11. Reformatted lead search page and added first and last name search options
+
+12. Added 3-WAY status to the Real-time report to show when agents are in 
+	consultative transfer sessions
+
+13. Added AGENTONLY Scheduled Callbacks display options to allow the Callbacks
+	link line in the agent interface to show as red and/or blink. Also, 
+	added option to have callbacks count display only triggered callbacks
+
+14. Added carrier log display option to Real-time report to show the hangup
+	causes for the last 24/6/1 hours and 15/5/1 minutes of outbound calls
+
+15. Added agc/deactivate_lead.php script that can change the status of a lead in
+	another campaign with the same vendor_lead_code, source_id or other 
+	field match. See the file comments for more information
+
+16. Added options.php for vicidial.php to give you the ability to change the 
+	interface options in a separate file so that they can be preserved
+	through an upgrade. See options-example.php for more information
+
+17. Added CallCard featureset to allow for pin-number entry before entering an
+	In-Group by a customer with minute balances and a basic admin interface.
+	See the CALLCARD.txt doc for more information.
+
+18. Added display options for agent screen Transfer-conf buttons in the User
+	Group modification screen.
+
+19. Added ra_call_control function to agent API to allow for hangup and transfer
+	of calls sent to a Remote Agent also allows for setting of a disposition
+	for more information read the AGENT_API.txt doc.
+
+20. Added Extension Groups feature to Remote Agents section allowing calls to be
+	sent to different numbers in a round-robin method when enabled on 
+	multi-line remote agent accounts. To enable, you must create Extension
+	Group entries and enable Extension Group in the Remote Agent entry.
+
+21. Added agi-AGENT_route.agi script to more easily allow for agentdirect calls
+	from call menus without having to create a DID entry for every agent.
+	Simply put this line in the custom dialplan section of the call menu
+	that you want to allow agentdirect dialing for:
+	   "exten => _XXXX,1,AGI(agi-AGENT_route.agi,default---AGENTDIRECT)"
+	That example will only work for agents that have 4-digit IDs.
+	This works well even after hours and when the agent is not available
+	because you can set the call to go to a voicemail box in the selected
+	in-group by using AGENTVMAIL in the voicemail field of the in-group.
+
+22. Add the following lines to the extensions.conf to fix bug with manual dial
+	leave answering machine message(put in the default context):
+		exten => _8320*.,1,AGI(VD_amd.agi,${EXTEN}-----YES)
+		exten => _8320*.,2,Hangup
+
+23. Added ability to search logs from admin search lead page
+
+24. Added more login information to the User Stats page including session,
+	server, phone and computer IP
+
+25. Added Manual Dial override option to campaigns to allow overriding of 
+	user options for manual dial permissions
+
+26. Added campaign option for alerting the agent when they are being blind
+	monitored. Options include an alert, a notice and an audio alert
+
+27. Added inbound custom call ID display and logging feature, also added 
+	vicidial_log_extended which stores more useful call log info
+
+28. Added optional phone codecs definitions as well as system-wide defaults
+	for codec definition. Default for both is blank which will keep 
+	whatever is set at the top of the iax.conf or sip.conf files
+
+29. Added option to allow user information to be blocked form the real-time
+	report by user login(the user viewing the report)
+
+30. Added Hold Time Option Minimum option to in-groups which will prevent the
+	hold time option from running until a minimum number of hold seconds.
+
+31. Added headers to the list export and calls export reports
+
+32. Added several PRESS-1 options to the Hold Time Option settings for In-Groups
+
+33. Added Call Time after-hours filename override option used by inbound groups
+
+34. Added Campaign setting for inbound queue no dial that will prohibit outbound
+	auto-dialing if there are any allowed in-group calls in queue if enabled
+
+35. Added In-group options for setting the length of the on hold message and the
+	hold time option press message as well as offering the option to have
+	those two prompts be non-blocking and allow existing newer calls through
+	to agents while the prompts are playing
+
+36. Added utility in CallCard section to generate new card IDs and view by Run.
+
+37. Added Agent API functions for Send DTMF, Park Customer and the Transfer 
+	Conference functions as well
+
+38. Added prompt options for in-group VIDPROMPT methods when initiated from Call
+	Menus
+
+39. Added web-configurable TTS voice option. Please make sure the Cepstral voice 
+	is installed before entering one.
+
+40. Added function for start_call_url to work with remote agents
+
+41. Added custom default field names for fields in the agent interface. Defined
+	in the Admin System Settings
+
+42. Added new code to help deal with agents on poor network connections. New
+	vicidial.php option is $conf_check_attempts
+
+43. Added Custom List Fields functions to the Admin and Agent web interfaces.
+	To activate you need to enable custom fields in system settings, then
+	you can go to the Lists section to add custom fields to a list. The
+	fields are tied to a list, not a campaign, and they can be displayed
+	in a new tab in the agent interface, and there is a new option to have
+	the Get Call Launch open this custom fields tab upon a call being sent
+	to the agent. Also, the Calls Export Report and the List Download 
+	feature include the custom fields values for the leads exported. You 
+	can import custom field data through the web-based lead loader in TXT
+	and CSV format(you must set a list ID override and you must select
+	Custom Format). You can also use the non-agent API add_lead function,
+	(see the NON-AGENT_API.txt doc for more info). You can also use the 
+	third gen lead loader to import leads with custom files in several 
+	other formats.
+
+44. Added more options to agi-AGENT_route.agi to allow it to prompt for user IDs
+	as well as set the number of digits to collect and check whether a user
+	is logged into ViciDial. The script can also now be run as an AGI route
+	option in CallMenus as well as in the custom dialplan.
+	Look at the comments in the code for more info.
+
+45. Added third generation web-based lead loader capable of loading more data 
+	file types and optionally loading all of them with custom list fields. 
+	You must install the following perl modules on your web server for this
+	new lead loader to work:
+		cpan> install Spreadsheet::XLSX
+		cpan> install Spreadsheet::Read
+	To get to the new lead loader, click to:
+		Lists -> Load New Leads
+	Here is a list of the file formats(by file extension) that are now
+	supported by the third generation web lead loader:
+		TXT  - tab or pipe delimited
+		CSV  - comma separated values
+		XLS  - MS Excel 2000/XP
+		XLSX - MS Excel 2007+
+		SXC  - OpenOffice.org First Generation Spreadsheet
+		ODS  - OpenOffice.org OpenDocument Spreadsheet
+
+46. Added the ability to run selected reports from a MySQL slave server. This is
+	definable in the System Settings in the admin.php interface. You must
+	already have MySQL Master/Slave replication set up for this to work.
+
+47. Added options to include recording ID, Filename and/or Location with Call 
+	Export Report results
+
+48. Added Non-Agent API function for updating leads: update_lead
+	Allows for searching by lead_id, vendor_lead_code and phone_number
+	as well as the ability to insert a new lead if no results found.
+	Works with custom fields as well.
+	For more information, look in the docs/NON-AGENT_API.txt doc
+
+49. Added Wait Time options to in-groups. This is different from the Estimated
+	Hold Time options because this is based only on the customer wait time.
+	Also, second and third options were added for both allow the offering of
+	a press 1, 2 and 3 option in the wait/hold time option features.
+
+50. Added timer action methods HANGUP, EXTENSION, CALLMENU and IN_GROUP. These
+	allow you to hangup or transfer the call at a set number of seconds
+	from start time or triggered from an outside process.
+
+51. Added Allowable Reports option in User Groups for user_level 7 and higher 
+	users to restrict viewable reports. Also enforced the Allowed
+	Campaigns option in User Group across admin.php and reports
+
+52. Changed the "Admin" link in admin.php to go to a links page instead of a 
+	listing of Phones, also forced level 7 users to the reports links page
+	if they try going anywhere in admin.php
+
+53. Renamed "In-Groups" header in admin.php to "Inbound" to reflect that it is
+	not just for In-groups, but includes DIDs and Call Menus as well
+
+54. Added Filter Phone Groups to allow calls coming into DIDs to be filtered
+	and sent to a different route if the caller ID number matches one in
+	the selected Filter Phone Group, or the search can be done by a web GET
+	to a URL that you define.
+
+55. Added method to clean caller ID number when calls come into DIDs, either by
+	stripping specific digits from the front of a number if they are there
+	or taking only the right X numbers, i.e. R10 will take only the 10 
+	digits on the right of a number, and L1 will remove only a 1 from the
+	left side of the number.
+
+56. Added ability to download DNC numbers from the internal and campaign-
+	specific DNC lists, as well as the Filter Phone Groups
+
+57. Added validation for Remote Agents to ensure that the User Start is a valid
+	User in the system, also added validation that Remote Agents do not
+	overlap their number of lines into another Remote Agent
+
+58. Added ability to override the System Settings webphone URL per User Group
+
+59. Added Calculate Estimated Hold Seconds setting which can delay the 
+	Calculation and optionally the announcement of Estimated Hold Time
+	for X seconds.
+
+60. Added new beta script for faster checking of leave-3way conferences,
+	AST_conf_update_3way.pl, read the comments before using.
+
+61. Added Transfer Presets to Campaigns allowing for unlimited dial presets for
+	agents to use in the transfer-conf frame of the agent interface. Also,
+	real-time and outbound report reporting have been added to show call
+	counts for these presets. Presets can optionally have their numbers
+	hidden from agents allowing agents only to select a preset name to
+	transfer or conference a call to. You must Enable Transfer Presets in a
+	campaign before you can define them in the Presets sub-menu.
+
+62. Added ability to hide the "Number to dial" field in the Transfer-conf frame
+	of the agent interface. This is a Campaign-level setting.
+
+63. Added Manual Dial Prefix to allow for a different dial path for manual dial
+	calls placed through the agent interface.
+
+64. Added did_id, did_extension, did_pattern, did_description, closecallid, 
+	xfercallid and agent_log_id as webform and script variables in the agent
+	screen.
+
+65. Added webphone options for System Key and Dialpad, may not be compatible
+	with all webphones.
+
+66. Allow the changing of the queue priority of an inbound call while the call
+	is in queue.
+
+67. Changed the example iax.conf and sip.conf to default to context=trunkinbound
+	to prevent unauthenticated calls on insecure phone accounts
+
+68. Added password strength grading for users, phones and servers. Added ability
+	to force a user password change on the next admin login. Added password 
+	default settings to System Settings and added a first login setup screen
+
+69. Changed application limit for lead_id from 9 digits to 10 digits. This does 
+	not affect the database limit of lead_id: 4294967295
+
+70. Added customer 3way hangup logging options to campaigns which will log if 
+	and how far into the 3-way call a customer has hung-up, as well as if
+	the agent initiated the call after the customer hung up. There is also
+	an option to end the 3-way call and send the agent to the disposition
+	screen if the customer hangs up during the 3-way call.
+
+71. Added ability to view Inbound Report by selected DIDs instead of by 
+	in-groups. Link added to Reports page.
+
+72. Added dispo_move_list.php script which can be used in the Dispo Call URL
+	option for a campaign or in-group. This script can be used to move a
+	lead into a different list_id after the agent disposition depending on
+	the disposition that is selected. Optionally, the lead can also be reset
+	so that it can be dialed back immediately. See the code comments for 
+	more information.
+
+73. Added the Lists Campaign Statuses Report which is a list inventory report, 
+	not a calling report. This report will show statistics for all of the 
+	lists in the selected campaigns.
+
+74. Added ability to use Custom List Fields in Web Forms, Scripts and Dispo 
+	Call URL entries used by the agent interface.
+
+75. Added "Add Lead URL" feature to in-groups. Works like Dispo Call URL except
+	it will send a web get out as soon as a lead is created by the inbound
+	process. There is a more limited set of variables available for use with
+	this option, see the admin.php help for more details
+
+76. Changed the PARK CUSTOMER option in campaigns to use a Music-on-Hold context
+	instead of a difficult-to-configure filename and extension as before
+
+77. Added new IVR PARK CUSTOMER feature to campaigns allowing an agent to park
+	a customer to an AGI script as an IVR and have the customer enter in
+	digits unassisted and then be redirected back to the agent who parked
+	them when they are finished. Optional in-group redirect if customer 
+	does not enter valid input. See example park_call_IVR_example.agi script
+
+78. Added In-Group options for Estimated Hold Time Minimum, which can replace
+	the "15 seconds" minimum accouncement with an announcement of your 
+	choosing
+
+79. Added a campaign option for Manual Preview Dial, to enable or disable that
+	manual dial option, as well as allowing or disallowing for the SKIP
+	lead option.
+
+80. Added two new recording filename variable options: VENDORLEADCODE, LEADID
+
+81. Added the ViciDial Web Dial Firefox web browser plugin, that allows right-
+	click selection dialing of phone numbers on web pages to a logged-in
+	ViciDial Agent session. See "extras/firefox_plugin" for more info.
+
+82. Added ability to change users' in-group settings from the in-group 
+	modification screen in bulk.
+
+83. Added Agent Average time stats option to the real-time screen. Must enable
+	realtime_agent_time_stats option in campaign screen.
+
+84. Added customer park time counter to the agent screen when customer is on
+	park. Also, added logging of parked calls to park_log table
+
+85. Added ADDMEMBER queue_log logging option to System Settings, and added 
+	CALLERONHOLD entries to queue_log when customer is on park.
+
+86. Added admin no-cache and auto-refresh of modify screens to admin interface.
+	These are configurable in the System Settings
+
+87. Added option for cross-server phone dialplan extensions in System Settings.
+
+88. Added campaign feature to automatically adjust the hopper level to the 
+	dialing rate and the number of active agents, also added a trim feature
+	to make sure the hopper is not filled too much
+
+89. Added the ability to filter manual dial calls to adhere to the call time
+	scheme selected for the campaign. Does not work with State Call Times.
+	Must be enabled in the Campaign Detail settings.
+
+90. Added the ability to queue multiple manual dial calls for a specific logged-
+	in agent using the Agent API. Feature must be enabled in the Campaign 
+	Detail settings.
+
+91. Added ability to modify scheduled callback dates and comments in the Admin 
+	Modify Lead screen.
+
+92. Added List override options for webform fields
+
+93. Added script to purge all vicidial_callbacks records that are inactive or
+	are tied to deleted leads, AST_DB_dead_cb_purge.pl
+	add to the crontab like this:
+	# cleanup of the scheduled callback records
+	25 0 * * * /usr/share/astguiclient/AST_DB_dead_cb_purge.pl --purge-non-cb -q
+
+94. Added did_log_export and recording_lookup functions to the non-agent API
+
+95. Added option to display statuses within the active lists of a campaign in
+	the campaign modification screen. Also includes called and not called
+	counts.
+
+96. Added rewritten AJAX/Javascript driven real-time report, able to support
+	webphones.
+
+97. Added the ability to hide fields in the agent interface by entering 
+	---HIDE--- into the System Settings label option for the field
+
+98. Added preprocess leads in script to filter leads and generate standard
+	format lead files before being imported
+
+99. Added the ability to have call times go beyond midnight for inbound calls.
+
+100. Added capability for agent interface to have webphone as a thin top bar
+
+101. Added hopper loader randomization option in Campaign Detail screen, which
+	allows for the results to be randomized inside of the sorted results as
+	sorted by the List Order option
+
+102. Added add_user and add_phone non-agent API functions
+
+103. Changed vicidial.php HTML formatting to be XHTML compliant
+
+104. Added vdc_script_dispo_example.php script which can be customized to
+	require specific fields be filled in before submitting, as well as 
+	limiting this restriction to only specific dispositions. You can also
+	specify dispositions to be selectable that are set to non-selectable.
+	You use this script in an IFRAME for the campaign. It must be 
+	customized for your specific business rules.
+
+105. Added the ability to use custom statuses for scheduled callbacks. These
+	are configurable with the Scheduled Callbacks flag in the System
+	Statuses and Campaign Statuses administrative screens.
+
+106. Added Secondary List Order which allows for further sorting of leads to be
+	dialed by a secondary sorting method
+
+107. Added Default Campaign setting for the My Callback agent interface option
+	so that the checkbox can be pre-selected or not on every call
+
+108. Added the campaign option for per-call call notes in the agent interface.
+	If the User Group also has Call Log enabled, the agent can also see 
+	the call notes from previous calls.
+
+109. Added the add-a-new-lead link to the admin interface
+
+110. Added ability for an agent to search for a lead in the agent interface 
+	while paused. This feature can be enabled per campaign and per user. 
+	Searches can optionally be restricted to campaign lists or only one 
+	list. All search queries are logged.
+
+111. Added options to restrict agent lead search to the owner field equal to
+	the user, user group or selected territories for the agent.
+
+112. Added option for phone load balanced logins server twin checking on 
+	systems that have servers installed in pairs
+
+113. Changed scheduled callbacks display in the agent interface to show all
+	callback and lead information, including call history and call notes,
+	without having to dial the lead.
+
+114. Added on-hook agent phone feature. This feature allows inbound calls from
+	customers to ring on an on-hook agent phone, but not be transferred to 
+	that agent until the agent's phone is answered. If the call times out 
+	then the call will go on to the next agent. This is defined in the 
+	Phones record and allows the agent using the vicidial.php agent screen 
+	to not have to stay on the phone at all times when they are logged in. 
+	You will need to add the following lines to the default context in your 
+	extensions.conf file:
+		; these are used for the ring_all function in VICIDIAL
+		exten => _8331*.,1,Playback(sip-silence)
+		exten => _8331*.,n,AGI(agi-VDAD_RINGALL.agi,${EXTEN})
+		exten => _8331*.,n,AGI(agi-VDAD_RINGALL.agi,${EXTEN})
+		exten => _8331*.,n,AGI(agi-VDAD_RINGALL.agi,${EXTEN})
+		exten => _8331*.,n,Hangup
+
+115. Added ring_all Next Agent Call option for in-groups. This works with on-
+	hook agent phones to allow all available agents to have their phones
+	ring at the same time, with the first agent to pick up their phone 
+	receiving the call. It is not recommended to use this on high-volume 
+	systems or systems with many agents available.
+
+116. Added DEFER options to the Scheduled Callbacks Alert campaign feature. 
+	These allow you to stop the blinking of the alert in the agent screen
+	after you have viewed the callbacks, but if the number of callbacks 
+	changes the red and/or blink will start again.
+
+117. Added add_list and update_list functions to the Non-Agent API, allowing
+	you to add, modify and delete lists, as well as reset leads in a list,
+	change a list to active or inactive, change the campaign of a list and
+	delete the leads inside of a list.
+
+118. Added Campaign option to auto-pause agents when they go into several 
+	pre-call functions like Manual Dial, Lead Search, Callbacks Check, etc.
+	Also added an option to auto-resume the agent when leaving those 
+	funtions.
+
+119. Changed almost all of the browser alerts to HTML alerts. These are the 
+	messages that tell you for example that you cannot do this when paused.
+	The reason for the change is that browser alerts are blocking and will
+	halt executiong of javascript on the agent workstation. This change
+	should require no alterations to any configurations.
+
+120. Added recording of Remote Agents calls per recording settings in campaigns.
+	If recording is set to ALLCALLS or ALLFORCE then a recording will be 
+	initiated for the call upon routing to the Remote Agent and will be tied
+	to the R/ user and the lead_id. Also works with on-hook enabled. User-
+	level recording settings for the start user of the remote agent will 
+	also be followed.
+
+121. Added MULTI_LEAD option for Auto-Alt-Dialing. Using MULTI_LEAD allows you 
+	to use a separate lead for each number on a customer account that all 
+	share a common vendor_lead_code, and the type of phone number for each 
+	is defined with a label in the Owner field. This option will disable 
+	some options on the Modify Campaign screen and show a link to the 
+	Multi-Alt Settings page which allows you to set which phone number types
+	, defined by the label of each lead, will be dialed and in what order. 
+	This will create a special lead filter and will alter the Rank field of 
+	all of the leads inside the lists set to this campaign in order to call 
+	them in the order you have specified.
+
+122. Added option to use the owner field to define a time zone abbreviation code
+	Works across web/api/cli lead loading methods. There is also an option
+	in the time zone updating script to use this method.
+
+123. Added ability to use external_dial Agent API function with a defined 
+	lead_id and optional alt_dial setting
+
+124. Added feature to give an alert on manual dial campaigns if the phone number
+	area code and the postal code are in different time zones, or if either
+	of them are outside of the local call time for the campaign. Viewable in
+	preview mode as well as lead info viewing from the callbacks list, the 
+	call log and search results in the agent interface.
+
+125. Added utility to synchronize users, remote agents, dids, call menus, 
+	in-groups and campaigns with entries in QM: ADMIN_qm_sync.pl
+
+126. Added Custom 3-Way Button Transfer feature which allows for 3-way calls to
+	be placed using one of several lead fields or campaign presets, as well 
+	as the customer optionally being put on park, and the transfer - conf
+	frame being brought up, all at the click of one button on the main agent
+	screen.
+
+127. Added the agc/phone_only.php script, a web-based web-phone-only client 
+	application that allows full phone usage without needing to login as an
+	agent
+
+128. Added option to Lists to allow you to choose in the List Modification 
+	screen the method of time zone adjustment that happens nightly on a per
+	list basis. COUNTRY_AND_AREA_CODE is the default, and will use the 
+	country code and area code of the phone number to determine the time 
+	zone of the lead. POSTAL_CODE will use the postal code if available to 
+	determine the time zone of the lead. NANPA_PREFIX works only in the USA 
+	and will use the area code and prefix of the phone number to determine 
+	the time zone of the lead, but this is not enabled by default in the 
+	system, so please be sure you have the NANPA prefix data loaded onto 
+	your system before selecting this option. OWNER_TIME_ZONE_CODE will use 
+	a standard time zone abbreviation loaded into the owner field of the 
+	lead to determine the time zone, in the USA examples are AST, EST, CST, 
+	MST, PST, AKST, HST. This feature does NOT affect the time zone used at
+	the moment leads are loaded, that needs to be selected when you are 
+	loading leads. This feature must be enabled in the crontab for the GMT 
+	adjust script:
+	/usr/share/astguiclient/ADMIN_adjust_GMTnow_on_leads.pl --list-settings
+
+129. Added Available Only Tally Threshold campaign option which allows you to 
+	set the number of agents below which Available Only Tally will be 
+	temporarily enabled
+
+130. Added Auto Dial Level Threshold campaign option which allows you to set a 
+	minimum number agents that the predictive algorithm will work at. If the 
+	number of agents falls below the number that you have set, then the 
+	dial level will go to 1.0 until more agents log in or go into the 
+	selected state
+
+131. Change Dial Level Difference Target to work properly with all RATIO and
+	ADAPT dial method outbound campaigns. Added a Method option to restrict
+	this feature to only calculation of dial level or to affect the calls 
+	dialed on each dialing engine.
+
+132. Added ability to have outbound auto-dial campaigns drop to an audio prompt
+	or a call menu. Outbound IVR Report added. Added optional logging of 
+	call menu caller key presses. Lead ID can now be preserved on calls 
+	coming from auto-dial or in-groups that go through call menus and back
+	into an in-group. Call Menu transfer also works from an Outbound Survey.
+
+133. Added new agent interface alert where manual dial calls will not be allowed
+	if the disposition process has not completed. Usually a rare problem on 
+	systems with networking issues.
+
+134. Added Callback Days Limit campaign option to allow scheduled callbacks to 
+	be scheduled only a set number of days from today.
+
+135. Added ability to disable the Disposition screen on the agent interface.
+
+136. Added install.pl options to define conf file and copy web language
+	translation files.
+
+137. Added Export Leads Report similar to Export Calls Report, but a lead is 
+	only exported once and with the current status.
+
+138. Added Agent Screen Labels sub-section of the Admin functions. Allows for
+	each campaign to use a different set of labels for the fields on the 
+	default agent screen.
+
+139. Added ability to define the agent screen status fields shown to the agent:
+	Call ID, Lead ID and List ID
+
+140. Added HIDDEN and READONLY field types for custom list fields.
+
+141. Added Outbound Campaign Test Call feature to allow you to place a call from
+	the Campaign Detail screen that will go out as if it were an auto-dial 
+	call. Must be enabled in System Settings.
+
+142. Added ability to check for USA and Canada valid prefix and areacodes when
+	loading leads into the web/cli/api lead loaders
+
+143. Added ability to use AGENTEXT in AGENTDIRECT in-groups as a way to send 
+	dropped, no-agent-no-queue and other transferred calls to a specific
+	dialplan number per-user defined in the User Custom Five field.
+
+144. Added last_inbound_call_time and last_inbound_call_finish Next Agent Call 
+	routing options to in-groups.
+
+145. Added CSV download option to almost all reports.
+
+146. Added manual dial agent skip lead logging to the user stats page
+
+147. Added HIDEBLOB field type for custom list fields
+
+148. Added options to set the voicemail zone and extra voicemail options for 
+	each voicemail box in phones and extra voicemail boxes. Also added 
+	default voicemail zone and timezone settings in the system settings.
+	**	**** NOTE **** You might want to add the new zones in the new 
+	**	voicemail.conf.sample file to your voicemail.conf file
+   You must delete the BUILD voicemail file for this feature to work:
+	rm -f /etc/asterisk/BUILDvoicemail-vicidial.conf
+
+149. Added ability to chose the type of callerid sent for inbound ring-agent
+	calls in the in-group: GENERIC, INGROUP, CUSTOMER PHONE and a couple
+	of combinations of those.
+
+150. Added NA Call URL feature to campaigns and in-groups. This works like
+	dispo call url, but it works only for non-agent handled calls, like
+	dropped calls, No Answers, Busy, etc... 
+
+151. Changed MULTI_LEAD Auto-Alt-Dial to use the Auto-Alt-Dial Statuses as set
+	in the campaign automatically. If you are using MULTI_LEAD you may need
+	to add statuses like DROP, PDROP and others to your campaign's auto-alt
+	dial statuses so that the other leads tied by vendor_lead_code in the 
+	campaign's lists are not deactivated.
+
+152. Added noanswer logging feature to System Settings, will log only auto-dial
+	calls that are not answered to a separate table
+
+153. Added new Team Performance Detail report to the Reports page. This is a 
+	fairly detailed and database-intensive report that summarizes several
+	user-grouped statistics
+
+154. Added ability to use static audio from dynamic fields in Survey and
+	Answering machine messages when using Cepstral TTS
+
+155. Added the Campaign Status List Report which shows calls broken down by
+	status within each list_id for a campaign.
+
+156. Added update_phone, add_phone_alias, update_phone_alias functions to the
+	Non-Agent API.
+
+157. Added optional DID Agent logging as System Settings option. This logs calls
+	that come into DIDs in a separate table that includes the in-group and
+	user that the call was sent to, if applicable
+
+158. Added options in Call Menus to allow for invalid action on second or third
+	invalid selection by the caller instead of just the first.
+
+159. Added ability to set custom callerID numbers per campaign for outbound 
+	calls by areacode. You can even set multiple callerIDs per areacode.
+
+160. Added Agent API function logout to log an agent out of their session
+
+161. Added Phone Login Load Balancing Grouping campaign settings to allow 
+	smaller campaigns to have their agents on the same server to allow for
+	more efficient dialing on outbound campaigns. Must have more than one
+	agent server and phone aliases enabled for this feature to work.
+
+162. Added DID remote agent extension override entries allowing for inbound
+	calls that are routed to remote agents being able to have DID-specific
+	extensions that a call would be routed to instead of the remote agent
+	extension. Multiple entries allowed per DID/Remote-Agent as well as 
+	per DID for all agents(---ALL---). Must be enabled in System Settings.
+
+163. Added 9 new User permissions to allow access to specific Admin sections
+	like Vociemail Music-on-hold and 7 others individually.
+
+164. Added ability to define a callerid to use for action transfers from 
+	in-groups(Drop, After-Hours, No-Agent-No-Queue) when transferring out
+	to voicemail, extension, callmenu, etc... You can also select that the
+	customer phone number is used.
+
+165. Added ability to drop or after-hours to a call menu in in-groups.
+
+166. Added ability to set scheduled callbacks through the non-agent-api in the
+	add_lead and update_lead functions.
+
+167. Added new cm_lookup.agi script to allow for account lookups within a 
+	Call Menu without having to go into an in-group. Also new Call Menu
+	option added to allow for vicidial_list field logging of responses
+	inside of a call menu.
+
+166. Added new Call Count Limit option to the campaign screen. This allows you 
+	to limit the number of attempts for any lead being dialed by a campaign.
+	Previously you had to use a filter to achieve this functionality.
+
+167. Added new Complete flag for statuses and campaign statuses. Used by the 
+	new columns mentioned below as well as for future reports.
+
+168. Added Dialable and Penetration columns to the Statuses Within This List/
+	Campaign tables on the list and campaign screens, showing the DIALABLE
+	count for each status as well as the complete-flag and call-count-limit
+	percentage as PENETRATION.
+
+
+
+
+
+########## UPGRADING FROM 2.0.5 TO 2.2.0 ##########
+
+1. install new files:
+	perl ./install.pl
+	NOTES: If you have customized any scripts in the bin or agi folders, 
+	then make sure you back them up before running the install.pl script. 
+	This script will replace existing files in the astguiclient installation.
+
+2. upgrade the MySQL asterisk database:
+	mysql
+	use asterisk
+	\. /path/from/root/extras/upgrade_2.2.0.sql
+	quit
+
+3. Added new method for monitoring from the Real-time screen using a phone entry
+
+4. Outbound Survey option for using Cepstral Text-to-speech. Requires Cepstral 
+	to be installed and configured with proper licenses in place to use.
+	You must enable TTS in the System Settings screen, then you can access 
+	the TTS section of the web administration.
+
+5. Added RANDOM and LAST CALL TIME lead order options to campaigns
+
+6. Changed List Mix to be active by default, depricated the 
+	AST_VDhopper_MIXtest.pl script, if you use it change it to the
+	AST_VDhopper.pl in your crontab entries
+
+7. Added Call Menus Feature(aka IVR) in the In-groups section. This allows you
+	to create call menus with DTMF options using the Admin web interface.
+
+8. Changed all PHP scripts to use long tags, short tags are depricated in PHP6
+
+9. Added audio upload ability from web interface, choose audio prompts from a
+	list in the call menu and in-group admin screens, and back-end audio 
+	synchronization utilities have been added for multi-server setups.
+	to seed all Asterisk audio files, run the following command from your
+	Asterisk server with ViciDial installed:
+	/usr/share/astguiclient/ADMIN_audio_store_sync.pl --force-upload --debug
+	NOTE: Make sure the web audio store folder exists and is writable
+
+10. Added Active Voicemail Server setting to System Settings. Now the voicemail
+	and prompt recording extensions are auto-generated so that they all
+	direct to the same server and they should be removed from the 
+	extensions.conf file:
+	8168, 8167, 85026666666666, 8500, 8501
+
+11. Added auto dial limit setting to System Settings to allow setting of the 
+	top limit for Campaign Auto Dial Level pull-down menu in the Modify
+	Campaign screens
+
+12. Added Agent Time Detail report showing the timeclock time, agent activity
+	time and pause codes time by agent across selected campaigns and/or 
+	user groups. Also reformatted Reports screen in Administration
+
+13. Removed the ViciDial recording extensions from the general dialplan since
+	they are now auto-generated and placed in the extensions-vicidial.conf
+	file(8309 and 8310). Also, phone dial-out contexts are definable now 
+	allowing you to lock out agent phone in a call center from dialing out.
+
+14. Added option to login as an agent with no phone. Must create a phones entry
+	called 'nophone' with dialplan number of 8300.
+
+15. Added live monitoring of calls and retrieval of recorded calls through the
+	QueueMetrics interface
+
+16. Added up to 40 records to one List Mix going down to 1% mix, as well as the
+	option to populate all records with a set of statuses
+
+17. Added ability to force auto-incremented ID values for Users, Campaigns,
+	Lists, Scripts, In-groups, etc... using the vicidial_override_ids table
+
+18. Added the HIDE option for Disable Alter Customer Phone field to hide the 
+	customer phone number from the agent interface
+
+19. Added dynamic route options to Call Menus and links to Call Menus and DIDs
+
+20. Added DID traffic stats report: AST_DIDstats.php
+
+21. Added User Time-Clock Detail report to show agent login and logout times
+	along with totals, sortable and downloadable
+
+22. Added DAHDI channel compatibility and carrier logging for outbound list calls
+
+23. Changed Auto-Detected Busy and Disconnected statuses to AB and ADC to better
+	separate them from agent-defined statuses
+
+24. Added option to lock out DROP calls from being called again for a period of 
+	time, as a campaign option. This is useful to be able to comply with the
+	UK telemarketing regulations that state you may not auto-dial a customer
+	back within 72 hours of an abandon.
+
+25. Changed In-Group and Call Menu prompts to allow for multiple audio files per
+	prompt by separating them by pipes |. Also, changed the Agent Alert 
+	Extention to a Filename in In-Groups
+
+26. Added a conf_secret field to phones table to be used as sip.conf/iax.conf
+	password instead of the pass field. Please check that this is set 
+	properly if you are having phone registration issues
+
+27. Added no-agent-no-queueing options to In-Groups to send a call somewhere 
+	else when there is no agent logged in(or active) to the in-group
+
+28. Changed the agent alert extension to a filename in in-groups
+
+29. Added process for updating statuses on leads in the vicidial_list table
+	through a batch process(VICIDIAL_UPDATE_leads_status_file.pl) as well
+	as a web-based report to show the stats for these transactions
+
+30. Added the option for a Quick Transfer from the agent screen. This option
+	allows the blind transfer of a call to the default transfer group or one
+	of the presets with a single button click. Also added a preset populate
+	feature to pre-populate the Number to Call field with one of the presets
+	for the campaign.
+
+31. Added Multiple Campaign Drop Rate Groups to allow campaigns to share a drop
+	percentage. This allows you to to run multiple smaller campaigns at one
+	time and more easily control your drop rate.
+
+32. Added pre-Answer statuses and processing for the Sangoma CPD(Call Progress
+	Detection) proxy as well as a new netborder sip patch:
+	netborder-cpd-1.4.patch
+
+33. Added Agents Status View sidebar to agent interface, and available transfer
+	agent frame to AGENTDIRECT transfers when clicking on the NUMBER TO CALL
+	field in the transfer conference frame
+
+34. Added Calls in Queue display to Agent screen, along with click to grab a 
+	call from this listing. 
+
+35. Added a Re-Queue Call button to send the current call back to an AGENTDIRECT
+	in-group for the agent to take later
+
+36. Added rank and owner to the vicidial_list table. the CLI lead loader has
+	a new stdrankowner format to add these fields in lead files. Also, added
+	these fields to the web-based lead loader formats and field chooser.
+	Related to this, RANK and OWNER are now lead order options in the 
+	campaign screen.
+
+37. Added automatic list reset option to List Modification screen. You can enter
+	multiple times, and the leads in the list will be reset at those times.
+
+38. Added no-hopper dialing option for MANUAL and INBOUND_MAN campaigns. If This
+	is enabled, the hopper will not run for this campaign. This option is 
+	only available when the dial method is set to MANUAL or INBOUND_MAN. It 
+	is recommended that you do not enable this option if you have a very 
+	large lead database, over 100,000 leads. With No Hopper Dialing, the 
+	following features do not work: lead recycling, auto-alt-dialing, list 
+	mix, list ordering with Xth NEW. If you want to use Owner Only Dialing 
+	you must have No Hopper Dialing enabled. Default is N for disabled.
+
+39. Added lead owner option to restrict dialing within a list to the owner of a
+	lead only. If This is enabled, the agent will only receive leads that 
+	they are within the ownership parameters for. If this is set to USER 
+	then the agent must be the user defined in the database as the owner of 
+	this lead. If this is set to TERRITORY then the owner of the lead must 
+	match the territory listed in the User Modification screen for this 
+	agent. If this is set to USER_GROUP then the owner of the lead must 
+	match the user group that the agent is a member of. For this feature to 
+	work the dial method must be set to MANUAL or INBOUND_MAN and No Hopper 
+	Dialing must be enabled. Default is NONE for disabled.
+
+40. Agent screen Alert option is now disabled by default.
+
+41. Added --GSW option for audio processing scripts 2 and 3 for GSM codec files
+	with an RIFF header and named with .wav file extension
+
+42. Added agent screen display dialable leads option for campaigns
+
+43. Added ViciDial Balance Rank for servers to allow prioritizing the servers
+	that will dial the FILL calls in a multi-server cluster
+
+44. Added optional twoday_ log tables which give you a safer place to be pulling
+	slightly less than real-time information from log tables without locking
+	the live log tables. there are 6 twoday_ log tables: recording_log, 
+	call_log, vicidial_log, vicidial_closer_log, vicidial_xfer_log and
+	vicidial_agent_log
+
+45. Added new Inbound Summary Hourly Report to show stats by in-group and broken
+	down per in-group in hourly increments. This report also allows
+	filtering of the stats by call time scheme.
+
+46. Added option to the Outbound(VDAD) report to calculate stats including the
+	overflow drop in-group stats with the outbound campaign stats.
+
+47. Added longest_wait_time option for Next Agent Call in Campaigns and 
+	In-Groups. 
+
+48. Changed Real-time Report screen agent time display to be based upon a change
+	in "state"(INCALL, READY, PAUSED, etc...) instead of being based upon
+	the time of the last call they handled.
+
+49. Changed the ViciDial agent screen to not delete session reservations by
+	default at agent logout. Instead, the ADMIN_keepalive process will clear
+	out unused session reservations once a day at the timeclock reset time 
+	as set in system_settings.
+
+50. Changed voicemail config to use phone password as voicemail password instead
+	of just the voicemail ID as the password
+
+51. Rewrote how scripts are displayed in the ViciDial agent interface
+
+52. Added List agent script override setting allowing different scripts to be 
+	used for each list ID even within the same campaign
+
+53. Added web-configurable Music-On-Hold and conferences to the admin interface.
+	Make sure you add the following lines to your meetme.conf and 
+	musiconhold.conf files, or just use the samples included:
+	#include musiconhold-vicidial.conf
+	#include meetme-vicidial.conf
+
+54. Changed the reloading of Asterisk modules to only reload the ones that have
+	had changes made to them.
+
+55. Added "Active Agent Server" option to servers to allow disabling of agent
+	phone logins through ViciDial Agent Screen to a specific server
+
+56. Added TIMEZONE UP and DOWN lead orders options for campaigns
+
+57. Added DEAD call time logging and agent notification of call hangup
+
+58. Added second web form button with different URLs possible per campaign and
+	in-group. Must be enabled in System Settings
+
+59. Changed Answering Machine Message campaign option to an audio select with an
+	option for TTS prompt to be used. You must change any custom values you 
+	have set in this field to an audio prompt or it will not function 
+	properly. Also added WaitForSilence Options setting to the campaign 
+	screen. If you want to use this it must be populated in each campaign.
+
+	You must change 8320 to the following in your extensions.conf:
+		exten => 8320,1,AGI(VD_amd.agi,${EXTEN}-----YES)
+		exten => 8320,2,Hangup
+	# the VD_amd_post.agi script is now depricated
+
+60. Added additional Voicemail configuration through admin.php. Voicemail boxes
+	can now be created without being tied to a phone. These voicemail boxes
+	are added to the active voicemail server and there must be an active
+	voicemail server defined in the system settings for these to work.
+
+61. Added List override options for callerID, answering machine message and
+	drop inbound group to override campaign settings for leads within a
+	specific list
+
+62. Added Agent-selectable territories list upon login to select what list
+	territories they want to place calls in. 
+	REQUIREMENTS:
+	- Must have System Setting "User Territories Active" enabled
+	- Must have Campaign "No Hopper Dialing" enabled
+	- Must have Campaign "Owner Only Dialing" set to TERRITORY
+	- Must have Campaign "Agent Select Territories" enabled
+	- Must have User "Agent Choose Territories" enabled
+	- Leads must have the owner field set to desired territory
+
+63. Added ability to use Remote Agents with all inbound next-agent-call settings
+
+64. Added ability to use DNCC and DNCL as Auto-Alt-Dial statuses
+
+65. Added ability to DNC filter by North American AREACODE using 201XXXXXXX as
+	a DNC list entry. Enabled by using the AREACODE option in Campaign
+	Detail settings
+
+66. Added agi-NVA_recording.agi script to allow for recording of non-agent calls
+	as well as the ability to log them. If audio recording using this script
+	make sure you use the STEP 1 audio mixing script in your crontab with
+	the "--MIX" option so that these recordings are stored properly
+
+67. Added queue_log DID and IVR logging entries for QueueMetrics
+
+68. Added secondary FTP audio recording file transfer script to send recordings
+	to a second FTP server after finishing transfer to the primary server.
+
+69. Added Conf File Secret to Servers section to allow for a custom password
+	on internal ASTloop, ASTblind and server-to-server IAX connections
+	This requires some lines to be removed from the iax.conf file:
+	- remove the register entries for ASTloop and ASTblind
+	- remove the account entries for [ASTloop] and [ASTblind]
+	This requires some lines to be removed from the extensions.conf file:
+	- remove the TRUNKloop and TRUNKblind entries near the top
+
+70. Added Outbound Summary Interval Report which will show various statistics
+	for a range of campaigns, filtering results by call time and displaying
+	them broken down by 15/30/60 minute periods by campaign. Also has an 
+	option to included the drop overflow calls in the statistics.
+
+71. Added option for links to the reports page by including a file in vicidial
+	web directory named 'custom_report_links.html'. This allows you to 
+	maintain custom links even after upgrading your system. There is a
+	'EXAMPLEcustom_report_links.html' file included in that directory that
+	can just be copied and customized for your needs.
+
+72. Replaced all "SELECT *" MySQL queries with proper field lists. This makes
+	database table field order less important, allowing for more 
+	customizations by the user without causing problems.
+
+73. Added an API function(change_ingroups) which allows the selected in-groups
+	for an agent to be changed while they are active in the ViciDial Agent
+	screen. Once changed in this way, the agent would need to log out and 
+	back in to be able to select in-groups themselves. Blended can also be
+	changed using this function. For more information see the AGENT_API.txt
+	document in the docs directory.
+
+74. Added a non-agent-API function and a new feature to the Real-Time screen
+	that allows a manager to change the in-groups selected by an agent in
+	real time while an agent is logged in. Simply click on the INFO + link
+	for the agent you want to modify, select the in-groups, select blended
+	and select if you want to override the agent default settings then 
+	click submit. Manager must have the ability to Change Agent Campaign in
+	their user settings.
+
+75. Added Recording Filename and Recording ID as Script variables. If you use
+	either or both of these the script content will load twice if you have
+	auto-launch set to SCRIPT. Only works with recording set to ALLCALLS or
+	ALLFORCE for script on auto-launch. Also, added a refresh link for the
+	script tab to reload content at will.
+
+76. Redesigned the Transfer-Conference frame in the agent interface and added
+	a CONSULTATIVE checkbox to allow for easier consultative 3-way calls
+	with other ViciDial agents with customer information. This also allows
+	for AGENTDIRECT consultative transfers. CXFER is no longer needed to do
+	consultative transfers
+
+77. Added "Delete Voicemail After Email" options to delete messages on the
+	server after they have been emailed
+
+78. Added CRM Login Popup to campaign settings to allow for a custom window to
+	be opened on agent login, optionally using agent and campaign variables
+
+79. Added 5 custom fields to the user settings
+
+80. Added Initial Queue Position logging on inbound calls and a summary of this
+	to the Inbound report
+
+81. Added six duplication check methods to the non-agent API add_lead function
+
+82. Added VIDPROMPT options for in-group call handling to prompt caller for an
+	ID number that will be populated in the vendor ID(vendor_lead_code) 
+	field.
+
+83. Added an agent API function to update vicidial_list fields and the field
+	values in the agent screen on-the-fly for the agent's current call
+
+84. Added timer action options to campaigns and in-groups allowing a message,
+	webform or D1/D2-dial to happen at a specified number of seconds after
+	the customer connects to the agent. Also, an API callw as added for this
+
+85. Added three more transfer-conference number-to-dial presets as well as List
+	ID override options for all five number presets
+
+86. Added Dispo Call URL that allows a back-end call to a web page or URL, that
+	will not display to the agent, which can send information like the 
+	selected disposition, talk time, phone number or most of the other 
+	fields available in the web form into a formatted URL to post to a 
+	remote web server. Available in Campaigns and In-Groups.
+
+87. Added log rolling archive script to automatically move logs into archive 
+	tables monthly. The ADMIN_archive_log_tables.pl script needs to be added
+	to your crontab to run monthly(example: "30 1 1 * *")
+
+88. Added Traditional Chinese (zt_tw) language translation of the agent screen
+	which can be found in the LANG_www/agc_tw directory
+
+89. Added popup calendars to many of the reports for easier date selection
+
+
+
+
+
+########## UPGRADING FROM 2.0.4 TO 2.0.5 ##########
+
+1. Note the license change from GPLv2 to AGPLv2. This change was made to close
+	the ASP loophole for code distribution that was present in the GPLv2 
+	license. Please read the docs/LICENSE.txt file for more information
+
+2. install new files:
+	perl ./install.pl
+	NOTES: If you have customized any scripts in the bin or agi folders, 
+	then make sure you back them up before running the install.pl script. 
+	This script will replace existing files in the astguiclient installation.
+
+3. upgrade the MySQL asterisk database:
+	mysql
+	use asterisk
+	\. /path/from/root/extras/upgrade_2.0.5.sql
+	quit
+
+4. Several of the MySQL tables have been changed to a HEAP type to reside in
+	memory to improve performance.
+
+5. Added the ability for inbound and blended agents to choose their selected
+	in-groups without logging out. The new GROUPS link at the top of the 
+	agent screen(vicidial.php) can be used when an agent is Paused to
+	change their selected groups and whether they are set to do Blended
+	calling or not. There is also a new log with the details of what
+	groups an agent has selected each time in the user stats page.
+
+6. Queue Priority has been added allowing for the prioritization of one in-group
+	over another in-group or outbound campaign(when in blended mode)
+
+7. Drop call action has been added to both inbound and outbound calling. You
+	can now send a call that would drop into an inbound group. The call will
+	still be recorded as a DROP in it's original in-group or campaign, but 
+	the lead information will move on to the drop in-group.
+
+8. Audio recording mixing/compression/ftping scripts have been completely
+	rewritten and separated into different scripts for better fault
+	tolerance. Also, you have the option of compression in to the following
+	formats: WAV, GSM, MP3 and OGG
+	- AST_CRON_audio_1_move_mix.pl
+	- AST_CRON_audio_1_move_VDonly.pl
+	- AST_CRON_audio_2_compress.pl
+	- AST_CRON_audio_3_ftp.pl
+
+9. Created a new script to backup a VICIDIAL setup, including the Asterisk conf
+	files, prompt recordings, bin, agi and web files:
+	ADMIN_backup.pl
+
+10. Added ability to override recording options of a campaign for individual
+	inbound-groups
+
+11. The 8 outbound agi-VDADtransfer scripts are in process of being consolidated
+	into a single AGI script: agi-VDAD_ALL_outbound.agi
+	All older outbound scripts are depricated and do not function any more
+
+12. The start of a new QC (Quality Control) feature [non functional right now]
+
+13. Install the Switch perl module from CPAN
+	perl -MCPAN -e shell
+	- install Switch
+
+14. Recording to RAM now uses tmpfs it is usually included in all kernels if you want 
+	to check in in menuconfig you will find it under
+	File Systems --> Pseudo filesystems --> [*] Virtual memory file system support.
+	It does not hurt to enable 
+	[*] Tmpfs POSIX Access Control Lists  
+	as well.
+	The following line should be added to /etc/fstab:
+	tmpfs                /var/spool/asterisk/monitor  tmpfs  rw                    0 0
+	Mounting the ramdisk in rc.local should be remove:
+	# mke2fs -m 0 /dev/ram0
+	# mount /dev/ram0 /var/spool/asterisk/monitor
+	This allows for a more efficient use of memory and recording to RAM with less RAM 
+	available.
+
+15. The following should be added to the [featuremap] section of /etc/asterisk/features.conf
+	to prevent agents and called parties from being able to "transfer" a call to any 
+	number possible in your Asterisk dialplan.
+	[featuremap]
+	blindxfer => D
+
+16. Added ip_relay to allow for loopback IAX trunks that make true blind 
+	monitoring possible for all agents no matter their phone type 0860XXXX.
+
+17. Added the ability to load balance the logins to vicidial.php for phones 
+	that are registered to multiple servers on a multi-server system. 
+	Simply put multiple phone_login values in the phone login field at 
+	login separated by a comma and the vicidial.php script will pick the 
+	server that has the fewest agents logged into it at the moment of login.
+
+18. Added ability for vicidial.php to populate the phones.computer_ip field upon
+	agent login. Options set in the vicidial.php file to allow for overwrite
+	every login or only if field is empty.
+
+19. Several code changes for better UTF8 compatibility with the database as well
+	as special character leads in the agent screen, lead loading
+
+20. Added after hours redirect of calls to an in-group to another in-group
+
+21. Added collection of hangup reasons for inbound and outbound calls in the
+	vicidial_log and vicidial_closer_log tables
+
+22. Added a new timeclock feature w/ audit and log, including the addition
+	of shifts to VICIDIAL user groups and the ability to auto-generate 
+	user IDs as you are adding users to the system. timeclock.php user login
+	page created and linked to from admin/agent/welcome screens
+
+23. Added a new inbound/closer(queues) report for showing service levels
+
+24. Added Calls in Queue counter to agent vicidial.php screen
+
+25. Added ability to use calltime scheme for calls not yet in an in-group(queue)
+	as well as display in real-time stats. See Inbound_VDAC_IVR.txt doc for
+	more information
+
+26. Auto-dial survey broadcast campaigns can now be fully configured within the 
+	admin.php interface and they have new options shown in the Survey sub-
+	section
+
+27. Changed add-to-DNC list to allow for multiple phone numbers per submission
+
+28. Date/time and phone formats that appear in the VICIDIAL agent screen are now
+	customizable as defined in the Admin -> System Settings screen.
+
+29. Added manual dial and inbound queue_log logging capability for better
+	QueueMetrics compatibility
+
+30. Added some basic agent interface API functions and an agc/api.php script
+
+31. A field has been added to vicidial_list(last_local_call_time) to sort by
+	the last time a lead was called as well as for lead recycling changes.
+
+32. IMPORTANT FOR RECORDINGS!!!
+   The recording extensions have been changed within VICIDIAL so you need to
+   add the following lines to your extensions.conf
+     ; quiet monitor-only entry and leaving conferences for VICIDIAL (recording)
+     exten => _58600XXX,1,Meetme,${EXTEN:1}|Fmq
+
+33. Added option (for Internet Explorer users only) to copy a field to the
+   clipboard of the agent computer upon a call being sent to the agent.
+
+34. Added new alternate number dialing method which allows for over 65,000 alt
+   phone numbers per lead. Currently these extra numbers are only available for 
+   auto dialing, not manual dial. These extra alternate number leads must be 
+   imported either with the CLI lead loader(VICIDIAL_IN_new_leads_file.pl) or
+   the non-agent API script.
+
+35. Added campaign-specific DNC filtering lists to the system
+
+36. Added optional dialplan entries to sample extensions.conf to play a not-in-
+    service message for invalid phone numbers that cannot be dialing in North
+    America
+
+37. Rewrote Leave-3way function for conference calling to work more reliably on
+    high load systems.
+	Need to add more vicidial_conferences entries and meetme.conf entries
+	for this, see the meetme.conf.sample file and the 
+	first_server_install.sql file for more information
+
+38. Added several new features to inbound call handling including:
+	- announce place in line
+	- announce estimated hold time
+	- welcome message options
+	- options for call routing when estimated hold time is too high
+	- press 1 to leave a voicemail for customers if wait time too high
+
+39. Added DID call routing to allow for basic routing of calls to phones, 
+   extensions, voicemail and VICIDIAL inbound groups without editing the 
+   extensions.conf dialplan. 
+   *requires initial adding one line to dialplan of inbound context:
+      exten => _X.,1,AGI(agi-DID_route.agi)
+   *as well as a few more lines in your VICIDIAL default context:
+      ; DID forwarded calls
+      exten => _99909*.,1,Answer
+      exten => _99909*.,2,AGI(agi-VDAD_ALL_inbound.agi)
+      exten => _99909*.,3,Hangup
+
+40. Added ability to set callerID number on outgoing conference calls to
+   CAMPAIGN, CUSTOMER or AGENT_PHONE callerID settings.
+
+41. New Slovak translation for the agent screen, as well as new German agent
+   screen translation and new German buttons for the agent screen
+
+42. New Welcome demo and languages screens with links to all translations of 
+   agent and admin screens
+
+43. Added INBOUND_MAN dial method to allow for inbound call handling by agents
+   that are also placing manual dial list calls through their campaign lists
+
+44. Added option to see the inbound group call stats in the Real-time screen
+
+45. Added ability for agents to dial in to an AGI script(agi-AGENT_dial_in.agi)
+   to log their phone into the session instead of having VICIDIAL call them.
+   The user ID and password for the agent must be digits only for this to work!
+   This requires the following to be added to the dialplan on the dial-in DID
+   or extension that you want to use:
+	exten => 2345,1,Answer		; Answer the line
+	exten => 2345,2,AGI(agi-AGENT_dial_in.agi)
+	exten => 2345,3,Hangup
+
+46. Added pause codes display to the Real-time report as well as pause code
+   statistics to the agent performance detail report. Also added an option to
+   force agents to enter a pause code(this is a campaign option)
+
+47. Added full MySQL error logging to vicidial agent web interface. Logs are 
+   written to the webserver.
+
+48. Added new inbound-only reporting to Real-time report as well as many new
+   features to existing inbound report. Created IVR stats report to show stats
+   on Asterisk IVRs
+
+49. Updated Vtiger integration to version 5.0.4 and allow searching by 
+   leads/accounts/vendors. Also added user synchronization with vicidial_users. 
+   Also added click-to-dial from Vtiger sending call to vicidial agent screen.
+   Also added batch synchronization of Accounts between Vtiger and VICIDIAL.
+
+50. Added notification of time synchronization problems in the vicidial.php page
+
+51. Added AGENTDIRECT queueing to be able to send calls to only one agent 
+   without having to create a new in-group for each agent. You can configure
+   DIDs to use AGENTDIRECT, and you can have VICIDIAL agents send calls to 
+   specific agents using the AGENTDIRECT transfer group with LOCAL CLOSER button
+   and putting the agent to send the call to in the Number To Dial field.
+
+52. Added agent alert option to agent screen. sends browser alert prompt when
+   a call is send to the agent screen.
+
+53. Added option for using North American NANPA prefix timezone encoding for
+   more accurate time zone encoding. The data is NOT included but can be 
+   purchased from the VICIDIAL Group.
+
+54. Added System Settings option to disable auto-dialing(list dialing) from the
+   system to simplify administration for inbound-only call centers
+
+55. Added patch and configuration options to allow VICIDIAL to work with Sangoma
+   ParaXip CPD(Call Progress Detection) for Answering Maching and Fax detection
+
+56. Added list_download.php that allows you to download the entire contents of
+   vicidial lists from the admin.php interface. You must set the download_lists
+   permission in vicidial_users to 1 for this to work.
+
+57. Small redesign of the agent interface to use grey backgrounds and new tabs
+
+58. Added Asterisk version prompt to the install.pl script to allow for the
+   copying of the proper conf files for the installed Asterisk version
+
+59. Added auto-generation of SIP and IAX phones and carriers into the Asterisk 
+   conf files so that you can fully configure them using only the admin.php
+   web interface. See the ASTERISK_CONF-GEN.txt file for more information
+
+60. Added group alias option for selecting callerID on manual and 3rd-party
+   calls
+
+61. Added options for custom web variables for each agent per in-group and
+   camaign. This is definable in the user modification page
+
+62. Added Agent Shift enforcement options to restrict logins and vicidial 
+   agent activity 
+
+63. Added Server vital statistics(load/CPU/disk) to the reports screen and the
+   server modification screen
+
+64. Removed the admin_changes flat text log file and now put all administrative 
+   actions into the vicidial_admin_log table in MySQL. These logs are displayed
+   to user_level 9 users in admin.php through a link on the REPORTS screen, and 
+   at the bottom of the other screens (USERS, CAMPAIGNS, LISTS, etc...)you can 
+   click on the "Click here to see Admin chages to this record" link to find out
+   the most recent changes to that record.
+
+65. Added uniform admin headers to all administrative pages and reports
+
+66. Added Calls Export Utility allowing exporting of call and lead data by 
+   defining the following parameters: date range, campaigns, in-groups, statuses,
+   lists and user groups. A flat tab-delimited text file is exported.
+
+67. Added new monitoring functionality to allow monitoring from one agent to
+   another without hanging up
+
+68. Added Russian version of the Agent screen
+
+69. Added Dutch version of the Agent screen
+
+70. Many changes have been made to the extensions.conf dialplan. It is usually
+   better to take the default docs/conf_examples/extensions.conf.sample file and
+   take the customizations from your old extensions.conf file and move them into
+   the new file.
+
+
+
+
+
+########## UPGRADING FROM 2.0.3 TO 2.0.4 ##########
+
+1. install new files:
+	perl ./install.pl
+	NOTES: If you have customized any scripts in the bin or agi folders, 
+	then make sure you back them up before running the install.pl script. 
+	This script will replace existing files in the astguiclient installation.
+
+2. upgrade the MySQL asterisk database:
+	mysql
+	use asterisk
+	\. /path/from/root/extras/upgrade_2.0.4.sql
+	quit
+	NOTE: If you do not use the standard "cron" database login, you will
+	need to add "LOCK TABLES" to the permissions to your db login
+
+3. add the "server_reports" directory to your Web Path:
+	mkdir $PATHweb/vicidial/server_reports/
+	chmod 0777 $PATHweb/vicidial/server_reports/
+
+4. A new set of changes have been made to the statuses sections in the admin.php
+	pages allowing for categorizing statues and modifying them without delete.
+	Also, the gathering of a tally of the statuses in these categories is 
+	now available on the timeonVDADall scripts.
+
+5. The admin.php interface has had more sections broken into sub-sections for
+	easier management and rapid modifications.
+
+6. Added option for shorter enter and leave sounds(done during Asterisk build)
+	BASE/SCRATCH_INSTALL or extras/Changed_meetme_sounds for more details
+
+7. Added optional patch to meetme in Asterisk 1.2.X that will allow for better 
+	DTMF passthru. Need to use the "F" flag to enable on Meetme in 
+	extensiosn.conf. Feature is backported from Asterisk 1.4.X
+
+8. REQUIRED! Changed the FastAGI_log process to consolidate the "h" exten hangup 
+	process into one executed function instead of two. Because of this, the 
+	h exten needs to be changed to only the following:
+	exten => h,1,DeadAGI(agi://127.0.0.1:4577/call_log--HVcauses--PRI-----NODEBUG-----${HANGUPCAUSE}-----${DIALSTATUS}-----${DIALEDTIME}-----${ANSWEREDTIME}))
+
+9. Moved the audio transfer script and report generating scripts settings to 
+	/etc/astguiclient.conf settings file. FTP and reports login info.
+
+10. Added agent alert, music-on-hold and several other parameters to inbound 
+	groups. Make sure you have musiconhold working properly before using 
+	in production.
+
+11. REQUIRED CHANGE! in your dialplan you must now add lines for load balancing
+	even if you only have one server, and you must also have lines with the
+	7 prefix for silent insertion into the meetme conference:
+		exten => _010*010*010*015*8600XXX,...
+		exten => _010*010*010*015*8600XXX*.,...
+		exten => _010*010*010*015*78600XXX,...
+		exten => _010*010*010*015*78600XXX*.,...
+		exten => _78600XXX*.,1,AGI(agi-VDADfixCXFER.agi)
+	See LOAD_BALANCING.txt and extensions.conf.sample for more information
+
+12. Inbound, Blended and Closer-type campaigns are no longer required to have
+	campaign_id incude specific words or characters to be treated as such.
+	There is now a new campaign_allow_inbound field where this is set.
+
+13. Call distribution by agent ranking per in-group and total calls to in-group
+
+14. Added ability to copy the settings campaigns, users and in-groups to new records
+
+15. REQUIRED CHANGE! Old inbound and Closer AGI scripts have all been consolidated
+	into a single script: agi-VDAD_ALL_inbound.agi
+	Please look at the script header or the SCRATCH_INSTALL doc for more
+	info on how to alter your extenions.conf to use the new script.
+	The old agi-VDAD_closer... scripts have all been depricated and moved
+	to the extras/old_agi/ directory.
+
+16. AST_agent_performance_detail.php report script has been completely rewritten
+
+17. REQUIRED CHANGE! If you use Fronter/Closer campaigns where an agent is sending
+	calls to a closer, you will need to define the new "Default Transfer Group"
+	field with the inbound group that you want to take the calls. Transfers
+	are now allowed from a list of definable in-groups that you have to set
+	in the campaign detail screen.
+
+18. In the vicidial.php code, you can now modify the size of the elements on the
+	screen using the BROWSER_HEIGHT and BROWSER_WIDTH variables.
+
+
+
+
+
+########## UPGRADING FROM 2.0.2 TO 2.0.3 ##########
+
+1. install new files:
+	perl ./install.pl
+	NOTES: If you have customized any scripts in the bin or agi folders, 
+	then make sure you back them up before running the install.pl script. 
+	This script will replace existing files in the astguiclient installation.
+
+2. upgrade the MySQL asterisk database:
+	mysql
+	use asterisk
+	\. /path/from/root/extras/upgrade_2.0.3.sql
+	quit
+
+3. The server_stats.php has been merged into the vicidial/admin.php page
+
+4. Width of the admin.php screen, and the color and size of the headers are all
+	now definable by variables at top of the admin.php script.
+
+5. Dial Override checkbox added to the campaign modification screen of admin.php
+	to force manual dial_level changes in ADAPT dialing modes.
+
+6. Behaviour of HotKeys in manual dial mode has changed to automatically go on 
+	to the next lead when a HotKey is pressed.
+
+7. It is now possible for agents to dial alternate phone numbers using only
+	HotKeys if ALTPH2 and/or ADDR3 are added to a campaign's hotkeys.
+
+8. You can now use BLEND/INBND/*_C/*_B/*_I to define a campaign a a CLOSER 
+	campaign capable of taking inbound calls.
+
+9. In Auto-dialing campaigns(RATIO and ADAPT) you can now configure the dialer 
+	to dial up to two alternate numbers per lead automatically, as well as 
+	defining the statuses that you want to do this for. More info about
+	this feature in the ALTERNATE_NUMBER_DIALING.txt doc.
+
+10. Added ability to send multiple concurrent transfers at once to agents in 
+	outbound campaigns. This will greatly benefit larger VICIDIAL 
+	installations by decreasing the time it takes for a call to get	to an 
+	agent once answered after a large queue backup. This is defaulted to 
+	AUTO, but can be forced to a set number. This is the Concurrent 
+	Transfers option in the Campaign Modification page.
+
+11. New optimized code for AST_manager_send.pl and AST_send_action_child.pl. 
+	Thanks to Lott Caskey for the code contribution
+
+12. The field user_group has been added to several log tables to allow for 
+	better tracking of stats by user groups. Several reports now offer 
+	user group display options.
+
+13. VERY IMPORTANT!!! Make sure the php.ini setting for memory_limit is set to 
+	a minimum of 12M, we recommend 48M:
+		memory_limit = 48M
+	Some of the scripts have grown in size and need more memory to run
+	properly on some systems.
+
+14. Added ability to control access to each admin section by vicidial_users.
+	This includes a view_reports settings to restrict access to all of the
+	reports scripts.
+
+15. Added Agent Pause Codes that are definable per campaign and allows the
+	agent to select what they are doing when they are in pause time.
+
+16. Added optional Asterisk-compatible queue_log logging for QueueMetrics
+	compatibility. See the QUEUEMETRICS.txt doc for more information
+
+17. RECOMMENDATION - If you are calling in the USA, you should add the 
+	"--postal-code-gmt" flag to your adjust GMT script in the crontab to
+	more accurately assign timezones to your leads.
+
+18. Changed dial statuses to use dynamic number of dial statuses instead of
+	static dial_status_x fields.
+
+19. Added Mute/UnMute ability to vicidial.php agent screen. To use, you must
+	have the _X18600XXX and _X28600XXX entries in your extensions.conf
+
+20. Added basic sipsak display on compatible SIP devices for VICIDIAL activity.
+
+21. Tested with Asterisk 1.2.16 and 1.2.17, new patch for meetme volume controls
+	for those two versions, see SCRATCH_INSTALL for more info.
+
+22. Added HOME link to the admin web page that goes to a configurable web address.
+
+
+
+
+
+
+########## UPGRADING FROM 2.0.1 TO 2.0.2 ##########
+
+1. install new files:
+	perl ./install.pl
+	NOTES: If you have customized any scripts in the bin or agi folders, 
+	then make sure you back them up before running the install.pl script. 
+	This script will replace existing files in the astguiclient installation.
+
+	/etc/astguiclient.conf has new variables for new functionality including:
+	- new ADMIN_keepalive_ALL process settings
+	- FastAGI_log server settings
+	and comments are added to the astguiclient.conf file
+
+2. upgrade the MySQL asterisk database:
+	mysql
+	use asterisk
+	\. /path/from/root/extras/upgrade_2.0.2.sql
+	quit
+	/usr/share/astguiclient/ADMIN_area_code_populate.pl
+		The Daylight Savings Time scheme for the USA and Canada has been
+		updated for the 2007 changes. Also, Brazil DST has been added.
+		Another addition on this topic is the addition of USA zipcode
+		GMT offset list that allows for more accurate timezone lookups.
+
+3. The astguiclient web directory has been removed and the 
+	astguiclient/admin.php functions have been merged into the 
+	vicidial/admin.php page
+
+4. You can now define trunks for use only by specific campaigns. See the help
+	in the vicidial/admin.php server modification page under the 
+	VICIDIAL SERVER TRUNKS section.
+
+5. Agents now have the ability to control volume levels for any call in their 
+	meetme room directly from the vicidial.php page. This only works on 
+	Asterisk 1.2.7.1, 1.2.12.1, 1.2.13 or SVN_1.2 and the meetmeadmin_volume_control.patch
+	patch must be applied as described in the SCRATCH_INSTALL. Also, a few 
+	lines must be added to the extensions.conf for this to work:
+	(_X48600XXX, _X38600XXX, 8300 [see docs/conf_examples/extensions.conf.sample])
+
+6. Multiple ADMIN_keepalive scripts have been replaced with a single script
+	ADMIN_keepalive_ALL.pl
+	Remove all other ADMIN keepalive entries in your crontab and replace
+	with this one:
+	### keepalive script for astguiclient processes
+	* * * * * /usr/share/astguiclient/ADMIN_keepalive_ALL.pl
+
+	NOTE: the scripts to be kept alive are to be defined in the astguiclient.conf file
+
+7. FastAGI replacement for call_log and VD_hangup AGI scripts:
+	FastAGI_log.pl - requires cpan module Net::Server to run
+	If you want to use it, read the comments at the top of the script
+	Look at the docs/conf_examples/extensions.conf.sample file for examples
+	of how to use this new feature in your dialplan
+	- cpan
+	- install Net::Server
+
+8. Fix for unregistered SIP trunks (thanks to Chris Doyle):
+	look at the bottom of the docs/conf_examples/extensions.conf.sample
+	file for examples of what to put in your extensions.conf file to get
+	VICIDIAL auto dialing to work with non-registered SIP trunks. remember 
+	to put sip-silence.gsm in your /var/lib/asterisk/sounds/ directory.
+
+9. Added new campaign summary screen and reformatted the timeonVDADall report:
+	A summary screen with all of the call information for every active 
+	campaign for the day. reformatted campaign Realtime report with new
+	colors and other display options.
+
+10. Added new script to change the server_ip entries when a machine changes IPs
+	The ADMIN_update_server_ip.pl script can be used to update your server's
+	IP address within all vicidial database tables and config files from
+	this one script. This can even be run in the crontab if you are on
+	a DHCP service and need to modify your IP address often
+
+11. Added new script to allow for dial-out-only(no agents on the server) 
+	VICIDIAL servers as well as balance dialing where a server with 
+	available trunk lines can dial lines for another server that does not
+	have enough lines to dial for it's dial_level. AST_VDauto_dial_FILL.pl
+	script is only for multi-server systems and is started from new 
+	ADMIN_keepalive_ALL.pl script with option 7 in astguiclient.conf
+
+12. Added the ability to restrict agent logins by user group to a specific set
+	of campaigns. This is definable in the USER GROUPS section of admin.php.
+	You must make sure that your admin login is in a user group and that
+	the selected user group has the allowable campaigns set to ALL
+	CAMPAIGNS to be able to view and modify all campaigns in the system.
+
+13. Added lead_id and user fields to the recording_log, along with cross-
+	reference links in several admin web pages for these.
+
+14. Changed Drop percentage to be out of Answered calls for FTC compliance.
+
+15. Tested new asterisk-perl module (0.09) and found that it is NOT compatible.
+	Please make sure you use asterisk-perl-0.08 ONLY.
+
+
+
+
+
+########## UPGRADING FROM 1.1.12-3 TO 2.0.1 ##########
+
+If you are upgrading to the 2.0 code tree from the 1.1.12-3 release there have 
+been several changes made to the code base and to where some files are stored in
+the release as well as on your machine.
+
+1. upgrade the MySQL Asterisk database:
+	mysql
+	use asterisk
+	\. /path/from/root/extras/upgrade_2.0.1.sql
+	quit
+
+
+2. use the new installer for astguiclient-VICIDIAL files:
+	NOTE: this new script is interactive with prompts. this script will
+	create the new /etc/astguiclient.conf settings file that replaces the
+	old AST_SERVER_conf.pl file that has been removed. Also, this settings
+	file is used by dbconnect.php scripts so no need to manually edit them
+
+	perl install.pl
+
+
+3. Make sure you have MySQL clientlibs installed:
+Because all perl script now use DBI instead of Net::MySQL you need to make sure 
+that you have at least the MySQL client installed on all VICIDIAL servers even 
+if the MySQL server is installed on another machine. You can skip this step if 
+MySQL server is already on your VICIDIAL server:
+  Go to http://www.mysql.com/ and download the mysql package
+   - to install this directly on the command line type:
+	- cd /usr/local
+	- wget http://mirror.trouble-free.net/mysql_mirror/Downloads/MySQL-4.0/mysql-4.0.27.tar.gz
+	- gunzip mysql-4.0.27.tar.gz
+	- tar xvf mysql-4.0.27.tar
+	- cd mysql-4.0.27
+	- groupadd mysql
+	- useradd -g mysql mysql
+	- "./configure --prefix=/usr/local/mysql --without-server --enable-shared=yes --with-readline"
+	- make
+	- make install
+   - you are done
+
+
+4. New MySQL perl modules:
+You will need to make sure that you have installed the following perl modules:
+DBI (top-level Database interface module "install DBI")
+DBD::mysql (MySQL-specific interface through DBI "force install DBD::mysql")
+
+
+5. new predictive dialing crontab entry:
+If you will be using the new predictive dialing functions you need to make sure 
+you have the keepalive for this function loaded in your crontab:
+NOTE: this only needs to be on a single server if you are in a multiple 
+VICIDIAL server setup.
+### keepalive script for VICIDIAL predictive script
+* * * * * /usr/share/astguiclient/ADMIN_keepalive_AST_VDadapt.pl
+
+
+6. all old crontab entries and /home/cron files 
+All of your old crontab entries need to be changed from /home/cron to
+/usr/share/astguiclient if you choose the default installation path. You can
+manually set the path to /home/cron if you like though since the home path is
+now dynamic in all vicidial perl(.pl) scripts. If you do choose to use the new
+default path, you can delete everything in the /home/cron directory if you like
+
+
+7. old /etc/rc.d/rc.local entries
+Be sure to change your /etc/rc.d/rc.local entries(the commands that are run at
+system boot to start asterisk and other scripts like log rolling) and change the
+/home/cron path to the new /usr/share/astguiclient path.
+
+
+8. other notes:
+- there is a new DIAL METHOD field and several other new dial-control fields 
+in campaign modification page, please take a minute to read the help 
+documentation for these new features.
+
+

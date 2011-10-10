@@ -1,0 +1,521 @@
+#!/usr/bin/perl
+#
+# agi-VDAD_RINGALL.agi version 2.4
+# 
+# NOTE: this script is used for on-hook agents to be connected to customer calls
+# when they answer their ringing phones
+#
+# In the default dialplan context, this is set to the following:
+# ; these are used for the ring_all function in VICIDIAL
+# exten => _8331*.,1,Playback(sip-silence)
+# exten => _8331*.,n,AGI(agi-VDAD_RINGALL.agi,${EXTEN})
+# exten => _8331*.,n,AGI(agi-VDAD_RINGALL.agi,${EXTEN})
+# exten => _8331*.,n,Hangup
+#
+# Copyright (C) 2011  Matt Florell <vicidial@gmail.com>    LICENSE: AGPLv2
+#
+# changes:
+# 110303-2325 - First build
+# 110324-2328 - Added recording of remote agent calls, per in-group and campaign recording settings
+# 110325-1411 - Added user recording override settings checking for remote agent recording
+#
+
+$script = 'agi-VDAD_RINGALL.agi';
+
+($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
+$year = ($year + 1900);
+$mon++;
+if ($mon < 10) {$mon = "0$mon";}
+if ($mday < 10) {$mday = "0$mday";}
+if ($hour < 10) {$hour = "0$hour";}
+if ($min < 10) {$min = "0$min";}
+if ($sec < 10) {$sec = "0$sec";}
+$now_date_epoch = time();
+$now_date = "$year-$mon-$mday $hour:$min:$sec";
+$now_num = "$year$mon$mday$hour$min$sec";
+$S='*';
+
+# default path to astguiclient configuration file:
+$PATHconf =		'/etc/astguiclient.conf';
+
+open(conf, "$PATHconf") || die "can't open $PATHconf: $!\n";
+@conf = <conf>;
+close(conf);
+$i=0;
+foreach(@conf)
+	{
+	$line = $conf[$i];
+	$line =~ s/ |>|\n|\r|\t|\#.*|;.*//gi;
+	if ( ($line =~ /^PATHhome/) && ($CLIhome < 1) )
+		{$PATHhome = $line;   $PATHhome =~ s/.*=//gi;}
+	if ( ($line =~ /^PATHlogs/) && ($CLIlogs < 1) )
+		{$PATHlogs = $line;   $PATHlogs =~ s/.*=//gi;}
+	if ( ($line =~ /^PATHagi/) && ($CLIagi < 1) )
+		{$PATHagi = $line;   $PATHagi =~ s/.*=//gi;}
+	if ( ($line =~ /^PATHweb/) && ($CLIweb < 1) )
+		{$PATHweb = $line;   $PATHweb =~ s/.*=//gi;}
+	if ( ($line =~ /^PATHsounds/) && ($CLIsounds < 1) )
+		{$PATHsounds = $line;   $PATHsounds =~ s/.*=//gi;}
+	if ( ($line =~ /^PATHmonitor/) && ($CLImonitor < 1) )
+		{$PATHmonitor = $line;   $PATHmonitor =~ s/.*=//gi;}
+	if ( ($line =~ /^VARserver_ip/) && ($CLIserver_ip < 1) )
+		{$VARserver_ip = $line;   $VARserver_ip =~ s/.*=//gi;}
+	if ( ($line =~ /^VARDB_server/) && ($CLIDB_server < 1) )
+		{$VARDB_server = $line;   $VARDB_server =~ s/.*=//gi;}
+	if ( ($line =~ /^VARDB_database/) && ($CLIDB_database < 1) )
+		{$VARDB_database = $line;   $VARDB_database =~ s/.*=//gi;}
+	if ( ($line =~ /^VARDB_user/) && ($CLIDB_user < 1) )
+		{$VARDB_user = $line;   $VARDB_user =~ s/.*=//gi;}
+	if ( ($line =~ /^VARDB_pass/) && ($CLIDB_pass < 1) )
+		{$VARDB_pass = $line;   $VARDB_pass =~ s/.*=//gi;}
+	if ( ($line =~ /^VARDB_port/) && ($CLIDB_port < 1) )
+		{$VARDB_port = $line;   $VARDB_port =~ s/.*=//gi;}
+	$i++;
+	}
+
+
+if (!$VARDB_port) {$VARDB_port='3306';}
+if (!$AGILOGfile) {$AGILOGfile = "$PATHlogs/agiout.$year-$mon-$mday";}
+
+use DBI;
+use Asterisk::AGI;
+$AGI = new Asterisk::AGI;
+
+$dbhA = DBI->connect("DBI:mysql:$VARDB_database:$VARDB_server:$VARDB_port", "$VARDB_user", "$VARDB_pass")
+    or die "Couldn't connect to database: " . DBI->errstr;
+
+### Grab Server values from the database
+$stmtA = "SELECT agi_output,ext_context FROM servers where server_ip = '$VARserver_ip';";
+$sthA = $dbhA->prepare($stmtA) or die "preparing: ",$dbhA->errstr;
+$sthA->execute or die "executing: $stmtA ", $dbhA->errstr;
+$sthArows=$sthA->rows;
+$rec_count=0;
+while ($sthArows > $rec_count)
+	{
+	$AGILOG = '0';
+	@aryA = $sthA->fetchrow_array;
+	$DBagi_output =	$aryA[0];
+	$ext_context =	$aryA[1];
+	if ($DBagi_output =~ /STDERR/)	{$AGILOG = '1';}
+	if ($DBagi_output =~ /FILE/)	{$AGILOG = '2';}
+	if ($DBagi_output =~ /BOTH/)	{$AGILOG = '3';}
+	$rec_count++;
+	}
+$sthA->finish();
+
+
+### begin parsing run-time options ###
+$|=1;
+while(<STDIN>) 
+	{
+	chomp;
+	last unless length($_);
+	if ($AGILOG)
+		{
+		if (/^agi_(\w+)\:\s+(.*)$/)
+			{
+			$AGI{$1} = $2;
+			}
+		}
+
+	if (/^agi_uniqueid\:\s+(.*)$/)		{$unique_id = $1;}
+	if (/^agi_channel\:\s+(.*)$/)		{$channel = $1;}
+	if (/^agi_extension\:\s+(.*)$/)		{$extension = $1;}
+	if (/^agi_type\:\s+(.*)$/)		{$type = $1;}
+	if (/^agi_callerid\:\s+(.*)$/)		{$callerid = $1;}
+	if (/^agi_calleridname\:\s+(.*)$/)	{$calleridname = $1;}
+	if ( $calleridname =~ /\"/)  {$calleridname =~ s/\"//gi;}
+	if ( (!$callerid) or ($callerid =~ /unknown/) or ( ($calleridname =~ /\d\d\d\d\d\d\d\d\d/) && (length($calleridname) > 16) ) )
+		{$callerid = $calleridname;}
+	if ( ($callerid =~ / /) && (length($callerid) > 20) )
+		{$callerid =~ s/ .*//gi;}
+	$calleridname = $callerid;
+
+	if ($extension =~ /^8331\*\d/)
+		{
+		@EXTEN_vars = split(/\*/, $extension);
+		$auto_call_id =		$EXTEN_vars[1];
+		$call_callerid =	$EXTEN_vars[2];
+		$dial_user =		$EXTEN_vars[3];
+		$phone_exten =		$EXTEN_vars[4];
+		$channel_root = $channel;
+		$channel_root =~ s/\,.*//gi;
+		}
+	}
+
+
+if ($AGILOG) {$agi_string = "AGI Environment Dump:";   &agi_output;}
+
+foreach $i (sort keys %AGI) 
+	{
+	if ($AGILOG) {$agi_string = " -- $i = $AGI{$i}";   &agi_output;}
+	}
+
+
+if ($AGILOG) {$agi_string = "AGI Variables: |$unique_id|$channel|$extension|$type|$callerid|$auto_call_id|";   &agi_output;}
+
+if ($AGILOG) {$agi_string = "RING-AGENT AGI STARTED";   &agi_output;}
+
+
+### Hangup if Local/ channel, since these are usually invalid or voicemail
+if ($channel =~ /^Local/)
+	{
+	$AGI->stream_file('sip-silence');
+	$AGI->stream_file('sip-silence');
+	$AGI->stream_file('sip-silence');
+	if ($AGILOG) {$agi_string = "RING-ALL AGI Local Channel, exiting...";   &agi_output;}
+	exit;
+	}
+
+
+### Check that the call exists, if not then buzz and hangup ###
+$stmtA = "SELECT campaign_id,call_type,extension,phone_number,lead_id FROM vicidial_auto_calls where auto_call_id='$auto_call_id';";
+$sthA = $dbhA->prepare($stmtA) or die "preparing: ",$dbhA->errstr;
+$sthA->execute or die "executing: $stmtA ", $dbhA->errstr;
+$VACcount=$sthA->rows;
+if ($VACcount > 0)
+	{
+	@aryA = $sthA->fetchrow_array;
+	$VAC_campaign_id =	$aryA[0];
+	$VAC_call_type =	$aryA[1];
+	$VAC_extension =	$aryA[2];
+	$VAC_phone_number =	$aryA[3];
+	$VAC_lead_id =		$aryA[4];
+	if ($AGILOG) {$agi_string = "--    VAC Call Found: |$callerid|$VAC_campaign_id|$VAC_call_type|$VAC_extension|$VAC_phone_number|$VAC_lead_id|$auto_call_id|";   &agi_output;}
+	$sthA->finish();
+	}
+else
+	{
+	if ($AGILOG) {$agi_string = "--    VAC Call Not Found, exiting: |$callerid|$auto_call_id|";   &agi_output;}
+	$AGI->stream_file('buzz');
+	$AGI->hangup();
+	exit;
+	}
+
+
+### Check that the user exists in vicidial_live_agents, if not then buzz and hangup ###
+$stmtA = "SELECT conf_exten,extension,server_ip,ra_user,campaign_id from vicidial_live_agents WHERE user='$dial_user' and status IN('READY','CLOSER');";
+$sthA = $dbhA->prepare($stmtA) or die "preparing: ",$dbhA->errstr;
+$sthA->execute or die "executing: $stmtA ", $dbhA->errstr;
+$VLAcount=$sthA->rows;
+if ($VLAcount > 0)
+	{
+	@aryA = $sthA->fetchrow_array;
+	$VLAconf_exten	=	$aryA[0];
+	$VLAextension	=	$aryA[1];
+	$VLAserver_ip =		$aryA[2];
+	$VLAra_user	=		$aryA[3];
+	$VLAcampaign_id =	$aryA[4];
+	if ($AGILOG) {$agi_string = "--    VLA Agent Found: |$callerid|$VLAconf_exten|$VLAextension|$VLAserver_ip|$VLAra_user|$VLAcampaign_id|$auto_call_id|";   &agi_output;}
+	$sthA->finish();
+	}
+else
+	{
+	if ($AGILOG) {$agi_string = "--    VLA Agent Not Found, exiting: |$callerid|$auto_call_id|$dial_user|";   &agi_output;}
+	$AGI->stream_file('buzz');
+	$AGI->hangup();
+	exit;
+	}
+
+
+### Check that the call has not been grabbed already, if it has then buzz and hangup ###
+$stmtA = "SELECT count(*) FROM vicidial_auto_calls where auto_call_id='$auto_call_id' and agent_grab='';";
+$sthA = $dbhA->prepare($stmtA) or die "preparing: ",$dbhA->errstr;
+$sthA->execute or die "executing: $stmtA ", $dbhA->errstr;
+$NAGcount=$sthA->rows;
+if ($NAGcount > 0)
+	{
+	@aryA = $sthA->fetchrow_array;
+	$not_grabbed_count =	$aryA[0];
+	$sthA->finish();
+
+	if ($not_grabbed_count > 0)
+		{
+		if ($VLAextension =~ /^R\//)
+			{
+			### BEGIN If remote agent, then reserve a vicidial_conferences session on their server to send the calls to ###
+			$stmtA="SELECT count(*) FROM vicidial_conferences where server_ip='$VLAserver_ip' and ((extension='') or (extension is null)) and conf_exten != '$VLAconf_exten';";
+			$sthA = $dbhA->prepare($stmtA) or die "preparing: ",$dbhA->errstr;
+			$sthA->execute or die "executing: $stmtA ", $dbhA->errstr;
+			$AVCcount=$sthA->rows;
+			if ($AVCcount > 0)
+				{
+				@aryA = $sthA->fetchrow_array;
+				$available_sessions =	$aryA[0];
+				$sthA->finish();
+				if ($available_sessions > 0)
+					{
+					$stmtA="UPDATE vicidial_conferences set extension='3WAY_$dial_user', leave_3way='1', leave_3way_datetime='$now_date' where server_ip='$VLAserver_ip' and ((extension='') or (extension is null)) and conf_exten != '$VLAconf_exten' limit 1;";
+					$AVCaffected_rows = $dbhA->do($stmtA);  
+					if ($AVCaffected_rows)
+						{
+						$stmtA="SELECT conf_exten from vicidial_conferences where server_ip='$VLAserver_ip' and extension='3WAY_$dial_user' and leave_3way_datetime='$now_date' and conf_exten != '$VLAconf_exten';";
+						$sthA = $dbhA->prepare($stmtA) or die "preparing: ",$dbhA->errstr;
+						$sthA->execute or die "executing: $stmtA ", $dbhA->errstr;
+						$SVCcount=$sthA->rows;
+						if ($SVCcount > 0)
+							{
+							@aryA = $sthA->fetchrow_array;
+							$VLAconf_exten =	$aryA[0];
+							$sthA->finish();
+							if ($AGILOG) {$agi_string = "--    AVC Session Reserved: |$callerid|$auto_call_id|$dial_user|3WAY_$dial_user|$now_date|$VLAconf_exten|";   &agi_output;}
+
+							### get the recording settings for the campaign that this remote agent is logged into
+							if (length($VLAcampaign_id) > 0)
+								{
+								$stmtA = "SELECT campaign_recording,campaign_rec_filename FROM vicidial_campaigns where campaign_id='$VLAcampaign_id';";
+								$sthA = $dbhA->prepare($stmtA) or die "preparing: ",$dbhA->errstr;
+								$sthA->execute or die "executing: $stmtA ", $dbhA->errstr;
+								$VCRcount=$sthA->rows;
+								if ($VCRcount > 0)
+									{
+									@aryA = $sthA->fetchrow_array;
+									$campaign_recording =		$aryA[0];
+									$campaign_rec_filename =	$aryA[1];
+									}
+								$sthA->finish();
+								}
+
+							### look for the recording settings for the start user of this remote agent
+							if (length($VLAra_user) > 0)
+								{
+								$stmtA = "SELECT vicidial_recording_override,vicidial_recording FROM vicidial_users where user='$VLAra_user';";
+								$sthA = $dbhA->prepare($stmtA) or die "preparing: ",$dbhA->errstr;
+								$sthA->execute or die "executing: $stmtA ", $dbhA->errstr;
+								$sthArowsVUrec=$sthA->rows;
+								if ($sthArowsVUrec > 0)
+									{
+									@aryA = $sthA->fetchrow_array;
+									if ($aryA[0] !~ /DISABLED/)
+										{$campaign_recording =	$aryA[0];}
+									if ($aryA[1] < 1)
+										{$campaign_recording =	'NONE';}
+									}
+								$sthA->finish();
+								}
+
+							### if recording is enabled then start recording on this call before sending to a remote agent
+							if ($campaign_recording =~ /ALLCALLS|ALLFORCE/)
+								{
+								$stmtA = "SELECT vendor_lead_code FROM vicidial_list where lead_id='$VAC_lead_id';";
+								$sthA = $dbhA->prepare($stmtA) or die "preparing: ",$dbhA->errstr;
+								$sthA->execute or die "executing: $stmtA ", $dbhA->errstr;
+								$sthArows=$sthA->rows;
+								if ($sthArows > 0)
+									{
+									@aryA = $sthA->fetchrow_array;
+									$vendor_lead_code =	$aryA[0];
+									}
+								$sthA->finish();
+
+								# get date/time
+								($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
+								$year = ($year + 1900);
+								$Tyear = ($year - 2000);
+								$mon++;
+								if ($mon < 10)	{$mon = "0$mon";}
+								if ($mday < 10) {$mday = "0$mday";}
+								if ($hour < 10) {$hour = "0$hour";}
+								if ($min < 10)	{$min = "0$min";}
+								if ($sec < 10)	{$sec = "0$sec";}
+
+								$now_date_epoch = time();
+								$now_date = "$year-$mon-$mday $hour:$min:$sec";
+								$recdate = "$year$mon$mday-$hour$min$sec";
+								$tinydate = "$Tyear$mon$mday$hour$min$sec";
+
+								$campaign_rec_filename =~ s/CAMPAIGN/$VLAcampaign_id/gi;
+								$campaign_rec_filename =~ s/CUSTPHONE/$VAC_phone_number/gi;
+								$campaign_rec_filename =~ s/FULLDATE/$recdate/gi;
+								$campaign_rec_filename =~ s/TINYDATE/$tinydate/gi;
+								$campaign_rec_filename =~ s/EPOCH/$now_date_epoch/gi;
+								$campaign_rec_filename =~ s/AGENT/$dial_user/gi;
+								$campaign_rec_filename =~ s/VENDORLEADCODE/$vendor_lead_code/gi;
+								$campaign_rec_filename =~ s/LEADID/$VAC_lead_id/gi;
+								$campaign_rec_filename =~ s/\"|\'//gi;
+
+								$AGI->exec("Monitor wav|/var/spool/asterisk/monitor/MIX/$campaign_rec_filename"); 
+
+								### insert record into recording_log table ###
+								$stmtA = "INSERT INTO recording_log (channel,server_ip,extension,start_time,start_epoch,length_in_sec,filename,lead_id,user,location,vicidial_id) values('$channel','$VARserver_ip','$VAC_phone_number','$now_date','$now_date_epoch','0','$campaign_rec_filename','$VAC_lead_id','$dial_user','$campaign_rec_filename','$uniqueid');";
+								$RLRAaffected_rows = $dbhA->do($stmtA);
+								if ($AGILOG) {$agi_string = "--    REMOTE RECORDING STARTED : |$RLRAaffected_rows|$campaign_rec_filename|$stmtA|";   &agi_output;}
+								}
+							}
+						else
+							{
+							if ($AGILOG) {$agi_string = "--    AVC No Available Sessions(SELECT3), exiting: |$VLAserver_ip|$auto_call_id|$dial_user|$VLAextension$now_num|";   &agi_output;}
+							$AGI->stream_file('buzz');
+							$AGI->hangup();
+							exit;
+							}
+						}
+					else
+						{
+						if ($AGILOG) {$agi_string = "--    AVC No Available Sessions(UPDATE), exiting: |$VLAserver_ip|$auto_call_id|$dial_user|";   &agi_output;}
+						$AGI->stream_file('buzz');
+						$AGI->hangup();
+						exit;
+						}
+					}
+				else
+					{
+					if ($AGILOG) {$agi_string = "--    AVC No Available Sessions(SELECT2), exiting: |$VLAserver_ip|$auto_call_id|$dial_user|";   &agi_output;}
+					$AGI->stream_file('buzz');
+					$AGI->hangup();
+					exit;
+					}
+				}
+			else
+				{
+				if ($AGILOG) {$agi_string = "--    AVC No Available Sessions(SELECT), exiting: |$VLAserver_ip|$auto_call_id|$dial_user|";   &agi_output;}
+				$AGI->stream_file('buzz');
+				$AGI->hangup();
+				exit;
+				}
+			### END If remote agent, then reserve a vicidial_conferences session on their server to send the calls to ###
+			}
+
+		### Try to grab the call for this agent, if already grabbed then buzz and hangup ###
+		$stmtA = "UPDATE vicidial_auto_calls SET agent_grab='$dial_user',agent_grab_extension='$VLAconf_exten' where auto_call_id='$auto_call_id' and agent_grab='';";
+		$AGaffected_rows = $dbhA->do($stmtA);  
+		if ($AGaffected_rows)
+			{
+			if ($AGILOG) {$agi_string = "--    VAC Call Grabbed: |$callerid|$auto_call_id|$dial_user|$AGaffected_rows|";   &agi_output;}
+
+			### send agent to their session ###
+			if($VLAserver_ip =~ m/(\S+)\.(\S+)\.(\S+)\.(\S+)/ )
+				{
+				$a = leading_zero($1);
+				$b = leading_zero($2);
+				$c = leading_zero($3);
+				$d = leading_zero($4);
+				$VLA_DIALstr = "$a$S$b$S$c$S$d$S";
+				}
+			$VLA_DIALstr .= "7$VLAconf_exten";
+
+			$AGI->stream_file('sip-silence');
+			$AGI->stream_file('sip-silence');
+			$AGI->stream_file('sip-silence');
+			$AGI->stream_file('sip-silence');
+
+			if ($AGILOG) {$agi_string = "--    Ring-Agent Sending Call: |$callerid|$auto_call_id|$dial_user|$VLA_DIALstr|";   &agi_output;}
+
+			print "SET CONTEXT $ext_context\n";
+				checkresult($result);
+			print "SET EXTENSION $VLA_DIALstr\n";
+				checkresult($result);
+			print "SET PRIORITY 1\n";
+				checkresult($result);
+			
+			$dbhA->disconnect();
+
+			exit;
+			}
+		else
+			{
+			if ($AGILOG) {$agi_string = "--    VAC Call Already Grabbed(UPDATE2), exiting: |$callerid|$auto_call_id|$dial_user|$AGaffected_rows|";   &agi_output;}
+			$AGI->stream_file('buzz');
+			$AGI->hangup();
+			exit;
+			}
+		}
+	else
+		{
+		if ($AGILOG) {$agi_string = "--    VAC Call Already Grabbed(UPDATE), exiting: |$callerid|$auto_call_id|$dial_user|$AGaffected_rows|";   &agi_output;}
+		$AGI->stream_file('buzz');
+		$AGI->hangup();
+		exit;
+		}
+	}
+else
+	{
+	if ($AGILOG) {$agi_string = "--    VAC Call Already Grabbed(SELECT), exiting: |$callerid|$auto_call_id|$dial_user|$AGaffected_rows|";   &agi_output;}
+	$AGI->stream_file('buzz');
+	$AGI->hangup();
+	exit;
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+if ($AGILOG) {$agi_string = "--    sleeping: |$callerid|$auto_call_id|";   &agi_output;}
+
+sleep(10);
+
+exit;
+
+
+$dbhA->disconnect();
+
+
+$AGI->stream_file('sip-silence');
+
+if ($AGILOG) {$agi_string = "--    Exiting Ring-Agent AGI:  |$callerid|";   &agi_output;}
+
+exit;
+
+
+
+
+
+sub agi_output
+	{
+	if ($AGILOG >=2)
+		{
+		### open the log file for writing ###
+		open(Lout, ">>$AGILOGfile")
+				|| die "Can't open $AGILOGfile: $!\n";
+		print Lout "$now_date|$script|$agi_string\n";
+		close(Lout);
+		}
+		### send to STDERR writing ###
+	if ( ($AGILOG == '1') || ($AGILOG == '3') )
+		{print STDERR "$now_date|$script|$agi_string\n";}
+	$agi_string='';
+	}
+
+
+sub checkresult 
+	{
+	my ($res) = @_;
+	my $retval;
+	$tests++;
+	chomp $res;
+	if ($res =~ /^200/) 
+		{
+		$res =~ /result=(-?\d+)/;
+		if (!length($1)) 
+			{
+		#	print STDERR "FAIL ($res)\n";
+			$fail++;
+			}
+		else 
+			{
+		#	print STDERR "PASS ($1)\n";
+			$pass++;
+			}
+		}
+	else 
+		{
+		#	print STDERR "FAIL (unexpected result '$res')\n";
+			$fail++;
+		}
+	}
+
+
+sub leading_zero($) 
+	{
+	$_ = $_[0];
+	s/^(\d)$/0$1/;
+	s/^(\d\d)$/0$1/;
+	return $_;
+	} # End of the leading_zero() routine.

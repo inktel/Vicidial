@@ -1,0 +1,93 @@
++------------------------------------------------------------------------------+
+|      Asterisk GUI client - astguiclient                                      |
+|             Description of the Asterisk Central Queue System                 |
+|    created by Matt Florell <mattf@vicimarketing.com> <info@eflo.net>         |
+|  project started 2003-10-06   http://sourceforge.net/projects/astguiclient/  |
++------------------------------------------------------------------------------+
+
+This suite of programs is designed to work with the Asterisk Open-source PBX
+(http://www.asterisk.org) as a cross-platform GUI client and the supporting 
+server side applications necessary for the features of the GUI application to 
+work with Asterisk.
+
+Scripts that are involved with the ACQS backend are:
+
+ - /etc/astguiclient.conf - file where you define your variables for the server apps
+   + Must be present and configured through the install.pl script
+
+ - AST_manager_listen.pl - listener for the Asterisk Central Queue System (ACQS)
+   + Must be present in the /home/cron/ directory
+   + Requires Net::Telnet, Net::MySQL and Time::HiRes perl Modules
+
+ - AST_manager_send.pl - send-spawn for the ACQS
+   + Must be present in the /home/cron/ directory
+   + Requires Net::Telnet, Net::MySQL and Time::HiRes perl Modules
+
+ - AST_send_action_child.pl - blind-send for the ACQS
+   + Must be present in the /home/cron/ directory
+   + Requires Net::Telnet, Net::MySQL perl Modules
+
+ - ADMIN_keepalive_ALL.pl - checks to see that ACQS is running
+   + Must put entry for this script in the cron as "* * * * * /path/script"
+
+ - ADMIN_restart_roll_logs.pl - rolls logs over datestamp upon restart
+   + put this script in your machine's startup routine
+
+
+DESCRIPTION:
+This set of programs was created to reduce the risk of deadlocks that occur when 
+the manager interface connection from a remote machine to the Asterisk server 
+becomes severed or backlogged in some way resulting in a buffer-overflow of the 
+manager interface on the Asterisk box and a deadlock of the Asterisk PBX. The 
+probability of this happening is rare on a system where you may have 100 or less 
+action commans being executed a day, but when the action commands rise to the 
+level of 3000+ per server across 30 machines you will have at least 1 deadlock 
+per day if not one per hour. That's why we needed to find a way to still issue 
+manager Actions but not have to maintain a connection with the Asterisk Manager 
+interface. Here is a rundown of how the ACQS works:
+
+There is a simple database table where the action information with unique IDs is 
+stored and where each action's information is updated by the listener. The table 
+I use is called vicidial_manager and is detailed in the CONF_MySQL.txt file in 
+this distribution.
+
+1. First, the GUI client application inserts a record into the table as a NEW 
+action and includes a unique callerID for REDIRECT and ORIGINATE commands(the 
+callerID field is how the listener will update the record in the DB) 
+INSERT INTO vicidial_manager values('','','2004-01-30 
+17:22:53','NEW','N','10.10.11.12','','Originate','DL40130172253cc160','Channel: 
+local/8600011@demo','Context: default','Exten: 917274515135','Priority: 
+1','Callerid: DL40130172253cc160','','','','',''); 
+
+2. Second, there is a constantly running application on the Asterisk box that 
+selects queues from the database to be processed, and launches a new child 
+script to send the action to the database, then marks the action as SENT. 
+
+3. Third, each child process logs into the manager interface and sends the 
+action immediately, then stays open for 10 seconds to not cause any problems, 
+clears it's buffer and then logs out and exits. 
+
+4. Fourth, the listener app is constantly connected on the Asterisk box to the 
+manager interface and parses all output from the manager interface. Every time a 
+"Newstate Ringing" event is seen an update statement is sent to the DB based 
+upon the callerid of the call filling in the channel that the call is on and the 
+uniqueID of the call and sets the record to "UPDATED" 
+
+5. Fifth, the listener also listens for "Hangup" events and sends an update to 
+the DB with a "DEAD" status keyed by the call's uniqueID. 
+
+The above process is executed extremely fast and actually has suprisingly little 
+effect on the load of the Asterisk box. Because each action is sent through it's 
+own child process there is no risk of the system deadlocking because of a single 
+bad action thread. 
+
+
+
+NOTES:
+This started out as a desperate quick fix that evolved into a system that has 
+been up and running reliably on two separate Asterisk servers. Since we 
+implemented ACQS we haven't had a single deadlock on either of these servers.
+If anyone has suggestions/praises/criticisms I would love to hear them.
+
+To use, follow the instructions in the docs/SCRATCH_INSTALL.txt document.
+

@@ -1,0 +1,51 @@
+############################################################  ADMIN
+
+If you want to allow Consultative Transfers, a fronter to a closer, you can place CXFER as one of the number-to-dial presets and the proper dialstring will be sent to do a Local Consultative Transfer, then the agent can just LEAVE-3WAY-CALL and move on to their next call. If you want to allow Blind transfers of customers to a VICIDIAL AGI script for logging or an IVR, then place AXFER in the number-to-dial field. You can also specify an custom extension after the AXFER or CXFER, for instance if you want to do Internal Consultative transfers instead of Local you would put CXFER90009 in the number-to-dial field||
+System Performance -<\/B> Setting this option to Y will enable logging of system performance stats for the server machine including system load, system processes and Asterisk channels in use. Default is N||
+Server Logs -<\/B> Setting this option to Y will enable logging of all VICIDIAL related scripts to their text log files. Setting this to N will stop writing logs to files for these processes, also the screen logging of asterisk will be disabled if this is set to N when Asterisk is started. Default is Y||
+AGI Output -<\/B> Setting this option to NONE will disable output from all VICIDIAL related AGI scripts. Setting this to STDERR will send the AGI output to the Asterisk CLI. Setting this to FILE will send the output to a file in the logs directory. Setting this to BOTH will send output to both the Asterisk CLI and a log file. Default is FILE||
+Recording Delay -<\/B> For ALLCALLS and ALLFORCE recording only. This setting will delay the starting of the recording on all calls for the number of seconds specified in this field. Default is 0||
+Omit Phone Code -<\/B> This field allows you to leave out the phone_code field while dialing within VICIDIAL. For instance if you are dialing in the UK from the UK you would have 44 in as your phone_code field for all leads, but you just want to dial 10 digits in your dialplan extensions.conf to place calls instead of 44 then 10 digits. Default is N
+Campaign Recording -<\/B> This menu allows you to choose what level of recording is allowed on this campaign. NEVER will disable recording on the client. ONDEMAND is the default and allows the agent to start and stop recording as needed. ALLCALLS will start recording on the client whenever a call is sent to an agent. ALLFORCE will start recording on the client whenever a call is sent to an agent giving the agent no option to stop recording. For ALLCALLS and ALLFORCE there is an option to use the Recording Delay to cut down on very short recordings and recude system load
+Dial Method -<\/B> This field is the way to define how dialing is to take place. If MANUAL then the auto_dial_level will be locked at 0 unless Dial Method is changed. If RATIO then the normal dialing a number of lines for Active agents. ADAPT_HARD_LIMIT will dial predictively up to the dropped percentage and then not allow aggressive dialing once the drop limit is reached until the percentage goes down again. ADAPT_TAPERED allows for running over the dropped percentage in the first half of the shift(as defined by call_time selected for campaign) and gets more strict as the shift goes on. ADAPT_AVERAGE tries to maintain an average or the dropped percentage not imposing hard limits as aggressively as the other two methods
+Available Only Tally -<\/B> This field if set to Y will leave out INCALL and QUEUE status agents when calculating the number of calls to dial when not in MANUAL dial mode. Default is N
+Drop Percentage Limit -<\/B> This field is where you set the limit of the percentage of dropped calls you would like while using an adaptive-predictive dial method, not MANUAL or RATIO
+Maximum Adapt Dial Level -<\/B> This field is where you set the limit of the limit to the numbr of lines you would like dialed per agent while using an adaptive-predictive dial method, not MANUAL or RATIO. This number can be higher than the Auto Dial Level if your hardware will support it. Value must be a positive number greater than one and can have decimal places Default 3.0
+Latest Server Time -<\/B> This field is only used by the ADAPT_TAPERED dial method. You should enter in the hour and minute that you will stop calling on this campaign, 2100 would mean that you will stop dialing this campaign at 9PM server time. This allows the Tapered algorithm to decide how aggressively to dial by how long you have until you will be finished calling
+Adapt Intensity Modifier -<\/B> This field is used to adjust the predictive intensity either higher or lower. The higher a positive number you select, the greater the dialer will increase the call pacing when it goes up and the slower the dialer will decrease the call pacing when it goes down. The lower the negative number you select here, the slower the dialer will increase the call pacing and the faster the dialer will lower the call pacing when it goes down. Default is 0. This field is not used by the MANUAL or RATIO dial methods
+Dial Level Difference Target -<\/B> This field is used to define whether you want to target having a specific number of agents waiting for calls or calls waiting for agents. For example if you would always like to have on average one agent free to take calls immediately you would set this to -1, if you would like to target always having one call on hold waiting for an agent you would set this to 1. Default is 0. This field is not used by the MANUAL or RATIO dial methods
+System Performance
+Server Logs
+AGI Output
+Recording Delay
+Omit Phone Code
+Campaign Recording
+Dial Method
+Available Only Tally
+Drop Percentage Limit
+Maximum Adapt Dial Level
+Latest Server Time
+Adapt Intensity Modifier
+Dial Level Difference Target
+You cannot change the Auto Dial Level if you are in any of the ADAPT dial methods. Only the Dialer can change the dial level when in predictive dialing mode
+
+############################################################ CLIENT
+
+Previous Callback Information||
+Last Call: ||
+CallBack: ||
+Agent: ||
+Comments: ||
+
+############################################################  ADMIN Manual
+
+Add consultative transfer info to Campaign modification screen info
+
+Add note about phone_code being manditory for proper GMT offset encoding for proper time zone.
+
+
+############################################################  AGENT Manual
+
+Add consultative transfer info to transfer-conf frame info
+
+If you want to Consultative Transfer, a fronter to a closer, you must place CXFER in the number-to-dial field(Your manager may have set a preset to do this) and the proper dialstring will be sent to do a Local Consultative Transfer. Once the call is picked up and you have finished your introductions you can leave the customer with the closer agent and move on to your next call by clicking on the LEAVE 3WAY CALL button. If you want to Blind transfer a customer to an internal IVR then you must place AXFER in the number-to-dial field(Your manager may have set a preset to do this).

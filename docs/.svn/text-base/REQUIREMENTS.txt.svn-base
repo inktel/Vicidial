@@ -1,0 +1,33 @@
+This is the basic list of requirements for using astGUIclient. It is highly
+recommended that you read the SCRATCH_INSTALL doc for more information on
+installing the package properly.
+
+Requirements for installing astGUIclient/VICIDIAL on an Asterisk server:
+- Asterisk 1.2.27 and 1.4.21.2 recommended but will work with most older Asterisk versions
+- ViciDial does NOT support Asterisk 1.6.X at this time due to stability issues
+- Zap trunks(T1/E1 or PSTN lines), IAX2 trunks or SIP trunks required
+- If using VOIP trunks and VICIDIAL auto-dial, you must have trunks registered
+- It is strongly suggested that you have a zaptel timer like a PSTN/T1/E1 card or ztdummy
+- Client phones can be SIP/IAX/Zap
+- In extensions.conf you must use the 'o' Dial flag on your outbound extensions
+- In extensions.conf you must have the following line in your default context:
+    exten => h,1,DeadAGI(agi://127.0.0.1:4577/call_log--HVcauses--PRI-----NODEBUG-----${HANGUPCAUSE}-----${DIALSTATUS}-----${DIALEDTIME}-----${ANSWEREDTIME}))
+- No modification of outgoing callerID (you can set callerID through admin)
+- Access to Apache/PHP webserver, php.ini memory_limit set to 48M
+- In php.ini you must have uploads turned on to use the web lead loader
+- Even so eAccelerator is technically not mandatory, it is strongly recommended. 
+- SoX 12.17.5 or greater must be installed
+- GNU screen 3.9.15 or greater must be installed
+- ntp must be installed and syncd to same time source as any other servers
+- Perl5 with several CPAN modules(Time::HiRes, DBD::mysql, Net::Telnet, etc)
+- asterisk-perl-0.08 perl module required (0.09 version does NOT work)
+- Access to MySQL server and mysqlclientlibs, must be version 4.0.X or higher
+- Several entries in the crontab for interval-running scripts and keepalives
+
+Requirements for using the astGUIclient/VICIDIAL web-client versions
+- Recommended 500MHz speed or faster and 64MB RAM or more
+- Any Unix with Xwindows, Mac OS9/X or Win98/2k/XP operating system
+- Recommended use Firefox for all OSs (will run under IE5.0 or greater as well)
+   Will also run on Opera 8.5+, Mozilla 1.7+, Netscape 8+ and IE 6.0
+- ntp or sntp time syncing to same source as server recommended
+- Proper configuration settings for each phone/computer in the phones DB table

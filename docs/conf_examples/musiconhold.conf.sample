@@ -1,0 +1,22 @@
+;
+; Music on Hold -- Sample Configuration
+;
+
+[old-default]
+mode=files
+directory=/var/lib/asterisk/mohmp3
+
+[old-quiet]
+mode=files
+directory=/var/lib/asterisk/quiet-mp3
+
+#include musiconhold-vicidial.conf
+
+; valid mode options:
+; quietmp3      -- default
+; mp3           -- loud
+; mp3nb         -- unbuffered
+; quietmp3nb    -- quiet unbuffered
+; custom        -- run a custom application
+; files         -- read files from a directory in any Asterisk supported format
+

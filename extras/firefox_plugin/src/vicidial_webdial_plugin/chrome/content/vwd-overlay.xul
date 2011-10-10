@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet href="chrome://vicidial_webdial_plugin/skin/overlay.css" type="text/css"?>
+<!DOCTYPE overlay SYSTEM "chrome://vicidial_webdial_plugin/locale/overlay.dtd">
+<overlay id="vicidial_webdial_plugin-overlay" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+  <script src="overlay.js"/>
+  <script src="vwd-overlay.js"/>
+
+  <stringbundleset id="stringbundleset">
+    <stringbundle id="vicidial_webdial_plugin-strings" src="chrome://vicidial_webdial_plugin/locale/overlay.properties"/>
+  </stringbundleset>
+
+ 
+<!-- RIGHT-CLICK...VERY IMPORTANT! //-->
+  <popup id="contentAreaContextMenu">
+    <menuitem id="context-vicidial_webdial_plugin" label="&vicidial_webdial_pluginContext.label;"
+              accesskey="&vicidial_webdial_pluginContext.accesskey;"
+              insertafter="context-viewinfo"
+              oncommand="PlaceCall();"
+	      disabled="true"/>
+    <menuitem id="connect-vicidial_webdial_plugin" label="&vwdmenu.connect;"
+              insertafter="context-vicidial_webdial_plugin"
+	      style="color: #FF0000;"
+              oncommand="VWDConnect(this.label);"/>
+    <menuitem id="preferences-vicidial_webdial_plugin" label="&vicidial_webdial_pluginPreferences.label;"
+              accesskey="&vicidial_webdial_pluginContext.accesskey;"
+              insertafter="connect-vicidial_webdial_plugin"
+	      style="color: #FF0000;"
+              oncommand="openVWDOptionsWindow();"/>
+    <menuitem id="about-vicidial_webdial_plugin" label="&vicidial_webdial_pluginAbout.label;"
+              accesskey="&vicidial_webdial_pluginContext.accesskey;"
+              insertafter="preferences-vicidial_webdial_plugin"
+	      style="color: #FF0000;"
+              oncommand="openVWDAboutWindow();"/>
+  </popup>
+
+  <statusbar id="status-bar">
+    <statusbarpanel id="my-panel" label="&vicidial_webdial_pluginStatusbar.label;" tooltiptext="Status bar control panel for vicidial_webdial_plugin">
+	<image id="vicidial_webdial_plugin-status-icon" src="chrome://vicidial_webdial_plugin/skin/vicidial_logo.png" tooltiptext="VICI Web Dial" 
+		onmousedown="openVWDOptionsWindow();" hidden="false" />
+	<textbox id="vicidial_webdial_plugin-phone-textbox" type="search" empty="true" emptytext="&vicidial_webdial_pluginPhoneField.label;" size="12" command="cmd_statusdial" searchbutton="false" hidden="false" />
+	<image id="vicidial_webdial_plugin-dial-button" src="chrome://vicidial_webdial_plugin/skin/dial_button.gif" tooltiptext="VICI Web Dial" 
+		onmousedown="vicidial_webdial_pluginPlaceCall();" hidden="false"/>
+    </statusbarpanel>
+  </statusbar>
+
+
+  <toolbarpalette id="BrowserToolbarPalette">
+  <toolbarbutton id="vicidial_webdial_plugin-toolbar-button" class="toolbarbutton-1 chromeclass-toolbar-additional"
+    label="&vicidial_webdial_pluginToolbarButton.label;" tooltiptext="&vicidial_webdial_pluginToolbarButton.tooltip;"
+    oncommand="vicidial_webdial_plugin.onToolbarButtonCommand()"/>
+  </toolbarpalette>
+
+</overlay>

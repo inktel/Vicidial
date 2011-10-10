@@ -1,0 +1,328 @@
+--- ./Smarty/templates/DetailViewFields.tpl	2009-01-26 11:01:37.000000000 -0500
++++ ./Smarty/templates/DetailViewFields.tpl	2009-01-26 15:03:13.000000000 -0500
+@@ -13,28 +13,34 @@
+ -->*}
+ 
+ <!-- This file is used to display the fields based on the ui type in detailview -->
+-		{if $keyid eq '1' || $keyid eq 2 || $keyid eq '11' || $keyid eq '7' || $keyid eq '9' || $keyid eq '55' || $keyid eq '71' || $keyid eq '72' || $keyid eq '255'} <!--TextBox-->
+-                                         		<td width=25% class="dvtCellInfo" align="left">&nbsp;
+-                                         		        {if $keyid eq '55' || $keyid eq '255'}<!--SalutationSymbol-->
+-									{if $keyaccess eq $APP.LBL_NOT_ACCESSIBLE}
+-										<font color='red'>{$APP.LBL_NOT_ACCESSIBLE}</font>
+-									{else}
+-                                                                		{$keysalut}
+-									{/if}
+-								{*elseif $keyid eq '71' || $keyid eq '72'}  <!--CurrencySymbol-->
++                {if $keyid eq '1' || $keyid eq 2 || $keyid eq '7' || $keyid eq '9' || $keyid eq '55' || $keyid eq '71' || $keyid eq '72' || $keyid eq '255'} <!--TextBox-->
++                                                        <td width=25% class="dvtCellInfo" align="left">&nbsp;
++                                                                {if $keyid eq '55' || $keyid eq '255'}<!--SalutationSymbol-->
++                                                                        {if $keyaccess eq $APP.LBL_NOT_ACCESSIBLE}
++                                                                                <font color='red'>{$APP.LBL_NOT_ACCESSIBLE}</font>
++                                                                        {else}
++                                                                                {$keysalut}
++                                                                        {/if}
++                                                                {*elseif $keyid eq '71' || $keyid eq '72'}  <!--CurrencySymbol-->
+                                                                     {$keycursymb*}
+                                                                 {/if}
+                                                        <span id ="dtlview_{$label}">{$keyval}</span>
+                                                   </td>
+                                              {elseif $keyid eq '13'} <!--Email-->
+                                                   <td width=25% class="dvtCellInfo" align="left">
+-							{if $smarty.session.internal_mailer eq 1}
++                                                        {if $smarty.session.internal_mailer eq 1}
+                                                                 <a href="javascript:InternalMailer({$ID},{$keyfldid},'{$keyfldname}','{$MODULE}','record_id');">{$keyval}</a>
+                                                         {else}
+                                                                 <a href="mailto:{$keyval}" target="_blank" >{$keyval}</a>
+                                                         {/if}
+                                                         </span>
+-						  </td>
++                                                  </td>
++                                             {elseif $keyid eq '11'} <!--VICIDIALcall-->
++                                                  <td width=25% class="dvtCellInfo" align="left">
++                                                  <span id ="dtlview_{$label}">
++                                                      VCcall: <a href="javascript:VICIDIALcall({$ID},'{$keyfldname}','{$keyval}');">{$keyval}</a>
++                                                  </span>
++                                                  </td>
+                                              {elseif $keyid eq '15' || $keyid eq '16' || $keyid eq '111'} <!--ComboBox-->
+                					<td width=25% class="dvtCellInfo" align="left">&nbsp;
+ 							{foreach item=arr from=$keyoptions}
+--- ./Smarty/templates/DetailViewUI.tpl	2009-01-26 11:03:34.000000000 -0500
++++ ./Smarty/templates/DetailViewUI.tpl	2009-01-26 15:03:44.000000000 -0500
+@@ -13,7 +13,7 @@
+ -->*}
+ 
+ <!-- This file is used to display the fields based on the ui type in detailview -->
+-		{if $keyid eq '1' || $keyid eq 2 || $keyid eq '11' || $keyid eq '7' || $keyid eq '9' || $keyid eq '55' || $keyid eq '71' || $keyid eq '72' || $keyid eq '103' || $keyid eq '255'} <!--TextBox-->
++		{if $keyid eq '1' || $keyid eq 2 || $keyid eq '7' || $keyid eq '9' || $keyid eq '55' || $keyid eq '71' || $keyid eq '72' || $keyid eq '103' || $keyid eq '255'} <!--TextBox-->
+                                          		<td width=25% class="dvtCellInfo" align="left" id="mouseArea_{$label}" onmouseover="hndMouseOver({$keyid},'{$label}');" onmouseout="fnhide('crmspanid');">
+                                          		      {if $keyid eq '55' || $keyid eq '255'}<!--SalutationSymbol-->
+ 									{if $keyaccess eq $APP.LBL_NOT_ACCESSIBLE}
+@@ -46,6 +46,17 @@
+                                                        </div>
+ 							<div id="internal_mailer_{$keyfldname}" style="display: none;">{$keyfldid}####{$smarty.session.internal_mailer}</div>
+                                                   </td>
++                                             {elseif $keyid eq '11'} <!--VICIDIALcall-->
++                                                        <td width=25% class="dvtCellInfo" align="left" id="mouseArea_{$label}" onmouseover="hndMouseOver({$keyid},'{$label}');" onmouseout="fnhide('crmspanid');">
++                                                       VCcall: <span id="dtlview_{$label}">
++                                                        <a href="javascript:VICIDIALcall({$ID},'{$keyfldname}','{$keyval}');">{$keyval}</a>
++                                                        </span>
++                                                        <div id="editarea_{$label}" style="display:none;">
++                                                          <input class="detailedViewTextBox" onFocus="this.className='detailedViewTextBoxOn'" onBlur="this.className='detailedViewTextBox'" type="text" id="txtbox_{$label}" name="{$keyfldname}" maxlength='100' value="{$keyval}"></input>
++                                                          <br><input name="button_{$label}" type="button" class="crmbutton small save" value="{$APP.LBL_SAVE_LABEL}" onclick="dtlViewAjaxSave('{$label}','{$MODULE}',{$keyid},'{$keytblname}','{$keyfldname}','{$ID}');fnhide('crmspanid');"/> {$APP.LBL_OR}
++                                                          <a href="javascript:;" onclick="hndCancel('dtlview_{$label}','editarea_{$label}','{$label}')" class="link">{$APP.LBL_CANCEL_BUTTON_LABEL}</a>
++                                                       </div>
++                                                  </td>
+ 						<!-- uitype 111 added for noneditable existing picklist values - ahmed -->
+                                              {elseif $keyid eq '15' || $keyid eq '16' || $keyid eq '111'} <!--ComboBox-->
+ 						{foreach item=arr from=$keyoptions}
+--- ./include/js/dtlviewajax.js	2009-01-26 13:59:25.000000000 -0500
++++ ./include/js/dtlviewajax.js	2009-01-26 15:02:33.000000000 -0500
+@@ -293,6 +293,9 @@
+ 			if(secEmail)
+                 	        secEmail.value = tagValue;
+ 		}
++	}else if(uitype == '11')
++        {
++                getObj(dtlView).innerHTML = "<a href=\"javascript:VICIDIALcall("+crmId+",'"+fieldName+"','"+tagValue+"');\">"+tagValue+"&nbsp;</a>";
+ 	}else if(uitype == '17')
+ 	{
+ 		getObj(dtlView).innerHTML = "<a href=\"http://"+ tagValue+"\" target=\"_blank\">"+tagValue+"&nbsp;</a>";
+--- ./include/utils/ListViewUtils.php	2009-01-26 10:42:14.000000000 -0500
++++ ./include/utils/ListViewUtils.php	2009-01-26 18:54:39.000000000 -0500
+@@ -1291,6 +1291,11 @@
+ 			$value = '<a href="mailto:'.$field_val.'">'.$temp_val.'</a>';
+ 
+         }
++	// VICIDIAL agent screen phone number click to dial
++        elseif($uitype == 11)
++        {
++		$value = "VCcall: <a href=\"javascript:VICIDIALcall($entity_id,'$fieldname','$temp_val','$current_user->user_name');\">$temp_val</a>";
++        }
+ 	elseif($uitype == 56)
+ 	{
+ 		if($temp_val == 1)
+--- ./include/utils/UserInfoUtil.php	2008-12-31 21:39:39.000000000 -0500
++++ ./include/utils/UserInfoUtil.php	2009-01-01 01:20:17.000000000 -0500
+@@ -1175,6 +1175,18 @@
+ 	global $adb;
+ 	global $current_user;
+ 	global $seclog;
++	if (!file_exists('user_privileges/user_privileges_'.$current_user->id.'.php'))
++        {
++               # create User Priviledges file
++               require('modules/Users/CreateUserPrivilegeFile.php');
++               createUserPrivilegesfile($current_user->id);
++        }
++	if (!file_exists('user_privileges/sharing_privileges_'.$current_user->id.'.php'))
++	{
++		# create Sharing Priviledges file
++		require('modules/Users/CreateUserPrivilegeFile.php');
++		createUserSharingPrivilegesfile($current_user->id);
++	}
+ 	require('user_privileges/user_privileges_'.$current_user->id.'.php');
+ 	require('user_privileges/sharing_privileges_'.$current_user->id.'.php');
+ 	$permission = "no";
+--- ./Smarty/templates/DetailView.tpl	2008-03-10 08:54:31.000000000 -0400
++++ ./Smarty/templates/DetailView.tpl	2009-03-26 19:52:24.000000000 -0400
+@@ -175,6 +175,10 @@
+ 								<input title="{$APP.LBL_SENDMAIL_BUTTON_TITLE}" accessKey="{$APP.LBL_SENDMAIL_BUTTON_KEY}" class="crmbutton small edit" onclick="if(LTrim(document.DetailView.pri_email.value) !='' || LTrim(document.DetailView.sec_email.value) !=''){ldelim}fnvshobj(this,'sendmail_cont');sendmail('{$MODULE}',{$ID}){rdelim}else{ldelim}OpenCompose('','create'){rdelim}" type="button" name="SendMail" value="{$APP.LBL_SENDMAIL_BUTTON_LABEL}">&nbsp;
+ 								{/if}
+ 						{/if}
++                                                {if $MODULE eq 'Accounts'}
++						 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;	<a href="javascript:VICIDIALcall({$ID},'fax','');">VC fax log</a> &nbsp;
++						 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <a href="javascript:VICIDIALcall({$ID},'email','');">VC email log</a> &nbsp; 
++                                                {/if}
+ 						{if $MODULE eq 'Quotes' || $MODULE eq 'PurchaseOrder' || $MODULE eq 'SalesOrder' || $MODULE eq 'Invoice'}
+ 								{if $CREATEPDF eq 'permitted'}
+ 								<input title="Export To PDF" accessKey="Alt+e" class="crmbutton small create" onclick="this.form.return_module.value='{$MODULE}'; this.form.return_action.value='DetailView'; this.form.return_id.value='{$ID}'; this.form.module.value='{$MODULE}'; {if $MODULE eq 'SalesOrder'} this.form.action.value='CreateSOPDF'" {else} this.form.action.value='CreatePDF'" {/if} type="submit" name="Export To PDF" value="{$APP.LBL_EXPORT_TO_PDF}">&nbsp;
+
+--- ./include/js/general.js	2008-03-10 08:54:31.000000000 -0400
++++ ./include/js/general.js	2009-04-07 19:31:16.000000000 -0400
+@@ -1768,6 +1768,77 @@
+         openPopUp('xComposeEmail',this,url,'createemailWin',830,662,opts);
+ }
+ 
++function VICIDIALcall(record_id,field_name,phone,user_name) {
++//alert(record_id + "|" + field_name + "|" + phone + "|" user_name);
++var xmlhttp=false;
++/*@cc_on @*/
++/*@if (@_jscript_version >= 5)
++// JScript gives us Conditional compilation, we can cope with old IE versions.
++// and security blocked creation of the objects.
++ try {
++  xmlhttp = new ActiveXObject("Msxml2.XMLHTTP");
++ } catch (e) {
++  try {
++   xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
++  } catch (E) {
++   xmlhttp = false;
++  }
++ }
++@end @*/
++if (!xmlhttp && typeof XMLHttpRequest!='undefined')
++	{
++	xmlhttp = new XMLHttpRequest();
++	}
++if (xmlhttp) 
++	{
++	var callback_flag='';
++        if (field_name=='CallBack')
++                {
++                var log_call = record_id + '';
++                while (log_call.length < 10)
++                        {log_call = "0" + log_call;}
++                phone = "99" + log_call;
++		callback_flag = '&callback=1';
++                }
++	if (field_name=='fax')
++		{
++		var log_call = record_id + '';
++		while (log_call.length < 8)
++			{log_call = "0" + log_call;}
++		phone = "18" + log_call;
++		}
++        if (field_name=='email')
++                {
++                var log_call = record_id + '';
++                while (log_call.length < 8)
++                        {log_call = "0" + log_call;}
++                phone = "19" + log_call;
++                }
++	var VCcallQuery = "VCcall=1&phone=" + phone + "&vendor_id=" + record_id + '' + callback_flag;
++	xmlhttp.open('POST', 'vtigerservice.php'); 
++	xmlhttp.setRequestHeader('Content-Type','application/x-www-form-urlencoded; charset=UTF-8');
++	xmlhttp.send(VCcallQuery); 
++	xmlhttp.onreadystatechange = function() 
++		{ 
++		if (xmlhttp.readyState == 4 && xmlhttp.status == 200) 
++			{
++		//	alert(xmlhttp.responseText);
++			var Xoutput = null;
++			Xoutput = xmlhttp.responseText;
++			var regXFerr = new RegExp("ERROR","g");
++			if (Xoutput.match(regXFerr))
++				{
++				alert(xmlhttp.responseText);
++				}
++			else
++				{
++				self.close();
++				}
++			}
++		}
++	delete xmlhttp;
++	}
++}
+ function fnHide_Event(obj){
+         document.getElementById(obj).style.visibility = 'hidden';
+ }
+--- ./vtigerservice.php	2008-03-10 08:54:31.000000000 -0400
++++ ./vtigerservice.php	2009-04-07 19:16:44.000000000 -0400
+@@ -42,6 +42,63 @@
+ }
+ else
+ {
++	if(isset($_REQUEST['VCcall']))
++	{
++		$CL=':';
++		$server_name = getenv("SERVER_NAME");
++		$server_port = getenv("SERVER_PORT");
++		if (eregi("443",$server_port)) {$HTTPprotocol = 'https://';}
++		  else {$HTTPprotocol = 'http://';}
++		if (($server_port == '80') or ($server_port == '443') ) {$server_port='';}
++		else {$server_port = "$CL$server_port";}
++		$URLbase = "$HTTPprotocol$server_name$server_port";
++		
++		$callback_flag='';
++		if(isset($_REQUEST['callback']))
++			{
++			$callback_flag = '&vtiger_callback=YES';
++			}
++		global $entityDel;
++		global $display;
++		global $category;
++		header('Content-Type: text/html; charset='. $charset);
++		session_start();
++		require_once('include/utils/utils.php');
++		require_once('config.inc.php');
++		$default_config_values = Array( "allow_exports"=>"all","upload_maxsize"=>"3000000", "listview_max_textlength" => "40" );
++		set_default_config($default_config_values);
++		require_once('include/logging.php');
++		require_once('modules/Users/Users.php');
++		global $currentModule;
++		$current_user = new Users();
++
++		$log =& LoggerManager::getLogger('index');
++		global $seclog;
++		$seclog =& LoggerManager::getLogger('SECURITY');
++		$log->debug($_REQUEST);
++
++		// Check to see if there is an authenticated user in the session.
++		if(isset($_SESSION["authenticated_user_id"]) && (isset($_SESSION["app_unique_key"]) && $_SESSION["app_unique_key"] == $application_unique_key))
++		{
++			$log->debug("We have an authenticated user id: ".$_SESSION["authenticated_user_id"]);
++			$result = $current_user->retrieveCurrentUserInfoFromFile($_SESSION['authenticated_user_id']);
++			$log->debug('Current user is: '.$current_user->user_name);
++		}
++
++		$phone = $_REQUEST['phone'];   $vendor_id = $_REQUEST['vendor_id'];
++		$user = $current_user->user_name;
++
++		$VCapiURL = "/agc/api.php";
++		$VCpauseQuery = "?source=vtiger&user=1000&pass=1234&agent_user=$user&function=external_pause&value=PAUSE";
++		$VCcallQuery = "?source=vtiger&user=1000&pass=1234&agent_user=$user&function=external_dial&value=$phone&phone_code=1&search=YES&preview=NO&focus=YES&vendor_id=$vendor_id$callback_flag";
++		$replyP = file("$URLbase$VCapiURL$VCpauseQuery");
++//		sleep(1);
++		$replyC = file("$URLbase$VCapiURL$VCcallQuery");
++		echo "$replyP[0]|$replyC[0]\n";
++//		echo "$URLbase$VCapiURL$VCcallQuery\n";
++	}
++	else
++	{
+ 	echo "<h1>vtigerCRM Soap Services</h1>";
+ 	echo "<li>vtigerCRM Outlook Plugin EndPoint URL -- Click <a href='vtigerservice.php?service=outlook'>here</a></li>";
+ 	echo "<li>vtigerCRM Word Plugin EndPoint URL -- Click <a href='vtigerservice.php?service=wordplugin'>here</a></li>";
+@@ -49,6 +106,7 @@
+ 	echo "<li>vtigerCRM Customer Portal EndPoint URL -- Click <a href='vtigerservice.php?service=customerportal'>here</a></li>";
+ 	echo "<li>vtigerCRM WebForm EndPoint URL -- Click <a href='vtigerservice.php?service=webforms'>here</a></li>";
+ 	echo "<li>vtigerCRM FireFox Extension EndPoint URL -- Click <a href='vtigerservice.php?service=firefox'>here</a></li>";
++	}
+ }
+ 
+ 
+--- ./Smarty/templates/ActivityDetailView.tpl	2008-03-10 08:54:31.000000000 -0400
++++ ./Smarty/templates/ActivityDetailView.tpl	2009-04-07 18:50:36.000000000 -0400
+@@ -104,7 +104,10 @@
+ 						     <table border=0 cellspacing=0 cellpadding=5 width=100% class="small">
+ 						     	<tr>{strip}
+ 						     		<td colspan=4 class="tableHeading">
+-									<b>{$header}</b>
++									<b>{$header} &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </b>
++									{if $ACTIVITYDATA.eventstatus eq 'Planned'}
++									VCcall: <a href="javascript:VICIDIALcall('{$ID}','CallBack','');">Place VC Callback</a>
++									{/if}
+ 								</td>{/strip}
+ 					             	</tr>
+ 						     </table>
+--- ./modules/Users/Authenticate.php	2008-03-10 08:54:31.000000000 -0400
++++ ./modules/Users/Authenticate.php	2009-05-27 08:12:39.000000000 -0400
+@@ -64,7 +64,19 @@
+ 	//Security related entries start
+ 	require_once('include/utils/UserInfoUtil.php');
+ 
++	if (file_exists('user_privileges/user_privileges_'.$focus->id.'.php'))
++        {
++               # delete User Priviledges file
++		unlink('user_privileges/user_privileges_'.$focus->id.'.php');
++        }
++	if (file_exists('user_privileges/sharing_privileges_'.$focus->id.'.php'))
++	{
++		# delete Sharing Priviledges file
++		unlink('user_privileges/sharing_privileges_'.$focus->id.'.php');
++	}
++	# create User Sharing Priviledges files
+ 	createUserPrivilegesfile($focus->id);
++	createUserSharingPrivilegesfile($focus->id);
+ 	
+ 	//Security related entries end
+ 	session_unregister('login_password');

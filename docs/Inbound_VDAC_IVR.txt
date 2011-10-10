@@ -1,0 +1,69 @@
+Inbound VDAC IVR process				  2008-05-25
+
+
+NOTE: the Call Menu feature has been recently added in 2.2.0 that enables you to create and maintain IVRs, such as those mentioned in this document, using only the web-based Administration interface. For more information about Call Menus, take a look at the In-Groups -> Call Menu section of the Administration website or look at the ASTERISK_CONF-GEN.txt document
+
+
+
+This doc goes over the addition of the IVR status to the vicidial_auto_calls table and how calls that are not yet in an in-group(queue) can still be counted as active calls. This allows your system to show a tally of inbound calls that are still navigating menus before finding an in-group(queue) to be put into.
+
+The agi-VDAD_inbound_calltime_check.agi script does a check for the calltime scheme of the defined in-group(queue) as well as using the after-hours method for that in-group and the associated after-hours message if defined. Also, this script can place a record in the vicidial_auto_calls status in the IVR status. Calls in this status do not affect the dial ratios of blended campaigns, but they will display in the AST_timeonVDADall.php real-time status pages.
+
+A log of the calls going into this agi-VDAD_inbound_calltime_check.agi script is also inserted into the live_inbound_log table.
+
+The agi-VDAD_inbound_calltime_check.agi script can also be used to log the progression of a call through an IVR if you place it at major points in your IVR dialplan. The third field that you can define allows you to set a note or comment that is placed into the database when the call goes through that step.
+
+Now included in the vicidial web directory is the AST_IVRstats.php report which can show you the statistics on the progression of customers through an Asterisk dialplan-based IVR using tracking with this script.
+
+
+The example below shows how to do a very simple IVR before sending to a queue asking if the caller wants English, Spanish, French or German language service.
+
+The "test_in_menu" audio file would have something like the following script:
+
+"Hello, thank you for calling ACME Service Inc. For English press one, para el 
+español, prensa dos, pour le Français, presse trois, für Deutsche Presse vier."
+
+
+
+extensions.conf additions:
+
+
+; First, in the default context you will put a line sending the inbound calls 
+; for this number into a context named the same as the first in-group(queue), 
+; in this case "TEST_IN". There are also 3 other in-groups(queues) for the
+; non-English in-groups(queues):
+;    TEST_IN - English - option 1
+;    TEST_IN_ES - Spanish - option 2
+;    TEST_IN_FR - French - option 3
+;    TEST_IN_DE - German - option 4
+
+[default]
+exten => 7275551111,1,Goto(TEST_IN,s,1)
+
+
+[TEST_IN]
+exten => s,1,AGI(agi-VDAD_inbound_calltime_check.agi,TEST_IN-----YES-----START)
+exten => s,2,Background(test_in_menu)
+exten => s,n,WaitExten(10)
+exten => s,n,Background(test_in_menu)
+exten => s,n,WaitExten(10)
+exten => s,n,Playback(vm-goodbye)
+exten => s,n,hangup
+
+exten => 1,1,AGI(agi-VDAD_ALL_inbound.agi,CIDLOOKUP-----LB-----TEST_IN-----7275551111-----Closer-----park----------999-----1-----OUTB)
+exten => 1,n,Hangup
+
+exten => 2,1,AGI(agi-VDAD_ALL_inbound.agi,CIDLOOKUP-----LB-----TEST_IN_ES-----7275551111-----Closer-----park----------999-----1-----OUTB)
+exten => 2,n,Hangup
+
+exten => 3,1,AGI(agi-VDAD_ALL_inbound.agi,CIDLOOKUP-----LB-----TEST_IN_FR-----7275551111-----Closer-----park----------999-----1-----OUTB)
+exten => 3,n,Hangup
+
+exten => 4,1,AGI(agi-VDAD_ALL_inbound.agi,CIDLOOKUP-----LB-----TEST_IN_DE-----7275551111-----Closer-----park----------999-----1-----OUTB)
+exten => 4,n,Hangup
+
+exten => #,1,Goto(s,2)
+exten => i,1,Goto(s,2)
+exten => t,1,Goto(s,2)
+exten => h,1,DeadAGI(agi://127.0.0.1:4577/call_log--HVcauses--PRI-----NODEBUG-----${HANGUPCAUSE}-----${DIALSTATUS}-----${DIALEDTIME}-----${ANSWEREDTIME})
+

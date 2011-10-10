@@ -1,0 +1,69 @@
+#proc page
+#if @DEVICE in png,gif
+   scale: 0.6
+
+#endif
+#proc getdata
+file: /var/www/html/vicidial/ploticus//10.11.20.482011-05-18_134623.dat
+fieldnames: userproc sysproc datetime load processes channels
+
+#proc areadef
+title: Server 10.11.20.48   2011-05-18 09:00:00 to 2011-05-18 15:30:00
+titledetails: size=14  align=C
+rectangle: 1 1 12 7
+xscaletype: datetime yyyy-mm-dd.hh:mm:ss
+xrange: 2011-05-18.09:00:02 2011-05-18.13:46:22
+yrange: 0 238
+
+#proc xaxis
+stubs: inc 40 minutes
+minorticinc: 10 minutes
+stubformat: hh:mma
+
+#proc yaxis
+stubs: inc 50
+grid: color=yellow
+gridskip: min
+ticincrement: 100 1000
+
+#proc lineplot
+xfield: datetime
+yfield: userproc
+linedetails: color=purple width=.5
+fill: lavender
+legendlabel: user proc%
+maxinpoints: 4337
+
+#proc lineplot
+xfield: datetime
+yfield: sysproc
+linedetails: color=yelloworange width=.5
+fill: dullyellow
+legendlabel: system proc%
+maxinpoints: 4337
+
+#proc curvefit
+xfield: datetime
+yfield: load
+linedetails: color=blue width=.5
+legendlabel: load
+maxinpoints: 4337
+
+#proc curvefit
+xfield: datetime
+yfield: processes
+linedetails: color=red width=.5
+legendlabel: processes
+maxinpoints: 4337
+
+#proc curvefit
+xfield: datetime
+yfield: channels
+linedetails: color=green width=.5
+legendlabel: channels
+maxinpoints: 4337
+
+#proc legend
+location: max-1 max
+seglen: 0.2
+

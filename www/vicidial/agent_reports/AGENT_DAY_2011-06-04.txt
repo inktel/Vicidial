@@ -1,0 +1,4 @@
+TODAY:     Saturday      2011-06-04
+
+AGENT                USER     CALLS  TALK     PAUSE    WAIT     DISPO    ACTIVE   LOGTIME  FIRST                LAST                    
+Hector Manon        61933         1  0:00:00  0:00:00  0:00:00  0:00:00  0:00:00  0:00:00  2011-06-04 00:00:09  2011-06-04 00:00:09

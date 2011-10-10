@@ -1,0 +1,28 @@
+Daylight Savings Time(Summer Time) Schemes
+
+These are all of the Schemes for changing of the GMT offset within different geographic areas. Some of these schemes will change frequently.
+
+The first column is one country that is using the scheme
+The seconds colum is the code for the scheme
+The third column explains the scheme
+
+NORTHERN HEMISPHERE
+* USA-Canada	SSM-FSN		Second Sunday March to First Sunday November
+* Mexico	FSA-LSO		First Sunday April to Last Sunday October
+* Europe	LSM-LSO		Last Sunday March to Last Sunday October	European Summer Time
+Egypt		LTA-LTS		Last Thursday April to Last Thursday September
+Iraq		FDA-FDO		First day of April to the first day of October
+Israel		LFM-TSS		*changes every year* Last Friday March to First Sunday September
+
+SOUTHERN HEMISPHERE
+Namibia		FSS-FSA		First Sunday September to first sunday April
+Falkland Isls	FSS-TSA		First Sunday September to Third Sunday April
+Uruguay		FSO-SSM		First Sunday October to Second Sunday March
+Chile		SSO-SSM		Second Saturday October to Second Saturday March
+* Australia	LSO-LSM		Last Sunday October to Last Sunday March
+* AUS-Taz	FSO-LSM		First Sunday October to Last Sunday March
+* New Zealand	FSO-TSM		First Sunday October to Third Sunday March
+* Brazil	TSO-LSF		Third Sunday October to Last Sunday February
+
+
+* notes inclusion into ADMIN_adjust_GMTnow_on_leads.pl script

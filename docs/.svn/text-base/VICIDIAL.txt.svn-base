@@ -1,0 +1,207 @@
+# VICIDIAL.txt - description of the vicidial call center system
+# pronounced (VEE-CHEE DIAL)
+
+This system was initially created to fill the need of a customer service group 
+being able to call up clients efficiently and without using a predictive dialer 
+that would potentially lose calls and alienate clients. Since then we have added 
+the ability to do predictive dialing alongside ratio dialing and the traditional 
+one-call-at-a-time dialing as well as the ability to take inbound calls and set
+up campaigns to do blended inbound and outbound call handling at the same time.
+
+Major Features:
+- Inbound, Outbound and Blended call handling
+- Outbound agent-controlled, broadcast and predictive dialing
+- Full USA FTC-compliance capability
+- Web-based agent and administrative interfaces
+- Ability to have agents operate remotely
+- Integrated call recording
+- Three-Way calling within the agent application
+- Scheduled Callbacks: Agent-Only and Anyone
+- Scalable to hundreds of seats
+- Ability to use standard Telco lines and VOIP trunks
+- Open-Source GPL licensed, with no software licensing cost
+
+Complete Features List:
+- Ability for an agent to call clients in succession from a database through a web-client
+- Ability to display a script for the agent to read with fields like name, address, etc. filled-in
+- Ability to set a campaign to auto-dial and send live calls to available agents
+- Ability to dial predictively in a campaign with an adaptive dialing algorithm
+- Ability to dial on a single campaign across multiple Asterisk servers, or multiple campaigns on a single server
+- Ability to transfer calls with customer data to a closer on the local system or a remote Asterisk server
+- Ability to open a custom web page with user data from the call, per campaign
+- Ability to autodial campaigns to start with a simple IVR then direct to agent
+- Ability to broadcast dial to customers with a pre-recorded message
+- Ability to park the customer with custom music per campaign
+- Ability to send a dropped call to a voicemail box per campaign if no agent is available
+- Ability to set outbound CallerID per campaign
+- Ability to take inbound calls grabbing CallerID
+- Ability to function as an ACD for inbound and fronter/closer verification calls
+- Ability to have an agent take both inbound and outbound calls in one session(blended)
+- Ability to start and stop recording an agent's calls at any time
+- Ability to automatically record all calls
+- Ability to manually or automatically call upto two other customer numbers for the same lead
+- Ability to schedule a callback with a customer as either any-agent or agent-specific
+- Ability in Manual dial mode to preview leads before dialing
+- Ability for agents to be logged in remotely anywhere with just a phone and a web browser
+- Faster hangup and dispositioning of calls with one key press (HotKeys)
+- Definable Agent Wrapup-time per campaign
+- Ability to add custom call dispositions per campaign
+- Ability to use custom database queries in campaign dialing
+- Recycling of Busy calls at a specified interval without resetting a list
+- Dialing with custom TimeZone restrictions including per state and per day-of-the-week
+- Dialing with Answering Machine Detection, also playing a message for AM calls
+- Multiple campaigns and lead-lists are possible
+- Option of a drop timer with safe-harbor message for FTC compliance
+- Variable drop call percentage when dialing predictively for FTC compliance
+- Internal DNC list can optionally be activated per campaign
+- All calls are logged and statuses of calls are logged as well as agent time breakdowns
+- Load Balancing across multiple inbound or outbound Asterisk servers is possible
+- Several real-time and summary reports available
+- Real-time campaign display screens
+- 3rd party conferencing(with DTMF macros and number presets)
+- 3rd party blind call transfer
+- 3rd party conferencing with agent drop-off
+- Ability to set user levels and permissions for certain features and campaigns
+- Ability for managers to listen-in on agent conversations
+- Ability for managers to enter conversations with agents and customers
+- Ability for agents to select a Pause Code when they are not active
+- Ability for agents to control volume levels and mute themselves
+- Outbound dialing is QueueMetrics-compatible
+- Web-based administration
+- Client web-app web pages available in English, Spanish, Greek, German, French, Italian, Polish, Portuguese and Brazillian Portuguese
+- Admin web pages available in English, Spanish, Greek and German
+
+Required components:
+- Asterisk server with Zap, IAX2 or SIP trunks
+- SIP/IAX/Zap phones(hard or soft single-line or multiple)
+- Computer with proper software installed
+ 	- on Win32 Activestate perl
+ 	- on UNIX Xwindows Activestate perl recommended with perlTK libs loaded
+- Asterisk server with proper software installed
+- astGUIclient must be installed with the Asterisk Central Queue System(ACQS) 
+running
+
+Approach:
+This system is dependant on a MySQL server acting as the storage place of 
+all data and settings for the system. This was done so that it would be very 
+scalable and flexible. This application draws on a lot of the core scripting 
+inside of the astGUIclient suite of applications and was built with flexibility
+in mind. We have used VICIDIAL for over three years now on up to 160 seats at 
+once across 8 separate Asterisk servers all using the same MySQL server and 
+dialing on the same campaigns. It is important to keep in mind that because 
+VICIDIAL uses Asterisk meetme rooms for it's dialing that the Asterisk server 
+will see an increased load as compared to a simple Zap/SIP-only calls.
+
+Installation:
+Look at the INSTALL FROM SCRATCH documentation and start at phase 6 if you 
+already have asterisk running
+
+Process flow of a one-call-at-a-time call:
+ - all components are installed and running(with Asterisk and MySQL servers)
+ - user logs in to the client GUI [user/password/campaign]
+ - GUI assigns an open meetme extension to the user, this is called the 
+session_id
+ - GUI sends manager command ORIGINATE to connect the user to the meetme ext
+ - user clicks DIAL NEXT NUMBER and GUI UPDATEs first available number-to-call 
+in DB to PENDING status
+ - GUI SELECTs info on that number[name/address/...]
+ - GUI sends ORIGINATE command to call that client's number from meetme ext
+ - user is talking to the client
+	 - user transfers call to 3rd party, client Zap channel is REDIRECTed to 
+3rd party
+	     or
+	 - User transfers client to a closer to finish the call
+	     or
+	 - user puts client on park and dials 3rd party, then transfers client 
+back to meetme room
+ - Call is Hung up
+	 - user hangs up call and clicks HANGUP CALL on GUI
+	     or
+	 - person called hangs up so user clicks on the CALL HUNGUP then HANGUP 
+CALL
+ - call is disconnected
+ - user selects disposition status of the call and clicks OK
+ - goes back to step 4 and repeats
+
+Process flow of an auto-dial call:
+ - The lead hopper app(AST_VDhopper.pl) that is running every minute keeps the 
+hopper for each campaign up to at least the minimum hopper lead size providing 
+there are enough leads to fill it.
+ - The predictive dialing control app(AST_VDadapt.pl) that is running constantly
+analyzes the current status of calls and agents and calculates the dial level 
+that the campaign will need to be set at for the campaign's specific settings.
+ - The call center manager can either set the dial method (on the campaign 
+screen of the admin web page) to Manual for no autodialing, Ratio for fixed 
+lines-to-agent dialing or any of the Adapt predictive dialing models to use 
+Predictive dialing.
+ - As soon as an agent logs into a campaign, the client app will look at the 
+auto_dial_level setting of the campaign and determine whether 
+	 - it will insert a record into the vicidial_live_agents table(and set 
+status to READY) and update that record every second with a random 8 
+digit number to show that the client is still alive and ready. Also, 
+the client app will show a "pause" and "resume" button to start or stop 
+receiving calls automatically instead of the usual "dial next number" 
+button.
+	     or
+	 - it will allow normal manual dialing operation
+ - The auto_dial app(AST_VDauto_dial.pl) will:
+	 - count how many agents are READY,QUEUE,INCALL with updated 
+last_update_time in the last 2.5 seconds.
+	 - look at the campaign's auto_dial_level to determine how many calls 
+should be placed each specific campaign on each server.
+	 - update the vicidial_auto_calls records by searching for active 
+callerids in the vicidial_manager to see if they have hung up.
+	 - count the number of active calls that are 
+occuring(vicidial_auto_calls records with a status of SENT,RINGING or 
+LIVE)
+	 - place the calls for each server if the active calls is less than the 
+total that should be placed
+ - The auto_dial app will then:
+	 - grab the next lead to be called from the vicidial_hopper for each 
+campaign(it will update that lead record in the vicidial_hopper table 
+to QUEUE with VDAD as the user)
+	 - grab the lead information from vicidial_list and update 
+called_since_last_reset Y, the user to VDAD and increment the 
+called_count by 1
+	 - delete the record from vicidial_hopper for that lead
+	 - place the call first to the Zap trunk(Exten: 917275551212), then to a 
+specified Local extension number(Channel: Local/99999@default) where 
+the auto_dial_transfer_agent app(agi-VDADtransfer.agi) is waiting to 
+take over.
+	 - if the call is busy, disconnect or telco voicemail the call is never 
+technically picked up so it never makes it to the 
+auto_dial_transfer_agent app
+	 - check for dead calls by looking in the call_log for and end time of 
+the call keyed by callerID(caller_code) and delete them t=from the 
+vicidial_auto_calls table
+ - The auto_dial_transfer_agent app takes the call and:
+	 - immediately grabs the uniqueid and callerid of the call and updates 
+the vicidial_auto_calls record to LIVE
+	 - logs the call to vicidial_log using the callerid to find out the lead 
+number(VmmddhhmmssLLLLLLLLL[where LLLLLLLLL is the zero-padded lead_id 
+from vicidial_list])
+	 - inserts the number_dialed and the caller_code in the vicidial_log 
+table for the uniqueid record of the call
+	 - attempts to update(limit 1) a record in the vicidial_live_agents 
+table to see who is the next agent to receive a call(ordered by 
+last_call_time)[update the status to QUEUE, the lead_id to the proper 
+lead_id and the uniqueid and callerID to proper values for the call]
+	 - if there are agents available[affected rows = 1](goto substep VII.)
+	 - if there are no agents available:
+		 - wait in 1 second increments and then checking substep IV.
+		 - if no agent is available for the drop interval(usually 5 
+seconds on outbound campaigns), the call is hung up and logged as DROP in 
+vicidial_log under user VDAD
+	 - grabs the agent info from the vicidial_live_agents[conf_exten] and 
+does a redirect to the agent's meetme room.
+	 - agent's app checks the vicidial_live_agents record every second for 
+itself to see if it is changed to QUEUE
+	 - agent's app changes the vicidial_live_agents status to INCALL and 
+updates the vicidial_list record to INCALL and user to the agent's 
+userID and the call progresses normally
+ - The agent hangs up and the vicidial_live_agents record is changed back to 
+READY with the lead and call fields cleared out so the agent is ready to take 
+another call
+
+
+

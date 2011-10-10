@@ -1,0 +1,48 @@
+OUTBOUND LIST ORDERING AND MIXING				  2007-05-16
+
+** THIS NEW OPTIONAL LIST ORDERING FEATURE IS PLANNED FOR THE 2.0.4 RELEASE **
+
+This document will outline the new optional feature within VICIDIAL outbound dialing that will allow for both list ordering and mixing while dialing outbound vicidial campaigns.
+
+
+
+The Agent Side:
+Nothing changes
+
+
+
+The Admin Side:
+The lists used in a VICIDIAL campaign will be moved to a different tab in the Campaign Modification screen to allow for easier quick modification of the lists used and their order and mixing percentage. Also, a new field will be added to vicidial_campaigns table and a new vicidial_campaigns_list_mix table will be created to store the information for list ordering and mixing:
+
+ALTER TABLE vicidial_campaigns ADD list_order_mix VARCHAR(20) default 'DISABLED';
+
+ CREATE TABLE vicidial_campaigns_list_mix (
+vcl_id VARCHAR(20) PRIMARY KEY NOT NULL,
+vcl_name VARCHAR(50),
+campaign_id VARCHAR(8),
+list_mix_container TEXT,
+mix_method ENUM('EVEN_MIX','IN_ORDER','RANDOM') default 'EVEN_MIX',
+status ENUM('ACTIVE','INACTIVE') default 'INACTIVE',
+index (campaign_id)
+);
+
+The list_mix field would be a container for the following parameters:
+list_id|order|percent|statuses|:list_id|order|percent|statuses|:...
+for example:
+101|1|40| A B NA -|:102|2|25| NEW -|:103|3|30| DROP CALLBK -|:101|4|5| DROP -|
+The percentages always have to add up to 100, and the lists all have to be active and set to the campaign for the order mix entry to be Activated.
+
+campaign hopper_level must be at least 100 when in list-mix-mode
+
+No more than 10 lists can be in a single list mix record
+
+List orders with "2nd NEW, 3rd NEW and 4th NEW" are ignored, and only DOWN COUNT is used
+
+
+
+The Server Side:
+The AST_VDhopper.pl script will need to be changed to use the new order mix to grab and order the leads for a campaign. This will involve checking if the list_order_mix is set to DISABLED or not, and if it is then it will proceed as it currently does. If it does not, it will grab the vicidial_campaigns_list_mix record that matches the list_order_mix and parse through it's lists. Then it will do a SELECT for each of the lists and mix all of the leads together using the proper mix_method.
+
+
+
+MORE TO COME...

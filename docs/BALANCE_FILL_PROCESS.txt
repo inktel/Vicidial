@@ -1,0 +1,42 @@
+VICIDIAL Dialing-out Balance FILL proces flow                        2006-11-20
+
+** FULL VICIDIAL BALANCE DIALING FUNCTIONALITY WAS ADDED IN THE 2.0.2 RELEASE **
+
+This will outline the process I have thought through in my head for a way to allow for dialing-out only servers and for dialing-out-trunk-lines on one VICIDIAL server to be utilized when another dialing server does not have enough lines to meet it's dial level for the number of agents that are on the server.
+
+This process is made much more complicated by the addition of the new campaign-reserved-trunks feature for servers, meaning that you need to check on the trunk reservations and their settngs before being able to place any calls.
+
+This script(AST_VDauto_dial_FILL.pl) will be a constantly running script that needs to only be run on one server in a VICIDIAL cluster of servers. 
+
+This script will be started up and monitored by the ADMIN_keepalive_ALL.pl script.
+
+This script is not needed on a single-server or single-VICIDIAL/Asterisk server setup.
+
+
+
+MySQL database changes needed for this new feature:(already in upgrade_2.0.2.sql file)
+ALTER TABLE vicidial_auto_calls MODIFY call_type ENUM('IN','OUT','OUTBALANCE') default 'OUT';
+- Added OUTBALANCE to keep track of the calls that were originated by the Balance FILL process.
+
+
+
+Changes to existing AST_VDauto_dial.pl script:
+Only one notable change for CLOSER campaigns to look for OUTBALANCE in addition to OUT calls in vicidial_auto_calls when dialing BLENDED on CLOSER campaigns.
+
+
+
+Process Flow of the AST_VDauto_dial_FILL.pl script:
+- Check if there are any servers with vicidial_balance_active=Y and no trunk shortage
+	- Get a count of the shortages and what campaigns they are on
+	- Start looping through the campaigns with trunk shortages
+		- Get a count of the DB value and current balance_trunk_fill
+		- Get list of servers with trunk shortfall
+		- Get a count of the servers that have no shortfall and allow balance dialing
+			- Get dialing variable values for servers with balance available and no shortfall
+			- Loop through these servers
+				- Calculate the available trunks for this campaign per server
+				- Calculate the number of trunks to dial for this server for this campaign
+				- Select leads from the hopper and dial 
+				  (this step is identical to normal AST_VDauto_dial.pl script)
+
+

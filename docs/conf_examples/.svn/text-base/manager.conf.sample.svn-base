@@ -1,0 +1,24 @@
+[general]
+enabled = yes
+port = 5038
+bindaddr = 0.0.0.0
+
+[cron]
+secret = 1234
+read = system,call,log,verbose,command,agent,user
+write = system,call,log,verbose,command,agent,user
+
+[updatecron]
+secret = 1234
+read = command
+write = command
+
+[listencron]
+secret = 1234
+read = system,call,log,verbose,command,agent,user
+write = command
+
+[sendcron]
+secret = 1234
+read = command
+write = system,call,log,verbose,command,agent,user

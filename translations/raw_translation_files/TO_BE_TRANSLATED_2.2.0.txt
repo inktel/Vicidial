@@ -1,0 +1,408 @@
+############################################################  ADMIN
+Delete From DNC Lists||
+This setting if set to 1 will allow a manager to remove phone numbers from the DNC lists in the VICIDIAL system||
+DNC NOT DELETED||
+This phone number is not in the Do Not Call List||
+DNC DELETED||
+ADD OR DELETE NUMBERS FROM THE DNC LIST||
+Add or Delete||
+Add-Delete Number From DNC||
+Vtiger Search Dead Accounts||
+If Vtiger integration is enabled in the system settings then this setting will define whether deleted accounts will be searched when the agent clicks WEB FORM to search in the Vtiger system. DISABLED- deleted leads will not be searched, ASK- deleted leads will be searched and the vtiger search web page will ask the agent if they want to make the Vtiger account active, RESURRECT- will automatically make the deleted account active again and will take the agent to the account screen without delay upon clicking on WEB FORM. Default is DISABLED||
+The DISPO option will create a call record for the Vtiger account without the agent needing to go to the vtiger search page through the WEB FORM||
+The NEW_WINDOW option will open a new window upon login to the VICIDIAL agent screen||
+Vtiger Status Call||
+If Vtiger integration is enabled in the system settings then this setting will define whether the status of the Vtiger Account will be updated with the status of the VICIDIAL call after it has been dispositioned. Default is N||
+There are also 5 additional settings that will define the kind of status: sale, dnc, customer contact, not interested, unworkable||
+If the customer is on hold and hears this estimated hold time message, the minimum time that will be played is 15 seconds||
+Email, User Code and Territory||
+These are optional fields||
+All options except for the Not Interested, Third and Fourth digit options will move on to the Survey Method call path||
+Survey Third Digit||
+This allows for a third call path if the Third digit as defined in this field is pressed by the customer||
+Survey Fourth Digit||
+This allows for a fourth call path if the Fourth digit as defined in this field is pressed by the customer||
+Survey Third Audio File||
+Survey Fourth Audio File||
+This is the third audio file to be played upon the selection by the customer of the Third Digit option||
+Survey Third Status||
+Survey Fourth Status||
+This is the third status used for the call upon the selection by the customer of the Third Digit option||
+Survey Third Extension||
+Survey Fourth Extension||
+This is the third extension used for the call upon the selection by the customer of the Third Digit option. Default is 8300 which immediately hangs up the call after the Audio File message is played||
+RANDOM: Randomly grabs lead within the statuses and lists defined||
+UP LAST CALL TIME: Sorts by the newest local call time for the leads||
+DOWN LAST CALL TIME: Sorts by the oldest local call time for the leads||
+WARNING, we only recommend List Mix for advanced users, Please read the ViciDial Manager Manual||
+Add Call Menu||
+Copy Call Menu||
+New Call Menu||
+Modify Call Menu||
+Delete Call Menu||
+Call Menus||
+Menu ID||
+This is the ID for this step of the call menu. This will also show up as the context that is used in the dialplan for this call menu||
+Menu Name||
+This field is the descriptive name for the call menu||
+Menu Prompt||
+This field contains the file name of the audio prompt to play at the beginning of this menu||
+Menu Timeout||
+This field is where you set the timeout in seconds that the menu will wait for the caller to enter in a DTMF choice||
+Menu Timeout Prompt||
+This field contains the file name of the audio prompt to play when the timeout has been reached. Default is NONE to play no audio at timeout||
+Menu Invalid Prompt||
+This field contains the file name of the audio prompt to play when the caller has selected an invalid option. Default is NONE to play no audio at invalid||
+Menu Repeat||
+This field is where you define the number of times that the menu will play after the first time if no valid choice is made by the caller. Default is 1 to repeat the menu once||
+Menu Time Check||
+This field is where you can select whether to restrict the Call Menu access to the specific hours set up in the selected Call Time. If the Call Time is blank, this setting will be ignored. Default is 0 for disabled||
+Call Time ID||
+This is the Call Time ID that will be used to restrict calling times if the Menu Time Check option is enabled||
+Track Calls in Real-Time Report||
+This field is where you can select whether you want the call to be tracked in the Real-time screen as an incoming IVR type call. Default is 1 for active||
+Option Value||
+This field is where you define the menu option, possible choices are||
+Option Route||
+This menu contains the options for where to send the call if this option is selected||
+The special option TIMECHECK can be used only if you have Menu Time Check enabled and there is a Call Time defined for the Menu||
+Option Route Value||
+This field is where you enter the value that defines where in the selected Option Route that the call is to be directed to||
+Option Route Value Context||
+This field is optional and only used for EXTENSION Option Routes||
+ADD A NEW CALL MENU||
+COPY CALL MENU||
+This menu contains the options for where to send the call if this option is selected: CALLMENU,INGROUP,DID,HANGUP,EXTENSION,PHONE. For CALLMENU, the Route Value should be the Menu ID of the Call Menu that you want the call sent to. For INGROUP, the In-Group that you want the call to be sent to needs to be selected as well as the other 5 options that need to be set to properly route a call to an Inbound Group. For DID, the Route Value needs to be the DID pattern that you want to send the call to. For HANGUP, the Route Value can be the name of an audio file to play before hanging up the call. For EXTENSION, the Route Value needs to be the dialplan extension you want to send the call to, and the Route Value Context is the context that extension is located in, if left blank the context will default to default. For PHONE, the Route Value needs to be the phone login value for the phones entry that you want to send the call to. For VOICEMAIL, the Route Value needs to be the voicemail box number, the unavailable mesage will be played. For AGI, the Route Value needs to be the agi script and any values taht need to be passed to it.||
+Option Description||
+This field is where you can describe the option, this description will be put into the dialplan as a comment above the option||
+Source Menu||
+CALL MENU NOT ADDED||
+Call Menu ID must be between 2 and 50 characters in length and contain no||
+CALL MENU ADDED||
+CALL MENU NOT MODIFIED||
+CALL MENU MODIFIED||
+Click here to see Admin chages to this CALL MENU||
+DELETE THIS CALL MENU||
+MODIFY A CALL MENU RECORD||
+Time Check||
+No Time Check||
+Realtime Tracking||
+No Realtime Tracking||
+Call Menu Options||
+Option||
+CALL MENU NOT DELETED||
+CALL MENU DELETION CONFIRMATION||
+Click here to delete CALL MENU||
+CALL MENU DELETION COMPLETED||
+CALL MENU LISTINGS||
+CALLMENU will send the call to the defined Call Menu||
+Call Menu||
+If CALLMENU is selected as the DID Route, then this is the Call Menu that calls will be sent to||
+Show Call Menus||
+Add A New Call Menu||
+Copy Call Menu||
+To delete an Option, just set the Route to REMOVE and the option will be deleted when you click the SUBMIT button||
+Agent Only Callback Campaign Lock||
+This option defines whether AGENTONLY callbacks are locked to the campaign that the agent originally created them under. Setting this to 1 means that the agent can only dial them from the campaign they were set under, 0 means that the agent can access them no matter what campaign they are logged into. Default is 1||
+Central Sound Control Active||
+This option defines whether the sound synchronization system is active across all servers. Default is 0 for inactive||
+Sounds Web Server||
+This is the server name or IP address of the web server that will be handling the sound files on this system, this must match the server name or IP of the machine you are trying to access the audio_store.php webpage on or it will not work. Default is 127.0.0.1||
+Sounds Web Directory||
+This auto-generated directory name is created at random by the system as the place that the audio store will be kept. All audio files will reside in this directory||
+Audio Store||
+Audio File to Upload||
+This utility allows you to upload audio files to the web server so that they can be distributed to all of the ViciDial servers in a multi-server cluster. An important note, only two audio file types will work, .wav files that are PCM 16bit 8k and .gsm files that are 8bit 8k. Please verify that your files are properly formatted before uploading them here||
+Sounds Update||
+If you want to force a check of the sound files on this server, and the central audio store is enabled as a system setting, then this field will allow the sounds updater to run at the next top of the minute. Any time an audio file is uploaded from the web interface this is automatically set to Y for all servers that have Asterisk active. Default is N||
+Active Voicemail Server||
+In multi-server systems, this is the server that will handle all voicemail boxes. This server is also where the dial-in generated prompts will be uploaded from, the 8168 recordings||
+Auto Dial Limit||
+This is the maximum limit of the auto dial level in the campaign screen||
+User Territories are not active on this system||
+User Territories||
+List All Territories:||
+User Territories Active||
+This setting allows you to enable the User Territories setttings from the user modification screen. This feature was added to allow for more integration with a customized Vtiger installation but can have applications in a pure ViciDial system as well. Default is 0 for disabled||
+List Territories||
+Add Territory||
+Add User Territory||
+Territory||
+Territory Description||
+Territory and Territory Description must be filled in||
+there is already a territory in the system with this name||
+Territory Added||
+Modify Territory||
+Territory not found||
+This territory is not in the system with this name||
+Territory Modified||
+Territory must be filled in||
+Territory Deleted||
+Delete This Territory||
+Vtiger Accounts||
+Agents||
+Territory, User and Level must be filled in||
+this territory user is already in the system||
+User Territory Added||
+this territory user is not in the system||
+User Territory Modified||
+Territory and User must be filled in||
+User Territory Deleted||
+Vtiger Change Territory Owner||
+Had to add user territory||
+Vtiger Territory Owner Changed||
+Records Changed||
+ViciDial Recording Limit||
+This field is where you set the maximum number of minutes that a call recording initiated by ViciDial can be. Default is 60 minutes||
+This is the dial plan context that the agent applications, like ViciDial, primarily use. It is assumed that all numbers dialed by the client apps are using this context so it is a good idea to make sure this is the most wide context possible. verify with extensions.conf file before changing. default is default||
+Phone Context||
+This is the dial plan context that this phone will use to dial out. If you are running a call center and you do not want your agents to be able to dial out outside of the ViciDial applicaiton for example, then you would set this field to a dialplan context that does not exist, something like agent-nodial. default is default||
+Use the HIDE option to completely remove the customer phone number from the agent display||
+Click here to see a traffic report for this DID||
+Agent Time Detail||
+User Timeclock Detail Report||
+Carrier Logging Active||
+This setting allows you to log all hangup return codes for any outbound list dialing calls that you are placing. Default is N.||
+Drop Lockout Time||
+This is a number of hours that DROP abandon calls will be prevented from being dialed, to disable set to 0. This setting is very useful in countries like the UK where there are regulations preventing the attempted calling of customers within 72 hours of an Abandon, or DROP. Default is 0||
+Phone Ring Timeout||
+This is the amount of time, in seconds, that the phone will ring in the dialplan before sending the call to voicemail. Default is 60 seconds||
+Allow Custom Dialplan Entries||
+This option allows you to enter custom dialplan lines into Call Menus. Default is 0 for inactive||
+Custom Dilplan Entry||
+This field allows you to enter in any dialplan elements that you want for the Call Menu||
+You can enter multiple propmts in this field and the other prompt fields by separating them with a pipe character||
+Setting this field to zero 0 will mean that there will be no wait time after the prompt is played||
+Conf File Secret||
+This is the secret, or password, for the phone in the iax or sip auto-generated conf file for this phone. Limit is 20 characters alphanumeric dash and underscore accepted. Default is test||
+Tracking Group||
+This is the ID that you can use to track calls to this Call Menu when looking at the IVR Report. The list includes CALLMENU as the default as well as all of the In-Groups||
+Agent Alert Filename||
+The audio file to play to an agent to announce that a call is coming to the agent. To not use this function set this to X. Default is ding||
+This field as with the other audio fields in In-Groups, with the exception of the Agent Alert Filename, can have multiple audio files played if you put a pipe-separated list of audio files into the field||
+No Agents No Queueing||
+If this field is set to Y or NO_PAUSED then no calls will be put into the queue for this in-group if there are no agents logged in and the calls will go to the No Agent No Queue Action. The NO_PAUSED option will also not send the callers into the queue if there are only paused agents in the in-group. Default is N||
+No Agent No Queue Action||
+If No Agent No Queue is enabled, then this field defines where the call will go if there are no agents in the In-Group. Default is MESSAGE, this plays the sound files in the Action Value field and then hangs up||
+No Agent No Queue Action Value||
+This is the value for the Action above. Default is||
+Quick Transfer Button||
+This option will add a Quick Transfer button to the agent screen below the Transfer-Conf button that will allow one click blind transferring of calls to the selected In-Group or number. IN_GROUP will send calls to the Default Xfer Group for this Campaign, or In-Group if there was an inbound call. The PRESET options will send the calls to the preset selected. Default is N for disabled||
+PrePopulate Transfer Preset||
+This option will fill in the Number to Dial field in the Transfer Conference frame of the agent screen if defined. Default is N for disabled||
+Enable TTS Integration||
+This setting allows you to enable Text To Speech integration with Cepstral. This is currently only available for outbound Survey type campaigns. Default is 0 for disabled||
+ADD NEW TTS ENTRY||
+ADDING NEW TTS ENTRY||
+MODIFY TTS ENTRY||
+DELETE TTS ENTRY||
+TTS ENTRY LIST||
+TEXT-TO-SPEECH(TTS) LISTINGS||
+Text To Speech||
+Show TTS Entries||
+Add A New TTS Entry||
+TTS ID||
+TTS Name||
+TTS Text||
+TTS ENTRY NOT ADDED||
+there is already a tts entry in the system with this ID||
+TTS ENTRY ADDED||
+MODIFY A TTS RECORD||
+Click here to see Admin chages to this TTS entry||
+DELETE THIS TTS ENTRY||
+TTS ENTRY NOT MODIFIED||
+TTS ENTRY MODIFIED||
+TTS ENTRY NOT DELETED||
+TTS ENTRY DELETION CONFIRMATION||
+Click here to delete tts entry||
+This is the short name of a TTS entry. This needs to be a unique identifier. Do not use any spaces or punctuation for this field. max 50 characters, minimum of 2 characters||
+This is a more descriptive name of the TTS entry. This is a short summary of the TTS definition. max 100 characters, minimum of 2 characters||
+This option allows you to set the TTS entry to active or inactive||
+This is the actual Text To Speech data field that is sent to Cepstral for creation of the audio file to be played to the customer. you can use Speech Synthesis Markup Language -SSML- in this field, for example||
+for a 1 second break. You can also use several variables such as first name, last name and title as ViciDial variables just like you do in a Script: --A--first_name--B--. Here is a list of the available variables: ||
+Multiple Campaign Drop Rate Group||
+This feature allows you to set a campaign as a member of a Campaign Drop Rate Group, or a group of campaigns whose Human Answered calls and Drop calls for all campaigns in the group will be combined into a shared drop percentage, or abandon rate. This allows you to to run multiple campaigns at once and more easily control your drop rate. This is particularly useful in the UK where regulations permit this drop rate calculation method with campaign grouping for the same company even if there are several campaigns that company is running during the same day. To enable this for a campaign, just select a group from the list. There are 10 groups defined in the system by default, you can contact your system administrator to add more. Default is DISABLED||
+IMPORTANT, this is the password only for the agent web interface phone login, to change the sip.conf or iax.conf password, or secret, for this phone device you need to modify the Conf File Secret field further down on this page||
+Agent Status Viewable Groups||
+This is a selectable list of User Groups and user functions to which members of this user group can view the status of as well as transfer calls to inside of the agent screen. The ALL-GROUPS option allows the users in this group to see and transfer calls to any user on the system. The CAMPAIGN-AGENTS option allows users in this group to see and transfer calls to any user in the campaign that they are logged into||
+Agent Status View Time||
+This option defines whether the agent will see the amount of time that users in their agent sidebar have been in their current status. Default is N for no or disabled||
+This option allows an agent to disposition a call as CALLBK and choose the date and time at which the lead will be re-activated||
+Agent View Calls in Queue||
+If set to anything but NONE, agents will be able to see details about the calls that are waiting in queue in their agent screen. If set to a number value, the calls displayed will be limited to the number selected. Default is NONE||
+View Calls in Queue Launch||
+This setting if set to AUTO will have the Calls in Queue frame show up upon login by the agent into the agent screen. Default is MANUAL||
+Agent Grab Calls in Queue||
+This option if set to Y will allow the agent to select the call that they want to take from the Calls in Queue display by clicking on it while paused. Agents will only be able to grab inbound calls or transferred calls, not outbound calls. Default is N||
+Agent Call Re-Queue Button||
+This option if set to Y will add a Re-Queue Customer button to the agent screen, allowing the agent to send the call into an AGENTDIRECT queue that is reserved for the agent only. Default is N||
+Agent Pause After Each Call||
+This option if set to Y will pause the agent after every call automatically. Default is N||
+Starts with the highest rank and works its way down||
+Starts with the lowest rank and works its way up||
+Starts with owners beginning with Z and works its way down||
+Starts with owners beginning with A and works its way up||
+No Hopper Dialing||
+If This is enabled, the hopper will not run for this campaign. This option is only available when the dial method is set to MANUAL or INBOUND_MAN. It is recommended that you do not enable this option if you have a very large lead database, over 100,000 leads. With No Hopper Dialing, the following features do not work: lead recycling, auto-alt-dialing, list mix, list ordering with Xth NEW. If you want to use Owner Only Dialing you must have No Hopper Dialing enabled. Default is N for disabled||
+Owner Only Dialing||
+If This is enabled, the agent will only receive leads that they are within the ownership parameters for. If this is set to USER then the agent must be the user defined in the database as the owner of this lead. If this is set to TERRITORY then the owner of the lead must match the territory listed in the User Modification screen for this agent. If this is set to USER_GROUP then the owner of the lead must match the user group that the agent is a member of. For this feature to work the dial method must be set to MANUAL or INBOUND_MAN and No Hopper Dialing must be enabled. Default is NONE for disabled||
+Reset Times||
+This field allows you to put times in, separated by a dash-, that this list will be automatically reset by the system. The times must be in 24 hour format with no punctuation, for example 0800-1700 would reset the list at 8AM and 5PM every day. Default is empty||
+Owner: ||
+OWNERS WITHIN THIS LIST||
+RANKS WITHIN THIS LIST||
+Allow Alerts||
+This field gives you the ability to allow agent browser alerts to be enabled by the agent for when calls come into their vicidial.php session. Default is 0 for NO||
+Agent Display Dialable Leads||
+This option if enabled will show the number of dialable leads available in the campaign in the agent screen. This number is updated in the system once a minute and will be refreshed on the agent screen every few seconds||
+VICIDIAL Balance Rank||
+This field allows you to set the order in which this server is to be used for balance dialing, if balance dialing is enabled. The server with the highest rank will be used first in placing Balance fill calls. Default is 0||
+Inbound Summary Hourly Report||
+orders by the amount of time agent has been actively waiting for a call||
+Agent Script Override||
+If this field is set, this will be the script that the agent sees on their screen instead of the campaign script when the lead is from this list. Default is not set||
+Music On Hold||
+ADD NEW MUSIC ON HOLD ENTRY||
+ADDING NEW MUSIC ON HOLD ENTRY||
+MODIFY MUSIC ON HOLD ENTRY||
+DELETE MUSIC ON HOLD ENTRY||
+MUSIC ON HOLD ENTRY LIST||
+We STRONGLY recommend uploading only 16bit 8k PCM WAV audio files||
+Music On Hold ID||
+This is the short name of a Music On Hold entry. This needs to be a unique identifier. Do not use any spaces or punctuation for this field. max 100 characters, minimum of 2 characters||
+Music On Hold Name||
+This is a more descriptive name of the Music On Hold entry. This is a short summary of the Music On Hold context and will show as a comment in the musiconhold-vicidial.conf file. max 255 characters, minimum of 2 characters||
+This option allows you to set the Music On Hold entry to active or inactive. Inactive will remove the entry from the conf files||
+Random Order||
+This option allows you to define the playback of the audio files in a random order. If set to N then the defined order will be used||
+To add a new audio file to a Music On Hold entry the file must first be in the audio store, then you can select the file and click submit to add it to the file list. Music on hold is updated once per minute if there have been changes made. Any files not listed in a music on hold entry that are present in the music on hold folder will be deleted||
+MUSIC ON HOLD ENTRY NOT ADDED||
+there is already a moh entry in the system with this ID||
+MUSIC ON HOLD ENTRY ADDED||
+Click here to see Admin chages to this Music On Hold entry||
+Audio Files||
+Add An Audio File||
+Rank: ||
+MUSIC ON HOLD ENTRY NOT MODIFIED||
+MUSIC ON HOLD ENTRY MODIFIED||
+Add A New MOH Entry||
+Show MOH Entries||
+Active Agent Server||
+Setting this option to N will prevent agents from being able to login to this server through the vicidial agent screen. This is very useful when using a phone login load balanced setup. Default is Y||
+Rebuild Music On Hold||
+If you want to force a rebuilding of the music on hold files or if the music on hold entries or server entries have changed then this should be set to Y. After the music on hold files have been synchronized and reloaded then this will be changed to N. Default is Y||
+MUSIC ON HOLD ENTRY NOT DELETED||
+MUSIC ON HOLD ENTRY DELETION CONFIRMATION||
+Click here to delete music on hold entry||
+MUSIC ON HOLD DELETION COMPLETED||
+Starts with Eastern timezones and works West||
+Starts with Western timezones and works East||
+you must select a user group||
+Enable Second Webform||
+WaitForSilence Options||
+If Wait For Silence is desired on calls that are detected as Answering Machines then this field has those options. There are two settings separated by a comma, the first option is how long to detect silence in milliseconds and the second option is for how many times to detect that before playing the message. Default is EMPTY for disabled. A standard value for this would be wait for 2 seconds of silence twice||
+This field is for entering the prompt to play when the agent gets an answering machine and clicks on the Answering Machine Message button in the transfer conference frame. You must set this to either an audio file in the audio store or a TTS prompt if TTS is enabled on your system||
+EXTENDED ALTERNATE PHONE NUMBERS FOR THIS LEAD||
+ADD NEW VOICEMAIL BOX||
+ADDING NEW VOICEMAIL BOX||
+MODIFY VOICEMAIL BOX||
+MODIFY A VOICEMAIL BOX||
+DELETE VOICEMAIL BOX||
+VOICEMAIL BOXES LIST||
+VOICEMAIL BOXES||
+ADD NEW VOICEMAIL BOX||
+Voicemail ID||
+This is the all numbers identifier of this mailbox. This must not be a duplicate of an existing voicemail ID or the voicemail ID of a phone on the system, minimum of 2 characters||
+This is name associated with this voicemail box. max 100 characters, minimum of 2 characters||
+This is the password that is used to gain access to the voicemail box when dialing in to check messages max 10 characters, minimum of 2 characters||
+This option allows you to set the voicemail box to active or inactive. If the box is inactive you cannot leave messages on it and you cannot check messages in it||
+This optional setting allows you to have the voicemail messages sent to an email account, if your system is set up to send out email. If this field is empty then no emails will be sent out||
+VOICEMAIL BOX NOT ADDED||
+there is already a voicemail box in the system with this ID||
+there is already a phone in the system with this voicemail ID||
+VOICEMAIL BOX ADDED||
+VOICEMAIL BOX NOT MODIFIED||
+VOICEMAIL BOX MODIFIED||
+VOICEMAIL BOX NOT DELETED||
+VOICEMAIL BOX DELETION COMPLETED||
+VOICEMAIL BOX DELETION CONFIRMATION||
+Click here to delete voicemail box||
+DELETE THIS VOICEMAIL BOX||
+Click here to see Admin chages to this voicemail box||
+The following fields must have data||
+Campaign CID Override||
+If this field is set, this will override the campaign CallerID that is set for calls that are placed to leads in this list. Default is not set||
+Answering Machine Message Override||
+If this field is set, this will override the Answering Machine Message set in the campaign for customers in this list. Default is not set||
+Drop Inbound Group Override||
+If this field is set, this in-group will be used for outbound calls within this list that drop from the outbound campaign instead of the drop in-group set in the campaign detail screen. Default is not set||
+Agent Select Territories||
+If this option is enabled and the agent belongs to at least one territory, the agent will have the option of selecting territories to dial leads from. The agent will see a list of available territories upon login and they will have the ability to go back to that territory list when paused to change their territories. For this function to work the Owner Only Dialing option must be set to TERRITORY and User Terriories must be enabled in the System Settings.
+Agent Choose Territories||
+This option if set to 1 allows the user to choose the territories that they will receive calls from when they login to a MANUAL or INBOUND_MAN campaign. Otherwise the user will be set to use all of the territories that they are set to belong to in the User Territories administrative section||
+The AREACODE option is just like the Y option, except it is used to also filter out an entire area code in North America from being dialed, in this case using the 201XXXXXXX entry in the DNC list would block all calls to the 201 areacode if enabled||
+If you have the active DNC option set to AREACODE then you can also use area code wildcard entries like this 201XXXXXXX to block all calls to the 201 areacode when enabled||
+Carrier Description||
+This is put in the comments of the asterisk conf files above the dialplan and account entries. Maximum 255 characters||
+CAMPAIGNS ALLOWING THIS IN-GROUP||
+This is the secret, or password, for the server in the iax auto-generated conf file for this server on other servers. Limit is 20 characters alphanumeric dash and underscore accepted. Default is test||
+Delete Voicemail After Email||
+This optional setting allows you to have the voicemail messages deleted from the system after they have been emailed out. Default is N||
+Last Campaign Call Date||
+This is the last time that a call was handled by an agent logged into this campaign||
+Custom User Fields||
+These five fields can be used for various purposes, and they can be populated in the web form addresses and scripts as user_custom_one and so on||
+CRM Popup Login||
+If set to Y, the CRM Popup Address is used to open a new window on agent login to this campaign. Default is N||
+CRM Popup Address||
+The web address of a CRM login page, it can have variables populated just like the web form address, with the VAR in the front and using --A--user_custom_one--B-- to define variables||
+If IN_GROUP is selected as the DID Route, then this is the call handling method used for these calls. CID will add a new lead record with every call using the CallerID as the phone number, CIDLOOKUP will attempt to lookup the phone number by the CallerID in the entire system, CIDLOOKUPRL will attempt to lookup the phone number by the CallerID in only one specified list, CIDLOOKUPRC will attempt to lookup the phone number by the CallerID in all of the lists that belong to the specified campaign, CLOSER is specified for VICIDIAL Closer calls, ANI will add a new lead record with every call using the ANI as the phone number, ANILOOKUP will attempt to lookup the phone number by the ANI in the entire system, ANILOOKUPRL will attempt to lookup the phone number by the ANI in only one specified list, XDIGITID will prompt the caller for an X digit code before the call will be put into the queue, VIDPROMPT will prompt the caller for their ID number and will create a new lead record with the CallerID as the phone number and the ID as the Vendor ID, VIDPROMPTLOOKUP will attempt to lookup the ID in the entire system, VIDPROMPTLOOKUPRL will attempt to lookup the vendor ID by the ID in only one specified list, VIDPROMPTLOOKUPRC will attempt to lookup the vendor ID by the ID in all of the lists that belong to the specified campaign. Default is CID||
+UNIFIED_CONTACT- This option will use the beta Vtiger 5.1.0 feature to search by phone number and bring up a search page in Vtiger||
+Timer Action||
+This feature allows you to trigger actions after a certain amount of time. the D1 and D2 DIAL options will launch a call to the Transfer Conference Number presets and send them to the agent session, this is usually used for simple IVR validation AGI applications or just to play a pre-recorded message. WEBFORM will open the web form address. MESSAGE_ONLY will simply display the message that is in the field below. NONE will disable this feature and is the default||
+Timer Action Message||
+This is the message that appears on the agent screen at the time the Timer Action is triggered||
+Timer Action Seconds||
+This is the amount of time after the call is connected to the customer that the Timer Action is triggered. Default is -1 which is also inactive||
+This setting will override the Campaign settings||
+Start Call URL||
+This web URL address is not seen by the agent, but it is called every time a call is sent to an agent if it is populated. Uses the same variables as the web form fields and scripts. This URL can NOT be a relative path. The Start URL does not work for Manual dial calls. Default is blank||
+Dispo Call URL||
+This web URL address is not seen by the agent, but it is called every time a call is dispositioned by an agent if it is populated. Uses the same variables as the web form fields and scripts. dispo and talk_time are the variables you can use to retrieve the agent-defined disposition for the call and the actual talk time in seconds of the call. This URL can NOT be a relative path. Default is blank||
+Xfer-Conf Number Override||
+These five fields allow for you to override the Transfer Conference number presets when the lead is from this list. Default is blank||
+These four fields allow for you to have two sets of Transfer Conference and DTMF presets. When the call or campaign is loaded, the vicidial.php script will show two buttons on the transfer-conference frame and auto-populate the number-to-dial and the send-dtmf fields when pressed. If you want to allow Consultative Transfers, a fronter to a closer, have the agent use the CONSULTATIVE checkbox, which does not work for third party non-ViciDial consultative calls. For those just have the agent click the Dial With Customer button. Then the agent can just LEAVE-3WAY-CALL and move on to their next call. If you want to allow Blind transfers of customers to a VICIDIAL AGI script for logging or an IVR, then place AXFER in the number-to-dial field. You can also specify an custom extension after the AXFER, for instance if you want to do a call to a special IVR you have set to extension 83900 you would put AXFER83900 in the number-to-dial field||
+
+
+add-file: user_territories.php
+add-file: audio_store.php
+add-file: AST_agent_time_detail.php
+add-file: AST_agent_timeclock_detail.php
+
+############################################################ CLIENT
+
+You are not allowed to dial into other agent sessions||
+QUICK TRANSFER||
+Other Agents Status||
+Available Agents Transfer||
+Show Calls In Queue||
+Calls In Queue||
+Hide Calls In Queue||
+Calls in Queue View Disabled for this campaign||
+YOU MUST BE PAUSED TO GRAB CALLS IN QUEUE||
+Manager ||
+has selected your in-group choices||
+CONSULTATIVE||
+Close Message||
+TIMER NOTIFICATION||
+
+
+add-file: vdc_script_display.php
+
+
+############################################################  MANAGER Manual
+
+
+
+############################################################  AGENT Manual
+

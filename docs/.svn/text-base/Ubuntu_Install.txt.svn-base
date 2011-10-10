@@ -1,0 +1,305 @@
+Ubuntu VICIDIAL Install:					2009-09-13
+
+### NOTE ###
+If you just want a quick setup of ViciDial on Ubuntu, take a look at our 
+downloadable ViciBox server install ISO available at: http://www.vicibox.com
+
+
+From a full default install of Ubuntu Server 8.0.4.3:
+
+Open a terminal on the system
+$ sudo su
+$ passwd (set the root user's password)
+
+$ apt-get update (retrieves the latest repository information)
+$ apt-get upgrade (upgrades any out of date packages
+$ apt-get install linux-headers-server (Used for zaptel compil)
+$ reboot (reboot to use the new kernel)
+
+'apt-get install' the following packages:
+apache2 (web server)
+apache2-mpm-prefork (multi threaded portion to apache2)
+build-essential  (this is the build tool chain for gcc)
+iftop  (this is a useful tool for looking at the network interface)
+lame   (this is a mp3 encoding tool)
+libmysqlclient15-dev (library that lets programs connect to mysql)
+libncurses5-dev
+libploticus0-dev
+libsox-fmt-all (encoding and decoding libraries for sox)
+linux-source (needed if you are going to recompile the linux kernel)
+mpg123 (mp3 playback utility for the commandline)
+mtop  (utility for monitoring mysql)
+mysql-client-5.0 (command for connecting to mysql)
+mysql-doc-5.0  (documentation for mysql)
+mysql-server-5.0  (this will ask for a password you can just press enter a bunch of times)
+mytop   (utility for monitoring mysql)
+ntp   (time synchronization utility)
+openssh-server  (ssh server allows for remote connection)
+php5  (base php files)
+php5-cli  (php command line interface (allows us to run php -v for eaccelerator))
+php5-dev  (development tools for php5 allows us to compile eaccelerator
+php5-mysql (allows php5 to connect to a mysql server)
+phpmyadmin (vicidial uses apache2 as its webserver please select this)
+ploticus (this is what creates the graphs for the server performance screen)
+screen (vicidial runs its core scripts in screen so this is REQUIRED)
+sipsak (tool for sending various information to sip phones)
+sox  (command line encoding and decoding tool)
+subversion  (code versioning tool)
+subversion-tools
+unzip
+libcurl3
+curl
+vim
+
+
+Go to terminal:
+$ cd /usr/src
+$ tar -xjf linux-source-*.tar.bz2 (where * is the kernel version)
+$ cpan
+(press enter to go through the prompts. If you have a multi cored system you should enter the -j option when specified with n+1 as the value, where n is the number of CPUs you have in your system. Also enter UNINST=1 when asked. until you get to the mirror selection portion)
+(select 3 mirror sites in your area)
+> install MD5
+> install Digest::SHA1
+> install readline
+> install Bundle::CPAN   (do not change settings)
+> quit
+$ cpan   (enter through questions until you get to the cpan prompt)
+> o conf commit (saves the config changes)
+> force install Scalar::Util
+> install DBI
+> force install DBD::mysql
+> install Net::Server
+> install Time::HiRes
+> install Net::Telnet
+> install Unicode::Map
+> install Jcode
+> install OLE::Storage_Lite
+> install Spreadsheet::WriteExcel
+> install Proc::ProcessTable
+> install Spreadsheet::ParseExcel
+> install Mail::Sendmail
+> quit
+
+$ cd /usr/src
+$ wget http://asterisk.gnuinter.net/files/asterisk-perl-0.08.tar.gz
+$ tar xzf asterisk-perl-0.08.tar.gz
+$ cd asterisk-perl-0.08
+$ perl Makefile.PL
+$ make all
+$ make install
+
+$ cd /usr/src
+$ wget http://www.daveltd.com/src/util/ttyload/ttyload-0.5.tar.gz
+$ tar xzf ttyload-0.5.tar.gz
+$ cd ttyload-0.5
+$ make
+$ make install
+
+$ cd /usr/src
+$ wget http://bart.eaccelerator.net/source/0.9.5.3/eaccelerator-0.9.5.3.zip
+$ unzip eaccelerator-0.9.5.3.zip
+$ cd eaccelerator-0.9.5.3
+$ phpize
+$ ./configure
+$ make
+$ make install
+$ cd /etc/php5/conf.d/
+$ vim eaccelerator.ini
+> add the following to the eaccelerator.:
+          extension="eaccelerator.so"
+          eaccelerator.shm_size="48"
+          eaccelerator.cache_dir="/var/lib/eaccelerator"
+          eaccelerator.enable="1"
+          eaccelerator.optimizer="1"
+          eaccelerator.check_mtime="1"
+          eaccelerator.debug="0"
+          eaccelerator.filter=""
+          eaccelerator.shm_max="0"
+          eaccelerator.shm_ttl="0"
+          eaccelerator.shm_prune_period="0"
+          eaccelerator.shm_only="0"
+          eaccelerator.compress="1"
+          eaccelerator.compress_level="9"
+$ mkdir /var/lib/eaccelerator
+$ chmod 0777 /var/lib/eaccelerator
+$ php -v
+
+NOTE: You should see a line mentioning eaccelerator. If you do not or you get an error you have done something wrong
+
+$ mkdir /usr/src/asterisk
+$ cd /usr/src/asterisk
+
+****FOR 1.2 asterisk run the following
+$ wget http://downloads.digium.com/pub/asterisk/releases/asterisk-1.2.30.2.tar.gz
+$ wget http://downloads.digium.com/pub/zaptel/releases/zaptel-1.2.27.tar.gz 
+$ wget http://downloads.digium.com/pub/libpri/releases/libpri-1.2.8.tar.gz
+$ tar xzf asterisk-1.2.30.2.tar.gz
+$ tar xzf zaptel-1.2.27.tar.gz 
+$ tar xzf libpri-1.2.8.tar.gz
+$ cd libpri-1.2.8
+$ make clean && make && make install
+$ cd ../zaptel-1.2.27
+$ make clean&& make && make install
+$ cd ../asterisk-1.2.30.2
+$ cd apps
+$ wget http://www.eflo.net/files/app_amd2.c
+$ mv app_amd2.c app_amd.c
+$ vi Makefile
+ replace this line(line 32):
+   app_mixmonitor.so app_stack.so
+ with this line:
+   app_mixmonitor.so app_stack.so app_amd.so
+$ wget http://www.eflo.net/files/amd2.conf
+$ mkdir /etc/asterisk
+$ mv amd2.conf /etc/asterisk/amd.conf
+$ wget http://www.eflo.net/files/meetme_DTMF_passthru-1.2.23.patch
+$ patch -p1 < ./meetme_DTMF_passthru-1.2.23.patch
+   File to patch: app_meetme.c
+$ wget http://www.eflo.net/files/meetme_volume_control_1.2.16.patch
+$ patch -p1 < ./meetme_volume_control_1.2.16.patch
+   File to patch: app_meetme.c
+$ cd ../
+$ wget http://www.eflo.net/files/cli_chan_concise_delimiter.patch
+$ patch -p1 < ./cli_chan_concise_delimiter.patch
+   File to patch: cli.c
+$ wget http://www.eflo.net/files/app_waitforsilence.c
+$ mv app_waitforsilence.c apps/app_waitforsilence.c
+$ wget http://www.eflo.net/files/enter.h
+$ wget http://www.eflo.net/files/leave.h
+$ mv -f enter.h apps/enter.h
+$ mv -f leave.h apps/leave.h
+$ vi codecs/gsm/Makefile
+   add OPTIMIZE=-O2 to the file  before the ifneq section, to fix GSM audio problems
+$ make clean; make; make installation
+$ make samples
+$ modprobe zaptel
+$ modprobe ztdummy
+
+****FOR 1.4 asterisk do the following:
+$ wget http://downloads.vicidial.com/required-apps/asterisk-1.4.21.2-vic.tar.gz
+$ wget http://downloads.digium.com/pub/zaptel/zaptel-1.4.12.1.tar.gz
+$ wget http://downloads.asterisk.org/pub/telephony/libpri/old/libpri-1.4.10.1.tar.gz
+$ tar xzf asterisk-1.4.21.2-vici.tar.gz
+$ tar xzf zaptel-1.4.12.1.tar.gz 
+$ tar xzf libpri-1.4.9.tar.gz
+$ cd libpri-1.4.9
+$ make clean; make; make install
+$ cd ../zaptel-1.4.12.1
+$ ./configure; make clean; make; make install
+$ cd ../asterisk-1.4.21.2
+$ ./configure; make clean; make; make install
+$ make samples
+$ modprobe zaptel
+$ modprobe ztdummy
+
+$ asterisk -vvvvvvvvvvvvvvvvvvvvvvvvvvvvgc      (to see if Asterisk runs)
+> show version
+> zap show status
+> show application meetme
+> stop now
+
+**** for SVN 2.0.5 branch:
+$ mkdir /usr/src/astguiclient
+$ cd /usr/src/astguiclient
+$ svn checkout svn://svn.eflo.net:43690/agc_2-X/branches/agc_2.0.5
+$ cd agc_2.0.5
+$ perl install.pl
+
+**** for SVN 2.2.0 trunk:
+$ mkdir /usr/src/astguiclient
+$ cd /usr/src/astguiclient
+$ svn checkout svn://svn.eflo.net:43690/agc_2-X/trunk
+$ cd trunk
+$ perl install.pl
+
+ : manual configuration [y]
+ : press enter until you get to webroot and set that to the following: /var/www
+ : press enter through to the Sample configuration files and set that to 'y'
+ : press enter through to the end of the script
+$ cd /var/lib/asterisk/sounds
+$ wget http://downloads.vicidial.com/conf/conf.gsm
+$ cp conf.gsm park.gsm
+
+$ mysql -p (enter the mysql root user's password you set earlier)
+> CREATE DATABASE `asterisk` DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
+> GRANT SELECT,INSERT,UPDATE,DELETE,LOCK TABLES on asterisk.* TO cron@'%' IDENTIFIED BY '1234';
+> GRANT SELECT,INSERT,UPDATE,DELETE,LOCK TABLES on asterisk.* TO cron@localhost IDENTIFIED BY '1234';
+> use asterisk;
+> \. /usr/src/astguiclient/trunk/extras/MySQL_AST_CREATE_tables.sql
+> \. /usr/src/astguiclient/trunk/extras/first_server_install.sql
+> \. /usr/src/astguiclient/trunk/extras/sip-iax_phones.sql
+> quit
+$ /usr/share/astguiclient/ADMIN_update_server_ip.pl --old-server_ip=10.10.10.15
+$ /usr/share/astguiclient/ADMIN_area_code_populate.pl
+$ cp /usr/src/astguiclient/trunk/extras/performance_test_leads.txt /usr/share/astguiclient/LEADS_IN/
+$ /usr/share/astguiclient/VICIDIAL_IN_new_leads_file.pl --forcelistid=107 --forcephonecode=1
+
+$ crontab -e
+  Add the following lines:
+### recording mixing/compressing/ftping scripts
+0,3,6,9,12,15,18,21,24,27,30,33,36,39,42,45,48,51,54,57 * * * * /usr/share/astguiclient/AST_CRON_audio_1_move_mix.pl
+#0,3,6,9,12,15,18,21,24,27,30,33,36,39,42,45,48,51,54,57 * * * * /usr/share/astguiclient/AST_CRON_audio_1_move_VDonly.pl
+1,4,7,10,13,16,19,22,25,28,31,34,37,40,43,46,49,52,55,58 * * * * /usr/share/astguiclient/AST_CRON_audio_2_compress.pl --MP3
+#2,5,8,11,14,17,20,23,26,29,32,35,38,41,44,47,50,53,56,59 * * * * /usr/share/astguiclient/AST_CRON_audio_3_ftp.pl --MP3
+### keepalive script for astguiclient processes
+* * * * * /usr/share/astguiclient/ADMIN_keepalive_ALL.pl
+### kill Hangup script for Asterisk updaters
+* * * * * /usr/share/astguiclient/AST_manager_kill_hung_congested.pl
+
+### updater for voicemail
+* * * * * /usr/share/astguiclient/AST_vm_update.pl
+### updater for conference validator
+* * * * * /usr/share/astguiclient/AST_conf_update.pl
+### flush queue DB table every hour for entries older than 1 hour
+11 * * * * /usr/share/astguiclient/AST_flush_DBqueue.pl -q
+### fix the vicidial_agent_log once every hour
+33 * * * * /usr/share/astguiclient/AST_cleanup_agent_log.pl
+### updater for VICIDIAL hopper
+* * * * * /usr/share/astguiclient/AST_VDhopper.pl -q
+### adjust the GMT offset for the leads in the vicidial_list table
+1 1,7 * * * /usr/share/astguiclient/ADMIN_adjust_GMTnow_on_leads.pl --debug
+### reset several temporary-info tables in the database
+2 1 * * * /usr/share/astguiclient/AST_reset_mysql_vars.pl
+### optimize the database tables within the asterisk database
+3 1 * * * /usr/share/astguiclient/AST_DB_optimize.pl
+## adjust time on the server with ntp
+30 * * * * /usr/local/bin/ntpdate -u pool.ntp.org 2>/dev/null 1>&2
+### VICIDIAL agent time log weekly summary report generation
+2 0 * * 0 /usr/share/astguiclient/AST_agent_week.pl
+### remove old recordings more than 7 days old
+# 24 0 * * * /usr/bin/find /var/spool/asterisk/monitor -maxdepth 2 -type f -mtime +7 -print | xargs rm -f
+### remove old vicidial logs and asterisk logs more than 2 days old
+28 0 * * * /usr/bin/find /var/log/astguiclient -maxdepth 1 -type f -mtime +2 -print | xargs rm -f
+29 0 * * * /usr/bin/find /var/log/asterisk -maxdepth 3 -type f -mtime +2 -print | xargs rm -f
+
+
+$ cd /etc/init.d/
+$ wget http://download.vicidial.com/ubuntu/vicidial
+$ chmod +x vicidial
+$ update-rc.d -f vicidial defaults
+
+$ vim /etc/apache2/sites-available/default                  (add the following lines)
+ Alias /RECORDINGS/ "/var/spool/asterisk/monitorDONE/"
+ <Directory "/var/spool/asterisk/monitorDONE">
+ Options Indexes MultiViews
+ AllowOverride None
+ Order allow,deny
+ Allow from all
+ <files *.mp3>
+ Forcetype application/forcedownload
+ </files>
+ </Directory>
+$ chmod 0777 /var/spool/asterisk/monitorDONE/
+$ /etc/init.d/apache2 restart
+
+$ vi /etc/fstab             (add the following line to the end of the file)
+tmpfs	/var/spool/asterisk/monitor	tmpfs	rw  0 0
+
+
+
+$ shutdown -r 0
+$ screen -ls          (should show at least 6 screens, one of which should be asterisk)
+
+
+In a web browser, go to (http://YOUR_SERVER_IP_ADDRESS/vicidial/admin.php) to see if everything is working. You should also reboot at this point to make sure everything will start back up properly.
+From here on you should follow the tutorials in the VICIDIAL Manager Manual(available at eflo.net)

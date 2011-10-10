@@ -1,0 +1,54 @@
+############################################################  ADMIN
+
+VICIDIAL Server Trunks allows you to restrict the outgoing lines that are used on this server for campaign dialing on a per-campaign basis. You have the option to reserve a specific number of lines to be used by only one campaign as well as allowing that campaign to run over its reserved lines into whatever lines remain open, as long at the total lines used by vicidial on this server is less than the Max VICIDIAL Trunks setting. Not having any of these records will allow the campaign that dials the line first to have as many lines as it can get under the Max VICIDIAL Trunks setting||
+VICIDIAL Balance Dialing -<\/B> Setting this field to Y will allow the server to place balance calls for campaigns in VICIDIAL so that the defined dial level can be met even if there are no agents logged into that campaign on this server. Default is N||
+VICIDIAL Balance Offlimits -<\/B> This setting defines the number of trunks to not allow VICIDIAL balance dialing to use. For example if you have 40 max vicidial trunks and balance offlimits is set to 10 you will only be able to use 30 trunk lines for VICIDIAL balance dialing. Default is 0||
+Allowed Campaigns -<\/B> This is a selectable list of Campaigns to which members of this user group can log in to. The ALL-CAMPAIGNS option allows the users in this group to see and log in to any campaign on the system||
+VICIDIAL SERVER TRUNK RECORD NOT ADDED||
+there is already a server-trunk record for this campaign||
+the number of vicidial trunks is too high||
+VICIDIAL SERVER TRUNK RECORD ADDED||
+VICIDIAL SERVER TRUNK RECORD NOT MODIFIED||
+VICIDIAL SERVER TRUNK RECORD MODIFIED||
+VICIDIAL SERVER TRUNK RECORD NOT DELETED||
+VICIDIAL SERVER TRUNK RECORD DELETED||
+campaign must be between 3 and 8 characters in length||
+server_ip delay must be at least 7 characters||
+trunks must be a digit from 0 to 9999||
+VICIDIAL Balance Dialing||
+VICIDIAL Balance Offlimits||
+ADDING NEW SERVER VICIDIAL TRUNK RECORD||
+ADD NEW SERVER VICIDIAL TRUNK RECORD||
+MODIFY SERVER VICIDIAL TRUNK RECORD||
+DELETE SERVER VICIDIAL TRUNK RECORD||
+VICIDIAL TRUNKS FOR THIS SERVER||
+RESTRICTION||
+TRUNKS||
+Emergency VDAC Jam Clear||
+VDAC NOT CLEARED FOR CAMPAIGN||
+LAST VDAC RECORD CLEARED FOR CAMPAIGN||
+VDAC CLEAR CONFIRMATION||
+Click here to delete the oldest LIVE record in VDAC for||
+Allowed Campaigns||
+USERS CAN VIEW ANY CAMPAIGN||
+Campaign Not Allowed||
+
+############################################################ CLIENT
+
+VOLUME||
+
+
+############################################################  MANAGER Manual
+
+Add notes on balance dialing in Multi-server setups
+Add notes for user groups
+Add notes for this sample iframe in SCRIPTS:
+<iframe src="http://astguiclient.sf.net/test_VICIDIAL_output.php?lead_id=--A--lead_id--B--&vendor_id=--A--vendor_lead_code--B--&list_id=--A--list_id--B--&gmt_offset_now=--A--gmt_offset_now--B--&phone_code=--A--phone_code--B--&phone_number=--A--phone_number--B--&title=--A--title--B--&first_name=--A--first_name--B--&middle_initial=--A--middle_initial--B--&last_name=--A--last_name--B--&address1=--A--address1--B--&address2=--A--address2--B--&address3=--A--address3--B--&city=--A--city--B--&state=--A--state--B--&province=--A--province--B--&postal_code=--A--postal_code--B--&country_code=--A--country_code--B--&gender=--A--gender--B--&date_of_birth=--A--date_of_birth--B--&alt_phone=--A--alt_phone--B--&email=--A--email--B--&security_phrase=--A--security_phrase--B--&comments=--A--comments--B--&user=--A--user--B--&campaign=--A--campaign--B--&phone_login=--A--phone_login--B--&fronter=--A--fronter--B--&closer=--A--user--B--&group=--A--group--B--&channel_group=--A--group--B--&SQLdate=--A--SQLdate--B--&epoch=--A--epoch--B--&uniqueid=--A--uniqueid--B--&customer_zap_channel=--A--customer_zap_channel--B--&server_ip=--A--server_ip--B--&SIPexten=--A--SIPexten--B--&session_id=--A--session_id--B--&phone=--A--phone--B--" 
+      style="width:100%;height:100%;background-color:transparent;" 
+      scrolling="auto" frameborder="0" 
+      allowtransparency="true" id="popupFrame" 
+      name="popupFrame" width="100%" height="100%">
+</iframe>
+
+############################################################  AGENT Manual
+

@@ -1,0 +1,140 @@
+#!/usr/bin/perl
+#
+# agi-dtmf.agi - script for playing DTMF tones received as the callerid field
+# 
+# DTMF sound files must be in /var/lib/asterisk/sounds for this to work
+#
+# Accepted values are: 1 2 3 4 5 6 7 8 9 0 # * ,
+# comma means pause for 1 second
+#
+# exten => 8500998,1,Answer
+# exten => 8500998,2,Playback(silence)
+# exten => 8500998,3,AGI(agi-dtmf.agi)
+#; exten => 8500998,3,AGI(agi-dtmf.agi,signalonly) ; optional signal only DTMF
+# exten => 8500998,4,Hangup
+#
+# Copyright (C) 2009  Matt Florell <vicidial@gmail.com>    LICENSE: AGPLv2
+#
+# CHANGES
+# 90312-1534 - Added signalonly option
+#
+
+$signalonly=0;
+### begin parsing run-time options ###
+if (length($ARGV[0])>1)
+	{
+	$i=0;
+	while ($#ARGV >= $i)
+		{
+		$args = "$args $ARGV[$i]";
+		$i++;
+		}
+	
+	if ($ARGV[0] =~ /signalonly/)
+		{$signalonly=1;}
+	}
+
+$|=1;
+while(<STDIN>) 
+	{
+	chomp;
+	last unless length($_);
+	if (/^agi_(\w+)\:\s+(.*)$/) 
+		{$AGI{$1} = $2;}
+	if (/^agi_callerid\:\s+(.*)$/)		{$caller_id = $1;}
+	if (/^agi_calleridname\:\s+(.*)$/)  {$caller_idname = $1;}
+	}
+
+print STDERR "AGI Environment Dump:\n";
+foreach $i (sort keys %AGI) {
+	print STDERR " -- $i = $AGI{$i}\n";
+}
+
+use Time::HiRes ('gettimeofday','usleep','sleep');  # necessary to have perl sleep command of less than one second
+
+use Asterisk::AGI;
+my $agi = new Asterisk::AGI;
+
+my $clid = $agi->get_variable('CALLERID');
+my $clidname = $agi->get_variable('CALLERIDNAME');
+
+print STDERR "X.  |$clid|$caller_id|$clidname|\n";
+
+
+### sleep for 5 tenths of a second
+usleep(1*500*1000);
+
+print "STREAM FILE silence \"\"\n";
+
+$caller_id = "$caller_id$caller_idname";
+
+@CALLERID_DIGITS = split(//, $caller_id);
+
+foreach (@CALLERID_DIGITS)
+{
+
+if ($CALLERID_DIGITS[$g] =~ /\d/) 
+	{
+	if ($signalonly > 0)
+		{print "EXEC SendDTMF $CALLERID_DIGITS[$g] \"\"\n";}
+	else
+		{print "STREAM FILE $CALLERID_DIGITS[$g] \"\"\n";}
+	print STDERR "DIGIT: $CALLERID_DIGITS[$g]\n";
+	}
+else
+	{
+	if ($CALLERID_DIGITS[$g] =~ /\#/) 
+		{
+		if ($signalonly > 0)
+			{print "EXEC SendDTMF \# \"\"\n";}
+		else
+			{print "STREAM FILE hash \"\"\n";}
+		}
+	if ($CALLERID_DIGITS[$g] =~ /\*/) 
+		{
+		if ($signalonly > 0)
+			{print "EXEC SendDTMF \* \"\"\n";}
+		else
+			{print "STREAM FILE star \"\"\n";}
+		}
+	if ($CALLERID_DIGITS[$g] =~ /\,/) 
+		{sleep(1);}
+	print STDERR "NON-DIGIT: $CALLERID_DIGITS[$g]\n";
+	}
+$g++;
+
+### sleep for 20 hundredths of a second
+usleep(1*150*1000);
+
+print "STREAM FILE silence \"\"\n";
+
+### sleep for 10 hundredths of a second
+usleep(1*100*1000);
+}
+
+print "STREAM FILE silence \"\"\n";
+$result = <STDIN>;
+checkresult($result);
+
+exit;
+
+sub checkresult {
+	my ($res) = @_;
+	my $retval;
+	$tests++;
+	chomp $res;
+	if ($res =~ /^200/) {
+		$res =~ /result=(-?\d+)/;
+		if (!length($1)) {
+			print STDERR "FAIL ($res)\n";
+			$fail++;
+		} else {
+			print STDERR "PASS ($1)\n";
+			$pass++;
+		}
+	} else {
+		print STDERR "FAIL (unexpected result '$res')\n";
+		$fail++;
+	}
+}
+

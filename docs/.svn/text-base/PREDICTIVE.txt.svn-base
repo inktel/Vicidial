@@ -1,0 +1,132 @@
+PREDICTIVE Summary and Overview                                 2006-08-29
+
+*** PREDICTIVE OUTBOUND CALLING FUNCTIONALITY WAS ADDED IN THE 2.0.1 RELEASE ***
+
+This will outline the methods used to predictively dial outbound calling 
+campaigns in VICIDIAL with the ADAPT dial methods. This is a description of the 
+first versions of the Predictive/Adaptive dialing algorithms used in VICIDIAL. 
+As the need arises we will create more versions of different algorithms in the 
+future.
+
+
+The gathering of data to analyze:
+
+In order to properly analyze calling trends and adapt to the current list that 
+is being called we need to first gather a lot of data to analyze.
+
+The first set of data we want to gather is the recent queue and agent statistics 
+for each campaign. This information is gathered by the AST_VDauto_dial.pl script 
+as it runs through each loop every 2.5-3.0 seconds. This data is used only for 
+Blended CLOSER campaigns doing Predictive dialing and for the timeonVDADall 
+realtime campaign reports. The data gathered in this script are all averages of 
+the last 15 and 60 seconds of agent and queue activity:
+	1. The average number of agents that are logged into the campaign across 
+one minute
+	2. The average number of calls waiting to be transferred to an agent 
+across one minute
+	3. The average number of agents waiting for calls across one minute
+	4. The difference between the waiting calls and ready agents across one 
+minute
+		This number if positive means that on average more agents were 
+waiting for calls than calls waiting for agents in the last 
+minute for that campaign.
+
+The second set of data to gather is dropped call information across several 
+intervals as well as faster agent and queue call statistics. This information 
+will be gathered by the actual AST_VDadapt.pl script that will also be the 
+script actually changing the dial level when the predictive/adaptive dial method 
+is activated. 
+Once a second this script will gather:
+	1. The average number of agents that are logged into the campaign for 
+the last 15 seconds
+	2. The average number of calls waiting to be transferred to an agent for 
+the last 15 seconds
+	3. The average number of agents waiting for calls for the last 15 
+seconds
+	4. The difference between the waiting calls and ready agents for the 
+last 15 seconds
+Once every 15 seconds this script will:
+	1. Calculate the average dial level differential for the last 15 seconds
+	2. Apply the campaign's adaptive_dl_diff_target
+	3. Apply the campaign's adaptive_intensity setting
+	4. Calculate the new desired dial_level
+	5. Check the drop rate cap method(HARD_LIMIT, TAPERED, AVERAGE)
+	6. If drop rate is over the limit the proper equation is used to figure 
+out new dial_level difference.
+	7. Change the dial level for the campaign to the new suggested dial 
+level
+Once a minute this script will gather:
+	1. Total drops and total calls for the campaign since midnight
+	2. Total drops and total calls for the campaign in the past hour
+	3. Total drops and total calls for the campaign in the past half hour
+	4. Total drops and total calls for the campaign in the past five minutes
+	5. Total drops and total calls for the campaign in the past one minute
+		Also, the drop percentage is calculated and stored in the 
+vicidial_campaign_stats table.
+
+
+The settings in the campaign detail screen:
+
+Dial Method - This field is the way to define how dialing is to take place. If 
+MANUAL then the auto_dial_level will be locked at 0 unless Dial Method is 
+changed. If RATIO then the normal dialing a number of lines for Active agents. 
+ADAPT_HARD_LIMIT will dial predictively up to the dropped percentage and then 
+not allow aggressive dialing once the drop limit is reached until the percentage 
+goes down again. ADAPT_TAPERED allows for running over the dropped percentage in 
+the first half of the shift(as defined by call_time selected for campaign) and 
+gets more strict as the shift goes on. ADAPT_AVERAGE tries to maintain an 
+average or the dropped percentage not imposing hard limits as aggressively as 
+the other two methods.
+
+Auto Dial Level - This is where you set how many lines VICIDIAL should use per 
+active agent. zero 0 means auto dialing is off and the agents will click to dial 
+each number. Otherwise VICIDIAL will keep dialing lines equal to active agents 
+multiplied by the dial level to arrive at how many lines this campaign on each 
+server should allow.
+
+Available Only Tally - This field if set to Y will leave out INCALL and QUEUE 
+status agents when calculating the number of calls to dial when not in MANUAL 
+dial mode. Default is N.
+
+Drop Percentage Limit - This field is where you set the limit of the percentage 
+of dropped calls you would like while using an adaptive-predictive dial method, 
+not MANUAL or RATIO. Dropped calls percentage is measured out of the total 
+number of Answered calls for the campaign for the day.
+
+Maximum Adapt Dial Level - This field is where you set the limit of the limit to 
+the numbr of lines you would like dialed per agent while using an 
+adaptive-predictive dial method, not MANUAL or RATIO. This number can be higher 
+than the Auto Dial Level if your hardware will support it. Value must be a 
+positive number greater than one and can have decimal places Default 3.0.
+
+Latest Server Time - This field is only used by the ADAPT_TAPERED dial method. 
+You should enter in the hour and minute that you will stop calling on this 
+campaign, 2100 would mean that you will stop dialing this campaign at 9PM server 
+time. This allows the Tapered algorithm to decide how aggressively to dial by 
+how long you have until you will be finished calling.
+
+Adapt Intensity Modifier - This field is used to adjust the predictive intensity 
+either higher or lower. The higher a positive number you select, the greater the 
+dialer will increase the call pacing when it goes up and the slower the dialer 
+will decrease the call pacing when it goes down. The lower the negative number 
+you select here, the slower the dialer will increase the call pacing and the 
+faster the dialer will lower the call pacing when it goes down. Default is 0. 
+This field is not used by the MANUAL or RATIO dial methods.
+
+Dial Level Difference Target - This field is used to define whether you want to 
+target having a specific number of agents waiting for calls or calls waiting for 
+agents. For example if you would always like to have on average one agent free 
+to take calls immediately you would set this to -1, if you would like to target 
+always having one call on hold waiting for an agent you would set this to 1. 
+Default is 0. This field is not used by the MANUAL or RATIO dial methods.
+
+
+
+To use adaptive dialing you must have the ADMIN keepaliveAST_VDadapt.pl script 
+in your crontab running every minute:
+### keepalive script for VICIDIAL predictive script
+* * * * * /usr/share/astguiclient/ADMIN_keepalive_AST_VDadapt.pl
+
+
+NOTE: With Predictive dialing, the dial_level will never drop below 1.0.
+

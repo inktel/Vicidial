@@ -1,0 +1,24 @@
+# /etc/zaptel.conf:
+# Digium/Clone T100P EXAMPLE:
+# Here is an example of a configuration where an T100P single T1 card is used 
+# for connecting a single T1 PRI circuit with 23 voice channels
+
+loadzone=it
+defaultzone=it
+
+span=1,1,0,ccs,hdb3,crc4
+bchan=1-15,17-31
+dchan=16
+
+span=2,2,0,ccs,hdb3,crc4
+bchan=32-46,48-62
+dchan=47
+
+span=3,3,0,ccs,hdb3,crc4
+bchan=63-77,79-93
+dchan=78
+
+span=4,4,0,ccs,hdb3,crc4
+bchan=94-108,110-124
+dchan=109
+

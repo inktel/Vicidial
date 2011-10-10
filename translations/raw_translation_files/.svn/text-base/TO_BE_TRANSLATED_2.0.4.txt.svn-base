@@ -1,0 +1,145 @@
+############################################################  ADMIN
+
+CHECK FOR DUPLICATES BY PHONE IN ALL CAMPAIGN LISTS||
+CHECK FOR DUPLICATES BY PHONE IN ENTIRE SYSTEM||
+PHONE CODE OVERRIDE FOR THIS FILE||
+The VICIDIAL basic web-based lead loader is designed simply to take a lead file - up to 8MB in size - that is either tab or pipe delimited and load it into the vicidial_list table. The lead loader allows for field choosing and TXT- Plain Text, CSV- Comma Separated Values and XLS- Excel file formats. The lead loader does not do data validation, but it does allow you to check for duplicates in itself, within the campaign or within the entire system. Also, make sure that you have created the list that these leads are to be under so that you can use them. Here is a list of the fields in their proper order for the lead files:||
+NOTES: The Excel Lead loader functionality is enabled by a series of perl scripts and needs to have a properly configured /etc/astguiclient.conf file in place on the web server. Also, a couple perl modules must be loaded for it to work as well - OLE-Storage_Lite and Spreadsheet-ParseExcel. You can check for runtime errors in these by looking at your apache error_log file. Also, for duplication checks against gampaign lists, the list that has new leads going into it does need to be created in the system before you start to load the leads.||
+Campaign List Mix Added||
+Modify Campaign List Mix||
+Campaign List Mix Removed||
+Campaign Statuses||
+Campaign HotKeys||
+Campaign Lead Recycle Entries||
+Campaign Auto Alt Dial Statuses||
+Campaign Agent Pause Codes||
+Campaign Dial Statuses||
+Campaign List Mixes||
+ Lead Recycle ||
+ Auto-Alt Dial ||
+ Pause Codes ||
+ List Mix ||
+ Campaigns Main ||
+List Order Mix -<\/B> Overrides the Lead Order and Dial Status fields. Will use the List and status parameters for the selected List Mix entry in the List Mix sub section instead. Default is DISABLED||
+List Mix ID -<\/B> ID of the list mix. Must be from 2-20 characters in length with no spaces or other special punctuation.||
+List Mix Name -<\/B> Descriptive name of the list mix. Must be from 2-50 characters in length||
+List Mix Detail -<\/B> The composition of the List Mix entry. Contains the List ID, mix order, percentages and statuses that make up this List Mix. The percentages always have to add up to 100, and the lists all have to be active and set to the campaign for the order mix entry to be Activated||
+List Mix Method -<\/B> The method of mixing all of the parts of the List Mix Detail together. EVEN_MIX will mix leads from each part interleaved with the other parts, like this 1,2,3,1,2,3,1,2,3. IN_ORDER will put the leads in the order in which they are listed in the List Mix Detail screen 1,1,1,2,2,2,3,3,3. RANDOM will put them in RANDOM order 1,3,2,1,1,3,2,1,3. Default is IN_ORDER.||
+LIST MIXES FOR THIS CAMPAIGN: ||
+The human_answered field is used when calculating the drop percentage, or abandon rate. Setting human_answered to Y will use this status when counting the human-answered calls.||
+HUMAN ANSWER||
+ADDING VICIDIAL SYSTEM STATUSES||
+MODIFY VICIDIAL SYSTEM STATUSES||
+SYSTEM STATUS NOT ADDED||
+SYSTEM STATUS ADDED||
+SYSTEM STATUS NOT DELETED||
+the system status cannot be a reserved status: ||
+the system status needs to be at least 1 characters in length||
+VICIDIAL STATUSES WITHIN THIS SYSTEM: ||
+ADD NEW SYSTEM STATUS||
+CUSTOM CAMPAIGN STATUSES LISTINGS:||
+CAMPAIGN HOTKEYS LISTINGS:||
+CAMPAIGN LEAD RECYCLE LISTINGS:||
+LEAD RECYCLES||
+CAMPAIGN LEAD AUTO-ALT DIAL LISTINGS:||
+CAMPAIGN AGENT PAUSE CODE LISTINGS:||
+CAMPAIGN LIST MIX LISTINGS:||
+The Category option allows you to group several statuses into a catogy that can be used for statistical analysis.||
+MODIFY VICIDIAL STATUS CATEGORIES||
+ADDING VICIDIAL STATUS CATEGORY||
+ Status Categories ||
+ System Statuses ||
+MODIFY VICIDIAL SYSTEM STATUSES||
+MODIFY VICIDIAL STATUS CATEGORY||
+Through the use of system statuses, you can have statuses that exist for campaign and in-group. The Status must be 1-6 characters in length, the description must be 2-30 characters in length and Selectable defines whether it shows up in VICIDIAL as an agent disposition. The human_answered field is used when calculating the drop percentage, or abandon rate. Setting human_answered to Y will use this status when counting the human-answered calls. The Category option allows you to group several statuses into a catogy that can be used for statistical analysis||
+Through the use of system status categories, you can group together statuses to allow for statistical analysis on a group of statuses. The Category ID must be 2-20 characters in length with no spaces, the name must be 2-50 characters in length, the description is optional and TimeonVDAD Display defines whether that status will be one of the upto 4 statuses that can be calculated and displayed on the Time On VDAD Real-Time report||
+ADD NEW STATUS CATEGORY||
+STATUS CATEGORY NOT ADDED||
+there is already a status category in the system with this ID||
+ID must be between 2 and 20 characters in length||
+name name must be between 2 and 50 characters in length||
+STATUS CATEGORY NOT MODIFIED||
+the status category cannot be a reserved category: ||
+the status category needs to be at least 2 characters in length||
+STATUS CATEGORY DELETED||
+STATUS CATEGORY MODIFIED||
+Category: ||
+the system status name needs to be at least 1 characters in length||
+SYSTEM STATUS NOT MODIFIED||
+SYSTEM STATUS MODIFIED||
+ERROR: There are already 4 Status Categories set to TimeOnVDAD Display||
+CUSTOM CAMPAIGN STATUS MODIFIED||
+LIST MIX NOT MODIFIED||
+LIST MIX MODIFIED||
+You cannot delete the last list_id entry from a list mix||
+LIST MIX ADDED: ||
+LIST MIX NOT ADDED ||
+There is already a list mix with this ID in the system||
+LIST MIX NOT DELETED||
+LIST MIX DELETED: ||
+SET TO ACTIVE||
+LIST MIX NOT ACTIVATED||
+LIST MIX ACTIVATED||
+Enable Agent Transfer Logfile -<\/B> This option will log to a text logfile on the webserver every time a call is transferred to an agent. Default is 0, disabled||
+Enable Agent Transfer Logfile||
+Call Time -<\/B> This is the call time scheme to use for this inbound group. Keep in mind that the time is based on the server time. Default is 24hours||
+After Hours Action -<\/B> The action to perform if it is after hours as defined in the call time for this inbound group. HANGUP will immediately hangup the call, MESSASGE will play the file in the After Hours Message Filenam field, EXTENSION will send the call to the After Hours Extension in the dialplan and VOICEMAIL will send the call to the voicemail box listed in the After Hours Voicemail field. Default is MESSAGE||
+After Hours Message Filename -<\/B> The audio file located on the server to be played if the Action is set to MESSAGE. Default is vm-goodbye||
+After Hours Extension -<\/B> The dialplan extension to send the call to if the Action is set to EXTENSION. Default is 8300||
+After Hours Voicemail -<\/B> The voicemail box to send the call to if the Action is set to VOICEMAIL||
+Welcome Message Filename -<\/B> The audio file located on the server to be played when the call comes in. If set to ---NONE--- then no message will be played. Default is ---NONE---||
+Music On Hold Context -<\/B> The music on hold context to use when the customer is placed on hold. Default is default||
+On Hold Prompt Filename -<\/B> The audio file located on the server to be played at a regular interval when the customer is on hold. Default is generic_hold. This audio file MUST be 9 seconds or less in length.||
+On Hold Prompt Interval -<\/B> The length of time in seconds to wait before playing the on hold prompt. Default is 60||
+Agent Alert Extension -<\/B> The extension to send into the agent session to announce that a call is coming to the agent. This extension should have a Playback of an audio file. To not use this function set this to X. Default is X||
+Agent Alert Delay -<\/B> The length of time in milliseconds to wait before sending the call to the agent after playing the on Agent Alert Extension. Default is 1000||
+Call Time: ||
+After Hours Action: ||
+After Hours Message Filename: ||
+After Hours Extension: ||
+After Hours Voicemail: ||
+Welcome Message Filename: ||
+Music On Hold Context: ||
+On Hold Prompt Filename: ||
+On Hold Prompt Interval: ||
+Agent Alert Extension: ||
+Agent Alert Delay: ||
+You will also be able to set the rank, or skill level, in this section for each of the inbound groups as well as being able to see the number of calls received from each inbound group for this specific agent||
+Allow Inbound and Blended -<\/B> This is where you can set whether the users of this campaign will have the option to take inbound calls with this campaign. If you want to do blended inbound and outbound then this must be set to Y. If you only want to do outbound dialing on this campaign set this to N. Default is N||
+Allow Inbound and Blended: ||
+Manual Dial List ID -<\/B> The default list_id to be used when an agent placces a manual call and a new lead record is created in vicidial_list. Default is 999. This field can contain digits only||
+Manual Dial List ID: ||
+inbound_group_rank: orders by the rank given to the agent for the specific inbound group. Highest to Lowest||
+fewest_calls: orders by the number of calls received by an agent for that specific inbound group. Least calls first||
+Campaign Ranks: ||
+AGENT RANKS FOR THIS CAMPAIGN:||
+Copy Campaign||
+COPY A CAMPAIGN||
+Source Campaign: ||
+New Copied Campaign Addition||
+Copy In-Group||
+New Copied In-Group Addition||
+Copy User||
+New Copied User Addition||
+COPY USER||
+Copy In-Group||
+COPY INBOUND GROUP||
+campaign_rank: orders by the rank given to the agent for the campaign. Highest to Lowest||
+Default Transfer Group -<\/B> This field is the default In-Group that will be automatically selected when the agent goes to the transfer-conference frame in their agent interface||
+Default Transfer Group: ||
+Allowed Transfer Groups: ||
+Allowed Transfer Groups -<\/B> With these checkbox listings you can select the groups that agents in this campaign can transfer calls to. Allow Closers must be enabled for this option to show up||
+Campaign Ranks -<\/B> In this section you can define the rank an agent will have for each campaign. These ranks can be used to allow for preferred call routing when Next Agent Call is set to campaign_rank||
+Also in this section is the ability to give the agent a rank for each inbound group. These ranks can be used for preferred call routing when that option is selected in the in-group screen||
+
+
+############################################################ CLIENT
+
+PLEASE CLICK THE LOGOUT LINK TO LOG OUT NEXT TIME||
+
+
+############################################################  MANAGER Manual
+
+
+############################################################  AGENT Manual
+

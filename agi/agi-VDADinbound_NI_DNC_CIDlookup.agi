@@ -1,0 +1,445 @@
+#!/usr/bin/perl
+#
+# agi-VDADinbound_NI_DNC_CIDlookup.agi version 2.0.5   *DBI-version*
+# 
+# runs when a call comes in from an inbound call. This script will 
+# play a message and take input to automatically change customer lead to NI or DNC.
+#  *** This version detects inbound callerID over PRI ***
+#
+# Flag Options:
+# 1- default to insert into the vicidial_dnc table for DNC selections (Default=YES)
+# 2- campaign to take dnc settings from(overrides option 1)
+#
+# ;inbound call from outbound CID callbacks from VICIDIAL calls:
+#exten => 1234,1,Ringing                 ; call ringing
+#exten => 1234,2,Wait(1)                 ; Wait 1 second for CID delivery from PRI
+#exten => 1234,3,Answer                  ; Answer the line
+#exten => 1234,4,AGI(agi-VDADinbound_NI_DNC_CIDlookup.agi,YES-----TESTCAMP)
+#exten => 1234,5,Hangup
+#
+# Copyright (C) 2008  Matt Florell <vicidial@gmail.com>    LICENSE: AGPLv2
+#
+# changes:
+# 60914-1051 - First draft
+# 80909-0614 - Added optional field for campaign so that vicidial_campaign_dnc could be used
+#
+
+$script = 'agi-VDADinbound_NI_DNC_CIDlookup.agi';
+
+### number of seconds to wait until you drop a waiting call
+$DROP_TIME = 360;	
+
+### files to play for message of not interested or DNC and your request has been processed
+$prompt_file = 'not_interested_or_dnc';
+$processed_file = 'request_has_been_processed';
+$goodbye_audio_file = 'US_reminder_goodbye';
+
+
+($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
+$year = ($year + 1900);
+$mon++;
+if ($mon < 10) {$mon = "0$mon";}
+if ($mday < 10) {$mday = "0$mday";}
+if ($hour < 10) {$hour = "0$hour";}
+if ($min < 10) {$min = "0$min";}
+if ($sec < 10) {$sec = "0$sec";}
+
+$now_date_epoch = time();
+$now_date = "$year-$mon-$mday $hour:$min:$sec";
+$start_time=$now_date;
+	$CIDdate = "$mon$mday$hour$min$sec";
+	$tsSQLdate = "$year$mon$mday$hour$min$sec";
+	$SQLdate = "$year-$mon-$mday $hour:$min:$sec";
+	$SQLdateBEGIN = $SQLdate;
+
+# default path to astguiclient configuration file:
+$PATHconf =		'/etc/astguiclient.conf';
+
+open(conf, "$PATHconf") || die "can't open $PATHconf: $!\n";
+@conf = <conf>;
+close(conf);
+$i=0;
+foreach(@conf)
+	{
+	$line = $conf[$i];
+	$line =~ s/ |>|\n|\r|\t|\#.*|;.*//gi;
+	if ( ($line =~ /^PATHhome/) && ($CLIhome < 1) )
+		{$PATHhome = $line;   $PATHhome =~ s/.*=//gi;}
+	if ( ($line =~ /^PATHlogs/) && ($CLIlogs < 1) )
+		{$PATHlogs = $line;   $PATHlogs =~ s/.*=//gi;}
+	if ( ($line =~ /^PATHagi/) && ($CLIagi < 1) )
+		{$PATHagi = $line;   $PATHagi =~ s/.*=//gi;}
+	if ( ($line =~ /^PATHweb/) && ($CLIweb < 1) )
+		{$PATHweb = $line;   $PATHweb =~ s/.*=//gi;}
+	if ( ($line =~ /^PATHsounds/) && ($CLIsounds < 1) )
+		{$PATHsounds = $line;   $PATHsounds =~ s/.*=//gi;}
+	if ( ($line =~ /^PATHmonitor/) && ($CLImonitor < 1) )
+		{$PATHmonitor = $line;   $PATHmonitor =~ s/.*=//gi;}
+	if ( ($line =~ /^VARserver_ip/) && ($CLIserver_ip < 1) )
+		{$VARserver_ip = $line;   $VARserver_ip =~ s/.*=//gi;}
+	if ( ($line =~ /^VARDB_server/) && ($CLIDB_server < 1) )
+		{$VARDB_server = $line;   $VARDB_server =~ s/.*=//gi;}
+	if ( ($line =~ /^VARDB_database/) && ($CLIDB_database < 1) )
+		{$VARDB_database = $line;   $VARDB_database =~ s/.*=//gi;}
+	if ( ($line =~ /^VARDB_user/) && ($CLIDB_user < 1) )
+		{$VARDB_user = $line;   $VARDB_user =~ s/.*=//gi;}
+	if ( ($line =~ /^VARDB_pass/) && ($CLIDB_pass < 1) )
+		{$VARDB_pass = $line;   $VARDB_pass =~ s/.*=//gi;}
+	if ( ($line =~ /^VARDB_port/) && ($CLIDB_port < 1) )
+		{$VARDB_port = $line;   $VARDB_port =~ s/.*=//gi;}
+	$i++;
+	}
+
+if (!$VARDB_port) {$VARDB_port='3306';}
+if (!$AGILOGfile) {$AGILOGfile = "$PATHlogs/agiout.$year-$mon-$mday";}
+
+use DBI;
+use Time::HiRes ('gettimeofday','usleep','sleep');  # necessary to have perl sleep command of less than one second
+use Asterisk::AGI;
+$AGI = new Asterisk::AGI;
+
+$dbhA = DBI->connect("DBI:mysql:$VARDB_database:$VARDB_server:$VARDB_port", "$VARDB_user", "$VARDB_pass")
+    or die "Couldn't connect to database: " . DBI->errstr;
+
+### Grab Server values from the database
+$stmtA = "SELECT agi_output FROM servers where server_ip = '$VARserver_ip';";
+$sthA = $dbhA->prepare($stmtA) or die "preparing: ",$dbhA->errstr;
+$sthA->execute or die "executing: $stmtA ", $dbhA->errstr;
+$sthArows=$sthA->rows;
+$rec_count=0;
+while ($sthArows > $rec_count)
+	{
+	$AGILOG = '0';
+	 @aryA = $sthA->fetchrow_array;
+		$DBagi_output =			"$aryA[0]";
+		if ($DBagi_output =~ /STDERR/)	{$AGILOG = '1';}
+		if ($DBagi_output =~ /FILE/)	{$AGILOG = '2';}
+		if ($DBagi_output =~ /BOTH/)	{$AGILOG = '3';}
+	 $rec_count++;
+	}
+$sthA->finish();
+
+
+### begin parsing run-time options ###
+if (length($ARGV[0])>1)
+	{
+	if ($AGILOG) {$agi_string = "Perl Environment Dump:";   &agi_output;}
+	$i=0;
+	while ($#ARGV >= $i)
+	{
+	$args = "$args $ARGV[$i]";
+	if ($AGILOG) {$agi_string = "$i|$ARGV[$i]";   &agi_output;}
+	$i++;
+	}
+	
+	### list of command-line array arguments:
+	@ARGV_vars = split(/-----/, $ARGV[0]);
+
+	$dnc_default = 	$ARGV_vars[0];
+	$campaign_id = 	$ARGV_vars[1];
+	}
+
+if (length($dnc_default) < 2)
+	{$dnc_default = 'YES';}
+
+$|=1;
+while(<STDIN>) {
+	chomp;
+	last unless length($_);
+	if ($AGILOG)
+	{
+		if (/^agi_(\w+)\:\s+(.*)$/)
+		{
+			$AGI{$1} = $2;
+		}
+	}
+
+	if (/^agi_uniqueid\:\s+(.*)$/)		{$unique_id = $1; $uniqueid = $unique_id;}
+	if (/^agi_channel\:\s+(.*)$/)		{$channel = $1;}
+	if (/^agi_extension\:\s+(.*)$/)		{$extension = $1;}
+	if (/^agi_type\:\s+(.*)$/)		{$type = $1;}
+	if (/^agi_callerid\:\s+(.*)$/)		{$callerid = $1;}
+	if (/^agi_calleridname\:\s+(.*)$/)	{$calleridname = $1;}
+
+	if ( ($callerid =~ /\".*\"/) && ( (!$calleridname) or ($calleridname =~ /unknown/) ) )
+		{
+		$calleridname = $callerid;
+		$calleridname =~ s/\<\d\d\d\d\d\d\d\d\d\d\>//gi;
+		$calleridname =~ s/\"|\" //gi;
+		}
+
+		$callerid =~ s/\D//gi;
+		$calleridname =~ s/unknown//gi;
+	if ( (!$callerid) or ($callerid =~ /unknown/) )
+		{$callerid = $calleridname;}
+
+	if (length($callerid)>0) {$phone_number = $callerid;}
+	   else {$phone_number = '';}
+	if (length($calleridname)>0) {$VLcomments = $calleridname;}
+	   else {$VLcomments = '';}
+
+#	if ($channel =~ /^SIP/) {$channel =~ s/-.*//gi;}
+#	if ($channel =~ /^Zap\//) {$channel =~ s/-\d$//gi;}
+	if (length($callerid)<10) {$callerid = $parked_by;}
+	if (length($pin)>0) {$callerid = $pin;}
+
+
+	### allow for external callerid to be collected
+#	if ($extension =~ /\*\d\d\d\d\d\d\d\d\d\d\*/)
+#		{
+#		@EXT_vars = split(/\*/, $extension);
+#		
+#		$referring_extension =	$EXT_vars[0];	# initial extension sent
+#		$channel_group =	$EXT_vars[1];	# name of the parked group
+#		$inbound_number =	$EXT_vars[2];	# extension to send call to after parsing
+#		$parked_by =		$EXT_vars[3];	# leadID
+#		$park_extension =	$EXT_vars[4];	# filename of the on-hold music file
+#		$comment_d =		$EXT_vars[5];	# N/A
+#		$comment_e =		$EXT_vars[6];	# N/A
+#
+#		$PADlead_id = sprintf("%09s", $parked_by);	while (length($PADlead_id) > 9) {chop($PADlead_id);}
+#		# JmmddhhmmssLLLLLLLLL
+#			$JqueryCID = "J$CIDdate$PADlead_id";
+#			$callerid = $JqueryCID;
+#		### set the callerid to the filename of the audio for on-hold
+#		print "SET CALLERID $JqueryCID\n";
+#		checkresult($result);
+#		print STDERR "callerID changed: $JqueryCID\n";
+#		}
+}
+
+foreach $i (sort keys %AGI) 
+{
+	if ($AGILOG) {$agi_string = " -- $i = $AGI{$i}";   &agi_output;}
+}
+
+if ($AGILOG) {$agi_string = "AGI Variables: |$unique_id|$channel|$extension|$type|$callerid|";   &agi_output;}
+
+
+$AGI->stream_file('beep');
+
+&enter_pin_number;
+
+if ( (length($pin)<1) || ($pin =~ /9/) )
+	{&enter_pin_number;}
+if ( (length($pin)<1) || ($pin =~ /9/) )
+	{&enter_pin_number;}
+if ( (length($pin)<1) || ($pin =~ /9/) )
+	{&enter_pin_number;}
+if ( (length($pin)<1) || ($pin =~ /9/) )
+	{&enter_pin_number;}
+
+if ($pin =~ /2/)	# set the phone_number to NI
+	{
+	### Check to see if the number is in the system ###
+	$stmtA= "SELECT count(*) from vicidial_list where phone_number='$phone_number';";
+	$sthA = $dbhA->prepare($stmtA) or die "preparing: ",$dbhA->errstr;
+	$sthA->execute or die "executing: $stmtA ", $dbhA->errstr;
+	$sthArows=$sthA->rows;
+	if ($sthArows > 0)
+		{
+		@aryA = $sthA->fetchrow_array;
+		$lead_in_system = "$aryA[0]";
+		$sthA->finish();
+	
+		### update all records for the phone_number in vicidial_list to NI (Not Interested)
+		$stmtA = "UPDATE vicidial_list SET status='NI' where phone_number='$phone_number';";
+		$affected_rows = $dbhA->do($stmtA);
+			if ($AGILOG) {$agi_string = "$affected_rows|$stmtA|";   &agi_output;}
+		}
+	$AGI->stream_file("$processed_file");
+	}
+
+if ($pin =~ /3/)	# set the phone_number to DNC
+	{
+	### Check to see if the number is in the system ###
+	$stmtA= "SELECT count(*) from vicidial_list where phone_number='$phone_number';";
+	$sthA = $dbhA->prepare($stmtA) or die "preparing: ",$dbhA->errstr;
+	$sthA->execute or die "executing: $stmtA ", $dbhA->errstr;
+	$sthArows=$sthA->rows;
+	if ($sthArows > 0)
+		{
+		@aryA = $sthA->fetchrow_array;
+		$lead_in_system = "$aryA[0]";
+		$sthA->finish();
+	
+		### update all records for the phone_number in vicidial_list to NI (Not Interested)
+		$stmtA = "UPDATE vicidial_list SET status='DNC' where phone_number='$phone_number';";
+		$affected_rows = $dbhA->do($stmtA);
+			if ($AGILOG) {$agi_string = "$affected_rows|$stmtA|";   &agi_output;}
+		}
+
+	if (length($campaign_id)>1) 
+		{
+		### Grab DNC settings from campaign
+		$stmtA = "SELECT use_internal_dnc,use_campaign_dnc FROM vicidial_campaigns where campaign_id = '$campaign_id';";
+		$sthA = $dbhA->prepare($stmtA) or die "preparing: ",$dbhA->errstr;
+		$sthA->execute or die "executing: $stmtA ", $dbhA->errstr;
+		$sthArows=$sthA->rows;
+		@aryA = $sthA->fetchrow_array;
+		$use_internal_dnc =	"$aryA[0]";
+		$use_campaign_dnc =	"$aryA[1]";
+		$sthA->finish();
+
+		if ($use_internal_dnc =~ /Y/)
+			{
+			### add the number to the vicidial_dnc table
+			$stmtA = "INSERT INTO vicidial_dnc SET phone_number='$phone_number';";
+			$affected_rows = $dbhA->do($stmtA);
+				if ($AGILOG) {$agi_string = "$affected_rows|$stmtA|";   &agi_output;}
+			}
+		if ($use_campaign_dnc =~ /Y/)
+			{
+			### add the number to the vicidial_campaign_dnc table
+			$stmtA = "INSERT INTO vicidial_campaign_dnc SET phone_number='$phone_number',campaign_id='$campaign_id';";
+			$affected_rows = $dbhA->do($stmtA);
+				if ($AGILOG) {$agi_string = "$affected_rows|$stmtA|";   &agi_output;}
+			}
+		}
+	else
+		{
+		if ($dnc_default =~ /YES/) 
+			{
+			### add the number to the vicidial_dnc table
+			$stmtA = "INSERT INTO vicidial_dnc SET phone_number='$phone_number';";
+			$affected_rows = $dbhA->do($stmtA);
+				if ($AGILOG) {$agi_string = "$affected_rows|$stmtA|";   &agi_output;}
+			}
+		}
+
+	$AGI->stream_file("$processed_file");
+	}
+
+$dbhA->disconnect();
+
+
+$AGI->stream_file("$goodbye_audio_file");
+
+exit;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+sub enter_pin_number
+{
+# if you are not interested in this program press 2
+# if you would not like to be contacted by us again press 3
+# if you would like us to try to get in contact with you hangup
+
+$interrupt_digit='';
+undef $interrupt_digit;
+
+$interrupt_digit = $AGI->stream_file("$prompt_file",'239');   
+
+	if ($AGILOG) {$agi_string = "interrupt_digit |$interrupt_digit|";   &agi_output;}
+
+$digits_being_entered=1;
+$totalDTMF='';
+if ($interrupt_digit > 1)
+	{
+	if ($interrupt_digit == 48) {$interrupt_digit=0;}
+	if ($interrupt_digit == 49) {$interrupt_digit=1;}
+	if ($interrupt_digit == 50) {$interrupt_digit=2;}
+	if ($interrupt_digit == 51) {$interrupt_digit=3;}
+	if ($interrupt_digit == 52) {$interrupt_digit=4;}
+	if ($interrupt_digit == 53) {$interrupt_digit=5;}
+	if ($interrupt_digit == 54) {$interrupt_digit=6;}
+	if ($interrupt_digit == 55) {$interrupt_digit=7;}
+	if ($interrupt_digit == 56) {$interrupt_digit=8;}
+	if ($interrupt_digit == 57) {$interrupt_digit=9;}
+	
+	$totalDTMF=$interrupt_digit;
+	}
+
+#$digit_loop_counter=0;
+#while ( ($digits_being_entered) && ($digit_loop_counter < 20) )
+#	{
+#	$digit = chr($AGI->wait_for_digit('30000'));  # wait 30 seconds for input or until the pound key is pressed
+#	if ($digit =~ /\d/)
+#		{
+#		$totalDTMF = "$totalDTMF$digit";
+#		print STDERR "digit |$digit|     TotalDTMF |$totalDTMF|\n";
+#		$AGI->say_digits("$digit");
+#		undef $digit;
+#		}
+#	else
+#		{
+#		$digits_being_entered=0;
+#		}
+#	
+#	$digit_loop_counter++;
+#	}
+#while ( ($digit_loop_counter < 4) )
+#	{
+#	$digit = chr($AGI->wait_for_digit('10000'));  # wait 10 seconds for input or until the pound key is pressed
+#	if ($digit =~ /\d/)
+#		{
+#		$totalDTMF = "$totalDTMF$digit";
+#		if ($AGILOG) {$agi_string = "digit |$digit|     TotalDTMF |$totalDTMF|";   &agi_output;}
+#		$AGI->say_digits("$digit");
+#		undef $digit;
+#		}
+#	else
+#		{
+#		$digit_loop_counter=4;
+#		}
+#	
+#	$digit_loop_counter++;
+#	}
+
+$totalDTMF =~ s/\D//gi;
+$pin = $totalDTMF;
+if ($totalDTMF) {if ($AGILOG) {$agi_string = "digit |$digit|     TotalDTMF |$totalDTMF|";   &agi_output;}}
+}
+
+
+
+
+sub checkresult {
+	my ($res) = @_;
+	my $retval;
+	$tests++;
+	chomp $res;
+	if ($res =~ /^200/) {
+		$res =~ /result=(-?\d+)/;
+		if (!length($1)) {
+		#	print STDERR "FAIL ($res)\n";
+			$fail++;
+		} else {
+		#	print STDERR "PASS ($1)\n";
+			$pass++;
+		}
+	} else {
+	#	print STDERR "FAIL (unexpected result '$res')\n";
+		$fail++;
+	}
+}
+
+
+
+sub agi_output
+{
+if ($AGILOG >=2)
+	{
+	### open the log file for writing ###
+	open(Lout, ">>$AGILOGfile")
+			|| die "Can't open $AGILOGfile: $!\n";
+	print Lout "$now_date|$script|$agi_string\n";
+	close(Lout);
+	}
+	### send to STDERR writing ###
+if ( ($AGILOG == '1') || ($AGILOG == '3') )
+	{print STDERR "$now_date|$script|$agi_string\n";}
+$agi_string='';
+}

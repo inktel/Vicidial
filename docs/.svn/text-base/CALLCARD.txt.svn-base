@@ -1,0 +1,91 @@
+Call Card featureset				2010-03-11
+
+*** THIS SECTION OUTLINES THE NEW CALLCARD FEATURES  in the 2.4 version ***
+
+
+As of the 2.4 version we have added an optional callcard system to allow calls from customers to agents with timers and balances associated with card pin numbers. This is a highly customized system so it will take some work to get it running, it is not designed to work out of the box, but the framework is in place.
+
+
+
+# Calling Cards feature is used for ID numbers to be used for agent talk time. There are several applications for this including: paid support queues, chat lines, advisor services, financial advice, legal services. The system consists of an AGI script that takes calls in, asks for and validates the pin/status/balance and sends them to a defined in-group, then the deduction of time from the customer's account starts once the agent receives the call. Also, there will be an option for an alert to low balance injected into the calling session.
+
+
+
+
+
+AGI Script involved in call card feature:
+- agi-CALLCARD_dial_in.agi
+
+
+Web scripts involved:
+- callcard_admin.php
+- callcard_export_report.php
+
+
+For the calls to be properly logged, use these settings(or add to existing URLs) in the in-group that is handling these calls:
+- Start Call URL: "&minuteswarning=1&callcard=1" or "&minuteswarning=1&callcard=1&nextstep=HANGUP&destination=8300&nextmessage=timeout_hangup&"
+- Dispo URL: "&callcard=--A--talk_time_min--B--"
+
+
+
+
+Changes to database:
+*** DO NOT MAKE THESE CHANGES, for documentation only ***
+
+
+CREATE TABLE callcard_accounts (
+card_id VARCHAR(20) PRIMARY KEY NOT NULL,
+pin VARCHAR(10) NOT NULL,
+status ENUM('GENERATE','PRINT','SHIP','HOLD','ACTIVE','USED','EMPTY','CANCEL','VOID') default 'GENERATE',
+balance_minutes SMALLINT(5) default '3',
+inbound_group_id VARCHAR(20) default '',
+index (pin)
+);
+
+CREATE TABLE callcard_accounts_details (
+card_id VARCHAR(20) PRIMARY KEY NOT NULL,
+run VARCHAR(4) default '',
+batch VARCHAR(5) default '',
+pack VARCHAR(5) default '',
+sequence VARCHAR(5) default '',
+status ENUM('GENERATE','PRINT','SHIP','HOLD','ACTIVE','USED','EMPTY','CANCEL','VOID') default 'GENERATE',
+balance_minutes SMALLINT(5) default '3',
+initial_value VARCHAR(6) default '0.00',
+initial_minutes SMALLINT(5) default '3',
+note_purchase_order VARCHAR(20) default '',
+note_printer VARCHAR(20) default '',
+note_did VARCHAR(18) default '',
+inbound_group_id VARCHAR(20) default '',
+note_language VARCHAR(10) default 'English',
+note_name VARCHAR(20) default '',
+note_comments VARCHAR(255) default '',
+create_user VARCHAR(20) default '',
+activate_user VARCHAR(20) default '',
+used_user VARCHAR(20) default '',
+void_user VARCHAR(20) default '',
+create_time DATETIME,
+activate_time DATETIME,
+used_time DATETIME,
+void_time DATETIME
+);
+
+CREATE TABLE callcard_log (
+uniqueid VARCHAR(20) PRIMARY KEY NOT NULL,
+card_id VARCHAR(20),
+balance_minutes_start SMALLINT(5) default '3',
+call_time DATETIME,
+agent_time DATETIME,
+dispo_time DATETIME,
+agent VARCHAR(20) default '',
+agent_dispo VARCHAR(6) default '',
+agent_talk_sec MEDIUMINT(8) default '0',
+agent_talk_min MEDIUMINT(8) default '0',
+phone_number VARCHAR(18),
+inbound_did VARCHAR(18),
+index (card_id),
+index (call_time)
+);
+
+ALTER TABLE system_settings ADD callcard_enabled ENUM('1','0') default '0';
+
+ALTER TABLE vicidial_users ADD callcard_admin ENUM('1','0') default '0';

@@ -1,0 +1,924 @@
+#!/bin/sh
+#
+# VDconfig
+#
+# Copyright (C) 2007  VICIDIAL-astGUIclient <vicidial@gmail.com>  LICENSE: GPLv2
+#
+
+# CHANGES
+# 71120-0000 - Iniitial release
+# 71121-1220 - Added --no-menu to merge in astguiclient.conf and save config.
+# 71121-1334 - Added --env-make [make_option]  to set environment before make.
+# 71129-1947 - Fixed .agc-config load problem, fixed duplicate save issue.
+
+
+
+SetDefaults ()
+{
+	# default path to astguicient configuration file:
+	PATHconf="/etc/astguiclient.conf"
+	# default path to home direct:
+	PATHhome="/usr/share/astguiclient"
+	# default path to astguiclient logs directory:
+	PATHlogs="/var/log/astguiclient"
+	# default path to asterisk agi-bin directory:
+	PATHagi="/var/lib/asterisk/agi-bin"
+	# default path to web root directory (Best guess):
+	PATHweb="/var/www/html"
+	if [ -e "/usr/apache2/htdocs" ]; then
+		PATHweb="/usr/apache2/htdocs"
+	elif [ -e "/usr/local/apache2/htdocs" ]; then
+		PATHweb="/usr/local/apache2/htdocs"
+	fi
+	# default path to asterisk sounds directory:
+	PATHsounds="/var/lib/asterisk/sounds"
+	# default path to asterisk recording directory:
+	PATHmonitor="/var/spool/asterisk/monitor"
+	# default path to asterisk recording DONE directory:
+	PATHDONEmonitor="/var/spool/asterisk/monitorDONE"
+	# the IP address of this machine.  default to best guess:
+	VARserver_ip=`/sbin/ifconfig eth0 | grep 'inet addr' | awk -F: '{ print $2 }' | awk '{ print $1 }'`
+	# default database server variables:
+	VARDB_server="localhost"
+	VARDB_database="asterisk"
+	VARDB_user="cron"
+	VARDB_pass="1234"
+	VARDB_port="3306"
+	# default keepalive processes:
+	VARactive_keepalives="123456"
+	# default recording FTP archive variables:
+	VARFTP_host=$VARserver_ip
+	VARFTP_user="cron"
+	VARFTP_pass="test"
+	VARFTP_port="21"
+	VARFTP_dir="RECORDINGS"
+	VARHTTP_path="http://$VARserver_ip"
+	# default report FTP variables:
+	VARREPORT_host=$VARserver_ip
+	VARREPORT_user="cron"
+	VARREPORT_pass="test"
+	VARREPORT_port="21"
+	VARREPORT_dir="REPORTS"
+	# defaults for FastAGI Server PreFork
+	VARfastagi_log_min_servers="3"
+	VARfastagi_log_max_servers="16"
+	VARfastagi_log_min_spare_servers="2"
+	VARfastagi_log_max_spare_servers="8"
+	VARfastagi_log_max_requests="1000"
+	VARfastagi_log_checkfordead="30"
+	VARfastagi_log_checkforwait="60"
+}
+
+FileLocationConfig ()
+{
+	DONE=no
+	while [ "$DONE" != "yes" ]; do
+	{
+		$DIALOG --clear --ok-label "Edit" --cancel-label "Done" \
+		   	--backtitle "$BACKTITLE" \
+		   	--item-help \
+		   	--title "General Configuration Menu" \
+		   	--menu "General configuration and file location menu.\n" \
+			 	15 74 8 \
+			 	1 "This server's IP address" "This server's IP address: $VARserver_ip" \
+			 	2 "Home directory" "Home directory: $PATHhome" \
+			 	3 "Log directory" "Log directory: $PATHlogs" \
+			 	4 "Web root directory" "Web root directory: $PATHweb" \
+			 	5 "Asterisk AGI-bin directory" "Asterisk AGI-bin direcory: $PATHagi" \
+			 	6 "Asterisk sounds directory" "Asterisk sounds directory: $PATHsounds" \
+			 	7 "Asterisk recordings directory" "Asterisk recordings directory: $PATHmonitor" \
+			 	8 "Asterisk recordings DONE directory" "Asterisk recordings DONE directory $PATHDONEmonitor" 2>$TEMP
+
+		if [ "$?" != "0" ]; then
+		{
+			DONE=yes
+		}
+		else
+		{
+			set `cat $TEMP`
+			if [ "$1" = "1" ]; then
+			{
+				$DIALOG --clear --backtitle "$BACKTITLE" \
+			   	--title "Server IP Address" \
+			   	--inputbox "Enter this server's IP address:" 9 74 "$VARserver_ip" \
+			   	2> $TEMP
+				if [ "$?" = "0" ]; then
+				{
+					set `cat $TEMP`
+					VARserver_ip=$1
+				}
+				fi
+			}
+			elif [ "$1" = "2" ]; then
+			{
+				$DIALOG --clear --backtitle "$BACKTITLE" \
+			   	--title "Home Directory" \
+			   	--inputbox "Enter the astguiclient home directory" 9 74 "$PATHhome" \
+			   	2> $TEMP
+				if [ "$?" = "0" ]; then
+				{
+					set `cat $TEMP`
+					PATHhome=$1
+				}
+				fi
+			}
+			elif [ "$1" = "3" ]; then
+			{
+				$DIALOG --clear --backtitle "$BACKTITLE" \
+			   	--title "Log Directory" \
+			   	--inputbox "Enter the log directory" 9 74 "$PATHlogs" \
+			   	2> $TEMP
+				if [ "$?" = "0" ]; then
+				{
+					set `cat $TEMP`
+					PATHlogs=$1
+				}
+				fi
+			}
+			elif [ "$1" = "4" ]; then
+			{
+				$DIALOG --clear --backtitle "$BACKTITLE" \
+			   	--title "Web Root Directory" \
+			   	--inputbox "Enter the web root directory:" 9 74 "$PATHweb" \
+			   	2> $TEMP
+				if [ "$?" = "0" ]; then
+				{
+					set `cat $TEMP`
+					PATHweb=$1
+				}
+				fi
+			}
+			elif [ "$1" = "5" ]; then
+			{
+				$DIALOG --clear --backtitle "$BACKTITLE" \
+			   	--title "Asterisk AGI-bin Directory" \
+			   	--inputbox "Enter the location of Asterisk's AGI-bin directory:" 9 74 "$PATHagi" \
+			   	2> $TEMP
+				if [ "$?" = "0" ]; then
+				{
+					set `cat $TEMP`
+					PATHagi=$1
+				}
+				fi
+			}
+			elif [ "$1" = "6" ]; then
+			{
+				$DIALOG --clear --backtitle "$BACKTITLE" \
+			   	--title "Asterisk Sound Directory" \
+			   	--inputbox "Enter the location of Asterisk's sounds directory:" 9 74 "$PATHsounds" \
+			   	2> $TEMP
+				if [ "$?" = "0" ]; then
+				{
+					set `cat $TEMP`
+					PATHsounds=$1
+				}
+				fi
+			}
+			elif [ "$1" = "7" ]; then
+			{
+				$DIALOG --clear --backtitle "$BACKTITLE" \
+			   	--title "Asterisk Recording Directory" \
+			   	--inputbox "Enter the location of Asterisk's recordings directory:" 9 74 "$PATHmonitor" \
+			   	2> $TEMP
+				if [ "$?" = "0" ]; then
+				{
+					set `cat $TEMP`
+					PATHmonitor=$1
+				}
+				fi
+			}
+			elif [ "$1" = "8" ]; then
+			{
+				$DIALOG --clear --backtitle "$BACKTITLE" \
+			   	--title "Asterisk Recording Completed Directory" \
+			   	--inputbox "Enter the location of Asterisk's recording completion directory:" 9 74 "$PATHDONEmonitor" \
+			   	2> $TEMP
+				if [ "$?" = "0" ]; then
+				{
+					set `cat $TEMP`
+					PATHDONEmonitor=$1
+				}
+				fi
+			}
+			fi
+		}
+		fi
+	}
+	done
+	return 0
+}
+
+DatabaseConfig ()
+{
+	DONE=no
+	while [ "$DONE" != "yes" ]; do
+	{
+		$DIALOG --clear --ok-label "Edit" --cancel-label "Done" \
+		   	--backtitle "$BACKTITLE" \
+		   	--item-help \
+		   	--title "Database Configuration Menu" \
+		   	--menu "Setup database access parameters.\n" \
+			 	12 74 5 \
+			 	1 "MySQL server" "MySQL server: $VARDB_server" \
+			 	2 "MySQL port" "MySQL port: $VARDB_port" \
+			 	3 "MySQL database" "MySQL database: $VARDB_database" \
+			 	4 "MySQL user" "MySQL user: $VARDB_user" \
+			 	5 "MySQL password" "MySQL password: $VARDB_pass" \
+			   	2> $TEMP
+
+		if [ "$?" != "0" ]; then
+		{
+				DONE=yes
+		}
+		else
+		{
+			set `cat $TEMP`
+			if [ "$1" = "1" ]; then
+			{
+				$DIALOG --clear --backtitle "$BACKTITLE" \
+			   	--title "MySQL Server Address" \
+			   	--inputbox "Enter server's IP address or hostname:" 9 74 "$VARDB_server" \
+			   	2> $TEMP
+				if [ "$?" = "0" ]; then
+				{
+					set `cat $TEMP`
+					VARDB_server=$1
+				}
+				fi
+			}
+			elif [ "$1" = "2" ]; then
+			{
+				$DIALOG --clear --backtitle "$BACKTITLE" \
+			   	--title "MySQL Port" \
+			   	--inputbox "Enter port of the MySQL server:" 9 74 "$VARDB_port" \
+			   	2> $TEMP
+				if [ "$?" = "0" ]; then
+				{
+					set `cat $TEMP`
+					VARDB_port=$1
+				}
+				fi
+			}
+			elif [ "$1" = "3" ]; then
+			{
+				$DIALOG --clear --backtitle "$BACKTITLE" \
+			   	--title "MySQL Database" \
+			   	--inputbox "Enter database name to use:" 9 74 "$VARDB_database" \
+			   	2> $TEMP
+				if [ "$?" = "0" ]; then
+				{
+					set `cat $TEMP`
+					VARDB_database=$1
+				}
+				fi
+			}
+			elif [ "$1" = "4" ]; then
+			{
+				$DIALOG --clear --backtitle "$BACKTITLE" \
+			   	--title "MySQL Username" \
+			   	--inputbox "Enter the username:" 9 74 "$VARDB_user" \
+			   	2> $TEMP
+				if [ "$?" = "0" ]; then
+				{
+					set `cat $TEMP`
+					VARDB_user=$1
+				}
+				fi
+			}
+			elif [ "$1" = "5" ]; then
+			{
+				$DIALOG --clear --backtitle "$BACKTITLE" \
+			   	--title "MySQL Password" \
+			   	--inputbox "Enter the password for the above user:" 9 74 "$VARDB_pass" \
+			   	2> $TEMP
+				if [ "$?" = "0" ]; then
+				{
+					set `cat $TEMP`
+					VARDB_pass=$1
+				}
+				fi
+			}
+			fi
+		}
+		fi
+	}
+	done
+	return 0
+}
+
+RecordingConfig ()
+{
+	DONE=no
+	while [ "$DONE" != "yes" ]; do
+	{
+		$DIALOG --clear --ok-label "Edit" --cancel-label "Done" \
+		   	--backtitle "$BACKTITLE" \
+		   	--item-help \
+		   	--title "Recording Configuration Menu" \
+		   	--menu "Setup recording FTP/HTTP access.\n" \
+			 	13 74 6 \
+			 	1 "FTP host" "FTP host: $VARFTP_host" \
+			 	2 "FTP port" "FTP port: $VARFTP_port" \
+			 	3 "FTP user" "FTP user: $VARFTP_user" \
+			 	4 "FTP password" "FTP password: $VARFTP_pass" \
+			 	5 "FTP directory" "FTP directory: $VARFTP_dir" \
+			 	6 "HTTP path" "HTTP path: $VARHTTP_path" \
+			   	2> $TEMP
+
+		if [ "$?" != "0" ]; then
+		{
+				DONE=yes
+		}
+		else
+		{
+			set `cat $TEMP`
+			if [ "$1" = "1" ]; then
+			{
+				$DIALOG --clear --backtitle "$BACKTITLE" \
+			   	--title "FTP Server Address" \
+			   	--inputbox "Enter server's IP address or hostname:" 9 74 "$VARFTP_host" \
+			   	2> $TEMP
+				if [ "$?" = "0" ]; then
+				{
+					set `cat $TEMP`
+					VARFTP_host=$1
+				}
+				fi
+			}
+			elif [ "$1" = "2" ]; then
+			{
+				$DIALOG --clear --backtitle "$BACKTITLE" \
+			   	--title "FTP Port" \
+			   	--inputbox "Enter port of the FTP server:" 9 74 "$VARFTP_port" \
+			   	2> $TEMP
+				if [ "$?" = "0" ]; then
+				{
+					set `cat $TEMP`
+					VARFTP_port=$1
+				}
+				fi
+			}
+			elif [ "$1" = "3" ]; then
+			{
+				$DIALOG --clear --backtitle "$BACKTITLE" \
+			   	--title "FTP Username" \
+			   	--inputbox "Enter username:" 9 74 "$VARFTP_user" \
+			   	2> $TEMP
+				if [ "$?" = "0" ]; then
+				{
+					set `cat $TEMP`
+					VARFTP_user=$1
+				}
+				fi
+			}
+			elif [ "$1" = "4" ]; then
+			{
+				$DIALOG --clear --backtitle "$BACKTITLE" \
+			   	--title "FTP Password" \
+			   	--inputbox "Enter the password:" 9 74 "$VARFTP_pass" \
+			   	2> $TEMP
+				if [ "$?" = "0" ]; then
+				{
+					set `cat $TEMP`
+					VARFTP_pass=$1
+				}
+				fi
+			}
+			elif [ "$1" = "5" ]; then
+			{
+				$DIALOG --clear --backtitle "$BACKTITLE" \
+			   	--title "FTP Directory" \
+			   	--inputbox "Enter the directory to upload to:" 9 74 "$VARFTP_dir" \
+			   	2> $TEMP
+				if [ "$?" = "0" ]; then
+				{
+					set `cat $TEMP`
+					VARFTP_dir=$1
+				}
+				fi
+			}
+			elif [ "$1" = "6" ]; then
+			{
+				$DIALOG --clear --backtitle "$BACKTITLE" \
+			   	--title "HTTP Path" \
+			   	--inputbox "Enter the HTTP path to the FTP uploads:" 9 74 "$VARHTTP_path" \
+			   	2> $TEMP
+				if [ "$?" = "0" ]; then
+				{
+					set `cat $TEMP`
+					VARHTTP_path=$1
+				}
+				fi
+			}
+			fi
+		}
+		fi
+	}
+	done
+	return 0
+}
+
+ReportingConfig ()
+{
+	DONE=no
+	while [ "$DONE" != "yes" ]; do
+	{
+		$DIALOG --clear --ok-label "Edit" --cancel-label "Done" \
+		   	--backtitle "$BACKTITLE" \
+		   	--item-help \
+		   	--title "Reporting Configuration Menu" \
+		   	--menu "Setup reporting FTP access.\n" \
+			 	12 74 5 \
+			 	1 "FTP host" "FTP host: $VARREPORT_host" \
+			 	2 "FTP port" "FTP port: $VARREPORT_port" \
+			 	3 "FTP user" "FTP user: $VARREPORT_user" \
+			 	4 "FTP password" "FTP password: $VARREPORT_pass" \
+			 	5 "FTP directory" "FTP directory: $VARREPORT_dir" \
+			   	2> $TEMP
+
+		if [ "$?" != "0" ]; then
+		{
+				DONE=yes
+		}
+		else
+		{
+			set `cat $TEMP`
+			if [ "$1" = "1" ]; then
+			{
+				$DIALOG --clear --backtitle "$BACKTITLE" \
+			   	--title "FTP Server Address" \
+			   	--inputbox "Enter server's IP address or hostname:" 9 74 "$VARFTP_host" \
+			   	2> $TEMP
+				if [ "$?" = "0" ]; then
+				{
+					set `cat $TEMP`
+					VARFTP_host=$1
+				}
+				fi
+			}
+			elif [ "$1" = "2" ]; then
+			{
+				$DIALOG --clear --backtitle "$BACKTITLE" \
+			   	--title "FTP Port" \
+			   	--inputbox "Enter port of the FTP server:" 9 74 "$VARFTP_port" \
+			   	2> $TEMP
+				if [ "$?" = "0" ]; then
+				{
+					set `cat $TEMP`
+					VARFTP_port=$1
+				}
+				fi
+			}
+			elif [ "$1" = "3" ]; then
+			{
+				$DIALOG --clear --backtitle "$BACKTITLE" \
+			   	--title "FTP Username" \
+			   	--inputbox "Enter username:" 9 74 "$VARFTP_user" \
+			   	2> $TEMP
+				if [ "$?" = "0" ]; then
+				{
+					set `cat $TEMP`
+					VARFTP_user=$1
+				}
+				fi
+			}
+			elif [ "$1" = "4" ]; then
+			{
+				$DIALOG --clear --backtitle "$BACKTITLE" \
+			   	--title "FTP Password" \
+			   	--inputbox "Enter the password:" 9 74 "$VARFTP_pass" \
+			   	2> $TEMP
+				if [ "$?" = "0" ]; then
+				{
+					set `cat $TEMP`
+					VARFTP_pass=$1
+				}
+				fi
+			}
+			elif [ "$1" = "5" ]; then
+			{
+				$DIALOG --clear --backtitle "$BACKTITLE" \
+			   	--title "FTP Directory" \
+			   	--inputbox "Enter the directory to upload to:" 9 74 "$VARFTP_dir" \
+			   	2> $TEMP
+				if [ "$?" = "0" ]; then
+				{
+					set `cat $TEMP`
+					VARFTP_dir=$1
+				}
+				fi
+			}
+			fi
+		}
+		fi
+	}
+	done
+	return 0
+}
+
+FastAGIConfig ()
+{
+	DONE=no
+	while [ "$DONE" != "yes" ]; do
+	{
+		$DIALOG --clear --ok-label "Edit" --cancel-label "Done" \
+		   	--backtitle "$BACKTITLE" \
+		   	--item-help \
+		   	--title "FastAGI Configuration Menu" \
+		   	--menu "Settings for FastAGI logging server.\n" \
+			 	14 74 7 \
+			 	1 "Minimum Servers  ($VARfastagi_log_min_servers)" "Minimum Servers: $VARfastagi_log_min_servers" \
+			 	2 "Maximum Servers  ($VARfastagi_log_max_servers)" "Maximum Servers: $VARfastagi_log_max_servers" \
+			 	3 "Minimum Spares   ($VARfastagi_log_min_spare_servers)" "Minimum Spares: $VARfastagi_log_min_spare_servers" \
+			 	4 "Maximum Spares   ($VARfastagi_log_max_spare_servers)" "Maximum Spares: $VARfastagi_log_max_spare_servers" \
+			 	5 "Maximum Requests ($VARfastagi_log_max_requests)" "Maximum Requests: $VARfastagi_log_max_requests" \
+			 	6 "Check for Dead   ($VARfastagi_log_checkfordead)" "Check for Dead: $VARfastagi_log_checkfordead" \
+			 	7 "Check for Wait   ($VARfastagi_log_checkforwait)" "Check for Wait: $VARfastagi_log_checkforwait" \
+			   	2> $TEMP
+
+		if [ "$?" != "0" ]; then
+		{
+				DONE=yes
+		}
+		else
+		{
+			set `cat $TEMP`
+			if [ "$1" = "1" ]; then
+			{
+				$DIALOG --clear --backtitle "$BACKTITLE" \
+			   	--title "FastAGI Logger Minimum Servers" \
+			   	--inputbox "Enter the minimum servers to run:" 9 74 "$VARfastagi_log_min_servers" \
+			   	2> $TEMP
+				if [ "$?" = "0" ]; then
+				{
+					set `cat $TEMP`
+					VARfastagi_log_min_servers=$1
+				}
+				fi
+			}
+			elif [ "$1" = "2" ]; then
+			{
+				$DIALOG --clear --backtitle "$BACKTITLE" \
+			   	--title "FastAGI Logger Maximum Servers" \
+			   	--inputbox "Enter the maximum number of servers to run:" 9 74 "$VARfastagi_log_max_servers" \
+			   	2> $TEMP
+				if [ "$?" = "0" ]; then
+				{
+					set `cat $TEMP`
+					VARfastagi_log_max_servers=$1
+				}
+				fi
+			}
+			elif [ "$1" = "3" ]; then
+			{
+				$DIALOG --clear --backtitle "$BACKTITLE" \
+			   	--title "FastAGI Logger Minimum Spare Servers" \
+			   	--inputbox "Enter the minimum number of spares:" 9 74 "$VARfastagi_log_min_spare_servers" \
+			   	2> $TEMP
+				if [ "$?" = "0" ]; then
+				{
+					set `cat $TEMP`
+					VARfastagi_log_min_spare_servers=$1
+				}
+				fi
+			}
+			elif [ "$1" = "4" ]; then
+			{
+				$DIALOG --clear --backtitle "$BACKTITLE" \
+			   	--title "FastAGI Logger Maximum Spare Servers" \
+			   	--inputbox "Enter the maximum number of spares:" 9 74 "$VARfastagi_log_max_spare_servers" \
+			   	2> $TEMP
+				if [ "$?" = "0" ]; then
+				{
+					set `cat $TEMP`
+					VARfastagi_log_max_spare_servers=$1
+				}
+				fi
+			}
+			elif [ "$1" = "5" ]; then
+			{
+				$DIALOG --clear --backtitle "$BACKTITLE" \
+			   	--title "FastAGI Logger Maximum Requests" \
+			   	--inputbox "Enter the maximum requests before killing server:" 9 74 "$VARfastagi_log_max_requests" \
+			   	2> $TEMP
+				if [ "$?" = "0" ]; then
+				{
+					set `cat $TEMP`
+					VARfastagi_log_max_requests=$1
+				}
+				fi
+			}
+			elif [ "$1" = "6" ]; then
+			{
+				$DIALOG --clear --backtitle "$BACKTITLE" \
+			   	--title "FastAGI Logger Check for Dead" \
+			   	--inputbox "Enter the check for dead time:" 9 74 "$VARfastagi_log_checkfordead" \
+			   	2> $TEMP
+				if [ "$?" = "0" ]; then
+				{
+					set `cat $TEMP`
+					VARfastagi_log_cheackfordead=$1
+				}
+				fi
+			}
+			elif [ "$1" = "7" ]; then
+			{
+				$DIALOG --clear --backtitle "$BACKTITLE" \
+			   	--title "FastAGI Logger Check for Wait" \
+			   	--inputbox "Enter the check for wait time:" 9 74 "$VARfastagi_log_checkforwait" \
+			   	2> $TEMP
+				if [ "$?" = "0" ]; then
+				{
+					set `cat $TEMP`
+					VARfastagi_log_checkforwait=$1
+				}
+				fi
+			}
+			fi
+		}
+		fi
+	}
+	done
+	return 0
+}
+
+RunPerlKeepAliveSep ()
+{
+	KATMP="/tmp/.agc.conf.katmp.$$"
+	KAPTMP="/tmp/.agc.conf.kaptmp.$$"
+	echo '$k1 = "off"; $k2 = "off"; $k3 = "off"; $k4 = "off"; $k5 = "off"; $k6 = "off"; $k7 = "off";' > $KAPTMP
+	echo 'foreach $i (split //, $ARGV[0]) {' >> $KAPTMP
+	echo '	if ($i eq "1") { $k1 = "on"; } elsif ($i eq "2") { $k2 = "on";' >> $KAPTMP
+	echo '	} elsif ($i eq "3") { $k3 = "on"; } elsif ($i eq "4") { $k4 = "on";' >> $KAPTMP
+	echo '	} elsif ($i eq "5") { $k5 = "on"; } elsif ($i eq "6") { $k6 = "on";' >> $KAPTMP
+	echo '	} elsif ($i eq "7") { $k7 = "on"; }' >> $KAPTMP
+	echo '}' >> $KAPTMP
+	echo 'print "K1=$k1\nK2=$k2\nK3=$k3\nK4=$k4\nK5=$k5\nK6=$k6\nK7=$k7\n";' >> $KAPTMP
+	perl $KAPTMP $VARactive_keepalives >> $KATMP
+	. $KATMP
+	rm -f $KAPTMP
+	rm -f $KATMP
+}
+
+KeepaliveConfig ()
+{
+	RunPerlKeepAliveSep
+	DONE=no
+	while [ "$DONE" != "yes" ]; do
+	{
+		$DIALOG --clear --ok-label "Done" \
+		   	--backtitle "$BACKTITLE" \
+			--no-cancel \
+		   	--item-help \
+		   	--title "Keepalive Configuration Menu" \
+		   	--checklist "Settings for keepalive processes.\nDeselect all items if you do not want any keepalive processes running.\n\nUse (Space) to select/deselect items." \
+			 	17 74 7 \
+			 	1 "AST_update" "$K1" "" \
+			 	2 "AST_send_listen" "$K2" "" \
+			 	3 "AST_VDauto_dial" "$K3" "" \
+			 	4 "AST_VDremote_agents" "$K4" "" \
+			 	5 "AST_VDadapt" "$K5" "If multi-server system, this must only be on one server." \
+			 	6 "FastAGI Logger" "$K6" "" \
+			 	7 "AST_VDauto_dial_FILL" "$K7" "Only for multi-server, this must only be on one server." \
+			   	2> $TEMP
+
+		if [ "$?" = "0" ]; then
+		{
+			DONE=yes
+			VARactive_keepalives=`cat $TEMP | tr -d '"' | tr -d ' '`
+			if [ "$VARactive_keepalives" = "" ]; then
+			{
+				VARactive_keepalives="X"
+			}
+			fi
+		}
+		fi
+	}
+	done
+	return 0
+}
+
+
+SaveConfig ()
+	{
+	echo "# astguiclient.conf - configuration elements for the astguiclient package" > $PATHconf
+	echo "# this is the astguiclient configuration file" >> $PATHconf
+	echo "# all comments will be lost if you run install.pl again" >> $PATHconf
+	echo "AGCversion => $AGCversion" >> $PATHconf
+	echo "" >> $PATHconf
+	echo "# Paths used by astGUIclient" >> $PATHconf
+	echo "PATHhome => $PATHhome" >> $PATHconf
+	echo "PATHlogs => $PATHlogs" >> $PATHconf
+	echo "PATHagi => $PATHagi" >> $PATHconf
+	echo "PATHweb => $PATHweb" >> $PATHconf
+	echo "PATHsounds => $PATHsounds" >> $PATHconf
+	echo "PATHmonitor => $PATHmonitor" >> $PATHconf
+	echo "" >> $PATHconf
+	echo "# The IP address of this machine" >> $PATHconf
+	echo "VARserver_ip => $VARserver_ip" >> $PATHconf
+	echo "" >> $PATHconf
+	echo "# Database connection information" >> $PATHconf
+	echo "VARDB_server => $VARDB_server" >> $PATHconf
+	echo "VARDB_database => $VARDB_database" >> $PATHconf
+	echo "VARDB_user => $VARDB_user" >> $PATHconf
+	echo "VARDB_pass => $VARDB_pass" >> $PATHconf
+	echo "VARDB_port => $VARDB_port" >> $PATHconf
+	echo "" >> $PATHconf
+	echo "# Alpha-Numeric list of the astGUIclient processes to be kept running" >> $PATHconf
+	echo "# (value should be listing of characters with no spaces: 123456)" >> $PATHconf
+	echo "#  X - NO KEEPALIVE PROCESSES (use only if you want none to be keepalive)" >> $PATHconf
+	echo "#  1 - AST_update" >> $PATHconf
+	echo "#  2 - AST_send_listen" >> $PATHconf
+	echo "#  3 - AST_VDauto_dial" >> $PATHconf
+	echo "#  4 - AST_VDremote_agents" >> $PATHconf
+	echo "#  5 - AST_VDadapt (If multi-server system, this must only be on one server)" >> $PATHconf
+	echo "#  6 - FastAGI_log" >> $PATHconf
+	echo "#  7 - AST_VDauto_dial_FILL (only for multi-server, this must only be on one server)" >> $PATHconf
+	echo "VARactive_keepalives => $VARactive_keepalives" >> $PATHconf
+	echo "" >> $PATHconf
+	echo "# Settings for FastAGI logging server" >> $PATHconf
+	echo "VARfastagi_log_min_servers => $VARfastagi_log_min_servers" >> $PATHconf
+	echo "VARfastagi_log_max_servers => $VARfastagi_log_max_servers" >> $PATHconf
+	echo "VARfastagi_log_min_spare_servers => $VARfastagi_log_min_spare_servers" >> $PATHconf
+	echo "VARfastagi_log_max_spare_servers => $VARfastagi_log_max_spare_servers" >> $PATHconf
+	echo "VARfastagi_log_max_requests => $VARfastagi_log_max_requests" >> $PATHconf
+	echo "VARfastagi_log_checkfordead => $VARfastagi_log_checkfordead" >> $PATHconf
+	echo "VARfastagi_log_checkforwait => $VARfastagi_log_checkforwait" >> $PATHconf
+	echo "" >> $PATHconf
+	echo "# Recording FTP archive variables" >> $PATHconf
+	echo "VARFTP_host => $VARFTP_host" >> $PATHconf
+	echo "VARFTP_user => $VARFTP_user" >> $PATHconf
+	echo "VARFTP_pass => $VARFTP_pass" >> $PATHconf
+	echo "VARFTP_port => $VARFTP_port" >> $PATHconf
+	echo "VARFTP_dir => $VARFTP_dir" >> $PATHconf
+	echo "VARHTTP_path => $VARHTTP_path" >> $PATHconf
+	echo "" >> $PATHconf
+	echo "# Report FTP variables" >> $PATHconf
+	echo "VARREPORT_host => $VARREPORT_host" >> $PATHconf
+	echo "VARREPORT_user => $VARREPORT_user" >> $PATHconf
+	echo "VARREPORT_pass => $VARREPORT_pass" >> $PATHconf
+	echo "VARREPORT_port => $VARREPORT_port" >> $PATHconf
+	echo "VARREPORT_dir => $VARREPORT_dir" >> $PATHconf
+
+	chmod 644 $PATHconf
+
+	MESSAGE="Configuration: $PATHconf"
+	EXIT="yes"
+	}
+
+#############################################################################
+## Main Program
+if ! which dialog > /dev/null; then
+{
+	echo "dialog not found!"
+	exit 1
+}
+fi
+
+DIALOG="dialog"
+TEMP="/tmp/.agc.tmp.$$"
+EXIT="no"
+MESSAGE="Abnormal Termination"
+
+# Source to environment and do not print messages.
+if [ "$1" = "--env-make" ]; then
+	EXIT="yes"
+	OUTPUT="no"
+fi
+
+if [ "$1" = "--no-menu" ]; then
+	EXIT="yes"
+	MENU="no"
+fi
+
+# If a config for install is in current directory, use that.
+if [ -f ".agc.config" ]; then
+{
+	PATHconf=".agc.config"
+}
+fi
+
+# Set defaults and load configuration.
+SetDefaults
+if [ -f "version" ]; then
+{
+	AGCversion=`cat version`
+	INSTALL="yes"
+	PATHconf=".agc.config"
+}
+fi
+if [ -f "$PATHconf" ]; then
+{
+	CONFIG="/tmp/.agc.conf.$$"
+	if [ "$OUTPUT" != "no" ]; then
+		echo "Loading saved configuration from $PATHconf"
+		sleep 1
+	fi
+	sed 's/[ |>|\t]//g' $PATHconf > $CONFIG
+	. $CONFIG
+	rm -f $CONFIG
+}
+fi
+
+# If version is blank, assume 2.0.3"
+if [ "$AGCversion" = "" ]; then
+{
+	AGCversion="2.0.3"
+}
+fi
+
+while [ "$EXIT" != "yes" ]; do
+	{
+	BACKTITLE="VICIDIAL-astGUIclient $AGCversion Configuration"
+	MM_TEXT="Welcome to the VICIDIAL-astGUIclient Configuration Menu."
+	MM_TEXT="$MM_TEXT\nHere can configure the default settings for"
+	MM_TEXT="$MM_TEXT VICIDIAL-astGUIclient."
+	if [ "$INSTALL" = "yes" ]; then
+	{
+		$DIALOG --clear --backtitle "$BACKTITLE" \
+		   --title "Main Configuration Menu" \
+		   --menu "$MM_TEXT" 18 74 10 \
+			 1 "General configuration & file locations" \
+			 2 "Database configuration" \
+			 3 "Recording (FTP) configuration" \
+			 4 "Reporting (FTP) configuration" \
+			 5 "FastAGI server configuration" \
+			 6 "Active Keepalives" \
+			 - "---------------------------------------" \
+			 7 "Save configuration & exit" \
+			 8 "Exit WITHOUT saving" \
+			 9 "Save configuration & install" \
+			 2>$TEMP
+	}
+	else
+	{
+		$DIALOG --clear --backtitle "$BACKTITLE" \
+		   --title "Main Configuration Menu" \
+		   --menu "$MM_TEXT" 17 74 9 \
+			 1 "General configuration & file locations" \
+			 2 "Database configuration" \
+			 3 "Recording (FTP) configuration" \
+			 4 "Reporting (FTP) configuration" \
+			 5 "FastAGI server configuration" \
+			 6 "Active Keepalives" \
+			 - "--------------------------------------" \
+			 7 "Save configuration & exit" \
+			 8 "Exit WITHOUT saving" \
+			 2>$TEMP
+	}
+	fi
+
+	if [ "$?" != "0" ]; then
+	{
+		MESSAGE="Configuration cancelled!"
+		EXIT="yes"
+	}
+	else
+	{
+		set `cat $TEMP`
+		if [ "$1" = "1" ]; then FileLocationConfig
+		elif [ "$1" = "2" ]; then DatabaseConfig
+		elif [ "$1" = "3" ]; then RecordingConfig
+		elif [ "$1" = "4" ]; then ReportingConfig
+		elif [ "$1" = "5" ]; then FastAGIConfig
+		elif [ "$1" = "6" ]; then KeepaliveConfig
+		elif [ "$1" = "7" ]; then SaveConfig
+		elif [ "$1" = "8" ]; then
+		{
+			MESSAGE="Configuration NOT saved!"
+			EXIT=yes
+		}
+		elif [ "$1" = "9" ]; then
+		{
+				SaveConfig
+				RUNINSTALL=yes
+		}
+		fi
+	}
+	fi
+}
+done
+
+if [ "$MENU" = "no" ]; then
+	SaveConfig
+fi
+
+rm -f $TEMP
+if [ "$OUTPUT" != "no" ]; then
+	echo "$0 written by Lott Caskey, 2007-11-19."
+	echo
+	echo
+	echo $MESSAGE
+fi
+
+if [ "$1" = "--env-make" ]; then
+	export PATHconf PATHhome PATHlogs PATHagi PATHweb PATHsounds
+	export PATHmonitor PATHDONEmonitor DESTDIR
+	make $2
+fi
+
+if [ "$RUNINSTALL" = "yes" ]; then
+	export PATHconf PATHhome PATHlogs PATHagi PATHweb PATHsounds
+	export PATHmonitor PATHDONEmonitor DESTDIR
+	make install
+fi

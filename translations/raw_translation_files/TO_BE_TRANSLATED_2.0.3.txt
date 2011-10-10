@@ -1,0 +1,186 @@
+############################################################  ADMIN
+
+ADAPT OVERRIDE||
+The ADAPT OVERRIDE checkbox allows you to force a new dial level even though the dial method is in an ADAPT mode. This is useful if there is a dramatic shift in the quality of leads and you want to drastically change the dial_level manually.||
+There are two special HotKey options that you can use in conjunction with Alternate Phone number dialing, ALTPH2 - Alternate Phone Hot Dial and ADDR3-----Address3 Hot Dial allow an agent to use a hotkey to hangup their call, stay on the same lead, and dial another contact number from that lead.||
+Concurrent Transfers||
+Concurrent Transfers -<\/B> This setting is used to define the number of calls that can be sent to agents at the same time. It is recommended that this setting is left at AUTO. This field is not used by the MANUAL dial method||
+Auto Alt-Number Dialing -<\/B> This setting is used to automatically dial alternate number fields while dialing in the RATIO and ADAPT dial methods when there is no contact at the main phone number for a lead, the NA, B, DC and N statuses. This setting is not used by the MANUAL dial method||
+Auto Alt-Number Dialing||
+View Reports -<\/B> This option allows the user to view the VICIDIAL reports.||
+Modify Sections -<\/B> These options allow the user to view and modify each sections records. If set to 0, the user will be able to see the section list, but not the detail or modification screen of a record in that section||
+VICIDIAL AUTO ALT DIAL STATUSES||
+If the Auto Alt-Number Dialing field is set, then the leads that are dispositioned under these auto alt dial statuses will have their alt_phone and-or address3 fields dialed after any of these no-answer statuses are set||
+AUTO ALT NUMBER DIALING FOR THIS CAMPAIGN||
+ADD NEW AUTO ALT NUMBER DIALING STATUS||
+AUTO ALT DIAL STATUS NOT ADDED||
+there is already an entry for this campaign with this status||
+AUTO ALT DIAL STATUS ADDED||
+AUTO ALT DIAL STATUS NOT DELETED||
+AUTO ALT DIAL STATUS DELETED||
+this auto alt dial status is not in this campaign||
+New Auto Alt Dial Status||
+Delete Auto Alt Dial Status||
+ Users ||
+ Campaigns ||
+ Lists ||
+ Scripts ||
+ Filters ||
+ In-Groups ||
+ User Groups ||
+ Remote Agents ||
+ Admin ||
+ Reports ||
+ Show Users ||
+ Add A New User ||
+ Search For A User ||
+ Show Campaigns ||
+ Add A New Campaign ||
+ Real-Time Campaigns Summary ||
+ Show Lists ||
+ Add A New List ||
+ Search For A Lead ||
+ Add Number To DNC ||
+ Load New Leads ||
+ Show Scripts ||
+ Add A New Script ||
+ Show Filters ||
+ Add A New Filter ||
+ Show In-Groups ||
+ Add A New In-Group ||
+ Show User Groups ||
+ Add A New User Group ||
+ Group Hourly Report ||
+ Show Remote Agents ||
+ Add New Remote Agents ||
+ Call Times ||
+ Phones ||
+ Conferences ||
+ Servers ||
+ Show Call Times ||
+ Add A New Call Time ||
+ Show State Call Times ||
+ Add A New State Call Time ||
+ Show Phones ||
+ Add A New Phone ||
+ Show Conferences ||
+ Add A New Conference ||
+ Show VICIDIAL Conferences ||
+ Add A New VICIDIAL Conference ||
+ Show Servers ||
+ Add A New Server ||
+CallBacks Within User Group||
+USERS WITHIN THIS USER GROUP||
+Modify Users: ||
+Modify Campaigns: ||
+Modify Lists: ||
+Modify Scripts: ||
+Modify Filters: ||
+Modify In-Groups: ||
+Modify User Groups: ||
+Modify Remote Agents: ||
+Modify Servers: ||
+View Reports: ||
+You do not have permission to view this page||
+Lead Time Zone Lookup: ||
+Lead Duplicate Check: ||
+Agent Pause Codes Active -<\/B> Allows agents to select a pause code when they click on the PAUSE button in vicidial.php. Pause codes are definable per campaign at the bottom of the campaign view detail screen and they are stored in the vicidial_agent_log table. Default is N||
+AGENT PAUSE CODES||
+If the Agent Pause Codes Active field is set to active then the agents will be able to select from these pause codes when they click on the PAUSE button on their screens. This data is then stored in the vicidial agent log. The Pause code must contain only letters and numbers and be less than 7 characters long. The pause code name can be no longer than 30 characters.||
+AGENT PAUSE CODES FOR THIS CAMPAIGN||
+PAUSE CODES||
+BILLABLE||
+ADD NEW AGENT PAUSE CODE||
+Pause Code: ||
+Pause Code Name: ||
+Billable: ||
+New Agent Pause Code||
+Modify Agent Pause Code||
+Delete Agent Pause Code||
+AGENT PAUSE CODE NOT ADDED||
+there is already an entry for this campaign with this  pause code||
+AGENT PAUSE CODE ADDED||
+AGENT PAUSE CODE NOT MODIFIED||
+CAMPAIGN PAUSE CODE NOT DELETED||
+Campaign Description -<\/B> This is a memo field for the campaign, it is optional and can be a maximum of 255 characters in length||
+Campaign Change Date -<\/B> This is the last time that the settings for this campaign were modified in any way||
+Campaign Stats Refresh -<\/B> This checkbox will allow you to force a vicidial stats refresh, even if the campaign is not active||
+Last Campaign Login Date -<\/B> This is the last time that an agent was logged into this campaign||
+List Description -<\/B> This is the memo field for the list, it is optional||
+List Change Date -<\/B> This is the last time that the settings for this list were modified in any way||
+List Last Call Date -<\/B> This is the last time that lead was dialed from this list||
+List Description: ||
+List Change Date: ||
+Campaign Description: ||
+VICIDIAL Recording Override -<\/B> This option will override whatever the option is in the campaign for recording. DISABLED will not override the campaign recording setting. NEVER will disable recording on the client. ONDEMAND is the default and allows the agent to start and stop recording as needed. ALLCALLS will start recording on the client whenever a call is sent to an agent. ALLFORCE will start recording on the client whenever a call is sent to an agent giving the agent no option to stop recording. For ALLCALLS and ALLFORCE there is an option to use the Recording Delay to cut down on very short recordings and recude system load||
+VICIDIAL Recording Override: ||
+MODIFY VICIDIAL SYSTEM SETTINGS||
+ System Settings ||
+VICIDIAL SYSTEM SETTINGS MODIFIED||
+Version: ||
+Use Non-Latin: ||
+Webroot Writable: ||
+Enable QueueMetrics Logging: ||
+QueueMetrics Server IP: ||
+QueueMetrics DB Name: ||
+QueueMetrics DB Login: ||
+QueueMetrics DB Password: ||
+Use Non-Latin -<\/B> This option allows you to default the web display script to use UTF8 characters and not do any latin-character-family regular expression filtering or display formatting. Default is 0||
+Webroot Writable -<\/B> This setting allows you to define whether temp files and authentication files should be placed in the webroot on your web server. Default is 1||
+Enable QueueMetrics Logging -<\/B> This setting allows you to define whether VICIDIAL will insert log entries into the queue_log database table as Asterisk Queues activity does. QueueMetrics is a standalone, closed-source statistical analysis program. You must have QueueMetrics already installed and configured before enabling this feature. Default is 0||
+QueueMetrics Server IP -<\/B> This is the IP address of the database for your QueueMetrics installation||
+QueueMetrics Database Name -<\/B> This is the database name for your QueueMetrics database||
+QueueMetrics Database Login -<\/B> This is the user name used to log in to your QueueMetrics database||
+QueueMetrics Database Password -<\/B> This is the password used to log in to your QueueMetrics database||
+QueueMetrics URL -<\/B> This is the URL or web site address used to get to your QueueMetrics installation||
+QueueMetrics Log ID -<\/B> This is the server ID that all VICIDIAL logs going into the QueueMetrics database will use as an identifier for each record||
+QueueMetrics Log ID: ||
+Campaign Dial Status Added||
+Campaign Dial Status Removed||
+To add another status to dial, select it from the drop-down list and click ADD. To remove one of the dial statuses, click on the REMOVE link next to the status you want to remove||
+CAMPAIGN DIAL STATUS NOT ADDED||
+CAMPAIGN DIAL STATUS ADDED||
+this dial status is not selected for this campaign||
+CAMPAIGN DIAL STATUS NOT REMOVED||
+CAMPAIGN DIAL STATUS REMOVED||
+>REMOVE<||
+Dial Status ||
+no dial statuses selected for this campaign||
+QueueMetrics EnterQueue Prepend -<\/B> This field is used to allow for prepending of one of the vicidial_list data fields in front of the phone number of the customer for customized QueueMetrics reports. Default is NONE to not populate anything||
+QueueMetrics EnterQueue Prepend: ||
+VICIDIAL Agent Disable Display -<\/B> This field is used to select when to show an agent when their session has been disabled by the system, a manager action or by an external measure. The NOT_ACTIVE setting will disable the message on the agents screen. The LIVE_AGENT setting will only display the disabled message when the agents vicidial_auto_calls record has been removed, such as during a force logout or emergency logout||
+VICIDIAL Agent Disable Display: ||
+Disable Alter Customer Data -<\/B> If set to Y, does not change any of the customer data record when an agent dispositions the call. Default is N||
+Disable Alter Customer Data: ||
+Agent Alter Customer Data Override -<\/B> This option will override whatever the option is in the campaign for altering of customer data. NOT_ACTIVE will use whatever setting is present for the campaign. ALLOW_ALTER will always allow for the agent to alter the customer data, no matter what the campaign setting is. Default is NOT_ACTIVE||
+Agent Alter Customer Data Override: ||
+Allow No-Hopper-Leads Logins -<\/B> If set to Y, allows agents to login to the campaign even if there are no leads loaded into the hopper for that campaign. This function is not needed in CLOSER-type campaigns. Default is N||
+Allow No-Hopper-Leads Logins: ||
+Enable SIPSAK Messages -</B> If enabled the server will send messages to the SIP phone to display on the phone LCD display when logged into VICIDIAL. Feature only works with SIP phones and requires sipsak application to be installed on the web server. Default is 0||
+Enable SIPSAK Messages: ||
+Allow SIPSAK Messages -</B> If set to 1, this will allow the phones table setting to work properly, the server will send messages to the SIP phone to display on the phone LCD display when logged into VICIDIAL. This feature only works with SIP phones and requires sipsak application to be installed on the web server. Default is 0||
+Allow SIPSAK Messages: ||
+Admin Home URL -</B> This is the URL or web site address that you will go to if you click on the HOME link at the top of the admin.php page||
+Admin Home URL: ||
+>HOME<||
+ Welcome ||
+
+
+############################################################ CLIENT
+
+FAST DIAL||
+YOU MUST ENTER A PHONE NUMBER AND DIAL CODE TO USE FAST DIAL||
+ SELECT A PAUSE CODE :||
+ENTER A PAUSE CODE||
+YOU MUST BE PAUSED TO ENTER A PAUSE CODE IN AUTO-DIAL MODE||
+Your session has been disabled||
+
+
+############################################################  MANAGER Manual
+
+Add note about using CLOSER-type campaigns to allow logins with no leads
+
+
+############################################################  AGENT Manual
+
+Add instructions on FAST DIAL

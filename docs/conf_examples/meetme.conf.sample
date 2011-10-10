@@ -1,0 +1,5 @@
+[rooms]
+conf => 8600
+conf => 8601,1234
+
+#include meetme-vicidial.conf

@@ -1,0 +1,213 @@
+PROCESS FOR LIST SUGGESTIONS FOR ROOM MANAGERS		Started: 2008-07-14
+
+This document goes over the process for making suggestions of what lists to use at what time in a special report linked from the vicidial Administration web site(vicidial/admin.php).
+
+The suggestions would group lists usage into eight 3-hour periods for each day according to server time. The actual number of 3-hour periods shown for each list would be restricted depending on the local call time scheme selected for the campaign and the area that the leads were present in.
+
+The list suggestion process would most likely not be real-time, although at companies with small lists that might be possible. Instead, a server process running after-hours will generate statistics and scores for each list for each of the 3-hour periods. Something like the following will be viewable after the stats have been run:
+
+LIST   TIME      TZ-DIAL%   HA-SCORE  SALE-SCORE
+101    9AM-12PM	 100        15        15
+101    12PM-3PM	 100        25	      35     *
+101    3PM-6PM	 100        35        30
+101    6PM-9PM	 100        25        20
+
+In the above example, the best time for a manager to call the list, for the highest rate of Human-Answered CONTACT, would be from 3-6PM. Or to maximixe SALEs they might want to call the list earlier at 12PM-3PM. the reason that you only see four 3-hour periods is that this specific list has only US Eastern time-zone leads in it and the campaign time scheme is set to 9AM-9PM so there is no possibility of calling past 9PM server time since the server is located in US Eastern Timezone, but a list with central or mountain time zone leads in it would show a fifth period(9PM-12AM) that would have score next to it(see example below). The Asterisk * is next to the time period that is happening right now, in the actual report that line would be highlighted with a different color.
+
+LIST   TIME      TZ-DIAL%   HA-SCORE  SALE-SCORE
+102    9AM-12PM	 67         20        15
+102    12PM-3PM	 100        15	      15    *
+102    3PM-6PM	 100        20        25
+102    6PM-9PM	 100        15        10
+102    9PM-12AM  33         30        35
+
+In this example you get some indication of how the TZ-DIAL % will work. In the real application it might be better to use some kind of graph or filled-in sections of the table that would indicate the time ranges and lead percentage covered in each of the time periods to give a better visual of when the leads are able to be dialed.
+
+There will also be the ability to see a comparison of the available lists for the current time period so that a manager can make a decision as to which of those lists to make active.
+
+
+Factors to be taken into account by the scoring process:
+- number of leads in the list
+- number of leads in a callable time zone in the list
+- number of sales and the sales ratio in each time period
+- number of attempts by leads in the list in each time period
+- the amount of dead leads(leads that cannot be called anymore) in the list
+- the number of calls placed yesterday in the same time period
+- the number of Human-Answered leads for each period
+
+
+
+Needed database changes:
+!!! IMPORTANT !!! 
+THESE ARE FOR REFERENCE ONLY, DO NOT RUN THEM!!!
+
+ALTER TABLE vicidial_status_categories ADD sale_category ENUM('Y','N') default 'N';
+ALTER TABLE vicidial_status_categories ADD dead_lead_category ENUM('Y','N') default 'N';
+
+CREATE TABLE vicidial_lists_suggestions (
+list_id BIGINT(14) UNSIGNED PRIMARY KEY NOT NULL,
+last_update_time DATETIME,
+leads_count INT(9) UNSIGNED,
+calls_count INT(9) UNSIGNED,
+sales_count INT(9) UNSIGNED,
+contacts_count INT(9) UNSIGNED,
+period_1_dialable MEDIUMINT(7) UNSIGNED,
+period_1_tz_dial_pct TINYINT(3),
+period_1_calls MEDIUMINT(7) UNSIGNED,
+period_1_sales MEDIUMINT(7) UNSIGNED,
+period_1_contacts MEDIUMINT(7) UNSIGNED,
+period_1_avg_attempts TINYINT(3) UNSIGNED,
+period_1_calls_yesterday MEDIUMINT(7) UNSIGNED,
+period_1_score_sale TINYINT(3),
+period_1_score_contact TINYINT(3),
+period_2_dialable MEDIUMINT(7) UNSIGNED,
+period_2_tz_dial_pct TINYINT(3),
+period_2_calls MEDIUMINT(7) UNSIGNED,
+period_2_sales MEDIUMINT(7) UNSIGNED,
+period_2_contacts MEDIUMINT(7) UNSIGNED,
+period_2_avg_attempts TINYINT(3) UNSIGNED,
+period_2_calls_yesterday MEDIUMINT(7) UNSIGNED,
+period_2_score_sale TINYINT(3),
+period_2_score_contact TINYINT(3),
+period_3_dialable MEDIUMINT(7) UNSIGNED,
+period_3_tz_dial_pct TINYINT(3),
+period_3_calls MEDIUMINT(7) UNSIGNED,
+period_3_sales MEDIUMINT(7) UNSIGNED,
+period_3_contacts MEDIUMINT(7) UNSIGNED,
+period_3_avg_attempts TINYINT(3) UNSIGNED,
+period_3_calls_yesterday MEDIUMINT(7) UNSIGNED,
+period_3_score_sale TINYINT(3),
+period_3_score_contact TINYINT(3),
+period_4_dialable MEDIUMINT(7) UNSIGNED,
+period_4_tz_dial_pct TINYINT(3),
+period_4_calls MEDIUMINT(7) UNSIGNED,
+period_4_sales MEDIUMINT(7) UNSIGNED,
+period_4_contacts MEDIUMINT(7) UNSIGNED,
+period_4_avg_attempts TINYINT(3) UNSIGNED,
+period_4_calls_yesterday MEDIUMINT(7) UNSIGNED,
+period_4_score_sale TINYINT(3),
+period_4_score_contact TINYINT(3),
+period_5_dialable MEDIUMINT(7) UNSIGNED,
+period_5_tz_dial_pct TINYINT(3),
+period_5_calls MEDIUMINT(7) UNSIGNED,
+period_5_sales MEDIUMINT(7) UNSIGNED,
+period_5_contacts MEDIUMINT(7) UNSIGNED,
+period_5_avg_attempts TINYINT(3) UNSIGNED,
+period_5_calls_yesterday MEDIUMINT(7) UNSIGNED,
+period_5_score_sale TINYINT(3),
+period_5_score_contact TINYINT(3),
+period_6_dialable MEDIUMINT(7) UNSIGNED,
+period_6_tz_dial_pct TINYINT(3),
+period_6_calls MEDIUMINT(7) UNSIGNED,
+period_6_sales MEDIUMINT(7) UNSIGNED,
+period_6_contacts MEDIUMINT(7) UNSIGNED,
+period_6_avg_attempts TINYINT(3) UNSIGNED,
+period_6_calls_yesterday MEDIUMINT(7) UNSIGNED,
+period_6_score_sale TINYINT(3),
+period_6_score_contact TINYINT(3),
+period_7_dialable MEDIUMINT(7) UNSIGNED,
+period_7_tz_dial_pct TINYINT(3),
+period_7_calls MEDIUMINT(7) UNSIGNED,
+period_7_sales MEDIUMINT(7) UNSIGNED,
+period_7_contacts MEDIUMINT(7) UNSIGNED,
+period_7_avg_attempts TINYINT(3) UNSIGNED,
+period_7_calls_yesterday MEDIUMINT(7) UNSIGNED,
+period_7_score_sale TINYINT(3),
+period_7_score_contact TINYINT(3),
+period_8_dialable MEDIUMINT(7) UNSIGNED,
+period_8_tz_dial_pct TINYINT(3),
+period_8_calls MEDIUMINT(7) UNSIGNED,
+period_8_sales MEDIUMINT(7) UNSIGNED,
+period_8_contacts MEDIUMINT(7) UNSIGNED,
+period_8_avg_attempts TINYINT(3) UNSIGNED,
+period_8_calls_yesterday MEDIUMINT(7) UNSIGNED,
+period_8_score_sale TINYINT(3),
+period_8_score_contact TINYINT(3)
+);
+
+CREATE TABLE vicidial_lists_suggestion_log (
+list_id BIGINT(14) UNSIGNED NOT NULL,
+campaign_id VARCHAR(20) NOT NULL,
+log_datetime DATETIME NOT NULL,
+leads_count INT(9) UNSIGNED,
+calls_count INT(9) UNSIGNED,
+sales_count INT(9) UNSIGNED,
+contacts_count INT(9) UNSIGNED,
+period_1_dialable MEDIUMINT(7) UNSIGNED,
+period_1_tz_dial_pct TINYINT(3),
+period_1_calls MEDIUMINT(7) UNSIGNED,
+period_1_sales MEDIUMINT(7) UNSIGNED,
+period_1_contacts MEDIUMINT(7) UNSIGNED,
+period_1_avg_attempts TINYINT(3) UNSIGNED,
+period_1_calls_yesterday MEDIUMINT(7) UNSIGNED,
+period_1_score_sale TINYINT(3),
+period_1_score_contact TINYINT(3),
+period_2_dialable MEDIUMINT(7) UNSIGNED,
+period_2_tz_dial_pct TINYINT(3),
+period_2_calls MEDIUMINT(7) UNSIGNED,
+period_2_sales MEDIUMINT(7) UNSIGNED,
+period_2_contacts MEDIUMINT(7) UNSIGNED,
+period_2_avg_attempts TINYINT(3) UNSIGNED,
+period_2_calls_yesterday MEDIUMINT(7) UNSIGNED,
+period_2_score_sale TINYINT(3),
+period_2_score_contact TINYINT(3),
+period_3_dialable MEDIUMINT(7) UNSIGNED,
+period_3_tz_dial_pct TINYINT(3),
+period_3_calls MEDIUMINT(7) UNSIGNED,
+period_3_sales MEDIUMINT(7) UNSIGNED,
+period_3_contacts MEDIUMINT(7) UNSIGNED,
+period_3_avg_attempts TINYINT(3) UNSIGNED,
+period_3_calls_yesterday MEDIUMINT(7) UNSIGNED,
+period_3_score_sale TINYINT(3),
+period_3_score_contact TINYINT(3),
+period_4_dialable MEDIUMINT(7) UNSIGNED,
+period_4_tz_dial_pct TINYINT(3),
+period_4_calls MEDIUMINT(7) UNSIGNED,
+period_4_sales MEDIUMINT(7) UNSIGNED,
+period_4_contacts MEDIUMINT(7) UNSIGNED,
+period_4_avg_attempts TINYINT(3) UNSIGNED,
+period_4_calls_yesterday MEDIUMINT(7) UNSIGNED,
+period_4_score_sale TINYINT(3),
+period_4_score_contact TINYINT(3),
+period_5_dialable MEDIUMINT(7) UNSIGNED,
+period_5_tz_dial_pct TINYINT(3),
+period_5_calls MEDIUMINT(7) UNSIGNED,
+period_5_sales MEDIUMINT(7) UNSIGNED,
+period_5_contacts MEDIUMINT(7) UNSIGNED,
+period_5_avg_attempts TINYINT(3) UNSIGNED,
+period_5_calls_yesterday MEDIUMINT(7) UNSIGNED,
+period_5_score_sale TINYINT(3),
+period_5_score_contact TINYINT(3),
+period_6_dialable MEDIUMINT(7) UNSIGNED,
+period_6_tz_dial_pct TINYINT(3),
+period_6_calls MEDIUMINT(7) UNSIGNED,
+period_6_sales MEDIUMINT(7) UNSIGNED,
+period_6_contacts MEDIUMINT(7) UNSIGNED,
+period_6_avg_attempts TINYINT(3) UNSIGNED,
+period_6_calls_yesterday MEDIUMINT(7) UNSIGNED,
+period_6_score_sale TINYINT(3),
+period_6_score_contact TINYINT(3),
+period_7_dialable MEDIUMINT(7) UNSIGNED,
+period_7_tz_dial_pct TINYINT(3),
+period_7_calls MEDIUMINT(7) UNSIGNED,
+period_7_sales MEDIUMINT(7) UNSIGNED,
+period_7_contacts MEDIUMINT(7) UNSIGNED,
+period_7_avg_attempts TINYINT(3) UNSIGNED,
+period_7_calls_yesterday MEDIUMINT(7) UNSIGNED,
+period_7_score_sale TINYINT(3),
+period_7_score_contact TINYINT(3),
+period_8_dialable MEDIUMINT(7) UNSIGNED,
+period_8_tz_dial_pct TINYINT(3),
+period_8_calls MEDIUMINT(7) UNSIGNED,
+period_8_sales MEDIUMINT(7) UNSIGNED,
+period_8_contacts MEDIUMINT(7) UNSIGNED,
+period_8_avg_attempts TINYINT(3) UNSIGNED,
+period_8_calls_yesterday MEDIUMINT(7) UNSIGNED,
+period_8_score_sale TINYINT(3),
+period_8_score_contact TINYINT(3),
+index (list_id),
+index (campaign_id),
+index (log_datetime)
+);
+
+

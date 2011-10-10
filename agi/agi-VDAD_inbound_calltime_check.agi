@@ -1,0 +1,613 @@
+#!/usr/bin/perl
+#
+# agi-VDAD_inbound_calltime_check.agi   version 2.4
+# 
+# Runs when a call comes in from an inbound call. This script will check the
+# settings of the defined calltime scheme in VICIDIAL and either send the call
+# to the after-hours method for the defined IN-GROUP or exit to let the call 
+# continue. This script is also used by Call Menus.
+#
+# You need to put lines similar to those below in your extensions.conf file:
+# ; Below are the parameters needed for the script to be run properly
+# ; 1. the in-group to take settings from
+# ; 2. whether to log the call into the vicidial_auto_calls table:
+# ;		- YES - insert the call as status IVR
+# ;		- NO  - do not insert call into vac table
+# ; 3. note to put in the comment_b field when record inserted into the
+# ;    live_inbound_log table, no spaces in this field, use underscore '_'
+# ;    default if not populated is NONE
+# ; 4. call time scheme override
+# ; 5. call route after hours override
+# ; 6. call route value after hours override
+# ; 7. call route context after hours override
+# ;
+# ;inbound calls check calltime:
+#exten => 1234,1,Answer                  ; Answer the line
+#exten => 1234,2,AGI(agi-VDAD_inbound_calltime_check.agi,INBOUND-----YES-----START-----24hours-----EXTENSION-----101-----default)
+#exten => 1234,3,Hangup
+#
+# Copyright (C) 2011  Matt Florell <vicidial@gmail.com>    LICENSE: AGPLv2
+#
+# changes:
+# 80525-0144 - First Build
+# 81015-0305 - Added drop logging
+# 81015-2009 - Added more logging and NOTE option
+# 81017-0238 - Fixed duplication bug for vac in multi-entry dialplans
+# 90504-1555 - Added call time scheme override
+# 90621-1130 - Fixed issue when no call time is specified
+# 91122-2353 - Added QueueMetrics logging as IVR INFO entries
+# 101219-2110 - Added call time overflow
+# 110525-1347 - Added compatibility for outbound IVR logging
+#
+
+$script = 'agi-VDAD_inbound_calltime_check.agi';
+
+($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
+$year = ($year + 1900);
+$mon++;
+if ($mon < 10) {$mon = "0$mon";}
+if ($mday < 10) {$mday = "0$mday";}
+if ($hour < 10) {$hour = "0$hour";}
+if ($min < 10) {$min = "0$min";}
+if ($sec < 10) {$sec = "0$sec";}
+
+$hm = "$hour$min";
+$hm = ($hm + 0);
+
+$now_date_epoch = time();
+$now_date = "$year-$mon-$mday $hour:$min:$sec";
+$CLInow_date = "$year-$mon-$mday\\ $hour:$min:$sec";
+$start_time=$now_date;
+$CIDdate = "$mon$mday$hour$min$sec";
+$tsSQLdate = "$year$mon$mday$hour$min$sec";
+$SQLdate = "$year-$mon-$mday $hour:$min:$sec";
+$SQLdateBEGIN = $SQLdate;
+
+$BDtarget = ($now_date_epoch + 600);
+($Bsec,$Bmin,$Bhour,$Bmday,$Bmon,$Byear,$Bwday,$Byday,$Bisdst) = localtime($BDtarget);
+$Byear = ($Byear + 1900);
+$Bmon++;
+if ($Bmon < 10) {$Bmon = "0$Bmon";}
+if ($Bmday < 10) {$Bmday = "0$Bmday";}
+if ($Bhour < 10) {$Bhour = "0$Bhour";}
+if ($Bmin < 10) {$Bmin = "0$Bmin";}
+if ($Bsec < 10) {$Bsec = "0$Bsec";}
+$last_update_time = "$Byear$Bmon$Bmday$Bhour$Bmin$Bsec";
+
+# default path to astguiclient configuration file:
+$PATHconf =		'/etc/astguiclient.conf';
+
+open(conf, "$PATHconf") || die "can't open $PATHconf: $!\n";
+@conf = <conf>;
+close(conf);
+$i=0;
+foreach(@conf)
+	{
+	$line = $conf[$i];
+	$line =~ s/ |>|\n|\r|\t|\#.*|;.*//gi;
+	if ( ($line =~ /^PATHhome/) && ($CLIhome < 1) )
+		{$PATHhome = $line;   $PATHhome =~ s/.*=//gi;}
+	if ( ($line =~ /^PATHlogs/) && ($CLIlogs < 1) )
+		{$PATHlogs = $line;   $PATHlogs =~ s/.*=//gi;}
+	if ( ($line =~ /^PATHagi/) && ($CLIagi < 1) )
+		{$PATHagi = $line;   $PATHagi =~ s/.*=//gi;}
+	if ( ($line =~ /^PATHweb/) && ($CLIweb < 1) )
+		{$PATHweb = $line;   $PATHweb =~ s/.*=//gi;}
+	if ( ($line =~ /^PATHsounds/) && ($CLIsounds < 1) )
+		{$PATHsounds = $line;   $PATHsounds =~ s/.*=//gi;}
+	if ( ($line =~ /^PATHmonitor/) && ($CLImonitor < 1) )
+		{$PATHmonitor = $line;   $PATHmonitor =~ s/.*=//gi;}
+	if ( ($line =~ /^VARserver_ip/) && ($CLIserver_ip < 1) )
+		{$VARserver_ip = $line;   $VARserver_ip =~ s/.*=//gi;}
+	if ( ($line =~ /^VARDB_server/) && ($CLIDB_server < 1) )
+		{$VARDB_server = $line;   $VARDB_server =~ s/.*=//gi;}
+	if ( ($line =~ /^VARDB_database/) && ($CLIDB_database < 1) )
+		{$VARDB_database = $line;   $VARDB_database =~ s/.*=//gi;}
+	if ( ($line =~ /^VARDB_user/) && ($CLIDB_user < 1) )
+		{$VARDB_user = $line;   $VARDB_user =~ s/.*=//gi;}
+	if ( ($line =~ /^VARDB_pass/) && ($CLIDB_pass < 1) )
+		{$VARDB_pass = $line;   $VARDB_pass =~ s/.*=//gi;}
+	if ( ($line =~ /^VARDB_port/) && ($CLIDB_port < 1) )
+		{$VARDB_port = $line;   $VARDB_port =~ s/.*=//gi;}
+	$i++;
+	}
+
+if (!$VARDB_port) {$VARDB_port='3306';}
+if (!$AGILOGfile) {$AGILOGfile = "$PATHlogs/agiout.$year-$mon-$mday";}
+if (!$PRSLOGfile) {$PRSLOGfile = "$PATHlogs/prsout.$year-$mon-$mday";}
+if (!$PRSTESTfile) {$PRSTESTfile = "$PATHlogs/prstest.$year-$mon-$mday";}
+
+use DBI;
+use Time::HiRes ('gettimeofday','usleep','sleep');  # necessary to have perl sleep command of less than one second
+use Asterisk::AGI;
+$AGI = new Asterisk::AGI;
+
+$dbhA = DBI->connect("DBI:mysql:$VARDB_database:$VARDB_server:$VARDB_port", "$VARDB_user", "$VARDB_pass")
+    or die "Couldn't connect to database: " . DBI->errstr;
+
+### Grab Server values from the database
+$stmtA = "SELECT agi_output FROM servers where server_ip = '$VARserver_ip';";
+$sthA = $dbhA->prepare($stmtA) or die "preparing: ",$dbhA->errstr;
+$sthA->execute or die "executing: $stmtA ", $dbhA->errstr;
+$sthArows=$sthA->rows;
+if ($sthArows > 0)
+	{
+	$AGILOG = '0';
+	@aryA = $sthA->fetchrow_array;
+	$DBagi_output =			"$aryA[0]";
+	if ($DBagi_output =~ /STDERR/)	{$AGILOG = '1';}
+	if ($DBagi_output =~ /FILE/)	{$AGILOG = '2';}
+	if ($DBagi_output =~ /BOTH/)	{$AGILOG = '3';}
+	}
+$sthA->finish();
+
+#############################################
+##### START QUEUEMETRICS LOGGING LOOKUP #####
+$stmtA = "SELECT enable_queuemetrics_logging,queuemetrics_server_ip,queuemetrics_dbname,queuemetrics_login,queuemetrics_pass,queuemetrics_log_id,queuemetrics_eq_prepend FROM system_settings;";
+$sthA = $dbhA->prepare($stmtA) or die "preparing: ",$dbhA->errstr;
+$sthA->execute or die "executing: $stmtA ", $dbhA->errstr;
+$sthArows=$sthA->rows;
+if ($sthArows > 0)
+	{
+	@aryA = $sthA->fetchrow_array;
+	$enable_queuemetrics_logging =	$aryA[0];
+	$queuemetrics_server_ip	=	$aryA[1];
+	$queuemetrics_dbname =		$aryA[2];
+	$queuemetrics_login=		$aryA[3];
+	$queuemetrics_pass =		$aryA[4];
+	$queuemetrics_log_id =		$aryA[5];
+	$queuemetrics_eq_prepend =	$aryA[6];
+	}
+$sthA->finish();
+##### END QUEUEMETRICS LOGGING LOOKUP #####
+###########################################
+
+
+### begin parsing run-time options ###
+if (length($ARGV[0])>1)
+	{
+	if ($AGILOG) {$agi_string = "Perl Environment Dump:";   &agi_output;}
+	$i=0;
+	while ($#ARGV >= $i)
+		{
+		$args = "$args $ARGV[$i]";
+		if ($AGILOG) {$agi_string = "$i|$ARGV[$i]";   &agi_output;}
+		$i++;
+		}
+	
+	### list of command-line array arguments:
+	@ARGV_vars = split(/-----/, $ARGV[0]);
+
+	$channel_group = 			$ARGV_vars[0];
+	$log_to_vac =				$ARGV_vars[1];
+	$note =						$ARGV_vars[2];
+	  if (length($note)<1) {$note = 'NONE';}
+	$call_time_override =		$ARGV_vars[3];
+	$route_override =			$ARGV_vars[4];
+	$route_value_override =		$ARGV_vars[5];
+	$route_context_override =	$ARGV_vars[6];
+	}
+
+$|=1;
+while(<STDIN>) 
+	{
+	chomp;
+	last unless length($_);
+	if ($AGILOG)
+		{
+		if (/^agi_(\w+)\:\s+(.*)$/)
+			{
+			$AGI{$1} = $2;
+			}
+		}
+
+	if (/^agi_context\:\s+(.*)$/)		{$context = $1;}
+	if (/^agi_priority\:\s+(.*)$/)		{$priority = $1;}
+	if (/^agi_uniqueid\:\s+(.*)$/)		{$unique_id = $1; $uniqueid = $unique_id;}
+	if (/^agi_channel\:\s+(.*)$/)		{$channel = $1;}
+	if (/^agi_extension\:\s+(.*)$/)		{$extension = $1;}
+	if (/^agi_type\:\s+(.*)$/)		{$type = $1;}
+	if (/^agi_callerid\:\s+(.*)$/)		{$callerid = $1;}
+	if (/^agi_calleridname\:\s+(.*)$/)	{$calleridname = $1;}
+	}
+
+$outboundIVR=0;
+$ingroupIVR=0;
+if ($calleridname =~ /^V\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d|^Y\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d/)
+	{
+	$callerid = $calleridname;
+
+	$stmtA = "SELECT campaign_id,lead_id FROM vicidial_auto_calls where callerid='$callerid';";
+	$sthA = $dbhA->prepare($stmtA) or die "preparing: ",$dbhA->errstr;
+	$sthA->execute or die "executing: $stmtA ", $dbhA->errstr;
+	$sthArows=$sthA->rows;
+	if ($sthArows > 0)
+		{
+		@aryA = $sthA->fetchrow_array;
+		$campaign_id =	$aryA[0];
+		$lead_id =		$aryA[1];
+		}
+	$sthA->finish();
+
+	if ($calleridname =~ /^V\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d/)
+		{$outboundIVR=1;}
+	if ($calleridname =~ /^Y\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d/)
+		{$ingroupIVR=1;}
+	}
+else
+	{
+	if ( ($callerid =~ /\".*\"/) && ( (!$calleridname) or ($calleridname =~ /unknown/) ) )
+		{
+		$calleridname = $callerid;
+		$calleridname =~ s/\<\d\d\d\d\d\d\d\d\d\d\>//gi;
+		$calleridname =~ s/\"|\" //gi;
+		}
+
+	$callerid =~ s/\D|\'//gi;
+	$calleridname =~ s/unknown|\'//gi;
+	if ( (!$callerid) or ($callerid =~ /unknown/) )
+		{$callerid = $calleridname;}
+
+
+	if (length($callerid)>0) {$phone_number = $callerid;}
+	   else {$phone_number = '';}
+	if (length($calleridname)>0) {$VLcomments = $calleridname;}
+	   else {$VLcomments = '';}
+   }
+
+if (length($callerid)<8) {$callerid = $parked_by;}
+if (length($pin)>0) {$callerid = $pin;}
+
+
+foreach $i (sort keys %AGI) 
+	{
+	if ($AGILOG) {$agi_string = " -- $i = $AGI{$i}";   &agi_output;}
+	}
+
+if ($AGILOG) {$agi_string = "AGI Variables: |$unique_id|$channel|$extension|$type|$callerid|";   &agi_output;}
+
+
+if (length($pin) < 1) {$pin=$inbound_number;}
+
+$fronter = $pin;
+
+if ($AGILOG) {$agi_string = "+++++ INBOUND CALL VDCL STARTED : |$channel_group|$callerid-$pin|$now_date";   &agi_output;}
+
+$VDADphone='';
+$VDADphone_code='';
+
+if ($channel =~ /Local/i)
+	{
+	if ($AGILOG) {$agi_string = "+++++ VDAD START LOCAL CHANNEL: EXITING- $priority";   &agi_output;}
+	exit;
+	}
+
+### Grab Server values from the database
+$cbc=0;
+$stmtA = "SELECT voicemail_dump_exten,ext_context,answer_transfer_agent,local_gmt,asterisk_version,max_vicidial_trunks FROM servers where server_ip = '$VARserver_ip';";
+$sthA = $dbhA->prepare($stmtA) or die "preparing: ",$dbhA->errstr;
+$sthA->execute or die "executing: $stmtA ", $dbhA->errstr;
+$sthArows=$sthA->rows;
+while ($sthArows > $cbc)
+	{
+	@aryA = $sthA->fetchrow_array;
+	$DBvoicemail_dump_exten	=		$aryA[0];
+	$DBext_context		=			$aryA[1];
+	$DBanswer_transfer_agent	=	$aryA[2];
+	$DBSERVER_GMT		=			$aryA[3];
+	$DBasterisk_version	=			$aryA[4];
+	$DBmax_vicidial_trunks	=		$aryA[5];
+	if ($DBvoicemail_dump_exten)	{$voicemail_dump_exten = $DBvoicemail_dump_exten;}
+	if ($DBext_context)				{$ext_context = $DBext_context;}
+	if ($DBanswer_transfer_agent)	{$answer_transfer_agent = $DBanswer_transfer_agent;}
+	if ($DBSERVER_GMT)				{$SERVER_GMT = $DBSERVER_GMT;}
+	if ($DBasterisk_version)		{$AST_ver = $DBasterisk_version;}
+	if ($DBmax_vicidial_trunks)		{$max_vicidial_trunks = $DBmax_vicidial_trunks;}
+	$cbc++;
+	}
+$sthA->finish();
+
+if (length($channel_group) > 1)
+	{
+	### Grab inbound groups values from the database
+	$cbc=0;
+	$stmtA = "SELECT call_time_id,after_hours_action,after_hours_message_filename,after_hours_exten,after_hours_voicemail,welcome_message_filename,moh_context,onhold_prompt_filename,prompt_interval,agent_alert_exten,agent_alert_delay,drop_call_seconds,drop_action,drop_exten,next_agent_call,voicemail_ext,queue_priority,drop_inbound_group,afterhours_xfer_group FROM vicidial_inbound_groups where group_id = '$channel_group';";
+	$sthA = $dbhA->prepare($stmtA) or die "preparing: ",$dbhA->errstr;
+	$sthA->execute or die "executing: $stmtA ", $dbhA->errstr;
+	$sthArows=$sthA->rows;
+	while ($sthArows > $cbc)
+		{
+		@aryA = $sthA->fetchrow_array;
+		$call_time_id	=				$aryA[0];
+		$after_hours_action	=			$aryA[1];
+		$after_hours_message_filename	=	$aryA[2];
+		$after_hours_exten	=			$aryA[3];
+		$after_hours_voicemail	=		$aryA[4];
+		$welcome_message_filename	=	$aryA[5];
+		$moh_context	=				$aryA[6];
+		$onhold_prompt_filename	=		$aryA[7];
+		$prompt_interval	=			$aryA[8];
+		$agent_alert_exten	=			$aryA[9];
+		$agent_alert_delay	=			$aryA[10];
+		$drop_call_seconds	=			$aryA[11];
+			$DROP_TIME = $drop_call_seconds;
+		$drop_action =					$aryA[12];
+		$drop_exten	=					$aryA[13];
+		$CAMP_callorder	=				$aryA[14];
+		$VDADvoicemail_ext =			$aryA[15];
+			$VDADvoicemail_ext =~ s/\D//gi;
+		$queue_priority =				$aryA[16];
+		$drop_inbound_group =			$aryA[17];
+		$afterhours_xfer_group =		$aryA[18];
+		$cbc++;
+		}
+	$sthA->finish();
+	}
+if (length($call_time_override) > 1)
+	{
+	$call_time_id = $call_time_override;
+	}
+if (length($route_override) > 1)
+	{
+	$after_hours_action = $route_override;
+	}
+if (length($route_value_override) > 1)
+	{
+	$after_hours_message_filename = $route_value_override;
+	$after_hours_exten = $route_value_override;
+	$after_hours_voicemail = $route_value_override;
+	}
+if (length($route_context_override) > 1)
+	{
+	$ext_context = $route_context_override;
+	}
+
+if ($wday==0) {$daySQL=',ct_sunday_start,ct_sunday_stop';}
+if ($wday==1) {$daySQL=',ct_monday_start,ct_monday_stop';}
+if ($wday==2) {$daySQL=',ct_tuesday_start,ct_tuesday_stop';}
+if ($wday==3) {$daySQL=',ct_wednesday_start,ct_wednesday_stop';}
+if ($wday==4) {$daySQL=',ct_thursday_start,ct_thursday_stop';}
+if ($wday==5) {$daySQL=',ct_friday_start,ct_friday_stop';}
+if ($wday==6) {$daySQL=',ct_saturday_start,ct_saturday_stop';}
+
+$ct_default_start = '0';
+$ct_default_stop = '9999';
+
+### Grab call_times values from the database
+$stmtA = "SELECT ct_default_start,ct_default_stop $daySQL FROM vicidial_call_times where call_time_id = '$call_time_id';";
+$sthA = $dbhA->prepare($stmtA) or die "preparing: ",$dbhA->errstr;
+$sthA->execute or die "executing: $stmtA ", $dbhA->errstr;
+$sthArows=$sthA->rows;
+if ($sthArows > 0)
+	{
+	@aryA = $sthA->fetchrow_array;
+	$ct_default_start	=		$aryA[0];
+	$ct_default_stop	=		$aryA[1];
+	$ct_day_start	=			$aryA[2];
+	$ct_day_stop	=			$aryA[3];
+	$sthA->finish();
+
+	if ( ($ct_day_start > 0) || ($ct_day_stop > 0) )  
+		{
+		$ct_default_start	=	$ct_day_start;
+		$ct_default_stop	=	$ct_day_stop;
+		}
+	}
+
+$AGI->stream_file('sip-silence');
+$AGI->stream_file('sip-silence');
+
+##### BEGIN AFTER HOURS CHECK #####
+$ct_stop_overflow=0;   # allow for overflow time, past midnight
+if ($ct_default_stop > 2400)
+	{$ct_stop_overflow = ($ct_default_stop - 2400);}
+if ( ( ($hm < $ct_default_start) || ($hm > $ct_default_stop) ) && ($hm >= $ct_stop_overflow) )
+	{
+	$VHqueryCID = "VA$CIDdate$hour$min$sec$sec";
+
+	if ($outboundIVR > 0)
+		{
+		$stmtA = "DELETE FROM vicidial_auto_calls where callerid='$callerid' and campaign_id='$campaign_id' and server_ip='$VARserver_ip' order by call_time desc limit 1;";
+		$affected_rows = $dbhA->do($stmtA);
+		if ($AGILOG) {$agi_string = "--    AH VDAC vac record deleted: |$affected_rows|$campaign_id|$callerid|";   &agi_output;}
+
+		$stmtA = "INSERT INTO vicidial_outbound_ivr_log (uniqueid,caller_code,event_date,campaign_id,lead_id,menu_id,menu_action) values('$uniqueid','$callerid','$SQLdate','$campaign_id','$lead_id','$context','AFTERHOURSDROP')";
+			if ($AGILOG) {$agi_string = "|$stmtA|";   &agi_output;}
+		$affected_rowsL = $dbhA->do($stmtA);
+		if ($AGILOG) {$agi_string = "--    VOIL insert: |$affected_rowsL|$uniqueid|$callerid|$campaign_id|$lead_id|$context|";   &agi_output;}
+		}
+	else
+		{
+		$stmtA = "DELETE FROM vicidial_auto_calls where callerid='$callerid' and uniqueid='$uniqueid' and server_ip='$VARserver_ip' order by call_time desc limit 1;";
+		$affected_rows = $dbhA->do($stmtA);
+		if ($AGILOG) {$agi_string = "--    AH VDAC vac record deleted: |$affected_rows|$uniqueid|$callerid|";   &agi_output;}
+
+		$stmtA = "INSERT INTO live_inbound_log (uniqueid,channel,server_ip,caller_id,extension,phone_ext,start_time,comment_a,comment_b,comment_c,comment_d,comment_e) values('$uniqueid','$channel','$VARserver_ip','$callerid','$extension','$phone_number','$SQLdate','$channel_group','$note','AFTERHOURSDROP','$context','$priority')";
+			if ($AGILOG) {$agi_string = "|$stmtA|";   &agi_output;}
+		$affected_rowsL = $dbhA->do($stmtA);
+		if ($AGILOG) {$agi_string = "--    AH LIL insert: |$affected_rowsL|$uniqueid|$callerid|$extension|";   &agi_output;}
+		}
+
+	### QueueMetrics logging if enabled
+	if ($enable_queuemetrics_logging > 0)
+		{
+		$dbhB = DBI->connect("DBI:mysql:$queuemetrics_dbname:$queuemetrics_server_ip:3306", "$queuemetrics_login", "$queuemetrics_pass")
+		 or die "Couldn't connect to database: " . DBI->errstr;
+
+		if ($DBX) {print "CONNECTED TO QueueMetrics DATABASE:  $queuemetrics_server_ip|$queuemetrics_dbname\n";}
+
+		$stmtB = "INSERT INTO queue_log SET partition='P01',time_id='$now_date_epoch',call_id='$uniqueid',queue='NONE',agent='NONE',verb='INFO',data1='IVR',data2='$context',serverid='$queuemetrics_log_id';";
+			if ($AGILOG) {$agi_string = "|$stmtB|";   &agi_output;}
+		$Baffected_rows = $dbhB->do($stmtB);
+		$dbhB->disconnect();
+		}
+
+	if ($after_hours_action =~ /EXTENSION|VOICEMAIL|IN_GROUP/)
+		{
+		if ($after_hours_action =~ /EXTENSION/)
+			{
+			$DROPexten = "$after_hours_exten";
+			}
+		if ($after_hours_action =~ /VOICEMAIL/)
+			{
+			$DROPexten = "$voicemail_dump_exten$after_hours_voicemail";
+			}
+		if ($after_hours_action =~ /IN_GROUP/)
+			{ # 90009*CL_uk3survy_*8301*10000123*universal*7275551212*1234*"
+			$S='*';
+			$DROPexten = "90009*$afterhours_xfer_group$S$S$insert_lead_id$S$S$phone_number$S$fronter$S";
+			}
+		if (length($DROPexten)>0)
+			{	### if DROP extension is defined then send the dropped call there instead of hangup
+
+			$AGI->stream_file('sip-silence'); # stop music-on-hold process
+			$AGI->stream_file('sip-silence'); # stop music-on-hold process
+
+			sleep(1);
+
+			if ($AGILOG) {$agi_string = "exiting the VDAD app after hours, transferring call to $DROPexten   |$hm|$ct_default_start|$ct_default_stop|$ct_stop_overflow|";   &agi_output;}
+			print "SET CONTEXT $ext_context\n";
+				checkresult($result);
+			print "SET EXTENSION $DROPexten\n";
+				checkresult($result);
+			print "SET PRIORITY 1\n";
+				checkresult($result);
+			}
+		}
+
+	if ($after_hours_action =~ /MESSAGE|HANGUP/)
+		{
+		$AGI->stream_file('sip-silence');
+		$AGI->stream_file('sip-silence');
+		$AGI->stream_file("$after_hours_message_filename");
+		sleep(1);
+
+		### insert a NEW record to the vicidial_manager table to hangup the channel
+		$stmtA = "INSERT INTO vicidial_manager values('','','$SQLdate','NEW','N','$VARserver_ip','','Hangup','$VHqueryCID','Channel: $channel','','','','','','','','','')";
+		$affected_rows = $dbhA->do($stmtA);  
+		if ($AGILOG) {$agi_string = "--    VDCL call_hungup after hours: |$VHqueryCID|$VDADconf_exten|$channel|insert to vicidial_manager";   &agi_output;}
+		}
+
+	$dbhA->disconnect();
+
+	exit;
+	}
+##### END AFTER HOURS CHECK #####
+
+
+
+### insert an IVR record to the vicidial_auto_calls table
+if ($outboundIVR > 0)
+	{
+	$stmtA = "INSERT INTO vicidial_outbound_ivr_log (uniqueid,caller_code,event_date,campaign_id,lead_id,menu_id,menu_action) values('$uniqueid','$callerid','$SQLdate','$campaign_id','$lead_id','$context','')";
+		if ($AGILOG) {$agi_string = "|$stmtA|";   &agi_output;}
+	$affected_rowsL = $dbhA->do($stmtA);
+	if ($AGILOG) {$agi_string = "--    VOIL insert: |$affected_rowsL|$uniqueid|$callerid|$campaign_id|$lead_id|$context|";   &agi_output;}
+
+	$stmtA = "UPDATE vicidial_auto_calls SET last_update_time='$last_update_time',status='IVR' where callerid='$callerid';";
+		if ($AGILOG) {$agi_string = "|$stmtA|";   &agi_output;}
+	$affected_rowsV = $dbhA->do($stmtA);
+	if ($AGILOG) {$agi_string = "--    VAC update: |$affected_rowsV|$uniqueid|$callerid|$last_update_time|";   &agi_output;}
+	}
+else
+	{
+	if ($log_to_vac =~ /YES/)
+		{
+		if ($ingroupIVR > 0)
+			{
+			$stmtA = "UPDATE vicidial_auto_calls SET last_update_time='$last_update_time',status='IVR' where callerid='$callerid';";
+				if ($AGILOG) {$agi_string = "|$stmtA|";   &agi_output;}
+			$affected_rowsV = $dbhA->do($stmtA);
+			if ($AGILOG) {$agi_string = "--    VAC update: |$affected_rowsV|$uniqueid|$callerid|$last_update_time|";   &agi_output;}
+			}
+		else
+			{
+			$stmtA = "DELETE FROM vicidial_auto_calls where callerid='$callerid' and uniqueid='$uniqueid' and server_ip='$VARserver_ip';";
+			$affected_rows = $dbhA->do($stmtA);
+			if ($AGILOG) {$agi_string = "--    VDAC vac record deleted: |$affected_rows| $uniqueid|$callerid|";   &agi_output;}
+
+			$stmtA = "INSERT INTO vicidial_auto_calls (server_ip,campaign_id,lead_id,status,uniqueid,callerid,channel,phone_code,phone_number,call_time,call_type,stage,queue_priority,last_update_time) values('$VARserver_ip','$channel_group','0','IVR','$uniqueid','$callerid','$channel','$phone_code','$phone_number','$SQLdate','IN','IVR-0','$queue_priority','$last_update_time')";
+				if ($AGILOG) {$agi_string = "|$stmtA|";   &agi_output;}
+			$affected_rowsV = $dbhA->do($stmtA);
+			if ($AGILOG) {$agi_string = "--    VAC insert: |$affected_rowsV|$uniqueid|$callerid|$extension|";   &agi_output;}
+			}
+		}
+
+	$stmtA = "INSERT INTO live_inbound_log (uniqueid,channel,server_ip,caller_id,extension,phone_ext,start_time,comment_a,comment_b,comment_d,comment_e) values('$uniqueid','$channel','$VARserver_ip','$callerid','$extension','$phone_number','$SQLdate','$channel_group','$note','$context','$priority')";
+		if ($AGILOG) {$agi_string = "|$stmtA|";   &agi_output;}
+	$affected_rowsL = $dbhA->do($stmtA);
+	if ($AGILOG) {$agi_string = "--    LIL insert: |$affected_rowsL|$uniqueid|$callerid|$extension|";   &agi_output;}
+	}
+
+### QueueMetrics logging if enabled
+if ($enable_queuemetrics_logging > 0)
+	{
+	$dbhB = DBI->connect("DBI:mysql:$queuemetrics_dbname:$queuemetrics_server_ip:3306", "$queuemetrics_login", "$queuemetrics_pass")
+	 or die "Couldn't connect to database: " . DBI->errstr;
+
+	if ($DBX) {print "CONNECTED TO QueueMetrics DATABASE:  $queuemetrics_server_ip|$queuemetrics_dbname\n";}
+
+	if ($outboundIVR > 0)
+		{$uniqueid = $caller_id;}
+
+	$stmtB = "INSERT INTO queue_log SET partition='P01',time_id='$now_date_epoch',call_id='$uniqueid',queue='NONE',agent='NONE',verb='INFO',data1='IVR',data2='$context',serverid='$queuemetrics_log_id';";
+		if ($AGILOG) {$agi_string = "|$stmtB|";   &agi_output;}
+	$Baffected_rows = $dbhB->do($stmtB);
+	$dbhB->disconnect();
+	}
+
+
+$sthA->finish();
+$dbhA->disconnect();
+
+exit;
+
+
+
+
+
+
+
+sub checkresult 
+	{
+	my ($res) = @_;
+	my $retval;
+	$tests++;
+	chomp $res;
+	if ($res =~ /^200/) 
+		{
+		$res =~ /result=(-?\d+)/;
+		if (!length($1)) 
+			{
+		#	print STDERR "FAIL ($res)\n";
+			$fail++;
+			} 
+		else 
+			{
+		#	print STDERR "PASS ($1)\n";
+			$pass++;
+			}
+		} 
+	else 
+		{
+	#	print STDERR "FAIL (unexpected result '$res')\n";
+		$fail++;
+		}
+	}
+
+
+sub agi_output
+	{
+	if ($AGILOG >=2)
+		{
+		### open the log file for writing ###
+		open(Lout, ">>$AGILOGfile")
+				|| die "Can't open $AGILOGfile: $!\n";
+		print Lout "$now_date|$script|$agi_string\n";
+		close(Lout);
+		}
+		### send to STDERR writing ###
+	if ( ($AGILOG == '1') || ($AGILOG == '3') )
+		{print STDERR "$now_date|$script|$agi_string\n";}
+	$agi_string='';
+	}

@@ -1,0 +1,175 @@
+#!/usr/bin/perl
+#
+# agi-VDADselective_CID.agi version 0.1   *NO DB Connection*
+# 
+# Runs before a call is placed outbound to filter outgoing callerIDnumber 
+#
+# You need to put lines similar to those below in your extensions.conf file:
+#
+# ;outbound VICIDIAL calls:
+#exten => _91NXXNXXXXXX,1,AGI(call_log.agi,${EXTEN})
+#exten => _91NXXNXXXXXX,2,AGI(agi-VDADselective_CID.agi,${EXTEN})
+#exten => _91NXXNXXXXXX,3,Dial(${TRUNKX}/${EXTEN:1},55,tTo)
+#exten => _91NXXNXXXXXX,4,Hangup
+#
+# Copyright (C) 2008  Matt Florell <vicidial@gmail.com>    LICENSE: AGPLv2
+#
+# changes:
+# 60918-1042 - First build
+# 71012-1239 - changed method for getting areacode
+#
+
+$script = 'agi-VDADselective_CID.agi';
+
+$AGILOG=0;
+$FD=0; # force debug for testing
+
+# CLEAR AREA CODE LISTINGS:
+# Florida: 239|305|321|352|386|407|561|689|727|754|772|786|813|836|850|861|863|904|941|954
+
+$clear_area_codes = '239|305|321|352|386|407|561|689|727|754|772|786|813|836|850|861|863|904|941|954';
+
+
+($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
+$year = ($year + 1900);
+$mon++;
+if ($mon < 10) {$mon = "0$mon";}
+if ($mday < 10) {$mday = "0$mday";}
+if ($hour < 10) {$hour = "0$hour";}
+if ($min < 10) {$min = "0$min";}
+if ($sec < 10) {$sec = "0$sec";}
+
+$now_date_epoch = time();
+$now_date = "$year-$mon-$mday $hour:$min:$sec";
+
+use Asterisk::AGI;
+$AGI = new Asterisk::AGI;
+
+### begin parsing run-time options ###
+if (length($ARGV[0])>1)
+{
+	if ($AGILOG) {$agi_string = "Perl Environment Dump:";   &agi_output;}
+	$i=0;
+	while ($#ARGV >= $i)
+	{
+	$args = "$args $ARGV[$i]";
+	if ($AGILOG) {$agi_string = "$i|$ARGV[$i]";   &agi_output;}
+	$i++;
+	}
+}
+
+$|=1;
+while(<STDIN>) 
+{
+	chomp;
+	last unless length($_);
+	if ($AGILOG)
+	{
+		if (/^agi_(\w+)\:\s+(.*)$/)
+		{
+			$AGI{$1} = $2;
+		}
+	}
+
+	if (/^agi_extension\:\s+(.*)$/)		{$extension = $1;}
+	if (/^agi_callerid\:\s+(.*)$/)		{$callerid = $1;}
+	if (/^agi_calleridname\:\s+(.*)$/)	{$calleridname = $1;}
+
+	if ( ($callerid =~ /\".*\"/) && ( (!$calleridname) or ($calleridname =~ /unknown/) ) )
+		{
+		$calleridname = $callerid;
+		$calleridname =~ s/\<\d\d\d\d\d\d\d\d\d\d\>//gi;
+		$calleridname =~ s/\"|\" //gi;
+		}
+
+		$callerid =~ s/\D//gi;
+		$calleridname =~ s/unknown//gi;
+	if ( (!$callerid) or ($callerid =~ /unknown/) )
+		{$callerid = $calleridname;}
+
+	if (length($callerid)>0) {$phone_number = $callerid;}
+	   else {$phone_number = '';}
+	if (length($calleridname)>0) {$VLcomments = $calleridname;}
+	   else {$VLcomments = '';}
+}
+
+$areacode = substr($extension, -10, 3);
+
+
+foreach $i (sort keys %AGI) 
+{
+	if ($AGILOG) {$agi_string = " -- $i = $AGI{$i}";   &agi_output;}
+}
+
+
+if ($areacode !~ /$clear_area_codes/)
+{
+	if ( (length($callerid)>20) && ($callerid =~ /\"\S\S\S\S\S\S\S\S\S\S\S\S\S\S\S\S\S\S/) )
+	  {
+	   $calleridname =~ s/^\"//gi;
+	   $calleridname =~ s/\".*$//gi;
+	  }
+
+	### set the callerid to the ACQS value(calleridname)
+	## use these two lines for Asterisk 1.2 tree
+	$newcallerid = "\"$calleridname <0000000000>\"";
+	$AGI->set_callerid($newcallerid);
+	## use these two lines for Asterisk 1.0 tree
+#	print "SET CALLERID \"$calleridname\" <0000000000>\n";
+#	print "SET CALLERIDNAME \"$calleridname\"\n";
+
+	print STDERR "Setting CID \"$newcallerid\"\n";
+	checkresult($result);
+	if ($AGILOG) {$agi_string = "callerID changed: \"$calleridname\" \<0000000000\>";   &agi_output;}
+
+	if ($FD > 0) {print STDERR "callerID changed:     \"$calleridname\" \<0000000000\> |$areacode|\n";}
+}
+else
+{
+	if ($FD > 0) {print STDERR "callerID NOT changed: \"$calleridname\" <$callerid> |$areacode|\n";}
+
+}
+if ($AGILOG) {$agi_string = "AGI Variables: |$extension|$areacode|$callerid|$calleridname|";   &agi_output;}
+
+exit;
+
+
+
+
+sub checkresult {
+	my ($res) = @_;
+	my $retval;
+	$tests++;
+	chomp $res;
+	if ($res =~ /^200/) {
+		$res =~ /result=(-?\d+)/;
+		if (!length($1)) {
+		#	print STDERR "FAIL ($res)\n";
+			$fail++;
+		} else {
+		#	print STDERR "PASS ($1)\n";
+			$pass++;
+		}
+	} else {
+	#	print STDERR "FAIL (unexpected result '$res')\n";
+		$fail++;
+	}
+}
+
+
+
+sub agi_output
+{
+if ($AGILOG >=2)
+	{
+	### open the log file for writing ###
+	open(Lout, ">>$AGILOGfile")
+			|| die "Can't open $AGILOGfile: $!\n";
+	print Lout "$now_date|$script|$agi_string\n";
+	close(Lout);
+	}
+	### send to STDERR writing ###
+if ( ($AGILOG == '1') || ($AGILOG == '3') )
+	{print STDERR "$now_date|$script|$agi_string\n";}
+$agi_string='';
+}

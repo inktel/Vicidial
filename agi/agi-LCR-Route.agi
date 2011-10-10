@@ -1,0 +1,184 @@
+#!/usr/bin/perl
+#
+# agi-LCR-Route.agi version 2.2.0
+#
+# This script looks up the NPANXX in the lcr table and sets 
+# the LCRTRUNK dialplan variable to the carrier string 
+# with the cheapest rate. If no carrier is found for this NPANXX
+# the variable is unchanged so you should set it with the default
+# previously.
+#
+# [globals]
+# LCRTRUNK=SIP/provider1    ; default LCR trunk
+#
+# [default]
+# ;outbound VICIDIAL calls:
+# exten => _91NXXNXXXXXX,1,AGI(agi://127.0.0.1:4577/call_log)
+# exten => _91NXXNXXXXXX,n,AGI(agi-LCR-Route.agi,${EXTEN:2:6})
+# exten => _91NXXNXXXXXX,n,Dial(${LCRTRUNK}/${EXTEN:2},,To)
+# exten => _91NXXNXXXXXX,n,Hangup
+#
+# Here is the SQL to create the lcr table:
+#
+# create table if not exists lcr (
+#        npanxx mediumint not null,
+#        rate varchar(10) not null,
+#        carrier_string varchar(20) not null
+# );
+# alter table lcr add unique index (npanxx, rate, carrier_string);
+#
+# A typical npanxx from this table should look like:
+#
+# mysql> select npanxx,rate,carrier_string from lcr where npanxx='734223';
+# +--------+--------+----------------+
+# | npanxx | rate   | carrier_string |
+# +--------+--------+----------------+
+# | 734223 | 0.0064 | SIP/provider1  |
+# | 734223 | 0.0076 | SIP/provider2  |
+# +--------+--------+----------------+
+#
+# Unfortunately these rate sheets are not in a standard format.
+# You will have to write a custom loading script to populate this table.
+# An exampe loading script is provided in the extras directory of the
+# astguiclient source code called lcr_loader_example.pl
+#
+#
+# Copyright (C) 2009  Michael Cargile <mikec@vicidial.com>    LICENSE: AGPLv2
+#
+# changes:
+# 90717-1554 - First Build
+# 91129-2209 - formatting fixes
+#
+
+sub agi_output
+	{
+	if ($AGILOG >=2)
+		{
+		### open the log file for writing ###
+		open(Lout, ">>$AGILOGfile")
+						|| die "Can't open $AGILOGfile: $!\n";
+		print Lout "$now_date|$script|$agi_string\n";
+		close(Lout);
+		}
+		### send to STDERR writing ###
+	if ( ($AGILOG == '1') || ($AGILOG == '3') )
+			{print STDERR "$now_date|$script|$agi_string\n";}
+	$agi_string='';
+	}
+
+$script = 'agi-LCR-Route.agi';
+$AGILOG = '0';
+
+
+($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
+$year = ($year + 1900);
+$mon++;
+if ($mon < 10) {$mon = "0$mon";}
+if ($mday < 10) {$mday = "0$mday";}
+if ($hour < 10) {$hour = "0$hour";}
+if ($min < 10) {$min = "0$min";}
+if ($sec < 10) {$sec = "0$sec";}
+
+# default path to astguiclient configuration file:
+$PATHconf = '/etc/astguiclient.conf';
+
+open(conf, "$PATHconf") || die "can't open $PATHconf: $!\n";
+@conf = <conf>;
+close(conf);
+$i=0;
+foreach(@conf)
+	{
+	$line = $conf[$i];
+	$line =~ s/ |>|\n|\r|\t|\#.*|;.*//gi;
+	if ( ($line =~ /^PATHhome/) && ($CLIhome < 1) )
+		{$PATHhome = $line;   $PATHhome =~ s/.*=//gi;}
+	if ( ($line =~ /^PATHlogs/) && ($CLIlogs < 1) )
+		{$PATHlogs = $line;   $PATHlogs =~ s/.*=//gi;}
+	if ( ($line =~ /^PATHagi/) && ($CLIagi < 1) )
+		{$PATHagi = $line;   $PATHagi =~ s/.*=//gi;}
+	if ( ($line =~ /^PATHweb/) && ($CLIweb < 1) )
+		{$PATHweb = $line;   $PATHweb =~ s/.*=//gi;}
+	if ( ($line =~ /^PATHsounds/) && ($CLIsounds < 1) )
+		{$PATHsounds = $line;   $PATHsounds =~ s/.*=//gi;}
+	if ( ($line =~ /^PATHmonitor/) && ($CLImonitor < 1) )
+		{$PATHmonitor = $line;   $PATHmonitor =~ s/.*=//gi;}
+	if ( ($line =~ /^VARserver_ip/) && ($CLIserver_ip < 1) )
+		{$VARserver_ip = $line;   $VARserver_ip =~ s/.*=//gi;}
+	if ( ($line =~ /^VARDB_server/) && ($CLIDB_server < 1) )
+		{$VARDB_server = $line;   $VARDB_server =~ s/.*=//gi;}
+	if ( ($line =~ /^VARDB_database/) && ($CLIDB_database < 1) )
+		{$VARDB_database = $line;   $VARDB_database =~ s/.*=//gi;}
+	if ( ($line =~ /^VARDB_user/) && ($CLIDB_user < 1) )
+		{$VARDB_user = $line;   $VARDB_user =~ s/.*=//gi;}
+	if ( ($line =~ /^VARDB_pass/) && ($CLIDB_pass < 1) )
+		{$VARDB_pass = $line;   $VARDB_pass =~ s/.*=//gi;}
+	if ( ($line =~ /^VARDB_port/) && ($CLIDB_port < 1) )
+		{$VARDB_port = $line;   $VARDB_port =~ s/.*=//gi;}
+	$i++;
+	}
+
+if (!$VARDB_port) {$VARDB_port='3306';}
+if (!$AGILOGfile) {$AGILOGfile = "$PATHlogs/agiout.$year-$mon-$mday";}
+
+use DBI;
+use Asterisk::AGI;
+$AGI = new Asterisk::AGI;
+
+$dbhA = DBI->connect("DBI:mysql:$VARDB_database:$VARDB_server:$VARDB_port", "$VARDB_user", "$VARDB_pass")
+    or die "Couldn't connect to database: " . DBI->errstr;
+
+### Grab Server values from the database
+$stmtA = "SELECT agi_output FROM servers where server_ip = '$VARserver_ip';";
+$sthA = $dbhA->prepare($stmtA) or die "preparing: ",$dbhA->errstr;
+$sthA->execute or die "executing: $stmtA ", $dbhA->errstr;
+$sthArows=$sthA->rows;
+if ($sthArows > 0)
+	{
+	@aryA = $sthA->fetchrow_array;
+	$DBagi_output = "$aryA[0]";
+	if ($DBagi_output =~ /STDERR/)  {$AGILOG = '1';}
+	if ($DBagi_output =~ /FILE/)    {$AGILOG = '2';}
+	if ($DBagi_output =~ /BOTH/)    {$AGILOG = '3';}
+	}
+$sthA->finish();
+
+
+### begin parsing run-time options ###
+if (length($ARGV[0])>1)
+	{
+	if ($AGILOG) {$agi_string = "Perl Environment Dump:";   &agi_output;}
+	$i=0;
+	while ($#ARGV >= $i)
+		{
+		$args = "$args $ARGV[$i]";
+		if ($AGILOG) {$agi_string = "$i|$ARGV[$i]";   &agi_output;}
+		$i++;
+		}
+	
+	### list of command-line array arguments:
+	@ARGV_vars = split(/-----/, $ARGV[0]);
+
+	$npanxx = $ARGV_vars[0];
+	if ($AGILOG) {$agi_string = "Searching for NPANXX = $npanxx";   &agi_output;}
+	}
+
+# get the cheapest carrier
+$stmtA = "SELECT carrier_string, rate FROM lcr WHERE npanxx='$npanxx' ORDER BY rate ASC";
+$sthA = $dbhA->prepare($stmtA) or die "preparing: ",$dbhA->errstr;
+$sthA->execute or die "executing: $stmtA ", $dbhA->errstr;
+$sthArows=$sthA->rows;
+if ( $sthArows > 0 ) 
+	{ 
+	$rec_count=0;
+	@aryA = $sthA->fetchrow_array;
+	$carrier_string = "$aryA[0]";
+	$sthA->finish();
+
+	if ($AGILOG) {$agi_string = "Setting LCRTRUNK to $carrier_string";   &agi_output;}
+
+	$AGI->set_variable( "LCRTRUNK",$carrier_string );
+	}
+else 
+	{
+	if ($AGILOG) {$agi_string = "No carrier found for NPANXX = $npanxx. Leaving the LCRTRUNK variable as the default.";   &agi_output;}
+	}

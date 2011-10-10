@@ -1,0 +1,313 @@
+#!/usr/bin/perl
+#
+# THIS SCRIPT WILL BE DEPRICATED AND REMOVED BEFORE THE 2.2.0 RELEASE
+#
+# VD_amd_post.agi version 2.0.4   *DBI-version*
+#
+# NOTE: This script is only needed with app_amd enabled systems
+# 
+# runs after a call goes through AMD in extensions.conf to send the call on to
+# it's proper destination
+#
+# You need to put lines similar to those below in your extensions.conf file:
+# 
+# ; VICIDIAL_auto_dialer transfer script AMD with Load Balanced:
+# exten => 8369,1,AGI(call_log.agi,${EXTEN})
+# exten => 8369,2,(AMD),AMD
+# exten => 8369,3,AGI(VD_amd.agi,${EXTEN})
+# exten => 8369,4,AGI(agi-VDAD_LB_transfer.agi,${EXTEN})
+# exten => 8369,5,AGI(agi-VDAD_LB_transfer.agi,${EXTEN})
+# exten => 8369,6,AGI(agi-VDAD_LB_transfer.agi,${EXTEN})
+# exten => 8369,7,Hangup
+# 
+# ; this is used for playing a message to an answering machine forwarded from AMD in VICIDIAL
+# ;    replace conf with the message file you want to leave
+# exten => 8320,1,WaitForSilence(2000,2) ; AMD got machine.  leave message after recording
+# exten => 8320,2,Playback(ding)
+# exten => 8320,3,AGI(VD_amd_post.agi,${EXTEN})
+# exten => 8320,4,Hangup
+# 
+# Copyright (C) 2007  Matt Florell <vicidial@gmail.com>    LICENSE: AGPLv2
+#
+# changes:
+# 60217-1119 first build
+# 60731-1403 - changed to use DBI-DBD::mysql
+#            - changed to use /etc/astguiclient.conf for configs
+# 60817-1025 - added output options check from database
+# 71118-0257 - updated comments
+#
+
+$script = 'VD_amd_post.agi';
+
+$A = 1;		# set to 1 for AMD output messages mode
+$AMD_LOG = 0;	# set to 1 for logfile
+
+($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
+$year = ($year + 1900);
+$mon++;
+if ($mon < 10) {$mon = "0$mon";}
+if ($mday < 10) {$mday = "0$mday";}
+if ($hour < 10) {$Fhour = "0$hour";}
+if ($min < 10) {$min = "0$min";}
+if ($sec < 10) {$sec = "0$sec";}
+
+$now_date_epoch = time();
+$now_date = "$year-$mon-$mday $hour:$min:$sec";
+$start_time=$now_date;
+	$CIDdate = "$mon$mday$hour$min$sec";
+	$tsSQLdate = "$year$mon$mday$hour$min$sec";
+	$SQLdate = "$year-$mon-$mday $hour:$min:$sec";
+	$SQLdateBEGIN = $SQLdate;
+
+# default path to astguiclient configuration file:
+$PATHconf =		'/etc/astguiclient.conf';
+
+open(conf, "$PATHconf") || die "can't open $PATHconf: $!\n";
+@conf = <conf>;
+close(conf);
+$i=0;
+foreach(@conf)
+	{
+	$line = $conf[$i];
+	$line =~ s/ |>|\n|\r|\t|\#.*|;.*//gi;
+	if ( ($line =~ /^PATHhome/) && ($CLIhome < 1) )
+		{$PATHhome = $line;   $PATHhome =~ s/.*=//gi;}
+	if ( ($line =~ /^PATHlogs/) && ($CLIlogs < 1) )
+		{$PATHlogs = $line;   $PATHlogs =~ s/.*=//gi;}
+	if ( ($line =~ /^PATHagi/) && ($CLIagi < 1) )
+		{$PATHagi = $line;   $PATHagi =~ s/.*=//gi;}
+	if ( ($line =~ /^PATHweb/) && ($CLIweb < 1) )
+		{$PATHweb = $line;   $PATHweb =~ s/.*=//gi;}
+	if ( ($line =~ /^PATHsounds/) && ($CLIsounds < 1) )
+		{$PATHsounds = $line;   $PATHsounds =~ s/.*=//gi;}
+	if ( ($line =~ /^PATHmonitor/) && ($CLImonitor < 1) )
+		{$PATHmonitor = $line;   $PATHmonitor =~ s/.*=//gi;}
+	if ( ($line =~ /^VARserver_ip/) && ($CLIserver_ip < 1) )
+		{$VARserver_ip = $line;   $VARserver_ip =~ s/.*=//gi;}
+	if ( ($line =~ /^VARDB_server/) && ($CLIDB_server < 1) )
+		{$VARDB_server = $line;   $VARDB_server =~ s/.*=//gi;}
+	if ( ($line =~ /^VARDB_database/) && ($CLIDB_database < 1) )
+		{$VARDB_database = $line;   $VARDB_database =~ s/.*=//gi;}
+	if ( ($line =~ /^VARDB_user/) && ($CLIDB_user < 1) )
+		{$VARDB_user = $line;   $VARDB_user =~ s/.*=//gi;}
+	if ( ($line =~ /^VARDB_pass/) && ($CLIDB_pass < 1) )
+		{$VARDB_pass = $line;   $VARDB_pass =~ s/.*=//gi;}
+	if ( ($line =~ /^VARDB_port/) && ($CLIDB_port < 1) )
+		{$VARDB_port = $line;   $VARDB_port =~ s/.*=//gi;}
+	$i++;
+	}
+
+if (!$VARDB_port) {$VARDB_port='3306';}
+if (!$AGILOGfile) {$AGILOGfile = "$PATHlogs/agiout.$year-$mon-$mday";}
+
+use DBI;
+use Asterisk::AGI;
+$AGI = new Asterisk::AGI;
+
+$dbhA = DBI->connect("DBI:mysql:$VARDB_database:$VARDB_server:$VARDB_port", "$VARDB_user", "$VARDB_pass")
+    or die "Couldn't connect to database: " . DBI->errstr;
+
+### Grab Server values from the database
+$stmtA = "SELECT agi_output FROM servers where server_ip = '$VARserver_ip';";
+$sthA = $dbhA->prepare($stmtA) or die "preparing: ",$dbhA->errstr;
+$sthA->execute or die "executing: $stmtA ", $dbhA->errstr;
+$sthArows=$sthA->rows;
+$rec_count=0;
+while ($sthArows > $rec_count)
+	{
+	$AGILOG = '0';
+	 @aryA = $sthA->fetchrow_array;
+		$DBagi_output =			"$aryA[0]";
+		if ($DBagi_output =~ /STDERR/)	{$AGILOG = '1';}
+		if ($DBagi_output =~ /FILE/)	{$AGILOG = '2';}
+		if ($DBagi_output =~ /BOTH/)	{$AGILOG = '3';}
+	 $rec_count++;
+	}
+$sthA->finish();
+
+### begin parsing run-time options ###
+if (length($ARGV[0])>1)
+{
+	if ($AGILOG) {$agi_string = "Perl Environment Dump:";   &agi_output;}
+	$i=0;
+	while ($#ARGV >= $i)
+	{
+	$args = "$args $ARGV[$i]";
+	if ($AGILOG) {$agi_string = "$i|$ARGV[$i]";   &agi_output;}
+	$i++;
+	}
+
+	if ($args =~ /--help/i)
+	{
+	print "allowed run time options:\n  [-q] = quiet\n  [-t] = test\n  [-debug] = verbose debug messages\n\n";
+	}
+	else
+	{
+		if ($args =~ /-V/i)
+		{
+		$V=1;
+		}
+		if ($args =~ /-debug/i)
+		{
+		$DG=1;
+		}
+		if ($args =~ /-dbAVS/i)
+		{
+		$DGA=1;
+		}
+		if ($args =~ /-q/i)
+		{
+		$q=1;
+		$Q=1;
+		}
+		if ($args =~ /-t/i)
+		{
+		$TEST=1;
+		$T=1;
+		}
+	}
+}
+
+$|=1;
+while(<STDIN>) 
+{
+	chomp;
+	last unless length($_);
+	if ($AGILOG)
+	{
+		if (/^agi_(\w+)\:\s+(.*)$/)
+		{
+			$AGI{$1} = $2;
+		}
+	}
+
+	if (/^agi_uniqueid\:\s+(.*)$/)		{$unique_id = $1; $uniqueid = $unique_id;}
+	if (/^agi_priority\:\s+(.*)$/)		{$priority = $1;}
+	if (/^agi_channel\:\s+(.*)$/)		{$channel = $1;}
+	if (/^agi_extension\:\s+(.*)$/)		{$extension = $1;}
+	if (/^agi_type\:\s+(.*)$/)		{$type = $1;}
+	if (/^agi_callerid\:\s+(.*)$/)		{$callerid = $1;}
+	if (/^agi_calleridname\:\s+(.*)$/)	{$calleridname = $1;}
+}
+
+if ( (length($callerid)>20) && ($callerid =~ /\"\S\S\S\S\S\S\S\S\S\S\S\S\S\S\S\S\S\S/) )
+  {
+   $callerid =~ s/^\"//gi;
+   $callerid =~ s/\".*$//gi;
+#	### set the callerid to the ACQS value(calleridname)
+#	print "SET CALLERID $callerid\n";
+#	checkresult($result);
+#	print STDERR "callerID changed: $callerid\n";
+
+  }
+if ( (
+(length($calleridname)>5) && ( (!$callerid) or ($callerid =~ /unknown|private|00000000/i) or ($callerid =~ /5551212/) )
+) or ( (length($calleridname)>17) && ($calleridname =~ /\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d/) ) )
+  {
+   $callerid = $calleridname;
+#	### set the callerid to the ACQS value(calleridname)
+#	print "SET CALLERID $callerid\n";
+#	checkresult($result);
+#	print STDERR "callerID changed: $callerid\n";
+  }
+
+
+if ($AGILOG) {$agi_string = "AGI Environment Dump:";   &agi_output;}
+
+foreach $i (sort keys %AGI) 
+{
+	if ($AGILOG) {$agi_string = " -- $i = $AGI{$i}";   &agi_output;}
+}
+
+if ($AGILOG) {$agi_string = "AGI Variables: |$unique_id|$channel|$extension|$type|$callerid|$calleridname|$priority|";   &agi_output;}
+
+$VDADcampaign='';
+$VDADphone='';
+$VDADphone_code='';
+
+
+$callerid =~ s/\"//gi;
+$CIDlead_id = $callerid;
+$CIDlead_id = substr($CIDlead_id, 11, 9);
+$CIDlead_id = ($CIDlead_id + 0);
+$VD_lead_id = $CIDlead_id;
+
+if ($AGILOG) {$agi_string = "+++++ VD amd START: |$CIDlead_id|$now_date|$AST_ver|";   &agi_output;}
+
+if ( ($channel =~ /Local/i) && ($AST_ver !~ /^1\.0\.8|^1\.0\.9/) )
+{
+if ($AGILOG) {$agi_string = "+++++ VDAD START LOCAL CHANNEL: EXITING- $priority";   &agi_output;}
+if ($priority > 2) {sleep(1);}
+exit;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+################################################################################
+########## AMD says it's a machine so modify statuses and hangup call ##########
+########## something will go here later for leaving a message on AMs  ##########
+
+$stmtA = "UPDATE vicidial_log set status='AL' where lead_id='$VD_lead_id' order by call_date desc limit 1;";
+	if ($AGILOG) {$agi_string = "|$stmtA|";   &agi_output;}
+$affected_rows = $dbhA->do($stmtA);
+if ($AGILOG) {$agi_string = "--    VDAD vicidial_log AL update: |$affected_rows|$uniqueid|";   &agi_output;}
+
+$stmtA = "UPDATE vicidial_list set status='AL' where lead_id='$VD_lead_id';";
+	if ($AGILOG) {$agi_string = "|$stmtA|";   &agi_output;}
+$affected_rows = $dbhA->do($stmtA);
+if ($AGILOG) {$agi_string = "--    VDAD vicidial_list AL update: |$affected_rows|$uniqueid|";   &agi_output;}
+
+
+$dbhA->disconnect();
+
+
+
+
+exit;
+
+sub checkresult {
+	my ($res) = @_;
+	my $retval;
+	$tests++;
+	chomp $res;
+	if ($res =~ /^200/) {
+		$res =~ /result=(-?\d+)/;
+		if (!length($1)) {
+		#	print STDERR "FAIL ($res)\n";
+			$fail++;
+		} else {
+		#	print STDERR "PASS ($1)\n";
+			$pass++;
+		}
+	} else {
+	#	print STDERR "FAIL (unexpected result '$res')\n";
+		$fail++;
+	}
+}
+
+
+
+sub agi_output
+{
+if ($AGILOG >=2)
+	{
+	### open the log file for writing ###
+	open(Lout, ">>$AGILOGfile")
+			|| die "Can't open $AGILOGfile: $!\n";
+	print Lout "$now_date|$script|$agi_string\n";
+	close(Lout);
+	}
+	### send to STDERR writing ###
+if ( ($AGILOG == '1') || ($AGILOG == '3') )
+	{print STDERR "$now_date|$script|$agi_string\n";}
+$agi_string='';
+}

@@ -1,0 +1,379 @@
+#!/usr/bin/perl
+#
+# call_log.agi version 0.10   *DBI-version*
+# 
+# runs at the beginning and ending of every external call made and received
+# 
+# You need to put lines similar to those below in your extensions.conf file:
+# 
+# ;outbound dialing:
+# exten => _91NXXNXXXXXX,1,AGI(call_log.agi,${EXTEN})
+# 
+# ;inbound calls:
+# exten => 101,1,AGI(call_log.agi,${EXTEN})
+# 
+# ;all hangups:
+# exten => h,1,AGI(call_log.agi,${EXTEN})
+# 
+#
+# Copyright (C) 2006  Matt Florell <vicidial@gmail.com>    LICENSE: GPLv2
+#
+# CHANGES
+# 60311-1309 - Fixed CallerID/name for VICIDIAL calls
+# 60315-1020 - Added MySQL query fail debug print output
+# 60622-0956 - Altered log for Zap client phones for consistent output
+# 60718-1638 - changed to use DBI-DBD::mysql
+#            - changed to use /etc/astguiclient.conf for configs
+# 60815-1023 - added output options check from database
+#
+
+$script = 'call_log.agi';
+
+($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
+$year = ($year + 1900);
+$mon++;
+if ($mon < 10) {$mon = "0$mon";}
+if ($mday < 10) {$mday = "0$mday";}
+if ($hour < 10) {$Fhour = "0$hour";}
+if ($min < 10) {$min = "0$min";}
+if ($sec < 10) {$sec = "0$sec";}
+
+$now_date_epoch = time();
+$now_date = "$year-$mon-$mday $hour:$min:$sec";
+
+
+# default path to astguiclient configuration file:
+$PATHconf =		'/etc/astguiclient.conf';
+
+open(conf, "$PATHconf") || die "can't open $PATHconf: $!\n";
+@conf = <conf>;
+close(conf);
+$i=0;
+foreach(@conf)
+	{
+	$line = $conf[$i];
+	$line =~ s/ |>|\n|\r|\t|\#.*|;.*//gi;
+	if ( ($line =~ /^PATHhome/) && ($CLIhome < 1) )
+		{$PATHhome = $line;   $PATHhome =~ s/.*=//gi;}
+	if ( ($line =~ /^PATHlogs/) && ($CLIlogs < 1) )
+		{$PATHlogs = $line;   $PATHlogs =~ s/.*=//gi;}
+	if ( ($line =~ /^PATHagi/) && ($CLIagi < 1) )
+		{$PATHagi = $line;   $PATHagi =~ s/.*=//gi;}
+	if ( ($line =~ /^PATHweb/) && ($CLIweb < 1) )
+		{$PATHweb = $line;   $PATHweb =~ s/.*=//gi;}
+	if ( ($line =~ /^PATHsounds/) && ($CLIsounds < 1) )
+		{$PATHsounds = $line;   $PATHsounds =~ s/.*=//gi;}
+	if ( ($line =~ /^PATHmonitor/) && ($CLImonitor < 1) )
+		{$PATHmonitor = $line;   $PATHmonitor =~ s/.*=//gi;}
+	if ( ($line =~ /^VARserver_ip/) && ($CLIserver_ip < 1) )
+		{$VARserver_ip = $line;   $VARserver_ip =~ s/.*=//gi;}
+	if ( ($line =~ /^VARDB_server/) && ($CLIDB_server < 1) )
+		{$VARDB_server = $line;   $VARDB_server =~ s/.*=//gi;}
+	if ( ($line =~ /^VARDB_database/) && ($CLIDB_database < 1) )
+		{$VARDB_database = $line;   $VARDB_database =~ s/.*=//gi;}
+	if ( ($line =~ /^VARDB_user/) && ($CLIDB_user < 1) )
+		{$VARDB_user = $line;   $VARDB_user =~ s/.*=//gi;}
+	if ( ($line =~ /^VARDB_pass/) && ($CLIDB_pass < 1) )
+		{$VARDB_pass = $line;   $VARDB_pass =~ s/.*=//gi;}
+	if ( ($line =~ /^VARDB_port/) && ($CLIDB_port < 1) )
+		{$VARDB_port = $line;   $VARDB_port =~ s/.*=//gi;}
+	$i++;
+	}
+
+if (!$VARDB_port) {$VARDB_port='3306';}
+if (!$AGILOGfile) {$AGILOGfile = "$PATHlogs/agiout.$year-$mon-$mday";}
+
+use DBI;
+  
+$dbhA = DBI->connect("DBI:mysql:$VARDB_database:$VARDB_server:$VARDB_port", "$VARDB_user", "$VARDB_pass")
+    or die "Couldn't connect to database: " . DBI->errstr;
+
+### Grab Server values from the database
+$stmtA = "SELECT agi_output FROM servers where server_ip = '$VARserver_ip';";
+$sthA = $dbhA->prepare($stmtA) or die "preparing: ",$dbhA->errstr;
+$sthA->execute or die "executing: $stmtA ", $dbhA->errstr;
+$sthArows=$sthA->rows;
+$rec_count=0;
+while ($sthArows > $rec_count)
+	{
+	$AGILOG = '0';
+	 @aryA = $sthA->fetchrow_array;
+		$DBagi_output =			"$aryA[0]";
+		if ($DBagi_output =~ /STDERR/)	{$AGILOG = '1';}
+		if ($DBagi_output =~ /FILE/)	{$AGILOG = '2';}
+		if ($DBagi_output =~ /BOTH/)	{$AGILOG = '3';}
+	 $rec_count++;
+	}
+$sthA->finish();
+
+
+### begin parsing run-time options ###
+if (length($ARGV[0])>1)
+{
+	if ($AGILOG) {$agi_string = "Perl Environment Dump:";   &agi_output;}
+	$i=0;
+	while ($#ARGV >= $i)
+	{
+		$args = "$args $ARGV[$i]";
+		if ($AGILOG) {$agi_string = "$i|$ARGV[$i]";   &agi_output;}
+		$i++;
+	}
+
+	if ($args =~ /--help/i)
+	{
+		print "allowed run time options:\n  [-q] = quiet\n  [-t] = test\n  [-debug] = verbose debug messages\n\n";
+	}
+	else
+	{
+		## Seb Auriol added from here (04-May-05):
+		## From http://home.cogeco.ca/~camstuff/agi.html:
+		## """AGI scripts *always* receive two arguments.
+		## The first argument is the full path to the script itself.
+		## The second argument is the stuff passed in from the "exten" line."""
+		## $ARGV[1] is the second argument.
+		## Actually http://home.cogeco.ca/~camstuff/agi.html is INCORRECT!!!
+		## The FIRST and ONLY argument (in perl) is the stuff passed in from the "exten" line.
+		## I think this is do with the perl interpreter vs the python interpreter, which inserts the
+		## full path to the script as the 1st argument.
+		if (length($ARGV[0])>0)
+		{
+		$extensionarg = $ARGV[0]; # This is a fudge that assumes you only pass in one parameter. This argument should really be parsed. /Seb
+		}
+		## until here.
+		if ($args =~ /-V/i)
+		{
+		$V=1;
+		}
+		if ($args =~ /-debug/i)
+		{
+		$DG=1;
+		}
+		if ($args =~ /-dbAVS/i)
+		{
+		$DGA=1;
+		}
+		if ($args =~ /-q/i)
+		{
+		$q=1;
+		$Q=1;
+		}
+		if ($args =~ /-t/i)
+		{
+		$TEST=1;
+		$T=1;
+		}
+	}
+}
+
+$|=1;
+while(<STDIN>) {
+	chomp;
+	last unless length($_);
+	if ($AGILOG)
+	{
+		if (/^agi_(\w+)\:\s+(.*)$/)
+		{
+			$AGI{$1} = $2;
+		}
+	}
+
+	if (/^agi_uniqueid\:\s+(.*)$/)		{$unique_id = $1;}
+	if (/^agi_channel\:\s+(.*)$/)		{$channel = $1;}
+	if (/^agi_extension\:\s+(.*)$/)		{$extension = $1;}
+	if (/^agi_type\:\s+(.*)$/)		{$type = $1;}
+	if (/^agi_callerid\:\s+(.*)$/)		{$callerid = $1;}
+	if (/^agi_calleridname\:\s+(.*)$/)	{$calleridname = $1;}
+		if ( $callerid =~ /\"/)  {$callerid =~ s/\"//gi;}
+
+#	if ( (length($calleridname)>5) && ( (!$callerid) or ($callerid =~ /unknown|private|00000000/i) or ($callerid =~ /5551212/) ) )
+	if ( ( 
+	(length($calleridname)>5) && ( (!$callerid) or ($callerid =~ /unknown|private|00000000/i) or ($callerid =~ /5551212/) )
+	) or ( (length($calleridname)>17) && ($calleridname =~ /\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d/) ) )
+		{$callerid = $calleridname;}
+
+	### allow for ANI being sent with the DNIS "*3125551212*9999*"
+	if ($extension =~ /\d\d\d\d\d\d\d\d\d\d\*/)
+		{
+		$callerid = $extension;
+		$callerid =~ s/\*\d\d\d\d$//gi;
+		$callerid =~ s/^\*//gi;
+		$extension =~ s/\d\d\d\d\d\d\d\d\d\d\*//gi;
+		$extension =~ s/\*$//gi;
+		}
+	## Seb Auriol added from here (04-May-05):
+	## $extensionarg was supplied to the script and should override $extension.
+	## This is to enable us to call this script from a macro.
+	if ($extensionarg)		{$extension = $extensionarg;}
+	## until here.
+}
+
+if ($AGILOG) {$agi_string = "AGI Environment Dump:";   &agi_output;}
+
+foreach $i (sort keys %AGI) 
+{
+	if ($AGILOG) {$agi_string = " -- $i = $AGI{$i}";   &agi_output;}
+}
+
+
+if ($AGILOG) {$agi_string = "AGI Variables: |$unique_id|$channel|$extension|$type|$callerid|";   &agi_output;}
+
+if ( ($extension =~ /h/i) && (length($extension) < 3))  {$stage = 'END';}
+else {$stage = 'START';}
+
+### call start stage
+if ($stage =~ /START/)
+	{
+	if ($AGILOG) {$agi_string = "+++++ CALL LOG START : $now_date";   &agi_output;}
+
+	if ($channel =~ /^SIP/) {$channel =~ s/-.*//gi;}
+	if ($channel =~ /^IAX2/) {$channel =~ s/\/\d+$//gi;}
+	if ($channel =~ /^Zap\//)
+		{
+		$channel_line = $channel;
+		$channel_line =~ s/^Zap\///gi;
+
+		$stmtA = "SELECT count(*) FROM phones where server_ip='$VARserver_ip' and extension='$channel_line' and protocol='Zap';";
+		$sthA = $dbhA->prepare($stmtA) or die "preparing: ",$dbhA->errstr;
+		$sthA->execute or die "executing: $stmtA ", $dbhA->errstr;
+		$sthArows=$sthA->rows;
+		@aryA = $sthA->fetchrow_array;
+		$is_client_phone	 = "$aryA[0]";
+		if ($AGILOG) {$agi_string = "Local Zap phone: $aryA[0]|$channel_line|";   &agi_output;}
+		$sthA->finish();
+
+		if ($is_client_phone < 1)
+			{
+			$channel_group = 'Zap Trunk Line';
+			$number_dialed = $callerid;
+			}
+		}
+	### This section breaks the outbound dialed number down(or builds it up) to a 10 digit number and gives it a description
+	if ( ($channel =~ /^SIP|^IAX2/) or ($is_client_phone > 0) )
+		{
+		if ( ($extension =~ /^901144/) && (length($extension)==16) )  #test 207 608 6400 
+			{$extension =~ s/^9//gi;	$channel_group = 'Outbound Intl UK';}
+		if ( ($extension =~ /^901161/) && (length($extension)==15) )  #test  39 417 2011
+			{$extension =~ s/^9//gi;	$channel_group = 'Outbound Intl AUS';}
+		if ( ($extension =~ /^91800|^91888|^91877|^91866/) && (length($extension)==12) )
+			{$extension =~ s/^91//gi;	$channel_group = 'Outbound Local 800';}
+		if ( ($extension =~ /^9/) && (length($extension)==8) )
+			{$extension =~ s/^9/727/gi;	$channel_group = 'Outbound Local';}
+		if ( ($extension =~ /^9/) && (length($extension)==11) )
+			{$extension =~ s/^9//gi;	$channel_group = 'Outbound Local';}
+		if ( ($extension =~ /^91/) && (length($extension)==12) )
+			{$extension =~ s/^91//gi;	$channel_group = 'Outbound Long Distance';}
+		if ($is_client_phone > 0)
+			{$channel_group = 'Zap Client Phone';}
+		
+		$SIP_ext = $channel;	$SIP_ext =~ s/SIP\/|IAX2\/|Zap\///gi;
+
+		$number_dialed = $extension;
+		$extension = $SIP_ext;
+		}
+
+	$stmtA = "INSERT INTO call_log (uniqueid,channel,channel_group,type,server_ip,extension,number_dialed,start_time,start_epoch,end_time,end_epoch,length_in_sec,length_in_min,caller_code) values('$unique_id','$channel','$channel_group','$type','$VARserver_ip','$extension','$number_dialed','$now_date','$now_date_epoch','','','','','$callerid')";
+
+	if ($AGILOG) {$agi_string = "|$stmtA|";   &agi_output;}
+	$affected_rows = $dbhA->do($stmtA);
+
+	$dbhA->disconnect();
+	}
+
+
+### call end stage
+else		 
+	{
+	if ($AGILOG) {$agi_string = "|CALL HUNG UP|";   &agi_output;}
+
+	### get uniqueid and start_epoch from the call_log table
+	$stmtA = "SELECT uniqueid,start_epoch FROM call_log where uniqueid='$unique_id';";
+	$sthA = $dbhA->prepare($stmtA) or die "preparing: ",$dbhA->errstr;
+	$sthA->execute or die "executing: $stmtA ", $dbhA->errstr;
+	$sthArows=$sthA->rows;
+	$rec_count=0;
+	while ($sthArows > $rec_count)
+		{
+		@aryA = $sthA->fetchrow_array;
+		$start_time	=			"$aryA[1]";
+		if ($AGILOG) {$agi_string = "|$aryA[0]|$aryA[1]|";   &agi_output;}
+		$rec_count++;
+		}
+	$sthA->finish();
+
+	if ($rec_count)
+		{
+		$length_in_sec = ($now_date_epoch - $start_time);
+		$length_in_min = ($length_in_sec / 60);
+		$length_in_min = sprintf("%8.2f", $length_in_min);
+
+		if ($AGILOG) {$agi_string = "QUERY done: start time = $start_time | sec: $length_in_sec | min: $length_in_min |";   &agi_output;}
+
+		$stmtA = "UPDATE call_log set end_time='$now_date',end_epoch='$now_date_epoch',length_in_sec=$length_in_sec,length_in_min='$length_in_min' where uniqueid='$unique_id'";
+
+		if ($AGILOG) {$agi_string = "|$stmtA|";   &agi_output;}
+		$affected_rows = $dbhA->do($stmtA);
+		}
+
+	$stmtA = "DELETE from live_inbound where uniqueid='$unique_id' and server_ip='$VARserver_ip'";
+	if ($AGILOG) {$agi_string = "|$stmtA|";   &agi_output;}
+	$affected_rows = $dbhA->do($stmtA);
+
+##### BEGIN Park Log entry check and update #####
+	$stmtA = "SELECT UNIX_TIMESTAMP(parked_time),UNIX_TIMESTAMP(grab_time) FROM park_log where uniqueid='$unique_id' and server_ip='$VARserver_ip' LIMIT 1;";
+	$sthA = $dbhA->prepare($stmtA) or die "preparing: ",$dbhA->errstr;
+	$sthA->execute or die "executing: $stmtA ", $dbhA->errstr;
+	$sthArows=$sthA->rows;
+	$rec_count=0;
+	while ($sthArows > $rec_count)
+		{
+		@aryA = $sthA->fetchrow_array;
+		$parked_time	=			"$aryA[0]";
+		$grab_time	=			"$aryA[1]";
+		if ($AGILOG) {$agi_string = "|$aryA[0]|$aryA[1]|";   &agi_output;}
+		$rec_count++;
+		}
+	$sthA->finish();
+
+	  if ($rec_count)
+	  {
+	if ($AGILOG) {$agi_string = "*****Entry found for $unique_id-$VARserver_ip in park_log: $parked_time|$grab_time";   &agi_output;}
+	     if ($parked_time > $grab_time)
+	     {
+		$parked_sec=($now_date_epoch - $parked_time);
+		$talked_sec=0;
+	     }
+	     else
+	     {
+		$talked_sec=($now_date_epoch - $parked_time);
+		$parked_sec=($grab_time - $parked_time);
+	     }
+
+		$stmtA = "UPDATE park_log set status='HUNGUP',hangup_time='$now_date',parked_sec='$parked_sec',talked_sec='$talked_sec' where uniqueid='$unique_id' and server_ip='$VARserver_ip'";
+		$affected_rows = $dbhA->do($stmtA);
+	   }
+##### END Park Log entry check and update #####
+
+	$dbhA->disconnect();
+
+	if ($AGILOG) {$agi_string = "+++++ CALL LOG HUNGUP: |$unique_id|$channel|$extension|$now_date|min: $length_in_min|";   &agi_output;}
+	}
+
+exit;
+
+
+
+sub agi_output
+{
+if ($AGILOG >=2)
+	{
+	### open the log file for writing ###
+	open(Lout, ">>$AGILOGfile")
+			|| die "Can't open $AGILOGfile: $!\n";
+	print Lout "$now_date|$script|$agi_string\n";
+	close(Lout);
+	}
+	### send to STDERR writing ###
+if ( ($AGILOG == '1') || ($AGILOG == '3') )
+	{print STDERR "$now_date|$script|$agi_string\n";}
+$agi_string='';
+}

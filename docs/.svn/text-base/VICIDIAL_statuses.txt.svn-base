@@ -1,0 +1,62 @@
+NEW - New Lead - Lead has not been called, or cannot be called
+QUEUE - Lead To Be Called - Lead is about to be sent to an agent
+INCALL - Lead Being Called - Agent is talking to the lead
+DROP - Agent Not Available - Call was dropped while customer was waiting for an agent
+XDROP - Agent Not Available IN - Call was dropped while customer was waiting for an agent on an inbound call
+NA - No Answer AutoDial - Any outbound call that does not receive an Answer signal(or other signal) from the carrier. This can include ring-no-answer, disconnected, carrier congestion and other errors
+CALLBK - Call Back - Callback, both scheduled and non-scheduled
+CBHOLD - Call Back Hold - Scheduled ANYONE callback that has not hit it's trigger, or an AGENTONLY callback
+A - Answering Machine - Agent-defined Answering Machine
+AA - Answering Machine Auto - Dialer-defined Answering Machine
+AM - Answering Machine Sent to Mesg - AMD(Answering Machine Detection) call sent to a message to be played
+AL - Answering Machine Msg Played - AMD(Answering Machine Detection) call sent to a message and message has been played
+AFAX - Fax Machine Auto - Dialer-defined Fax Machine
+B - Busy - Agent-defined Busy signal
+AB - Busy Auto - Carrier-received Busy signal
+DC - Disconnected Number - Agent-Defined Disconnected number
+ADC - Disconnected Number Auto - Carrier-received Disconnected number
+DEC - Declined Sale - Agent-defined status
+DNC - DO NOT CALL - If defined, lead will also go in the VICIDIAL DNC list
+DNCL - DO NOT CALL Hopper Match - status of a lead that matches the phone number of a lead that has been placed in the VICIDIAL DNC list
+DNCC - DO NOT CALL Hopper Match Campaign- status of a lead that matches the phone number of a lead that has been placed in the VICIDIAL Campaign-specific DNC list for this Campaign
+SALE - Sale Made - Agent-defined status
+N - No Answer - Agent-defined status
+NI - Not Interested - Agent-defined status
+NP - No Pitch No Price - Agent-defined status
+PU - Call Picked Up - Status that a call is changed to as soon as the carrier has sent the Answer signal and before the call is sent on to an agent
+PM - Played Message - outbound broadcast or SURVEY campaign status for when a message has been played to the customer
+XFER - Call Transferred - Call has been sent from an agent to a Closer agent
+ERI - Agent Error - An agent has closed their browser before dispositioning a lead
+DONEM - Agent placed a manual dial phone call and then closed their browser before dispositioning a lead
+SVYEXT - Survey sent to Extension - Survey outbound campaign status only
+SVYVM - Survey sent to Voicemail - Survey outbound campaign status only
+SVYHU - Survey Hungup - Survey outbound campaign status only
+SVYREC - Survey sent to Record - Survey outbound campaign status only
+HXFER - Hold Recall Transfer to another in-group
+HOLDTO - Hold time option call termination on inbound call
+QVMAIL - Queue Abandon Voicemail Left
+RQXFER - Re-Queue Transfer back to agent
+CPDATB - Sangoma Call Progress Detection CPD All-Trunks-Busy
+CPDB - Sangoma Call Progress Detection CPD Busy
+CPDNA - Sangoma Call Progress Detection CPD No-Answer
+CPDREJ - Sangoma Call Progress Detection CPD Reject
+CPDINV - Sangoma Call Progress Detection CPD Invalid-Number
+CPDSUA - Sangoma Call Progress Detection CPD Service-Unavailable
+CPDSI - Sangoma Call Progress Detection CPD Sit-Intercept
+CPDSNC - Sangoma Call Progress Detection CPD Sit-No-Circuit
+CPDSR - Sangoma Call Progress Detection CPD Sit-Reorder
+CPDSUK - Sangoma Call Progress Detection CPD Sit-Unknown
+CPDSV - Sangoma Call Progress Detection CPD Sit-Vacant
+CPDUK - Sangoma Call Progress Detection CPD Unknown
+CPDERR - Sangoma Call Progress Detection CPD Error
+TIMEOT - Inbound call Drop Timeout, call waited until drop-seconds and was sent on to the drop action
+AFTHRS - Inbound after hours drop, call received outside of in-group call time
+NANQUE - Inbound no agent no queue drop, no agent logged in
+RAXFER - Remote Agent API transfer
+ALTNUM - Agent manual Dial Alternate number dialing, number dialed before final disposition
+DISPO - Agent in disposition screen when they closed their web browser wiithout selecting dispisition
+WAITTO - Wait time option call termination on inbound call
+PDROP - Pre-routing dropped call, call hung up the instant the Answer signal is received
+IVRXFR - Outbound drop to Call Menu
+SVYCLM - Survey sent to Call Menu - Survey outbound campaign status only
+MLINAT - Multi-Lead auto-alt-dial lead set to inactive

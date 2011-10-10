@@ -1,0 +1,819 @@
+NON-AGENT API DOCUMENT           Started: 2008-07-24         Updated: 2011-09-28
+
+This document describes the functions of an API(Application Programming 
+Interface) for all functions NOT directly relating to the VICIDIAL Agent screen. 
+This functionality will be rather limited at first and will be built upon as 
+critical functions are identified and programmed into it.
+
+There is also an agent API script, for more information on that, please read
+the AGENT_API.txt document.
+
+
+
+
+API functions:
+version - shows version and build of the API, along with the date/time
+sounds_list - outputs a list of audio files from the audio store
+moh_list - outputs a list of music on hold classes in the system
+vm_list - outputs a list of voicemail boxes in the system
+blind_monitor - calls user-defined phone and places them in session as blind monitor
+add_lead - adds a new lead to the vicidial_list table with several fields and options
+update_lead - updates lead information in vicidial_list and associated custom table
+agent_ingroup_info - shows in-group and outbound auto-dial info for logged-in agent
+recording_lookup - looks up recordings based upon user and date or lead_id
+did_log_export - exports all calls inbound to a DID for one day
+add_user - adds a user to the system
+add_phone - adds a phone to the system
+update_phone - updates or deletes an existing phone record in the system
+add_phone_alias - adds a phone alias record to the system
+update_phone_alias - updates or deletes an existing phone alias record in the system
+add_list - adds a list to the system
+update_list - updates list settings in the system, reset leads in list, delete list
+
+
+
+New scripts:
+/vicidial/non_agent_api.php - the script that is accessed to execute commands
+
+
+Changes:
+80724-1723 - First build
+90428-0208 - Added blind_monitor function
+90513-1720 - Added sounds_list function
+90721-1432 - Added rank and owner
+90904-1535 - Added moh_list musiconhold function
+90916-2342 - Added vm_list voicemail list
+91203-1140 - Added agent_ingroup_info feature
+91216-0331 - Added duplication check features to add_lead function
+100118-0543 - Added new Australian and New Zealand DST schemes (FSO-FSA and LSS-FSA)
+100704-1148 - Added custom fields inserts to the add_lead function
+100718-0245 - Added update_lead function to update existing leads
+100723-1333 - Added no_update option to the update_lead function
+100728-1952 - Added delete_lead option to the update_lead function
+100924-1403 - Added called_count as an update_lead option
+101111-1536 - Added vicidial_hopper.source to vicidial_hopper inserts
+101117-1104 - Added callback and custom field entry delete to delete_lead option
+101206-2126 - Added recording_lookup and did_log_export functions
+110127-2245 - Added add_user and add_phone functions
+110306-1044 - Added add_list and update_list functions
+110316-2035 - Added reset_time variable and NAMEPHONE dup search
+110404-1356 - Added uniqueid search parameter to recording_lookup function
+110409-0822 - Added run_time logging of API functions
+110424-0854 - Added option for time zone code lookups using owner field in add_lead function
+110529-1220 - Added time zone information output to version function
+110614-0726 - Added reset_lead option to update_lead function(issue #502)
+110705-1928 - Added options for USACAN 4th digit prefix(no 0 or 1) and valid areacode filtering to add_lead
+110821-2318 - Added update_phone, add_phone_alias, update_phone_alias functions
+110928-2110 - Added callback options to add_lead and update_lead
+
+
+
+
+API Functions use the 'function' variable
+
+NOTE: Just as with the Agent API, the non-agent API requires the user and pass of a
+valid api-enabled vicidial_users account to execute actions.
+
+
+
+--------------------------------------------------------------------------------
+version - shows version and build of the API, along with the date/time and timezone
+
+Example URL strings for API calls:
+http://server/vicidial/non_agent_api.php?function=version
+
+Example responses:
+VERSION: 2.4-34|BUILD: 110424-0854|DATE: 2011-05-29 12:19:22|EPOCH: 1306685962|DST: 1|TZ: -5|TZNOW: -4| 
+
+
+
+
+
+--------------------------------------------------------------------------------
+sounds_list - outputs a list of audio files from the audio store
+
+NOTE: api user for this function must have user_level set to 7 or higher
+
+OPTIONAL FIELDS-
+format -		format of the output(tab, link, selectframe)
+stage -			how to sort the output(date, size, name)
+comments -		name of the field to populate
+
+
+Example URL strings for API calls:
+http://server/vicidial/non_agent_api.php?source=test&user=6666&pass=1234&function=sounds_list&format=selectframe&comments=fieldname&stage=date
+
+Example responses:
+<success is inferred by output of audio files list>
+
+ERROR: sounds_list USER DOES NOT HAVE PERMISSION TO VIEW SOUNDS LIST
+
+ERROR: sounds_list CENTRAL SOUND CONTROL IS NOT ACTIVE
+
+
+
+
+
+--------------------------------------------------------------------------------
+moh_list - outputs a list of music on hold classes in the system
+
+NOTE: api user for this function must have user_level set to 7 or higher
+
+OPTIONAL FIELDS-
+format -		format of the output(tab, link, selectframe)
+comments -		name of the field to populate
+
+
+Example URL strings for API calls:
+http://server/vicidial/non_agent_api.php?source=test&user=6666&pass=1234&function=moh_list&format=selectframe&comments=fieldname&stage=date
+
+Example responses:
+<success is inferred by output of moh classes list>
+
+ERROR: moh_list USER DOES NOT HAVE PERMISSION TO VIEW SOUNDS LIST
+
+ERROR: moh_list CENTRAL SOUND CONTROL IS NOT ACTIVE
+
+
+
+
+
+--------------------------------------------------------------------------------
+vm_list - outputs a list of voicemail boxes in the system
+
+NOTE: api user for this function must have user_level set to 7 or higher
+
+OPTIONAL FIELDS-
+format -		format of the output(tab, link, selectframe)
+comments -		name of the field to populate
+
+
+Example URL strings for API calls:
+http://server/vicidial/non_agent_api.php?source=test&user=6666&pass=1234&function=vm_list&format=selectframe&comments=fieldname&stage=date
+
+Example responses:
+<success is inferred by output of voicemail boxes list>
+
+ERROR: vm_list USER DOES NOT HAVE PERMISSION TO VIEW VOICEMAIL BOXES LIST
+
+ERROR: vm_list CENTRAL SOUND CONTROL IS NOT ACTIVE
+
+
+
+
+
+--------------------------------------------------------------------------------
+blind_monitor - calls user-defined phone and places them in session as blind monitor
+
+NOTE: api user for this function must have user_level set to 7 or higher
+
+REQUIRED FIELDS-
+phone_login -		alpha-numeric, no spaces or special characters allowed
+session_id -		must be all numbers, 7 digits
+server_ip -		must be all numbers and dots, max 15 characters
+source -		description of what originated the API call (maximum 20 characters)
+stage -			MONITOR, BARGE or HIJACK, default is MONITOR
+			 (HIJACK option is not currently functional)
+
+
+Example URL strings for API calls:
+http://server/vicidial/non_agent_api.php?source=test&user=6666&pass=1234&function=blind_monitor&phone_login=350a&session_id=8600051&server_ip=10.10.10.16&stage=MONITOR
+
+Example responses:
+SUCCESS: blind_monitor HAS BEEN LAUNCHED - 350a|010*010*010*017*350|8600051
+
+ERROR: blind_monitor INVALID PHONE LOGIN - 350q 
+
+ERROR: blind_monitor INVALID SESSION ID - 8602051 
+
+ERROR: blind_monitor USER DOES NOT HAVE PERMISSION TO BLIND MONITOR - 6666|0 
+
+ERROR: NO FUNCTION SPECIFIED
+
+
+
+
+
+--------------------------------------------------------------------------------
+agent_ingroup_info - shows in-group and outbound auto-dial info for logged-in agent
+
+REQUIRED FIELDS-
+agent_user -		2-20 characters
+source -		description of what originated the API call (maximum 20 characters)
+
+SETTINGS FIELDS-
+stage -			info(show information only), change(show options to change), text(standard non-HTML output)
+
+Example URL strings for API calls:
+http://server/vicidial/non_agent_api.php?source=test&function=agent_ingroup_info&stage=change&user=6666&pass=1234&agent_user=1000
+
+Example responses:
+ERROR: agent_ingroup_info USER DOES NOT HAVE PERMISSION TO GET AGENT INFO - 6666|0
+ERROR: agent_ingroup_info INVALID USER ID - 1255|6666
+
+
+
+
+
+--------------------------------------------------------------------------------
+recording_lookup - looks up recordings based upon user and date or lead_id
+
+REQUIRED FIELDS-
+agent_user -		2-20 characters
+lead_id -		1-10 digits
+date -			date of the calls to pull (must be in YYYY-MM-DD format)
+uniqueid -		uniqueid of the call, works best included with another search field
+
+SETTINGS FIELDS-
+stage -			the format of the exported data: csv, tab, pipe(default)
+header -		include a header(YES) or not(NO). This is optional, default is not to include a header
+
+NOTES- 
+There is a hard limit of 100000 results
+
+Example URL strings for API calls:
+http://server/vicidial/non_agent_api.php?source=test&function=recording_lookup&stage=pipe&user=6666&pass=1234&agent_user=1000&date=2010-12-03
+
+Example responses:
+ERROR: recording_lookup USER DOES NOT HAVE PERMISSION TO GET RECORDING INFO - 6666|0
+ERROR: recording_lookup INVALID SEARCH PARAMETERS - 6666|1000||2010-12-03|
+ERROR: recording_lookup NO RECORDINGS FOUND - 1255|6666||2010-12-03|
+
+A SUCCESS response will not show "SUCCESS", but instead will just print the results in the following format:
+start_time|user|recording_id|lead_id|location
+2010-12-03 12:00:01|1000|534820|876409|http://server/path/to/recording/20101203_120000_1234567890_1000-all.wav
+
+
+
+
+
+--------------------------------------------------------------------------------
+did_log_export - exports all calls inbound to a DID for one day
+
+REQUIRED FIELDS-
+phone_number -		2-20 characters, the DID that you want to pull logs for
+date -			date of the calls to pull (must be in YYYY-MM-DD format)
+
+SETTINGS FIELDS-
+stage -			the format of the exported data: csv, tab, pipe(default)
+header -		include a header(YES) or not(NO). This is optional, default is not to include a header
+
+NOTES- 
+There is a hard limit of 100000 results
+
+Example URL strings for API calls:
+http://server/vicidial/non_agent_api.php?source=test&function=did_log_export&stage=pipe&user=6666&pass=1234&phone_number=3125551212&date=2010-12-03
+
+Example responses:
+ERROR: did_log_export USER DOES NOT HAVE PERMISSION TO GET DID INFO - 6666|0
+ERROR: did_log_export INVALID SEARCH PARAMETERS - 6666|3125551212|2010-12-03
+ERROR: did_log_export NO RECORDS FOUND - 1255|3125551212|2010-12-03
+
+A SUCCESS response will not show "SUCCESS", but instead will just print the results in the following format:
+did_number|call_date|caller_id_number|length_in_sec
+3125551212|2010-12-03 12:00:01|7275551212|123
+
+
+
+
+
+--------------------------------------------------------------------------------
+add_lead - adds a new lead to the vicidial_list table with several fields and options
+
+NOTE: api user for this function must have modify_leads set to 1 and user_level
+      must be set to 8 or higher
+
+REQUIRED FIELDS-
+phone_number -		must be all numbers, 6-16 digits
+phone_code -		must be all numbers, 1-4 digits, defaults to 1 if not set
+list_id -		must be all numbers, 3-12 digits, defaults to 999 if not set
+source -		description of what originated the API call (maximum 20 characters)
+
+SETTINGS FIELDS-
+dnc_check -		Y, N or AREACODE, default is N
+campaign_dnc_check -	Y, N or AREACODE, default is N
+campaign_id -		2-8 Character campaign ID, required if using campaign_dnc_check or callbacks
+add_to_hopper -		Y or N, default is N
+hopper_priority -	99 to -99, the higher number the higher priority, default is 0
+hopper_local_call_time_check - Y or N, default is N. Validate the local call time before inserting lead in the hopper
+duplicate_check -	Check for duplicate records in the system, can select more than one (duplicate_check=DUPLIST-DUPTITLEALTPHONELIST)
+			If duplicate is found, will return error, the duplicate data and lead_id and list_id of existing record
+			Here are the duplicate_check options:
+				DUPLIST - check for duplicate phone_number in same list
+				DUPCAMP - check for duplicate phone_number in all lists for this list's campaign
+				DUPSYS - check for duplicate phone_number in entire system
+				DUPTITLEALTPHONELIST - check for duplicate title and alt_phone in same list
+				DUPTITLEALTPHONECAMP - check for duplicate title and alt_phone in all lists for this list's campaign
+				DUPTITLEALTPHONESYS - check for duplicate title and alt_phone in entire system
+				DUPNAMEPHONELIST - check for duplicate first_name, last_name and phone_number in same list
+				DUPNAMEPHONECAMP - check for duplicate first_name, last_name and phone_number in all lists for this list's campaign
+				DUPNAMEPHONESYS - check for duplicate first_name, last_name and phone_number in entire system
+usacan_prefix_check -	Y or N, default is N. Check for a valid 4th digit for USA and Canada phone numbers (cannot be 0 or 1)
+usacan_areacode_check -	Y or N, default is N. Check for a valid areacode for USA and Canada phone numbers
+custom_fields -		Y or N, default is N. Defines whether the API will accept custom field data when inserting leads into the vicidial_list table
+			For custom fields to be inserted, just add the field label as a variable to the URL string
+			For example, if the field_label is "favorite_color" you would add "&favorite_color=blue"
+tz_method -		<empty>, POSTAL or TZCODE, default is <empty> which will use the country code and areacode for time zone lookups
+				POSTAL relies on the postal_code field
+				TZCODE relies on the owner field being populated with a proper time zone code
+callback -		Y or N, default is N. Set this lead as a scheduled callback. campaign_id field is REQUIRED for callbacks
+callback_status -	1-6 Character, callback status to use, default is CALLBK (vicidial_list status will be set to CBHOLD to lock)
+callback_datetime -	YYYY-MM-DD+HH:MM:SS, date and time of scheduled callback. REQUIRED if callback is set. NOW can be used for current datetime.
+callback_type -		USERONLY or ANYONE, default is ANYONE
+callback_user -		User ID the USERONLY callback is assigned to
+callback_comments -	Optional comments to appear when the callback is called back
+
+(for fields with spaces in the values, you can replace the space with a plus + sign[address, city, first_name, etc...])
+OPTIONAL FIELDS- 
+vendor_lead_code -	1-20 characters
+source_id  -		1-50 characters
+gmt_offset_now -	overridden by auto-lookup of phone_code and area_code portion of phone number if applicable
+title -			1-4 characters
+first_name -		1-30 characters
+middle_initial -	1 character
+last_name -		1-30 characters
+address1 -		1-100 characters
+address2 -		1-100 characters
+address3 -		1-100 characters
+city -			1-50 characters
+state -			2 characters
+province -		1-50 characters
+postal_code -		1-10 characters
+country_code -		3 characters
+gender -		U, M, F (Undefined, Male, Female) - defaults to 'U'
+date_of_birth -		YYYY-MM-DD
+alt_phone -		1-12 characters
+email -			1-70 characters
+security_phrase -	1-100 characters
+comments -		1-255 characters
+multi_alt_phones -	5-1024 characters (see examples for more info)
+rank -			1-5 digits
+owner -			1-20 characters (user ID, Territory or user group)
+
+
+
+Multi-ALT-Phones format:
+
+7275551212_1_work!7275551213_1_sister+house!1234567890_1_neighbor
+
+The multi-alt-phones field is formatted as a field of phone-number/phone-code/phone-note set of data(phone code and alt_note are both optional and the phone code can be overridden by the force phone code flag). The record delimiter is an exclamation point with the optional phone code and note delimited within the record by an underscore character _.
+
+
+Example URL strings for API calls:
+http://server/vicidial/non_agent_api.php?source=test&user=6666&pass=1234&function=add_lead&phone_number=7275551111
+
+http://server/vicidial/non_agent_api.php?source=test&user=6666&pass=1234&function=add_lead&phone_number=7275551212&phone_code=1&list_id=999&dnc_check=N&first_name=Bob&last_name=Wilson
+
+http://server/vicidial/non_agent_api.php?source=test&user=6666&pass=1234&function=add_lead&phone_number=7275551111&phone_code=1&list_id=999&dnc_check=N&first_name=Bob&last_name=Wilson&add_to_hopper=Y&hopper_local_call_time_check=Y
+
+http://server/vicidial/non_agent_api.php?source=test&user=6666&pass=1234&function=add_lead&phone_number=7275551111&phone_code=1&list_id=999&dnc_check=N&campaign_dnc_check=Y&campaign_id=TESTCAMP&first_name=Bob&last_name=Wilson&address1=1234+Main+St.&city=Chicago+Heights&state=IL&add_to_hopper=Y&hopper_local_call_time_check=Y&multi_alt_phones=7275551212_1_work!7275551213_1_sister+house!1234567890_1_neighbor
+
+http://server/vicidial/non_agent_api.php?source=test&user=6666&pass=1234&function=add_lead&phone_number=7275551212&phone_code=1&list_id=999&dnc_check=N&first_name=Bob&last_name=Wilson&duplicate_check=DUPLIST-DUPNAMEPHONELIST
+
+http://server/vicidial/non_agent_api.php?source=test&user=6666&pass=1234&function=add_lead&phone_number=7275551212&phone_code=1&list_id=999&custom_fields=Y&favorite_color=blue
+
+http://server/vicidial/non_agent_api.php?source=test&user=6666&pass=1234&function=add_lead&phone_number=7275551111&campaign_id=TESTCAMP&callback=Y&callback_status=CALLBK&callback_datetime=NOW&callback_type=USERONLY&callback_user=6666&callback_comments=Comments+go+here
+
+Example responses:
+SUCCESS: add_lead LEAD HAS BEEN ADDED - 7275551111|6666|999|193715|-4
+NOTICE: add_lead ADDED TO HOPPER - 7275551111|6666|193715|1677922
+
+SUCCESS: add_lead LEAD HAS BEEN ADDED - 7275551111|6666|999|193716|-4
+NOTICE: add_lead CUSTOM FIELDS VALUES ADDED - 7275551111|1234|101
+NOTICE: add_lead CUSTOM FIELDS NOT ADDED, CUSTOM FIELDS DISABLED - 7275551111|Y|0
+NOTICE: add_lead CUSTOM FIELDS NOT ADDED, NO CUSTOM FIELDS DEFINED FOR THIS LIST - 7275551111|1234|101
+NOTICE: add_lead CUSTOM FIELDS NOT ADDED, NO FIELDS DEFINED - 7275551111|1234|101
+NOTICE: add_lead MULTI-ALT-PHONE NUMBERS LOADED - 3|6666|193716
+NOTICE: add_lead NOT ADDED TO HOPPER, OUTSIDE OF LOCAL TIME - 7275551111|6666|193716|-4|0
+
+NOTICE: add_lead SCHEDULED CALLBACK ADDED - 1234|2011-09-29 12:00:01|TESTCAMP|6666|USERONLY|CALLBK
+NOTICE: add_lead SCHEDULED CALLBACK NOT ADDED, USER NOT VALID - 1234|TESTCAMP|6|
+NOTICE: add_lead SCHEDULED CALLBACK NOT ADDED, CAMPAIGN NOT VALID - 1234|XYZ
+
+ERROR: add_lead INVALID PHONE NUMBER LENGTH - 72755|6666 
+ERROR: add_lead INVALID PHONE NUMBER PREFIX - 72755|6666 
+ERROR: add_lead INVALID PHONE NUMBER AREACODE - 72755|6666 
+
+ERROR: add_lead USER DOES NOT HAVE PERMISSION TO ADD LEADS TO THE SYSTEM - 6666|0 
+
+ERROR: NO FUNCTION SPECIFIED
+
+ERROR: add_lead DUPLICATE PHONE NUMBER IN LIST - 7275551111|101|8765444
+ERROR: add_lead DUPLICATE PHONE NUMBER IN CAMPAIGN LISTS - 7275551111|101|8765444|101
+ERROR: add_lead DUPLICATE PHONE NUMBER IN SYSTEM - 7275551111|101|8765444|101
+ERROR: add_lead DUPLICATE TITLE ALT_PHONE IN LIST - 1234|7275551111|101|8765444
+ERROR: add_lead DUPLICATE TITLE ALT_PHONE IN CAMPAIGN LISTS - 1234|7275551111|101|8765444|101
+ERROR: add_lead DUPLICATE TITLE ALT_PHONE IN SYSTEM - 1234|7275551111|101|8765444|101
+ERROR: add_lead DUPLICATE NAME PHONE IN LIST - Bob|Smith|7275551113|101|8765444|101
+ERROR: add_lead DUPLICATE NAME PHONE IN CAMPAIGN LISTS - Bob|Smith|7275551113|101|8765444|101
+ERROR: add_lead DUPLICATE NAME PHONE IN SYSTEM - Bob|Smith|7275551113|101|8765444|101
+
+
+
+
+
+--------------------------------------------------------------------------------
+update_lead - updates lead information in the vicidial_list and custom_ tables
+
+NOTE: api user for this function must have modify_leads set to 1 and user_level
+      must be set to 8 or higher
+
+REQUIRED FIELDS-
+lead_id -		must be all numbers, 1-9 digits, not required if using vendor_lead_code or phone_number
+vendor_lead_code -	can be used instead of lead_id to match leads
+phone_number -		can be used instead of lead_id or vendor_lead_code to match leads
+source -		description of what originated the API call (maximum 20 characters)
+
+SETTINGS FIELDS-
+search_method -		You can combine the following 3 options in this field to search the parameters you desire:
+				LEAD_ID, will attempt to find a match with the lead_id
+				VENDOR_LEAD_CODE, will attempt to find a match with the vendor_lead_code
+				PHONE_NUMBER, will attempt to find a match with the phone_number
+			  For example to search lead_id and vendor_lead_code: "&search_method=LEAD_ID_VENDOR_LEAD_CODE"
+			  The search order is NOT preserved, Lead ID is always first, Vendor Lead Code is second
+			  and Phone number is last. Default is "LEAD_ID"
+search_location -	Where to check for records in the system, can select only one(default is SYSTEM):
+				LIST - check for lead in same list
+				CAMPAIGN - check for lead in all lists for this list's campaign
+				SYSTEM - check for lead in entire system
+			  If no list_id is defined, the the search_location will be assumed as SYSTEM
+insert_if_not_found -	Y or N, will attempt to insert as a NEW lead if no match is found, default is N.
+			Insertion will require phone_code, phone_number and list_id. lead_id will be ignored.
+			Most of the add_lead options that are not available if you use this setting in this function
+records -		number of records to update if more than 1 found (defaults to '1'[most recently loaded lead])
+custom_fields -		Y or N, default is N. Defines whether the API will accept custom field data when updating leads in the vicidial_list table
+			For custom fields to be updated, just add the field label as a variable to the URL string
+			For example, if the field_label is "favorite_color" you would add "&favorite_color=blue"
+no_update -		Y or N, Setting this to Y will not perform any updates, but will instead only tell
+			you if a lead exists that matches the search criteria, default is N.
+delete_lead -		Y or N, Setting this to Y will delete the lead from the vicidial_list table, default is N.
+reset_lead -		Y or N, Setting this to Y will reset the called-since-last-reset flag of the lead, default is N.
+callback -		Y, N or REMOVE, default is N. Set this lead as a scheduled callback. REMOVE will delete the scheduled callback entry
+callback_status -	1-6 Character, callback status to use, default is CALLBK (vicidial_list status will be set to CBHOLD to lock)
+callback_datetime -	YYYY-MM-DD+HH:MM:SS, date and time of scheduled callback. REQUIRED if callback is set. NOW can be used for current datetime.
+callback_type -		USERONLY or ANYONE, default is ANYONE
+callback_user -		User ID the USERONLY callback is assigned to
+callback_comments -	Optional comments to appear when the callback is called back
+
+EDITABLE FIELDS- 
+user_field -		1-20 characters, this updates the 'user' field in the vicidial_list table
+list_id_field -		3-12 digits, this updates the 'list_id' field in the vicidial_list table
+status -		1-6 characters, not punctuation or spaces
+vendor_lead_code -	1-20 characters
+source_id  -		1-50 characters
+gmt_offset_now -	overridden by auto-lookup of phone_code and area_code portion of phone number if applicable
+title -			1-4 characters
+first_name -		1-30 characters
+middle_initial -	1 character
+last_name -		1-30 characters
+address1 -		1-100 characters
+address2 -		1-100 characters
+address3 -		1-100 characters
+city -			1-50 characters
+state -			2 characters
+province -		1-50 characters
+postal_code -		1-10 characters
+country_code -		3 characters
+gender -		U, M, F (Undefined, Male, Female) - defaults to 'U'
+date_of_birth -		YYYY-MM-DD
+alt_phone -		1-12 characters
+email -			1-70 characters
+security_phrase -	1-100 characters
+comments -		1-255 characters
+rank -			1-5 digits
+owner -			1-20 characters (user ID, Territory or user group)
+called_count -		digits only, the number of attempts dialing the lead
+NOTES: 
+ - in order to set a field to empty('') set it equal to --BLANK--, i.e. "&province=--BLANK--"
+ - please use no special characters like apostrophes, quotes or amphersands
+
+Example URL strings for API calls:
+http://server/vicidial/non_agent_api.php?source=test&user=6666&pass=1234&function=update_lead&lead_id=27&last_name=SMITH
+
+http://server/vicidial/non_agent_api.php?source=test&user=6666&pass=1234&function=update_lead&search_method=VENDOR_LEAD_CODE&vendor_lead_code=1000019&last_name=JOHNSON
+
+http://server/vicidial/non_agent_api.php?source=test&user=6666&pass=1234&function=update_lead&search_method=PHONE_NUMBER&records=2&list_id=8107&search_location=LIST&phone_number=9999000019&last_name=WILSON
+
+http://server/vicidial/non_agent_api.php?source=test&user=6666&pass=1234&function=update_lead&lead_id=405794&last_name=SMITH&city=Chicago&custom_fields=Y&favorite_color=blue
+
+http://server/vicidial/non_agent_api.php?source=test&user=6666&pass=1234&function=update_lead&search_location=LIST&search_method=PHONE_NUMBER&insert_if_not_found=Y&phone_number=9999000029&phone_code=1&list_id=999&first_name=Bob&last_name=Wilson&city=Chicago&custom_fields=Y&favorite_color=red
+
+http://server/vicidial/non_agent_api.php?source=test&user=6666&pass=1234&function=update_lead&insert_if_not_found=Y&search_method=VENDOR_LEAD_CODE_PHONE_NUMBER&vendor_lead_code=89763545&phone_number=7275551212&phone_code=1&list_id=999&first_name=Bob&last_name=Wilson&custom_fields=Y&favorite_color=blue
+
+http://server/vicidial/non_agent_api.php?source=test&user=6666&pass=1234&function=update_lead&search_location=LIST&search_method=VENDOR_LEAD_CODE_PHONE_NUMBER&insert_if_not_found=Y&phone_number=9999000029&phone_code=1&list_id=999&first_name=Bob&last_name=Wilson&city=Chicago&custom_fields=Y&favorite_color=red&user_field=1008&list_id_field=107&status=OLD
+
+http://server/vicidial/non_agent_api.php?source=test&user=6666&pass=1234&function=update_lead&lead_id=27&no_update=Y
+
+http://server/vicidial/non_agent_api.php?source=test&user=6666&pass=1234&function=update_lead&lead_id=27&delete_lead=Y
+
+http://server/vicidial/non_agent_api.php?source=test&user=6666&pass=1234&function=update_lead&lead_id=27&delete_lead=Y&custom_fields=Y
+
+http://server/vicidial/non_agent_api.php?source=test&user=6666&pass=1234&function=update_lead&lead_id=406757&campaign_id=TESTCAMP&callback=Y&callback_status=CALLBK&callback_datetime=NOW&callback_type=USERONLY&callback_user=1028&callback_comments=Comments+go+here+again
+
+Example responses:
+SUCCESS: update_lead LEAD HAS BEEN UPDATED - 6666|193716
+NOTICE: update_lead CUSTOM FIELDS VALUES UPDATED - 7275551111|1234|101
+NOTICE: update_lead CUSTOM FIELDS NOT UPDATED, CUSTOM FIELDS DISABLED - 7275551111|Y|0
+NOTICE: update_lead CUSTOM FIELDS NOT UPDATED, NO CUSTOM FIELDS DEFINED FOR THIS LIST - 7275551111|1234|101
+NOTICE: update_lead CUSTOM FIELDS NOT UPDATED, NO FIELDS DEFINED - 7275551111|1234|101
+
+NOTICE: update_lead SCHEDULED CALLBACK UPDATED - 1234|2011-09-29 12:00:01|TESTCAMP|6666|USERONLY|CALLBK
+NOTICE: update_lead SCHEDULED CALLBACK NOT UPDATED, NO FIELDS SPECIFIED - 1234|
+NOTICE: update_lead SCHEDULED CALLBACK ADDED - 1234|2011-09-29 12:00:01|TESTCAMP|6666|USERONLY|CALLBK
+NOTICE: update_lead SCHEDULED CALLBACK NOT ADDED, USER NOT VALID - 1234|TESTCAMP|6|
+NOTICE: update_lead SCHEDULED CALLBACK NOT ADDED, CAMPAIGN NOT VALID - 1234|XYZ
+
+NOTICE: update_lead NO MATCHES FOUND IN THE SYSTEM - 6666|4567|897654327|7275551212
+SUCCESS: update_lead LEAD HAS BEEN ADDED - 7275551111|6666|999|193716|-4
+
+SUCCESS: update_lead LEAD HAS BEEN DELETED - 7275551111|6666|999|193716|-4
+NOTICE: update_lead CUSTOM FIELDS ENTRY DELETED 1 - 7275551111|6666|999|193716|-4
+
+NOTICE: update_lead LEADS FOUND IN THE SYSTEM - 6666|4567|897654327|7275551212|101|101
+
+ERROR: update_lead INVALID DATA FOR LEAD INSERTION - 6666|||
+ERROR: update_lead NO MATCHES FOUND IN THE SYSTEM - 6666|||
+ERROR: update_lead NO VALID SEARCH METHOD - 6666|SYSTEM|||
+
+ERROR: update_lead USER DOES NOT HAVE PERMISSION TO UPDATE LEADS IN THE SYSTEM - 6666|0 
+
+
+
+
+
+--------------------------------------------------------------------------------
+add_user - adds a user to the system
+
+REQUIRED FIELDS-
+agent_user -		2-20 characters (for auto-generated send 'AUTOGENERATED')
+agent_pass -		1-20 characters
+agent_user_level -	1 through 9, one digit only
+agent_full_name -	1-50 characters
+agent_user_group -	1-20 characters, must be a valid user group
+
+OPTIONAL FIELDS-
+phone_login -		1-20 characters
+phone_pass -		1-20 characters
+hotkeys_active -	0 or 1
+voicemail_id -		1-10 digits
+email -			1-100 characters
+custom_one -		1-100 characters
+custom_two -		1-100 characters
+custom_three -		1-100 characters
+custom_four -		1-100 characters
+custom_five -		1-100 characters
+
+NOTE: This function does not work with Vtiger integration
+
+Example URL strings for API calls:
+http://server/vicidial/non_agent_api.php?source=test&function=add_user&user=6666&pass=1234&agent_user=1000&agent_pass=9999&agent_user_level=1&agent_full_name=Testing+Person&agent_user_group=AGENTS
+http://server/vicidial/non_agent_api.php?source=test&function=add_user&user=6666&pass=1234&agent_user=1000&agent_pass=9999&agent_user_level=1&agent_full_name=Testing+Person&agent_user_group=AGENTS&phone_login=100&phone_pass=test&hotkeys_active=1&voicemail_id=&custom_one=jjjj&custom_two=yyyy&custom_three=kkk&custom_four=wwww&custom_five=hhhh
+
+Example responses:
+ERROR: add_user USER DOES NOT HAVE PERMISSION TO ADD USERS - 6666|0
+ERROR: add_user YOU MUST USE ALL REQUIRED FIELDS - 6666|1000||||
+ERROR: add_user USER DOES NOT HAVE PERMISSION TO ADD USERS IN THIS USER LEVEL - 6666|8
+ERROR: add_user USER GROUP DOES NOT EXIST - 6666|ADFHR
+ERROR: add_user USER ALREADY EXISTS - 6666|6666
+SUCCESS: add_user USER HAS BEEN ADDED - 6666|1000|1234|8|Testing+Person|AGENTS
+
+
+
+
+
+--------------------------------------------------------------------------------
+add_phone - adds a phone to the system
+
+REQUIRED FIELDS-
+extension -		2-100 characters
+dialplan_number -	1-20 digits
+voicemail_id -		1-10 digits
+phone_login -		1-20 characters
+phone_pass -		1-20 characters
+server_ip -		7-15 characters, must be a valid server_ip
+protocol -		Must be one of these: 'IAX2','SIP','Zap','EXTERNAL'
+registration_password -	1-20 characters
+phone_full_name -	1-50 characters
+local_gmt -		timezone setting, not adjusting for DST, default: '-5.00'
+outbound_cid -		1-20 digits
+
+OPTIONAL FIELDS-
+phone_context -		a phone context, default is 'default'
+email -			1-100 characters
+
+
+Example URL strings for API calls:
+http://server/vicidial/non_agent_api.php?source=test&function=add_phone&user=6666&pass=1234&extension=55000&dialplan_number=55000&voicemail_id=55000&phone_login=55000&phone_pass=test&server_ip=192.168.198.5&protocol=SIP&registration_password=test&phone_full_name=Extension+55000&local_gmt=-5.00&outbound_cid=7275551212
+http://server/vicidial/non_agent_api.php?source=test&function=add_phone&user=6666&pass=1234&extension=55000&dialplan_number=55000&voicemail_id=55000&phone_login=55000&phone_pass=test&server_ip=192.168.198.5&protocol=SIP&registration_password=test&phone_full_name=Extension+55000&local_gmt=-5.00&outbound_cid=7275551212&phone_context=default&email=test@test.com
+
+Example responses:
+ERROR: add_phone USER DOES NOT HAVE PERMISSION TO ADD PHONES - 6666|0
+ERROR: add_phone YOU MUST USE ALL REQUIRED FIELDS - 6666|1000|||||||||||
+ERROR: add_phone SERVER DOES NOT EXIST - 6666|10.0.9.9
+ERROR: add_phone PHONE ALREADY EXISTS ON THIS SERVER - 6666|10.0.9.8|cc101
+ERROR: add_phone PHONE LOGIN ALREADY EXISTS - 6666|cc100
+ERROR: add_phone YOU MUST USE A VALID TIMEZONE - 6666|-5
+SUCCESS: add_phone PHONE HAS BEEN ADDED - 6666|cc100|10.0.9.8|SIP|100
+
+
+
+
+
+--------------------------------------------------------------------------------
+update_phone - updates or deletes a phone entry already in the system
+
+REQUIRED FIELDS-
+extension -		2-100 characters
+server_ip -		7-15 characters, must be a valid server_ip
+
+SETTINGS FIELDS-
+delete_phone -		Y or N, Setting this to Y will delete the phone from the system, default is N.
+
+EDITABLE FIELDS- 
+dialplan_number -	1-20 digits
+voicemail_id -		1-10 digits
+phone_login -		1-20 characters
+phone_pass -		1-20 characters
+protocol -		Must be one of these: 'IAX2','SIP','Zap','EXTERNAL'
+registration_password -	1-20 characters
+phone_full_name -	1-50 characters
+local_gmt -		timezone setting, not adjusting for DST, default: '-5.00'
+outbound_cid -		1-20 digits
+phone_context -		a phone context, default is 'default'
+email -			1-100 characters
+
+Example URL strings for API calls:
+http://server/vicidial/non_agent_api.php?source=test&function=update_phone&user=6666&pass=1234&extension=55000&dialplan_number=55000&voicemail_id=55000&phone_login=55000&phone_pass=test&server_ip=192.168.198.5&protocol=SIP&registration_password=test&phone_full_name=Extension+55000&local_gmt=-5.00&outbound_cid=7275551212
+http://server/vicidial/non_agent_api.php?source=test&function=update_phone&user=6666&pass=1234&extension=55000&dialplan_number=55000&voicemail_id=55000&phone_login=55000&phone_pass=test&server_ip=192.168.198.5&protocol=SIP&registration_password=test&phone_full_name=Extension+55000&local_gmt=-5.00&outbound_cid=7275551212&phone_context=default&email=test@test.com
+http://server/vicidial/non_agent_api.php?source=test&function=update_phone&user=6666&pass=1234&extension=55000&server_ip=192.168.198.5&delete_phone=Y
+
+Example responses:
+ERROR: update_phone USER DOES NOT HAVE PERMISSION TO UPDATE PHONES - 6666|0
+ERROR: update_phone YOU MUST USE ALL REQUIRED FIELDS - 6666||
+ERROR: update_phone SERVER DOES NOT EXIST - 6666|10.0.9.9
+ERROR: update_phone PHONE DOES NOT EXIST ON THIS SERVER - 6666|10.0.9.8|cc101
+ERROR: update_phone LOGIN ALREADY EXISTS - 6666|x101
+ERROR: update_phone YOU MUST USE A VALID TIMEZONE - 6666|-99
+ERROR: update_phone YOU MUST USE A VALID DIALPLAN NUMBER - 6666|0
+ERROR: update_phone YOU MUST USE A VALID VOICEMAIL NUMBER - 6666|0
+ERROR: update_phone YOU MUST USE A VALID PHONE PASSWORD - 6666|0
+ERROR: update_phone YOU MUST USE A VALID REGISTRATION PASSWORD - 6666|0
+ERROR: update_phone YOU MUST USE A VALID PROTOCOL - 6666|0
+ERROR: update_phone YOU MUST USE A VALID PHONE NAME - 6666|0
+ERROR: update_phone YOU MUST USE A VALID PHONE CONTEXT - 6666|0
+ERROR: update_phone NO UPDATES DEFINED - 6666|0
+SUCCESS: update_phone PHONE HAS BEEN UPDATED - 6666|cc100|10.0.9.8|SIP|100
+SUCCESS: update_phone PHONE HAS BEEN DELETED - 6666|cc100|10.0.9.8|
+
+
+
+
+
+--------------------------------------------------------------------------------
+add_phone_alias - adds a phone alias entry to the system
+
+REQUIRED FIELDS-
+alias_id -		2-20 characters
+phone_logins -		2-255 characters (phone logins separated by commas)
+alias_name -		1-50 characters
+
+Example URL strings for API calls:
+http://server/vicidial/non_agent_api.php?source=test&function=add_phone_alias&user=6666&pass=1234&alias_id=xyz100&alias_name=XYZ+testing&phone_logins=100a,100b
+
+Example responses:
+ERROR: add_phone_alias USER DOES NOT HAVE PERMISSION TO ADD PHONE ALIASES - 6666|0
+ERROR: add_phone_alias YOU MUST USE ALL REQUIRED FIELDS - 6666||||
+ERROR: add_phone_alias PHONE ALIAS ALREADY EXISTS - 6666|x101
+ERROR: add_phone_alias PHONE DOES NOT EXIST - 6666|cc100
+SUCCESS: add_phone_alias PHONE ALIAS HAS BEEN ADDED - 6666|x100|testing_x100|cc100,bb100
+
+
+
+
+
+--------------------------------------------------------------------------------
+update_phone_alias - updates or deletes a phone alias entry already in the system
+
+REQUIRED FIELDS-
+alias_id -		2-20 characters
+phone_logins -	2-255 characters (phone logins separated by commas)
+alias_name -		1-50 characters
+
+SETTINGS FIELDS-
+delete_alias -		Y or N, Setting this to Y will delete the phone alias from the system, default is N.
+
+Example URL strings for API calls:
+http://server/vicidial/non_agent_api.php?source=test&function=update_phone_alias&user=6666&pass=1234&alias_id=xyz100&alias_name=XYZ+testing+X&phone_logins=100a,100b
+http://server/vicidial/non_agent_api.php?source=test&function=update_phone_alias&user=6666&pass=1234&alias_id=xyz100&delete_alias=Y
+
+Example responses:
+ERROR: update_phone_alias USER DOES NOT HAVE PERMISSION TO UPDATE PHONE ALIASES - 6666|0
+ERROR: update_phone_alias YOU MUST USE ALL REQUIRED FIELDS - 6666||||
+ERROR: update_phone_alias PHONE ALIAS DOES NOT EXIST - 6666|x101
+ERROR: update_phone_alias YOU MUST USE A VALID ALIAS NAME - 6666|x
+ERROR: update_phone_alias PHONE DOES NOT EXIST - 6666|cc100
+SUCCESS: update_phone_alias PHONE ALIAS HAS BEEN UPDATED - 6666|x100|
+SUCCESS: update_phone_alias PHONE ALIAS HAS BEEN DELETED - 6666|x100|
+
+
+
+
+
+--------------------------------------------------------------------------------
+add_list - adds a list to the system
+
+REQUIRED FIELDS-
+list_id -		2-14 digits
+list_name -		6-30 characters
+campaign_id -		2-8 characters, must be a valid campaign_id
+
+OPTIONAL FIELDS-
+active -		Must be one of these: 'Y','N', will default to 'N'
+outbound_cid -		6-20 digits
+script -		1-10 characters, must be a valid script
+am_message -		2-100 characters
+drop_inbound_group -	1-10 characters, must be a valid in-group
+web_form_address -	6-100 characters
+web_form_address_two -	6-100 characters
+reset_time -		4-100 characters, must be in valid 4-digit groups of 24-hour time (i.e. 0900-1700-2359)
+
+
+Example URL strings for API calls:
+http://server/vicidial/non_agent_api.php?source=test&function=add_list&user=6666&pass=1234&list_id=1101&list_name=Test+API+list&campaign_id=TESTCAMP
+http://server/vicidial/non_agent_api.php?source=test&function=add_list&user=6666&pass=1234&list_id=1101&list_name=Test+API+list&campaign_id=TESTCAMP&active=N&outbound_cid=7275551212&script=DEMOSCRIPT&am_message=8304&drop_inbound_group=SALESLINE&web_form_address=http://www.vicidial.org/?testing=hghg
+
+Example responses:
+ERROR: add_list USER DOES NOT HAVE PERMISSION TO ADD LISTS - 6666|0
+ERROR: add_list YOU MUST USE ALL REQUIRED FIELDS - 6666|1000||
+ERROR: add_list CAMPAIGN DOES NOT EXIST - 6666|TESTCIMP
+ERROR: add_list LIST ALREADY EXISTS - 6666|1101
+ERROR: add_list SCRIPT DOES NOT EXIST, THIS IS AN OPTIONAL FIELD - 6666|TESTSCRIPT
+ERROR: add_list IN-GROUP DOES NOT EXIST, THIS IS AN OPTIONAL FIELD - 6666|TEST_IN8
+ERROR: add_list RESET TIME IS NOT VALID, THIS IS AN OPTIONAL FIELD - 6666|012
+SUCCESS: add_list LIST HAS BEEN ADDED - 6666|1101|TESTCAMP
+
+
+
+
+
+--------------------------------------------------------------------------------
+update_list - updates list information in the vicidial_lists table
+
+REQUIRED FIELDS-
+list_id -		must be all numbers, 2-14 digits
+source -		description of what originated the API call (maximum 20 characters)
+
+SETTINGS FIELDS-
+insert_if_not_found -	Y or N, will attempt to insert as a new list if no match is found, default is N.
+			If list is not found, the function will change to add_list and be processed in that way
+reset_list -		Y or N, Setting this to Y will reset the Called-Since-Last-Reset flag for all of the leads in this list, default is N.
+delete_list -		Y or N, Setting this to Y will delete the list from the vicidial_lists table, default is N.
+delete_leads -		Y or N, Setting this to Y will delete all of the leads with this list_id from the vicidial_list table, default is N.
+
+EDITABLE FIELDS- 
+list_name -		6-30 characters
+campaign_id -		2-8 characters, must be a valid campaign_id
+active -		Must be one of these: 'Y','N', will default to 'N'
+outbound_cid -		6-20 digits
+script -		1-10 characters, must be a valid script
+am_message -		2-100 characters
+drop_inbound_group -	1-10 characters, must be a valid in-group
+web_form_address -	6-100 characters
+web_form_address_two -	6-100 characters
+reset_time -		4-100 characters, must be in valid 4-digit groups of 24-hour time (i.e. 0900-1700-2359)
+NOTES: 
+ - in order to set a field to empty('') set it equal to --BLANK--, i.e. "&drop_inbound_group=--BLANK--"
+ - please use no special characters like apostrophes, quotes or amphersands
+
+
+Example URL strings for API calls:
+http://server/vicidial/non_agent_api.php?source=test&user=6666&pass=1234&function=update_list&list_id=1101&list_name=Updated+test+API+list
+http://server/vicidial/non_agent_api.php?source=test&user=6666&pass=1234&function=update_list&list_id=1101&active=N
+http://server/vicidial/non_agent_api.php?source=test&user=6666&pass=1234&function=update_list&list_id=1102&active=N&insert_if_not_found=Y&list_name=Updated+test+API+list&campaign_id=TESTCAMP&outbound_cid=7275551212&script=DEMOSCRIPT&am_message=8304&drop_inbound_group=SALESLINE&web_form_address=http://www.vicidial.org/?testing=hghg
+http://server/vicidial/non_agent_api.php?source=test&user=6666&pass=1234&function=update_list&list_id=1102&reset_list=Y
+http://server/vicidial/non_agent_api.php?source=test&user=6666&pass=1234&function=update_list&list_id=1102&delete_list=Y&delete_leads=Y
+http://server/vicidial/non_agent_api.php?source=test&user=6666&pass=1234&function=update_list&list_id=1102&campaign_id=ASTRICON
+
+Example responses:
+ERROR: update_list USER DOES NOT HAVE PERMISSION TO UPDATE LISTS - 6666
+ERROR: update_list YOU MUST USE ALL REQUIRED FIELDS - 6666|1
+NOTICE: update_list LIST DOES NOT EXIST, SENDING TO add_list FUNCTION - 6666|1000
+ERROR: update_list LIST DOES NOT EXIST - 6666|1000
+ERROR: update_list CAMPAIGN DOES NOT EXIST, THIS IS AN OPTIONAL FIELD - 6666|TESTCIMP
+ERROR: update_list SCRIPT DOES NOT EXIST, THIS IS AN OPTIONAL FIELD - 6666|TESTSCRIPT
+ERROR: update_list IN-GROUP DOES NOT EXIST, THIS IS AN OPTIONAL FIELD - 6666|TEST_IN8
+ERROR: update_list LIST NAME MUST BE FROM 6 TO 30 CHARACTERS, THIS IS AN OPTIONAL FIELD - 6666|test
+ERROR: update_list ACTIVE MUST BE Y OR N, THIS IS AN OPTIONAL FIELD - 6666|U
+ERROR: update_list OUTBOUND CID MUST BE FROM 6 TO 18 DIGITS, THIS IS AN OPTIONAL FIELD - 6666|12345
+ERROR: update_list ANSWERING MACHINE MESSAGE MUST LESS THAN 101 DIGITS, THIS IS AN OPTIONAL FIELD - 6666|123...
+ERROR: update_list RESET TIME IS NOT VALID, THIS IS AN OPTIONAL FIELD - 6666|012
+NOTICE: update_list NO UPDATES DEFINED - 6666|
+SUCCESS: update_list LIST HAS BEEN UPDATED - 6666|1101
+NOTICE: update_list LEADS IN LIST HAVE BEEN RESET - 6666|1101|324
+NOTICE: update_list USER DOES NOT HAVE PERMISSION TO DELETE LISTS - 6666|0
+NOTICE: update_list LIST HAS BEEN DELETED - 6666|1101|1
+NOTICE: update_list USER DOES NOT HAVE PERMISSION TO DELETE LEADS - 6666|0
+NOTICE: update_list LEADS IN LIST HAVE BEEN DELETED - 6666|1101|324
+
+ERROR: NO FUNCTION SPECIFIED
+

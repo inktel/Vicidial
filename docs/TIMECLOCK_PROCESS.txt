@@ -1,0 +1,175 @@
+Timeclock process flow					  2008-05-12
+
+** THIS TIMECLOCK FUNCTIONALITY PROCESS IS PLANNED FOR THE 2.0.5 RELEASE **
+
+This will outline the process I have thought through for adding a timeclock component to the VICIDIAL system. The objective is to add the following features to make VICIDIAL a more well-rounded product:
+- Allow vicidial users to clock-in to the system
+- Allow vicidial managers to clock users in and out as well as edit timeclock records
+- Maintain an audit trail for manager-modified records
+- Add a SHIFT section to administration
+- Have reports showing all timeclock totals for various parameters(user-group/time-period/user/current-status/etc...)
+- ability to allow managers to alter timeclock records with audit trail
+
+Future planned features:
+- Allow restrictions of agent-login by shift
+- Allow ability to not allow agents to log-in to any VICIDIAL page(admin or agent) without clocking in.
+- reports showing user log activity outside of shift timeframes
+
+
+Description:
+
+The first new feature to be added to help with the overall adoption of this feature is the ability to have the system optionally generate unique userIDs as users are entered into the system. For this purpose a new auto-generate option has been added to the add-a-new-user and copy-user functions. This auto-generate feature will take the auto_user_add_value field in the system_settings table and check to see if an agent with that ID exists in the system. If they do, then 7 will be added to the number and checked again until a non-used number is found.
+
+To facilitate more workforce management, as is desired with the addition of a timeclock function to VICIDIAL, I have decided to add a SHIFT structure to the system as well. This should allow for scheduling of user_groups of agents and will have the ability to not allow them to login if they try to login outside of their scheduled hours. A shift will have a start time and a length(to make running over midnight easier) as well as a list of the days of the week that the shift applies. Each user-group can have multiple shifts activated for it, for instance you may want a Monday-Friday shift of 9AM-5PM and a Saturday shift of 10AM to 4PM. In this case the user-group would have two shifts selected. Some reports will also be viewable by shift as well.
+
+
+
+Newly Created Scripts:
+timeclock.php - linked to from vicidial.php/admin.php/welcome.php to give easy access for users to use the timeclock and then go back to what they were doing.
+
+timeclock_auto_logout.pl - script that runs at the defined system_settings.timeclock_end_of_day field that will go through all agents that are currently logged into the timeclock for the day and log them out with the AUTOLOGOUT event. Only runs once a day. Triggered by the ADMIN_keepalive_all.pl script. Defined to run by the '9' flag in the keepalive settings of the astguiclient.conf file
+
+timeclock_report.php - report linked from the reports page that shows completed timeclock records by user and user-group across a timeframe
+
+timeclock_edit.php - page that allows managers to edit existing completed timeclock records
+
+
+
+More to come...
+
+
+
+New associated features:
+
+VICIDIAL Administrator Log:
+The admin log will replace the older flat-file log of administrator and manager activity. This log will allow for much easier viewing of the changes that have taken place for a specific record and other activities that managers and administrators do from the VICIDIAL administration interface. There will be event types and record IDs that identify the kind of record and the specific record worked with by a specific administrator. This table will be utilized at first only by the timeclock apps, but as the code is developed it will fully replace the admin log file.
+
+Administrator Sections:
+USER
+TIMECLOCK
+CAMPAIGN
+CAMPAIGN DIAL STATUS
+CAMPAIGN HOPPER
+CAMPAIGN STATUS
+CAMPAIGN HOTKEY
+CAMPAIGN RECYCLE
+CAMPAIGN AUTO-ALT-DIAL
+CAMPAIGN PAUSE CODE
+CAMPAIGN LIST MIX
+CAMPAIGN QC
+LIST
+LIST DNC
+SCRIPT
+FILTER
+IN-GROUP
+USER GROUP
+REMOTE AGENT
+PHONE
+PHONE ALIAS
+CALLTIME
+STATE CALLTIME
+SHIFT
+CONFERENCE
+VICIDIAL CONFERENCE
+SERVER
+SERVER TRUNK
+SYSTEM SETTINGS
+SYSTEM STATUS
+STATUS CATEGORY
+QC STATUS
+REPORT
+OTHER
+
+
+The Database Changes:
+
+# add field for auto-increment of users
+ALTER TABLE system_settings ADD auto_user_add_value INT(9) UNSIGNED default '101';
+UPDATE system_settings SET auto_user_add_value='2110';
+
+# This table contains system shift information
+ CREATE TABLE vicidial_shifts (
+shift_id VARCHAR(20) NOT NULL,
+shift_name VARCHAR(50),
+shift_start_time VARCHAR(4) default '0900',
+shift_length VARCHAR(5) default '16:00',
+shift_weekdays VARCHAR(7) default '0123456',
+index (shift_id)
+);
+
+# add field for allowable shifts for user groups
+ALTER TABLE vicidial_user_groups ADD group_shifts TEXT;
+
+# This table contains the log of timeclock activity
+ CREATE TABLE vicidial_timeclock_log (
+timeclock_id INT(9) UNSIGNED AUTO_INCREMENT PRIMARY KEY NOT NULL,
+event_epoch INT(10) UNSIGNED NOT NULL,
+event_date DATETIME NOT NULL,
+login_sec INT(10) UNSIGNED,
+event VARCHAR(50) NOT NULL,
+user VARCHAR(20) NOT NULL,
+user_group VARCHAR(20) NOT NULL,
+ip_address VARCHAR(15),
+shift_id VARCHAR(20),
+notes VARCHAR(255),
+manager_user VARCHAR(20),
+manager_ip VARCHAR(15),
+event_datestamp TIMESTAMP NOT NULL,
+tcid_link INT(9) UNSIGNED,
+index (user)
+);
+
+# This table contains the current timeclock status of a user
+ CREATE TABLE vicidial_timeclock_status (
+user VARCHAR(20) UNIQUE NOT NULL,
+user_group VARCHAR(20) NOT NULL,
+event_epoch INT(10) UNSIGNED,
+event_date TIMESTAMP,
+status VARCHAR(50),
+ip_address VARCHAR(15),
+shift_id VARCHAR(20),
+index (user)
+);
+
+# This table contains the audit log of timeclock activity(non-editable)
+ CREATE TABLE vicidial_timeclock_audit_log (
+timeclock_id INT(9) UNSIGNED NOT NULL,
+event_epoch INT(10) UNSIGNED NOT NULL,
+event_date DATETIME NOT NULL,
+login_sec INT(10) UNSIGNED,
+event VARCHAR(50) NOT NULL,
+user VARCHAR(20) NOT NULL,
+user_group VARCHAR(20) NOT NULL,
+ip_address VARCHAR(15),
+shift_id VARCHAR(20),
+event_datestamp TIMESTAMP NOT NULL,
+tcid_link INT(9) UNSIGNED,
+index (timeclock_id),
+index (user)
+);
+
+# system settings added fields to define the time when all logged-in agents are to be auto-logged out
+ALTER TABLE system_settings ADD timeclock_end_of_day VARCHAR(4) default '0000';
+ALTER TABLE system_settings ADD timeclock_last_reset_date DATE;
+
+# vicidial_users added fields for permissions to allow users to edit timeclock_log records
+ALTER TABLE vicidial_users ADD add_timeclock_log ENUM('1','0') default '0'
+ALTER TABLE vicidial_users ADD modify_timeclock_log ENUM('1','0') default '0'
+ALTER TABLE vicidial_users ADD delete_timeclock_log ENUM('1','0') default '0'
+
+# added new table for administrator activity log
+ CREATE TABLE vicidial_admin_log (
+admin_log_id INT(9) UNSIGNED AUTO_INCREMENT PRIMARY KEY NOT NULL,
+event_date DATETIME NOT NULL,
+user VARCHAR(20) NOT NULL,
+ip_address VARCHAR(15) NOT NULL,
+event_section VARCHAR(30) NOT NULL,
+event_type ENUM('ADD','COPY','LOAD','RESET','MODIFY','DELETE','SEARCH','LOGIN','LOGOUT','CLEAR','OTHER') default 'OTHER',
+record_id VARCHAR(50) NOT NULL,
+event_code VARCHAR(255) NOT NULL,
+event_sql TEXT,
+event_notes TEXT,
+index (user),
+index (event_section),
+index (record_id)
+);

@@ -1,0 +1,48 @@
+Below are Timezone update instructions for Slackware and any generic Linux 
+install. Because of the changes in Daylight Savings Time in the USA ad Canada 
+in 2007, it becomes necessary to update your system's timezone info if you are 
+using a Linux distro that was released before 2006 and have not updated it.
+
+SLACKWARE 10.2:
+cd /
+wget ftp://ftp.slackware.com/pub/slackware/slackware-10.2/patches/packages/glibc-zoneinfo-2.3.5-noarch-7_slack10.2.tgz
+gunzip glibc-zoneinfo-2.3.5-noarch-7_slack10.2.tgz
+tar xvf glibc-zoneinfo-2.3.5-noarch-7_slack10.2.tar
+chmod 0777 install/doinst.sh
+./install/doinst.sh
+date
+
+
+SLACKWARE 10.1:
+cd /
+ncftpget ftp://ftp.slackware.com/pub/slackware/slackware-10.1/patches/packages/glibc-zoneinfo-2.3.4-noarch-2_slack10.1.tgz
+gunzip glibc-zoneinfo-2.3.4-noarch-2_slack10.1.tgz
+tar xvf glibc-zoneinfo-2.3.4-noarch-2_slack10.1.tar
+chmod 0777 install/doinst.sh
+./install/doinst.sh
+date
+
+
+SLACKWARE 10.0:
+cd /
+ncftpget ftp://ftp.slackware.com/pub/slackware/slackware-10.0/patches/packages/glibc-zoneinfo-2.3.2-noarch-7_slack10.0.tgz
+gunzip glibc-zoneinfo-2.3.2-noarch-7_slack10.0.tgz
+tar xvf glibc-zoneinfo-2.3.2-noarch-7_slack10.0.tar
+chmod 0777 install/doinst.sh
+./install/doinst.sh
+date
+
+
+GENERIC LINUX TIMEZONE CHANGES(Example New York EST):
+cd /tmp
+ncftpget ftp://elsie.nci.nih.gov/pub/tzdata2007c.tar.gz
+gunzip tzdata2007c.tar.gz
+tar xvf tzdata2007c.tar
+zic -d /tmp/zoneinfo northamerica
+cp -f /tmp/zoneinfo/EST5EDT /usr/share/zoneinfo/
+cp -f /tmp/zoneinfo/America/New_York /usr/share/zoneinfo/America/
+zdump -v /usr/share/zoneinfo/EST5EDT | grep 2007
+zdump -v /usr/share/zoneinfo/America/New_York | grep 2007
+ln -fs /etc/localtime /usr/share/zoneinfo/EST5EDT
+zdump -v /etc/localtime | grep 2007
+date

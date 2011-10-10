@@ -1,0 +1,261 @@
+#!/usr/bin/perl
+#
+# agi-VDADfixCXFER.agi version 2.0.5   *DBI-version*
+# 
+# runs when a Consultative transfer is released by the vicidial fronter as the
+# call arrives on another channel so that the vicidial_live_agents record is
+# updated to be accurate.
+#
+# You need to put lines similar to those below in your extensions.conf file:
+# 
+# ;VICIDIAL Consultative Xfer fix script:
+# exten => _8600XXX*.,1,AGI(agi-VDADfixCXFER.agi)
+# exten => _010*010*010*015*8600XXX*.,1,AGI(agi-VDADfixCXFER.agi)
+# 
+# Copyright (C) 2008  Matt Florell <vicidial@gmail.com>    LICENSE: AGPLv2
+#
+# CHANGELOG:
+# 60809-1749 - First build
+# 60817-1122 - Added output options check from database
+# 70212-1252 - Fixed issue with Local/ channel transfers on same server
+#
+
+$script = 'agi-VDADfixCXFER.agi';
+
+($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
+$year = ($year + 1900);
+$mon++;
+if ($mon < 10) {$mon = "0$mon";}
+if ($mday < 10) {$mday = "0$mday";}
+if ($hour < 10) {$hour = "0$hour";}
+if ($min < 10) {$min = "0$min";}
+if ($sec < 10) {$sec = "0$sec";}
+	$SQLdate = "$year-$mon-$mday $hour:$min:$sec";
+
+# default path to astguiclient configuration file:
+$PATHconf =		'/etc/astguiclient.conf';
+
+open(conf, "$PATHconf") || die "can't open $PATHconf: $!\n";
+@conf = <conf>;
+close(conf);
+$i=0;
+foreach(@conf)
+	{
+	$line = $conf[$i];
+	$line =~ s/ |>|\n|\r|\t|\#.*|;.*//gi;
+	if ( ($line =~ /^PATHhome/) && ($CLIhome < 1) )
+		{$PATHhome = $line;   $PATHhome =~ s/.*=//gi;}
+	if ( ($line =~ /^PATHlogs/) && ($CLIlogs < 1) )
+		{$PATHlogs = $line;   $PATHlogs =~ s/.*=//gi;}
+	if ( ($line =~ /^PATHagi/) && ($CLIagi < 1) )
+		{$PATHagi = $line;   $PATHagi =~ s/.*=//gi;}
+	if ( ($line =~ /^PATHweb/) && ($CLIweb < 1) )
+		{$PATHweb = $line;   $PATHweb =~ s/.*=//gi;}
+	if ( ($line =~ /^PATHsounds/) && ($CLIsounds < 1) )
+		{$PATHsounds = $line;   $PATHsounds =~ s/.*=//gi;}
+	if ( ($line =~ /^PATHmonitor/) && ($CLImonitor < 1) )
+		{$PATHmonitor = $line;   $PATHmonitor =~ s/.*=//gi;}
+	if ( ($line =~ /^VARserver_ip/) && ($CLIserver_ip < 1) )
+		{$VARserver_ip = $line;   $VARserver_ip =~ s/.*=//gi;}
+	if ( ($line =~ /^VARDB_server/) && ($CLIDB_server < 1) )
+		{$VARDB_server = $line;   $VARDB_server =~ s/.*=//gi;}
+	if ( ($line =~ /^VARDB_database/) && ($CLIDB_database < 1) )
+		{$VARDB_database = $line;   $VARDB_database =~ s/.*=//gi;}
+	if ( ($line =~ /^VARDB_user/) && ($CLIDB_user < 1) )
+		{$VARDB_user = $line;   $VARDB_user =~ s/.*=//gi;}
+	if ( ($line =~ /^VARDB_pass/) && ($CLIDB_pass < 1) )
+		{$VARDB_pass = $line;   $VARDB_pass =~ s/.*=//gi;}
+	if ( ($line =~ /^VARDB_port/) && ($CLIDB_port < 1) )
+		{$VARDB_port = $line;   $VARDB_port =~ s/.*=//gi;}
+	$i++;
+	}
+
+if (!$VARDB_port) {$VARDB_port='3306';}
+if (!$AGILOGfile) {$AGILOGfile = "$PATHlogs/agiout.$year-$mon-$mday";}
+
+use DBI;
+use Asterisk::AGI;
+$AGI = new Asterisk::AGI;
+
+$dbhA = DBI->connect("DBI:mysql:$VARDB_database:$VARDB_server:$VARDB_port", "$VARDB_user", "$VARDB_pass")
+    or die "Couldn't connect to database: " . DBI->errstr;
+
+### Grab Server values from the database
+$stmtA = "SELECT agi_output FROM servers where server_ip = '$VARserver_ip';";
+$sthA = $dbhA->prepare($stmtA) or die "preparing: ",$dbhA->errstr;
+$sthA->execute or die "executing: $stmtA ", $dbhA->errstr;
+$sthArows=$sthA->rows;
+$rec_count=0;
+while ($sthArows > $rec_count)
+	{
+	$AGILOG = '0';
+	 @aryA = $sthA->fetchrow_array;
+		$DBagi_output =			"$aryA[0]";
+		if ($DBagi_output =~ /STDERR/)	{$AGILOG = '1';}
+		if ($DBagi_output =~ /FILE/)	{$AGILOG = '2';}
+		if ($DBagi_output =~ /BOTH/)	{$AGILOG = '3';}
+	 $rec_count++;
+	}
+$sthA->finish();
+
+
+### begin parsing run-time options ###
+if (length($ARGV[0])>1)
+{
+	if ($AGILOG) {$agi_string = "Perl Environment Dump:";   &agi_output;}
+	$i=0;
+	while ($#ARGV >= $i)
+	{
+	$args = "$args $ARGV[$i]";
+	if ($AGILOG) {$agi_string = "$i|$ARGV[$i]";   &agi_output;}
+	$i++;
+	}
+
+	### list of command-line array arguments:
+	@ARGV_vars = split(/-----/, $ARGV[0]);
+
+	if ($args =~ /--help/i)
+	{
+	print "allowed run time options:\n  [-q] = quiet\n  [-t] = test\n  [-debug] = verbose debug messages\n\n";
+	}
+	else
+	{
+		if ($args =~ /-V/i)
+		{
+		$V=1;
+		}
+		if ($args =~ /-debug/i)
+		{
+		$DG=1;
+		}
+		if ($args =~ /-dbAVS/i)
+		{
+		$DGA=1;
+		}
+		if ($args =~ /-q/i)
+		{
+		$q=1;
+		$Q=1;
+		}
+		if ($args =~ /-t/i)
+		{
+		$TEST=1;
+		$T=1;
+		}
+	}
+}
+
+$|=1;
+while(<STDIN>) 
+{
+	chomp;
+	last unless length($_);
+	if ($AGILOG)
+	{
+		if (/^agi_(\w+)\:\s+(.*)$/)
+		{
+			$AGI{$1} = $2;
+		}
+	}
+
+	if (/^agi_uniqueid\:\s+(.*)$/)		{$unique_id = $1; $uniqueid = $unique_id;}
+	if (/^agi_channel\:\s+(.*)$/)		{$channel = $1;}
+	if (/^agi_extension\:\s+(.*)$/)		{$extension = $1;}
+}
+
+# 010*010*011*011*
+
+$extension =~ s/^\d\d\d\*\d\d\d\*\d\d\d\*\d\d\d\*//gi;
+
+@EXTEN = split(/\*/, $extension);
+	$conf_exten =		$EXTEN[0];
+	$lead_id =			$EXTEN[1];
+	$user =				$EXTEN[2];
+	$phone_code =		$EXTEN[3];
+	$phone_number =		$EXTEN[4];
+	$campaign_id =		$EXTEN[5];
+
+if ($AGILOG) {$agi_string = "AGI Environment Dump:";   &agi_output;}
+
+foreach $i (sort keys %AGI) 
+{
+	if ($AGILOG) {$agi_string = " -- $i = $AGI{$i}";   &agi_output;}
+}
+
+if ($AGILOG) {$agi_string = "AGI Variables: |$unique_id|$channel|$extension|$type|$callerid|$calleridname|$priority|";   &agi_output;}
+
+if ($AGILOG) {$agi_string = "CXFERfix : $lead_id $user $channel $uniqueid";   &agi_output;}
+
+	$CIDlead = sprintf("%010s", $lead_id);
+	$CIDlead = "C123412345$CIDlead";
+	print "SET CALLERID $CIDlead\n";
+	checkresult($result);
+	if ($AGILOG) {$agi_string = "callerID changed: $CIDlead";   &agi_output;}
+
+########## FIND AND UPDATE vicidial_live_agents ##########
+$stmtA = "UPDATE vicidial_live_agents SET channel='$channel',call_server_ip='$VARserver_ip',uniqueid='$uniqueid' where user='$user' and lead_id='$lead_id';";
+	if ($AGILOG) {$agi_string = "|$stmtA|";   &agi_output;}
+$affected_rows = $dbhA->do($stmtA);
+if ($AGILOG) {$agi_string = "--    VDAD vicidial_live_agents update: |$affected_rows|$lead_id|";   &agi_output;}
+
+########## INSERT NEW vicidial_auto_calls record ##########
+$stmtA = "INSERT INTO vicidial_auto_calls SET channel='$channel',server_ip='$VARserver_ip',uniqueid='$uniqueid',campaign_id='$campaign_id',status='CLOSER',lead_id='$lead_id',phone_code='$phone_code',phone_number='$phone_number',call_time='$SQLdate',call_type='IN',callerid='$CIDlead';";
+	if ($AGILOG) {$agi_string = "|$stmtA|";   &agi_output;}
+$affected_rows = $dbhA->do($stmtA);
+if ($AGILOG) {$agi_string = "--    VDAD vicidial_auto_calls insert: |$affected_rows|$lead_id|";   &agi_output;}
+
+$dbhA->disconnect();
+
+
+if ($AGILOG) {$agi_string = "exiting the CXFERfix app, transferring call to $conf_exten";   &agi_output;}
+#print "SET CONTEXT $ext_context\n";
+#	checkresult($result);
+print "SET EXTENSION $conf_exten\n";
+	checkresult($result);
+print "SET PRIORITY 1\n";
+	checkresult($result);
+
+
+
+
+exit;
+
+
+
+sub checkresult {
+	my ($res) = @_;
+	my $retval;
+	$tests++;
+	chomp $res;
+	if ($res =~ /^200/) {
+		$res =~ /result=(-?\d+)/;
+		if (!length($1)) {
+		#	print STDERR "FAIL ($res)\n";
+			$fail++;
+		} else {
+		#	print STDERR "PASS ($1)\n";
+			$pass++;
+		}
+	} else {
+	#	print STDERR "FAIL (unexpected result '$res')\n";
+		$fail++;
+	}
+}
+
+
+
+sub agi_output
+{
+if ($AGILOG >=2)
+	{
+	### open the log file for writing ###
+	open(Lout, ">>$AGILOGfile")
+			|| die "Can't open $AGILOGfile: $!\n";
+	print Lout "$now_date|$script|$agi_string\n";
+	close(Lout);
+	}
+	### send to STDERR writing ###
+if ( ($AGILOG == '1') || ($AGILOG == '3') )
+	{print STDERR "$now_date|$script|$agi_string\n";}
+$agi_string='';
+}

@@ -1,0 +1,16 @@
+﻿100001|10001|108|1|7275551213|MR|GREEK|P|Ενεργές|249  τηλ. συνδέσεις|||Καταγραμμένων|FL||33709|USA|M|1970-01-01|7275551212|test@test.com|nothing|Ελεγχος τηλ.σύνδεσης διάσκεψης
+100002|10002|108|44|7275551213|MR|FRENCH|P|Vous êtes|249  maintenant déconnecté|||Numéro|FL||33709|USA|M|1970-01-01|7275551212|test@test.com|England|VOUS DEVEZ ÊTRE Français
+100003|10003|108|61|864886000|MR|SPANISH|P|Español|249 LA GRABACIÓN DURARÁ|||Inválido|WA|AUS|33709|USA|M|1970-01-01|7275551212|test@test.com|WestAustralia|Inválido
+100004|10004|108|61|740421111|MR|RUSSIAN|P|языки|249 здравствулте! там|||MALDON|QL|AUS|33709|USA|M|1970-01-01|7275551212|test@test.com|Queensland|добро пожаловать
+100005|10005|108|61|292507250|MR|ARABIC|P|مرحبا|249 مرحبا هناك|||MALDON|NS|AUS|33709|USA|M|1970-01-01|7275551212|test@test.com|NewSouthWales|اللغات
+100006|10006|108|64|93737999|MR|HEBREW|P|שפה, לשון|249 ברכת שלום, שלום, הלו|||MALDON|FL|NZL|33709|USA|M|1970-01-01|7275551212|test@test.com|AuklandNewZealand|ברכת "ברוך הבא", קריאת ברכה לאורח או לפנים חדשות
+100007|10007|108|61|362262999|MR|BULGARIAN|P|здравей!|249 говор|||MALDON|TA|AUS|33709|USA|M|1970-01-01|7275551212|test@test.com|Tasmania|добре дошъл домашно огнище
+100007|10007|108|39|286955277|MR|GERMAN|P|größer|249 Mädchen|||MALDON|FL|ITA|33709|USA|M|1970-01-01|7275551212|test@test.com|MilanItaly|Mais im Alter von Kartoffel-Käse-Salat-türig
+100001|10001|108|61|889466666|MR|GREEK|P|Ενεργές|249  τηλ. συνδέσεις|||Καταγραμμένων|NT|AUS|33709|USA|M|1970-01-01|7275551212|test@test.com|NorthernTerritory|Ελεγχος τηλ.σύνδεσης διάσκεψης
+100002|10002|108|61|883026611|MR|FRENCH|P|Vous êtes|249  maintenant déconnecté|||Numéro|SA|AUS|33709|USA|M|1970-01-01|7275551212|test@test.com|SouthAustralia|VOUS DEVEZ ÊTRE Français
+100003|10003|108|1|7275551213|MR|SPANISH|P|Español|249 LA GRABACIÓN DURARÁ|||Inválido|FL||33709|USA|M|1970-01-01|7275551212|test@test.com|nothing|Inválido
+100004|10004|108|1|7275551213|MR|RUSSIAN|P|языки|249 здравствулте! там|||MALDON|FL||33709|USA|M|1970-01-01|7275551212|test@test.com|nothing|добро пожаловать
+100005|10005|108|1|7275551213|MR|ARABIC|P|مرحبا|249 مرحبا هناك|||MALDON|FL||33709|USA|M|1970-01-01|7275551212|test@test.com|nothing|اللغات
+100006|10006|108|1|7275551213|MR|HEBREW|P|שפה, לשון|249 ברכת שלום, שלום, הלו|||MALDON|FL||33709|USA|M|1970-01-01|7275551212|test@test.com|nothing|ברכת "ברוך הבא", קריאת ברכה לאורח או לפנים חדשות
+100007|10007|108|1|7275551213|MR|BULGARIAN|P|здравей!|249 говор|||MALDON|FL||33709|USA|M|1970-01-01|7275551212|test@test.com|nothing|добре дошъл домашно огнище
+100007|10007|108|1|7275551213|MR|GERMAN|P|größer|249 Mädchen|||MALDON|FL||33709|USA|M|1970-01-01|7275551212|test@test.com|nothing|Mais im Alter von Kartoffel-Käse-Salat-türig

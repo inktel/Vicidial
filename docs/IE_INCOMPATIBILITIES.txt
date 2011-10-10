@@ -1,0 +1,31 @@
+Microsoft Internet Explorer Incompatibilities with VICIDIAL Agent Interface	2007-06-13
+
+*** AS OF RELEASE 2.0.4 VICIDIAL IS COMPATIBLE WITH IE 6.0 ***
+
+There are quite a few issues with using Microsoft Internet Explorer(IE) with VICIDIAL because of incompatibilites with the W3C standards as well as stability and architectural issues.
+
+The decision was made to stop testing on IE because of time constraints as well as the lack of cross-compatibility of IE and lack of compatibility with standards, even between IE versions. Firefox meets all compatibility requirements which is why that is the recommended platform for VICIDIAL agents.
+
+As of release 2.0.4 of astguiclient, IE 5.0 and 5.5 compatibility was broken to make VICIDIAL fully compatible with IE 6.0. Along with this change, all of the memory issues were fixed, along with several features that were not working before in IE like HotKeys.
+
+
+Some of the issues include the following:
+- Because ActiveX is used for AJAX with IE(and no other browser) it is difficult to debug the issue with faulty garabage collection where IE, or rather ActiveX, will not delete any of the XMLHTTPRequest events that it grabs resulting in the eventual crashing of IE after it hits its memory limit. I have heard that with IE7 and newer ActiveX there is a potential way around this through using some different Javascript commands.
+- Using a span with NOSCROLL and a form element inside of it are sometimes ignored by IE, not sure why, but using spans with form elements may need to be changed to accomodate IE in the future.
+	Changed:
+		.cust_form {font-family: sans-serif; font-size: 10px; overflow:}
+	To:
+		.cust_form {font-family: sans-serif; font-size: 10px}
+- For some reason form elements inside of a hidden span cannot be given focus or blur(Causing Hotkeys not to work):
+	Commented out the following lines:
+		document.vicidial_form.inert_button.focus();
+		document.vicidial_form.inert_button.blur();
+- There are issues with Hotkeys key-binding working with some versions of IE dues to the Javascript used to achieve the function.
+- Sometimes document elements will error out as undefined even though Firefox ses them just fine, for example:
+	Commented out the folowing lines(3 locations):
+		if ( (dialed_label.length < 3) || (dialed_label=='NONE') ) {dialed_label='MAIN';}
+	Changed to:
+		if (dialed_label=='NONE') {dialed_label='MAIN';}
+	Making these changes allows IE to work with 2.0.3 but does not allow for color status bar changes on inbound calls.
+
+

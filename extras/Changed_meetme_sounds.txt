@@ -1,0 +1,37 @@
+* Changed Meetme Sounds in Asterisk			2007-07-27
+
+
+For some reason, possibly efficiency, the enter and leave sounds that you hear in standard Asterisk meetme rooms are actually hex dumps of RAW ULAW 8bit audio that have been compiled into the code of Asterisk in a header file. This makes them somewhat difficult to change, especially since there are no instructions.
+
+This should slightly reduce time that it takes for calls to get to agents, as well as reduce the time of the locks that occur when these sounds are played in Asterisk. The new enter and leave sounds I include with VICIDIAL are 0.12 and 0.13 seconds respectively as compared to the default sounds which are more than double that.
+
+
+Here are the steps I went to to change the meetme enter and leave sounds:
+
+
+1. grab the source audio file you want and open it in your favorite editor
+	- In my case I tweaked the audio I used for the app_conference build I made and shrunk them a bit until they were at most, half the length as the Asterisk default sounds they would be replacing
+
+
+2. Save the audio as 8-bit, 8k ULAW audio and save as .raw
+
+
+3. used "hexdump" to dump the audio file into two-character hex chunks
+	/usr/bin/hexdump -C ./enter.raw
+	- I'm sure this could be made prettier with the proper formatting strings, but I didn't have time for that
+	- Here's some of the output:
+
+	00000000  d6 dc 55 5f 63 67 f0 f0  74 75 d6 ee 5d 73 66 60  |÷‹U_cgtu÷Ó]sf`|
+	00000010  dc fd 62 68 5b 5a 57 5e  5b 5c ef fc 4d 51 57 4c  |‹˝bh[ZW^[\Ô¸MQWL|
+	00000020  5d 66 60 51 6c 5f 3e 4d  59 47 72 e4 52 53 58 48  |]f`Ql_>MYGr‰RSXH|
+
+
+4. Used favorite text editor to format the data properly:
+	- 60 character length lines comma-space separated in the same format as enter.h and leave.h were in. Don't forget the header and footer to this raw hex audio, they are important
+
+	0xd6, 0xdc, 0x55, 0x5f, 0x63, 0x67, 0xf0, 0xf0, 0x74, 0x75, 
+	0xd6, 0xee, 0x5d, 0x73, 0x66, 0x60, 0xdc, 0xfd, 0x62, 0x68, 
+	0x5b, 0x5a, 0x57, 0x5e, 0x5b, 0x5c, 0xef, 0xfc, 0x4d, 0x51, 
+
+5. Copied the new enter.h and leave.h files over the old ones, and compile Asterisk
+	
