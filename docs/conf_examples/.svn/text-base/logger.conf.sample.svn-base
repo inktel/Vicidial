@@ -1,3 +1,0 @@
-[logfiles]
-console => notice,warning,error
-messages => notice,warning,error,debug,verbose

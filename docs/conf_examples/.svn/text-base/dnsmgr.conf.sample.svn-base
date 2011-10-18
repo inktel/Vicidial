@@ -1,3 +1,0 @@
-[general]
-enable=yes		; enable creation of managed DNS lookups
-refreshinterval=300	; refresh managed DNS lookups every <n> seconds

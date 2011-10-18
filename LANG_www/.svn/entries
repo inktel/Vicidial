@@ -1,91 +1,0 @@
-10
-
-dir
-1737
-svn://svn.eflo.net/agc_2-X/trunk/LANG_www
-svn://svn.eflo.net
-
-
-
-2011-07-19T05:54:22.723989Z
-1696
-mattf
-
-
-svn:special svn:externals svn:needs-lock
-
-
-
-
-
-
-
-
-
-
-
-3d104415-ff17-0410-8863-d5cf3c621b8a
-
-agc_br
-dir
-
-agc_de
-dir
-
-agc_el
-dir
-
-agc_en
-dir
-
-agc_es
-dir
-
-agc_fr
-dir
-
-agc_it
-dir
-
-agc_nl
-dir
-
-agc_pl
-dir
-
-agc_pt
-dir
-
-agc_ru
-dir
-
-agc_se
-dir
-
-agc_sk
-dir
-
-agc_tw
-dir
-
-vicidial_br
-dir
-
-vicidial_de
-dir
-
-vicidial_el
-dir
-
-vicidial_en
-dir
-
-vicidial_es
-dir
-
-vicidial_fr
-dir
-
-vicidial_it
-dir
-

@@ -1,34 +1,0 @@
-10
-
-dir
-1737
-svn://svn.eflo.net/agc_2-X/trunk/www
-svn://svn.eflo.net
-
-
-
-2011-10-07T11:15:34.072201Z
-1737
-mattf
-
-
-svn:special svn:externals svn:needs-lock
-
-
-
-
-
-
-
-
-
-
-
-3d104415-ff17-0410-8863-d5cf3c621b8a
-
-agc
-dir
-
-vicidial
-dir
-
