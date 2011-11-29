@@ -844,7 +844,7 @@ if ($relogin == 'YES')
     echo "<span id=\"LogiNReseT\"><input type=\"button\" value=\"Refresh Campaign List\" onclick=\"login_allowable_campaigns()\"></span></td></tr>\n";
     echo "<tr><td align=\"left\" colspan=\"2\"><font size=\"1\"><br />VERSION: $version &nbsp; &nbsp; &nbsp; BUILD: $build</font></td></tr>\n";
     echo "</table></center>\n";
-    echo "</form>\n\n";br
+    echo "</form>\n\n";
 	echo "</body>\n\n";
 	echo "</html>\n\n";
 	exit;
