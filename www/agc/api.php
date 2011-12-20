@@ -285,7 +285,10 @@ if ($function == 'version')
 ################################################################################
 
 
-
+if(strlen($source)<2)
+{
+	$source = 'agc';
+}
 
 
 ################################################################################
@@ -308,19 +311,19 @@ else
 		}
 	else
 		{
-		$stmt="SELECT count(*) from vicidial_users where user='$user' and pass='$pass' and vdc_agent_api_access = '1';";
+		$stmt="SELECT count(*) from vicidial_users where user='$user' and vdc_agent_api_access = '1';";
 		if ($DB) {echo "|$stmt|\n";}
 		if ($non_latin > 0) {$rslt=mysql_query("SET NAMES 'UTF8'");}
 		$rslt=mysql_query($stmt, $link);
 		$row=mysql_fetch_row($rslt);
 		$auth=$row[0];
 
-		if( (strlen($user)<2) or (strlen($pass)<2) or ($auth==0))
+		if( (strlen($user)<2) or ($auth==0))
 			{
 			$result = 'ERROR';
-			$result_reason = "Invalid Username/Password";
-			echo "$result: $result_reason: |$user|$pass|$auth|\n";
-			$data = "$user|$pass|$auth";
+			$result_reason = "Invalid Username";
+			echo "$result: $result_reason: |$user|$auth|\n";
+			$data = "$user|$auth";
 			api_log($link,$api_logging,$api_script,$user,$agent_user,$function,$value,$result,$result_reason,$source,$data);
 			exit;
 			}
@@ -341,7 +344,10 @@ else
 				}
 			else
 				{
-				# do nothing for now
+					if (strlen($agent_user)<1)
+					{
+						$agent_user = $user;
+					}
 				}
 			}
 		}

@@ -1,4 +1,4 @@
-3<?php
+<?php
 # vicidial.php - the web-based version of the astVICIDIAL client application
 # 
 # Copyright (C) 2011  Matt Florell <vicidial@gmail.com>    LICENSE: AGPLv2
@@ -3646,10 +3646,8 @@ if ($enable_fast_refresh < 1) {echo "\tvar refresh_interval = 1000;\n";}
 		{
 		conf_dialed=1;
 
-		if (customerparked == 0)
-		{
-			mainxfer_send_redirect('ParK',lastcustchannel,lastcustserverip);
-		}
+		mainxfer_send_redirect('ParK',lastcustchannel,lastcustserverip);
+
 		SendManualDial('YES');
 		}
 
@@ -5985,11 +5983,7 @@ function set_length(SLnumber,SLlength_goal,SLdirection)
 			{
 			MD_channel_look=0;
 			MD_ring_secondS=0;
-			alert_box("No answer was received for almost a minute. Please try again later.\n");
-			if (taskCheckOR == 'YES')
-				{
-				xfercall_send_hangup();
-				}
+			alert_box("Dial timed out, contact your system administrator\n");
 			}
 
 		}
@@ -6381,7 +6375,7 @@ function set_length(SLnumber,SLlength_goal,SLdirection)
 							document.vicidial_form.security_phrase.value	= MDnextResponse_array[25];
 							var REGcommentsNL = new RegExp("!N","g");
 							MDnextResponse_array[26] = MDnextResponse_array[26].replace(REGcommentsNL, "\n");
-							document.vicidial_form.comments.value			= "Has been called " + MDnextResponse_array[27] + " times"; // changed to display called count
+							document.vicidial_form.comments.value			= MDnextResponse_array[26];
 							document.vicidial_form.called_count.value		= MDnextResponse_array[27];
 							previous_called_count							= MDnextResponse_array[27];
 							previous_dispo									= MDnextResponse_array[2];
@@ -7342,7 +7336,7 @@ function set_length(SLnumber,SLlength_goal,SLdirection)
 							document.vicidial_form.security_phrase.value	= check_VDIC_array[29];
 							var REGcommentsNL = new RegExp("!N","g");
 							check_VDIC_array[30] = check_VDIC_array[30].replace(REGcommentsNL, "\n");
-							document.vicidial_form.comments.value			= "Has been called " + check_VDIC_array[31] + " times"; // changed to show called count. use [30] to display comments instead
+							document.vicidial_form.comments.value			= check_VDIC_array[30];
 							document.vicidial_form.called_count.value		= check_VDIC_array[31];
 							CBentry_time									= check_VDIC_array[32];
 							CBcallback_time									= check_VDIC_array[33];
@@ -7958,7 +7952,6 @@ function set_length(SLnumber,SLlength_goal,SLdirection)
                 document.getElementById("WebFormSpanTwo").innerHTML = "<img src=\"./images/vdc_LB_webform_two_OFF.gif\" border=\"0\" alt=\"Web Form 2\" />";
 				}
             document.getElementById("ParkControl").innerHTML = "<img src=\"./images/vdc_LB_parkcall_OFF.gif\" border=\"0\" alt=\"Park Call\" />";
-			document.getElementById("ParkControl2").innerHTML = "<img src=\"./images/vdc_LB_parkcall_OFF.gif\" border=\"0\" alt=\"Park Call\" />";
 			if ( (ivr_park_call=='ENABLED') || (ivr_park_call=='ENABLED_PARK_ONLY') )
 				{
                 document.getElementById("ivrParkControl").innerHTML = "<img src=\"./images/vdc_LB_ivrparkcall_OFF.gif\" border=\"0\" alt=\"IVR Park Call\" />";
@@ -8151,7 +8144,7 @@ function set_length(SLnumber,SLlength_goal,SLdirection)
 			document.vicidial_form.xferchannel.value = "";
 			lastxferchannel='';
 
-            document.getElementById("Leave3WayCall").innerHTML ="<img src=\"./images/vdc_XB_leave3waycall_OFF.gif\" border=\"0\" alt=\"LEAVE 3-WAY CALL\" />";
+        //  document.getElementById("Leave3WayCall").innerHTML ="<img src=\"./images/vdc_XB_leave3waycall_OFF.gif\" border=\"0\" alt=\"LEAVE 3-WAY CALL\" />";
 
 			document.getElementById("ParkControl2").innerHTML = "<img src=\"./images/vdc_LB_parkcall_OFF.gif\" border=\"0\" alt=\"Park Call\" />";
 				

@@ -520,6 +520,8 @@ if ($agent_display_dialable_leads > 0)
     <span style="background-color: <?php echo $MAIN_COLOR ?>" id="LocalCloser"><img src="./images/vdc_XB_localcloser_OFF.gif" border="0" alt="LOCAL CLOSER" style="vertical-align:middle" /></span> &nbsp; &nbsp;
  </td>
     <td align="left">
+        <font class="body_small_bold"><span id="ParkCounterSpan2"> &nbsp; </span></font><br />
+    <span style="background-color: <?php echo $MAIN_COLOR ?>" id="ParkControl2"><img src="./images/vdc_LB_parkcall_OFF.gif" border="0" alt="Park Call" /></span><br />
     <span style="background-color: <?php echo $MAIN_COLOR ?>" id="HangupXferLine"><img src="./images/vdc_XB_hangupxferline_OFF.gif" border="0" alt="Hangup Xfer Line" style="vertical-align:middle" /></span>
  </td>
  </tr>

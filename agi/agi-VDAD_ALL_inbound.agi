@@ -606,7 +606,7 @@ $sthA->finish();
 
 ### Grab inbound groups values from the database
 $cbc=0;
-$stmtA = "SELECT call_time_id,after_hours_action,after_hours_message_filename,after_hours_exten,after_hours_voicemail,welcome_message_filename,moh_context,onhold_prompt_filename,prompt_interval,agent_alert_exten,agent_alert_delay,drop_call_seconds,drop_action,drop_exten,next_agent_call,voicemail_ext,queue_priority,drop_inbound_group,afterhours_xfer_group,play_place_in_line,play_estimate_hold_time,hold_time_option,hold_time_option_seconds,hold_time_option_exten,hold_time_option_voicemail,hold_time_option_xfer_group,hold_time_option_callback_filename,hold_time_option_callback_list_id,hold_recall_xfer_group,no_delay_call_route,play_welcome_message,no_agent_no_queue,no_agent_action,no_agent_action_value,extension_appended_cidname,uniqueid_status_display,uniqueid_status_prefix,hold_time_option_minimum,hold_time_option_press_filename,hold_time_option_callmenu,onhold_prompt_no_block,onhold_prompt_seconds,hold_time_option_no_block,hold_time_option_prompt_seconds,hold_time_second_option,hold_time_third_option,wait_hold_option_priority,wait_time_option,wait_time_second_option,wait_time_third_option,wait_time_option_seconds,wait_time_option_exten,wait_time_option_voicemail,wait_time_option_xfer_group,wait_time_option_callmenu,wait_time_option_callback_filename,wait_time_option_callback_list_id,wait_time_option_press_filename,wait_time_option_no_block,wait_time_option_prompt_seconds,active,calculate_estimated_hold_seconds,add_lead_url,eht_minimum_prompt_filename,eht_minimum_prompt_no_block,eht_minimum_prompt_seconds,on_hook_ring_time,ingroup_recording_override,ingroup_rec_filename FROM vicidial_inbound_groups where group_id = '$channel_group';";
+$stmtA = "SELECT call_time_id,after_hours_action,after_hours_message_filename,after_hours_exten,after_hours_voicemail,welcome_message_filename,moh_context,onhold_prompt_filename,prompt_interval,agent_alert_exten,agent_alert_delay,drop_call_seconds,drop_action,drop_exten,next_agent_call,voicemail_ext,queue_priority,drop_inbound_group,afterhours_xfer_group,play_place_in_line,play_estimate_hold_time,hold_time_option,hold_time_option_seconds,hold_time_option_exten,hold_time_option_voicemail,hold_time_option_xfer_group,hold_time_option_callback_filename,hold_time_option_callback_list_id,hold_recall_xfer_group,no_delay_call_route,play_welcome_message,no_agent_no_queue,no_agent_action,no_agent_action_value,extension_appended_cidname,uniqueid_status_display,uniqueid_status_prefix,hold_time_option_minimum,hold_time_option_press_filename,hold_time_option_callmenu,onhold_prompt_no_block,onhold_prompt_seconds,hold_time_option_no_block,hold_time_option_prompt_seconds,hold_time_second_option,hold_time_third_option,wait_hold_option_priority,wait_time_option,wait_time_second_option,wait_time_third_option,wait_time_option_seconds,wait_time_option_exten,wait_time_option_voicemail,wait_time_option_xfer_group,wait_time_option_callmenu,wait_time_option_callback_filename,wait_time_option_callback_list_id,wait_time_option_press_filename,wait_time_option_no_block,wait_time_option_prompt_seconds,active,calculate_estimated_hold_seconds,add_lead_url,eht_minimum_prompt_filename,eht_minimum_prompt_no_block,eht_minimum_prompt_seconds,on_hook_ring_time,ingroup_recording_override,ingroup_rec_filename,max_calls_in_queue,max_calls_in_queue_filename FROM vicidial_inbound_groups where group_id = '$channel_group';";
 $sthA = $dbhA->prepare($stmtA) or die "preparing: ",$dbhA->errstr;
 $sthA->execute or die "executing: $stmtA ", $dbhA->errstr;
 $sthArows=$sthA->rows;
@@ -690,6 +690,8 @@ if ($sthArows > 0)
 	$on_hook_ring_time =				$aryA[66];
 	$ingroup_recording_override =		$aryA[67];
 	$campaign_rec_filename =			$aryA[68];
+	$max_calls_in_queue =				$aryA[69];
+	$max_calls_in_queue_filename =		$aryA[70];
 	$custom_call_id='';
 	if ($uniqueid_status_display =~ /ENABLED/)
 		{$custom_call_id = "$uniqueid";}
@@ -1367,6 +1369,53 @@ if ($no_agent_no_queue =~ /Y|NO_PAUSED/)
 	}
 ##### END NO AGENT NO QUEUE CHECK #####
 
+### RETRIEVE THE QUEUE POSITION OF THE CALL AND CHECK FOR MAXIMUM CALLS IN QUEUE SETTING
+$queue_position=1;
+$stmtA = "SELECT count(*) from vicidial_auto_calls where status = 'LIVE' and campaign_id='$channel_group';";
+$sthA = $dbhA->prepare($stmtA) or die "preparing: ",$dbhA->errstr;
+$sthA->execute or die "executing: $stmtA ", $dbhA->errstr;
+$sthArows=$sthA->rows;
+if ($AGILOG) {$agi_string = "$sthArows|$stmtA|";   &agi_output;}
+$dbhP=$dbhA;   $mysql_count='02120';   $MEL_aff_rows=$sthArows;   &mysql_error_logging;
+if ($sthArows > 0)
+{
+	@aryA = $sthA->fetchrow_array;
+	$queue_position = $aryA[0];
+}
+
+if ( ($max_calls_in_queue > 0) && ($queue_position > $max_calls_in_queue) ) 
+{
+	### we've reached the maximum number of calls allowed in queue. Play message if we have to before disconnecting call
+	if ( ($max_calls_in_queue_filename !~ /---NONE---/) && (length($max_calls_in_queue_filename) > 0) )
+	{
+		if ($max_calls_in_queue_filename =~ /\|/)
+		{
+			@max_calls_in_queue_filename_array = split(/\|/,$max_calls_in_queue_filename);
+			$w=0;
+			foreach(@max_calls_in_queue_filename_array)
+			{
+				if (length($max_calls_in_queue_filename_array[$w])>0)
+				{
+					$AGI->stream_file("$max_calls_in_queue_filename_array[$w]");
+				}
+				$w++;
+			}
+		}
+		else
+		{$AGI->stream_file("$max_calls_in_queue_filename");}
+	}
+	
+	### add record to call log before hanging up
+	
+	
+	### now disconnect this call by inserting a NEW record to the vicidial_manager table to be processed
+	$VHqueryCID = "VA$CIDdate$hour$min$sec$sec";
+	$stmtA = "INSERT INTO vicidial_manager values('','','$SQLdate','NEW','N','$VARserver_ip','','Hangup','$VHqueryCID','Channel: $channel','','','','','','','','','')";
+	$affected_rows = $dbhA->do($stmtA);  
+	$dbhP=$dbhA;   $mysql_count='02102';   $MEL_aff_rows=$affected_rows;   &mysql_error_logging;
+	if ($AGILOG) {$agi_string = "--    VDCL call_hungup maxcallsinqueue: |$VHqueryCID|$VDADconf_exten|$channel|insert to vicidial_manager";   &agi_output;}
+}
+### END	RETRIEVE THE QUEUE POSITION OF THE CALL AND CHECK FOR MAXIMUM CALLS IN QUEUE SETTING
 
 
 ##### PLAY WELCOME MESSAGE #####
@@ -1562,20 +1611,6 @@ if ($enable_queuemetrics_logging > 0)
 	if ($AGILOG) {$agi_string = "$Baffected_rows|$stmtB|";   &agi_output;}
 		$dbhP=$dbhB;   $stmtA=$stmtB;   $mysql_count='02115';   $MEL_aff_rows=$Baffected_rows;   &mysql_error_logging;
 	$dbhB->disconnect();
-	}
-
-### determin original queue position of the call
-$queue_position=1;
-$stmtA = "SELECT count(*) from vicidial_auto_calls where status = 'LIVE' and campaign_id='$channel_group';";
-$sthA = $dbhA->prepare($stmtA) or die "preparing: ",$dbhA->errstr;
-$sthA->execute or die "executing: $stmtA ", $dbhA->errstr;
-$sthArows=$sthA->rows;
-	if ($AGILOG) {$agi_string = "$sthArows|$stmtA|";   &agi_output;}
-	$dbhP=$dbhA;   $mysql_count='02120';   $MEL_aff_rows=$sthArows;   &mysql_error_logging;
-if ($sthArows > 0)
-	{
-	@aryA = $sthA->fetchrow_array;
-	$queue_position = $aryA[0];
 	}
 
 ### UPDATE vicidial_auto_calls record with starting queue_position

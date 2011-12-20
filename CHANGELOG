@@ -1,5 +1,8 @@
 ################ CHANGELOG
 
 # 110617-1519 - Changed bin/AST_VDautodial.pl to fix bug in substring on line 1339
-# 110617-1430 - Added ability to support dispositions per ingroup on line 8278
+# 110617-1430 - Added ability to support dispositions per ingroup in agc/vicidial.php on line 8278
 # 110814-0910 - Added ability to sort by status in AST_timeonVDADcall.php on line 2011
+# 111220-1249 - Added max_calls_in_queue and max_calls_in_queue_filename options to vicidial_inbound_groups table
+# 111220-1250 - Added logic to support max_calls_in_queue/max_calls_in_queue_filename to agi-VDAD_ALL_inbound.agi beginning on lines 609,693,and 1372
+# 111220-1255 - Added fields to admin.php to capture max_calls_in_queue/max_calls_in_queue_filename options beginning on lines 1525,1803,14373,22615,22720,22857
