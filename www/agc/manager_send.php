@@ -423,7 +423,6 @@ if ($ACTION=="OriginateVDRelogin")
 		}
 	$ACTION="Originate";
 	}
-
 if ($ACTION=="Originate")
 	{
 	if ( (strlen($exten)<1) or (strlen($channel)<1) or (strlen($ext_context)<1) or ( (strlen($queryCID)<10) && ($alertCID < 1) ) )

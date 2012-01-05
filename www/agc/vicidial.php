@@ -1,4 +1,4 @@
-3<?php
+<?php
 # vicidial.php - the web-based version of the astVICIDIAL client application
 # 
 # Copyright (C) 2011  Matt Florell <vicidial@gmail.com>    LICENSE: AGPLv2
@@ -3316,6 +3316,9 @@ if ($enable_fast_refresh < 1) {echo "\tvar refresh_interval = 1000;\n";}
 	var API_selected_xfergroup='';
 	var API_selected_callmenu='';
 	var custom_fields_enabled='<?php echo $custom_fields_enabled ?>';
+   var on_hook_agent='<?php echo $on_hook_agent ?>';
+   var SIP_user_DiaL='<?php echo $SIP_user_DiaL ?>';
+   var SIqueryCID  = '<?php echo $SIqueryCID ?>';
 	var form_contents_loaded=0;
 	var enable_xfer_presets='<?php echo $enable_xfer_presets ?>';
 	var hide_xfer_number_to_dial='<?php echo $hide_xfer_number_to_dial ?>';
@@ -6281,7 +6284,13 @@ function set_length(SLnumber,SLlength_goal,SLdirection)
 				else
 					{var call_prefix = manual_dial_prefix;}
 
-				manDiaLnext_query = "server_ip=" + server_ip + "&session_name=" + session_name + "&ACTION=manDiaLnextCaLL&conf_exten=" + session_id + "&user=" + user + "&pass=" + pass + "&campaign=" + campaign + "&ext_context=" + ext_context + "&dial_timeout=" + dial_timeout + "&dial_prefix=" + call_prefix + "&campaign_cid=" + call_cid + "&preview=" + man_preview + "&agent_log_id=" + agent_log_id + "&callback_id=" + mdnCBid + "&lead_id=" + mdnBDleadid + "&phone_code=" + mdnDiaLCodE + "&phone_number=" + mdnPhonENumbeR + "&list_id=" + mdnLisT_id + "&stage=" + mdnStagE  + "&use_internal_dnc=" + use_internal_dnc + "&use_campaign_dnc=" + use_campaign_dnc + "&omit_phone_code=" + omit_phone_code + "&manual_dial_filter=" + manual_dial_filter + "&vendor_lead_code=" + mdVendorid + "&usegroupalias=" + mdgroupalias + "&account=" + active_group_alias + "&agent_dialed_number=" + agent_dialed_number + "&agent_dialed_type=" + agent_dialed_type + "&vtiger_callback_id=" + vtiger_callback_id + "&dial_method=" + dial_method + "&manual_dial_call_time_check=" + manual_dial_call_time_check;
+            var manual_dial_next_action = 'manDiaLnextCaLL';
+            if (on_hook_agent == 'Y') // if agent is on hook, need to call manDiaLnextCaLL both to agent and manually dialed number
+            {
+                manual_dial_next_action = 'manDiaLnextCaLLOnHook';
+            }
+                    
+				manDiaLnext_query = "server_ip=" + server_ip + "&session_name=" + session_name + "&ACTION=" + manual_dial_next_action + "&conf_exten=" + session_id + "&user=" + user + "&pass=" + pass + "&campaign=" + campaign + "&ext_context=" + ext_context + "&dial_timeout=" + dial_timeout + "&dial_prefix=" + call_prefix + "&campaign_cid=" + call_cid + "&preview=" + man_preview + "&agent_log_id=" + agent_log_id + "&callback_id=" + mdnCBid + "&lead_id=" + mdnBDleadid + "&phone_code=" + mdnDiaLCodE + "&phone_number=" + mdnPhonENumbeR + "&list_id=" + mdnLisT_id + "&stage=" + mdnStagE  + "&use_internal_dnc=" + use_internal_dnc + "&use_campaign_dnc=" + use_campaign_dnc + "&omit_phone_code=" + omit_phone_code + "&manual_dial_filter=" + manual_dial_filter + "&vendor_lead_code=" + mdVendorid + "&usegroupalias=" + mdgroupalias + "&account=" + active_group_alias + "&agent_dialed_number=" + agent_dialed_number + "&agent_dialed_type=" + agent_dialed_type + "&vtiger_callback_id=" + vtiger_callback_id + "&dial_method=" + dial_method + "&manual_dial_call_time_check=" + manual_dial_call_time_check + "&extrachannel=" + SIP_user_DiaL + "&customCID=" + SIqueryCID;
 				//		alert(manual_dial_filter + "\n" +manDiaLnext_query);
 				xmlhttp.open('POST', 'vdc_db_query.php');
 				xmlhttp.setRequestHeader('Content-Type','application/x-www-form-urlencoded; charset=UTF-8');
@@ -12373,56 +12382,77 @@ $zi=2;
 
 <form name=vicidial_form id=vicidial_form onsubmit="return false;">
 
+<!-- Loading gif used to display upon login -->
 <span style="position:absolute;left:0px;top:0px;z-index:300;" id="LoadingBox">
-    <table border="0" bgcolor="white" width="<?php echo $JS_browser_width ?>px" height="<?php echo $JS_browser_height ?>px"><tr><td align="left" valign="top">
- <br />
- <br />
- <br />
- <br />
- <br />
- <br />
-    &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <img src="./images/loading.gif" height="90px" width="545px" alt="Loading" />
- <br />
- <br />
-    </td></tr></table>
-</span>
-
-
-<span style="position:absolute;left:0px;top:0px;z-index:<?php $zi++; echo $zi ?>;" id="Header">
-    <table border="0" cellpadding="0" cellspacing="0" bgcolor="white" width="<?php echo $MNwidth ?>px" marginwidth="0" marginheight="0" leftmargin="0" topmargin="0" valign="top" align="left">
-    <tr valign="top" align="left"><td colspan="3" valign="top" align="left">
-    <input type="hidden" name="extension" id="extension" />
-    <input type="hidden" name="custom_field_values" id="custom_field_values" value="" />
-    <input type="hidden" name="FORM_LOADED" id="FORM_LOADED" value="0" />
-	<font class="queue_text">
-	<a href="#" onclick="start_all_refresh();"><font class="queue_text">Logged in as User</font></a>
-	<?php 
-	echo ": $VD_login on Phone: $SIP_user"; 
-	if ($on_hook_agent == 'Y')
-		{echo "(<a href=\"#\" onclick=\"NoneInSessionCalL();return false;\">ring</a>)";}
-	echo "&nbsp; to campaign: $VD_campaign&nbsp; \n"; 
-	?>
-	 &nbsp; &nbsp; <span id="agentchannelSPAN"></span></font>
-    </td><td colspan="3" valign="top" align="right"><font class="body_text">
-	<?php if ($territoryCT > 0) {echo "<a href=\"#\" onclick=\"OpeNTerritorYSelectioN();return false;\">TERRITORIES</a> &nbsp; &nbsp; \n";} ?>
-	<?php if ($INgrpCT > 0) {echo "<a href=\"#\" onclick=\"OpeNGrouPSelectioN();return false;\">GROUPS</a> &nbsp; &nbsp; \n";} ?>
-	<?php	echo "<a href=\"#\" onclick=\"NormalLogout();return false;\">LOGOUT</a>\n"; ?>
-    </font></td></tr>
+    <table border="0" bgcolor="white" width="<?php echo $JS_browser_width ?>px" height="<?php echo $JS_browser_height ?>px">
+        <tr>
+            <td align="left" valign="top">
+    
+                <br />
+                 <br />
+                 <br />
+                 <br />
+                 <br />
+                 <br />
+                &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <img src="./images/x/loading.gif" height="90px" width="545px" alt="Loading" />
+                 <br />
+                 <br />
+            </td>
+        </tr>
     </table>
 </span>
 
+<!-- Top  form displaying logged in user (ext) and campaign, along with the active channel information for live calls on the left and GROUPS/LOGOUT options on the right -->
+<span style="position:absolute;left:0px;top:0px;z-index:<?php $zi++; echo $zi ?>;" id="Header">
+    <table border="0" cellpadding="0" cellspacing="0" bgcolor="white" width="<?php echo $MNwidth ?>px" marginwidth="0" marginheight="0" leftmargin="0" topmargin="0" valign="top" align="left">
+        <tr valign="top" align="left">
+            <td colspan="3" valign="top" align="left">
+                <input type="hidden" name="extension" id="extension" />
+                <input type="hidden" name="custom_field_values" id="custom_field_values" value="" />
+                <input type="hidden" name="FORM_LOADED" id="FORM_LOADED" value="0" />
+                <font class="queue_text">
+                    <a href="#" onclick="start_all_refresh();"><font class="queue_text">Logged in as User</font></a>
+                    <?php 
+                    echo ": $VD_login on Phone: $SIP_user"; 
+                    if ($on_hook_agent == 'Y')
+                            {echo "(<a href=\"#\" onclick=\"NoneInSessionCalL();return false;\">ring</a>)";}
+                    echo "&nbsp; to campaign: $VD_campaign&nbsp; \n"; 
+                    ?>
+                    &nbsp; &nbsp; <span id="agentchannelSPAN"></span>
+                </font>
+            </td>
+            <td colspan="3" valign="top" align="right">
+                <font class="body_text">
+                    <?php if ($territoryCT > 0) {echo "<a href=\"#\" onclick=\"OpeNTerritorYSelectioN();return false;\">TERRITORIES</a> &nbsp; &nbsp; \n";} ?>
+                    <?php if ($INgrpCT > 0) {echo "<a href=\"#\" onclick=\"OpeNGrouPSelectioN();return false;\">GROUPS</a> &nbsp; &nbsp; \n";} ?>
+                    <?php	echo "<a href=\"#\" onclick=\"NormalLogout();return false;\">LOGOUT</a>\n"; ?>
+                </font>
+            </td>
+       </tr>
+    </table>
+</span>
+
+<!-- Top section displaying tab selections for customer form, campaign script, or list custom fields forms on the left;
+     agent's status and time in that status, conference session id and number of calls in queue in the middle;
+     and Live Call / No Call status indicator on the right -->
 <span style="position:absolute;left:0px;top:13px;z-index:<?php $zi++; echo $zi ?>;" id="Tabs">
     <table border="0" bgcolor="#FFFFFF" width="<?php echo $MNwidth ?>px" height="30px">
-    <tr valign="top" align="left">
-    <td align="left" width="115px"><a href="#" onclick="MainPanelToFront('NO');"><img src="./images/vdc_tab_vicidial.gif" alt="MAIN" width="115px" height="30px" border="0" /></a></td>
-    <td align="left" width="90px"><a href="#" onclick="ScriptPanelToFront();"><img src="./images/vdc_tab_script.gif" alt="SCRIPT" width="90px" height="30px" border="0" /></a></td>
-	<?php if ($custom_fields_enabled > 0)
-    {echo "<td align=\"left\" width=\"67px\"><a href=\"#\" onclick=\"FormPanelToFront();\"><img src=\"./images/vdc_tab_form.gif\" alt=\"FORM\" width=\"67px\" height=\"30px\" border=\"0\" /></a></td>\n";}
-	?>
-    <td width="<?php echo $HSwidth ?>px" valign="middle" align="center"><font class="body_text">&nbsp; <span id="status">LIVE</span>&nbsp; &nbsp;session ID: <span id="sessionIDspan"></span>&nbsp; &nbsp;<span id="AgentStatusCalls"></span></font></td>
-    <td width="109px"><img src="./images/agc_live_call_OFF.gif" name="livecall" alt="Live Call" width="109px" height="30px" border="0" /></td>
-    </tr>
- </table>
+        <tr valign="top" align="left">
+            <td align="left" width="115px">
+                <a href="#" onclick="MainPanelToFront('NO');"><img src="./images/vdc_tab_vicidial.gif" alt="MAIN" width="115px" height="30px" border="0" /></a>
+            </td>
+            <td align="left" width="90px">
+                <a href="#" onclick="ScriptPanelToFront();"><img src="./images/vdc_tab_script.gif" alt="SCRIPT" width="90px" height="30px" border="0" /></a>
+            </td>
+            <?php if ($custom_fields_enabled > 0)
+            {echo "<td align=\"left\" width=\"67px\"><a href=\"#\" onclick=\"FormPanelToFront();\"><img src=\"./images/vdc_tab_form.gif\" alt=\"FORM\" width=\"67px\" height=\"30px\" border=\"0\" /></a></td>\n";}
+            ?>
+            <td width="<?php echo $HSwidth ?>px" valign="middle" align="center">
+                <font class="body_text">&nbsp; <span id="status">LIVE</span>&nbsp; &nbsp;session ID: <span id="sessionIDspan"></span>&nbsp; &nbsp;<span id="AgentStatusCalls"></span></font>
+            </td>
+            <td width="109px"><img src="./images/agc_live_call_OFF.gif" name="livecall" alt="Live Call" width="109px" height="30px" border="0" /></td>
+        </tr>
+     </table>
 </span>
 
 <span style="position:absolute;left:0px;top:0px;z-index:<?php $zi++; echo $zi ?>;" id="WelcomeBoxA">

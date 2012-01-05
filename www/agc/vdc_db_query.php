@@ -329,6 +329,8 @@ if (isset($_GET["campaign_cid"]))				{$campaign_cid=$_GET["campaign_cid"];}
 	elseif (isset($_POST["campaign_cid"]))		{$campaign_cid=$_POST["campaign_cid"];}
 if (isset($_GET["MDnextCID"]))					{$MDnextCID=$_GET["MDnextCID"];}
 	elseif (isset($_POST["MDnextCID"]))			{$MDnextCID=$_POST["MDnextCID"];}
+if (isset($_GET["customCID"]))                  {$customCID=$_GET["customCID"];}
+	elseif (isset($_POST["customCID"]))         {$customCID=$_POST["customCID"];}
 if (isset($_GET["uniqueid"]))					{$uniqueid=$_GET["uniqueid"];}
 	elseif (isset($_POST["uniqueid"]))			{$uniqueid=$_POST["uniqueid"];}
 if (isset($_GET["lead_id"]))					{$lead_id=$_GET["lead_id"];}
@@ -343,6 +345,8 @@ if (isset($_GET["phone_number"]))				{$phone_number=$_GET["phone_number"];}
 	elseif (isset($_POST["phone_number"]))		{$phone_number=$_POST["phone_number"];}
 if (isset($_GET["channel"]))					{$channel=$_GET["channel"];}
 	elseif (isset($_POST["channel"]))			{$channel=$_POST["channel"];}
+if (isset($_GET["extrachannel"]))               {$extrachannel=$_GET["extrachannel"];}
+	elseif (isset($_POST["extrachannel"]))      {$extrachannel=$_POST["extrachannel"];}
 if (isset($_GET["start_epoch"]))				{$start_epoch=$_GET["start_epoch"];}
 	elseif (isset($_POST["start_epoch"]))		{$start_epoch=$_POST["start_epoch"];}
 if (isset($_GET["dispo_choice"]))				{$dispo_choice=$_GET["dispo_choice"];}
@@ -1204,6 +1208,15 @@ if ($ACTION == 'UpdateFields')
 ###                   in the campaign, reserve it, send data back to client and
 ###                   place the call by inserting into vicidial_manager
 ################################################################################
+if ($ACTION == 'manDiaLnextCaLLOnHook')
+	{
+        ### calls agent before connecting manual call
+        $stmt="INSERT INTO vicidial_manager values('','','$NOW_TIME','NEW','N','$server_ip','','Originate','$customCID','Channel: $extrachannel','Context: $ext_context','Exten: $conf_exten','Priority: 1','Callerid: $customCID','','','','','');";
+        if ($DB) {echo "$stmt\n";}
+        $rslt=mysql_query($stmt, $link);
+        if ($mel > 0) {mysql_error_logging($NOW_TIME,$link,$mel,$stmt,'00033',$user,$server_ip,$session_name,$one_mysql_log);}
+        $ACTION = 'manDiaLnextCaLL';
+    }
 if ($ACTION == 'manDiaLnextCaLL')
 	{
 	$MT[0]='';

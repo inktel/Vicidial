@@ -1383,7 +1383,7 @@ if ($sthArows > 0)
 	$queue_position = $aryA[0];
 }
 
-if ( ($max_calls_in_queue > 0) && ($queue_position > $max_calls_in_queue) ) 
+if ( ($max_calls_in_queue > 0) && ($queue_position >= $max_calls_in_queue) ) 
 {
 	### we've reached the maximum number of calls allowed in queue. Play message if we have to before disconnecting call
 	if ( ($max_calls_in_queue_filename !~ /---NONE---/) && (length($max_calls_in_queue_filename) > 0) )
@@ -1406,7 +1406,41 @@ if ( ($max_calls_in_queue > 0) && ($queue_position > $max_calls_in_queue) )
 	}
 	
 	### add record to call log before hanging up
+	$stmtA = "INSERT INTO vicidial_closer_log set status='MAXQUE',start_epoch='$now_date_epoch',end_epoch='$now_date_epoch',length_in_sec='1',queue_seconds='0',queue_position='$queue_position',lead_id = '$insert_lead_id',campaign_id='$channel_group',user='VDCL',list_id='$list_id',call_date='$now_date',phone_code='$phone_code',phone_number='$phone_number',comments='MAX CALLS IN QUEUE',term_reason='MAXQUEUE',uniqueid='$uniqueid';";
+	$affected_rows = $dbhA->do($stmtA);
+	$dbhP=$dbhA;   $mysql_count='02016';   $MEL_aff_rows=$affected_rows;   &mysql_error_logging;
+	$stmtB = "select LAST_INSERT_ID() LIMIT 1;";
+	$sthA = $dbhA->prepare($stmtB) or die "preparing: ",$dbhA->errstr;
+	$sthA->execute or die "executing: $stmtB ", $dbhA->errstr;
+	$sthArows=$sthA->rows;
+	$dbhP=$dbhA;   $stmtA=$stmtB;   $mysql_count='02017';   $MEL_aff_rows=$sthArows;   &mysql_error_logging;
+	if ($sthArows > 0)
+	{
+		@aryA = $sthA->fetchrow_array;
+		$insert_close_id = $aryA[0];
+		$cbc++; 
+	}
+	$sthA->finish();
+	if ($AGILOG) {$agi_string = "--  MQ VDCL vcl insert: |$affected_rows|$insert_lead_id|$insert_close_id|$hm|$queue_position|$max_calls_in_queue|$max_calls_in_queue_filename\n|$stmtA|";   &agi_output;}
 	
+	if ($VLEcount < 1)
+	{
+		$stmtA = "INSERT INTO vicidial_log_extended set uniqueid='$uniqueid',server_ip='$VARserver_ip',call_date='$now_date',lead_id = '$insert_lead_id',caller_code='$callerid',custom_call_id='$custom_call_id';";
+		$affected_rows = $dbhA->do($stmtA);
+		$dbhP=$dbhA;   $mysql_count='02145';   $MEL_aff_rows=$affected_rows;   &mysql_error_logging;
+		if ($AGILOG) {$agi_string = "--  MQ VLE insert: |$affected_rows|\n|$stmtA|";   &agi_output;}
+		$VLEcount++;
+	}
+	
+	$stmtA = "UPDATE vicidial_list set status='MAXQUE' where lead_id = '$insert_lead_id';";
+	$affected_rows = $dbhA->do($stmtA);
+	$dbhP=$dbhA;   $mysql_count='02018';   $MEL_aff_rows=$affected_rows;   &mysql_error_logging;
+	if ($AGILOG) {$agi_string = "--  MQ VDCL vl update: |$affected_rows|$insert_lead_id|\n|$stmtA|";   &agi_output;}
+	
+	$stmtA = "DELETE FROM vicidial_auto_calls where callerid='$callerid' and server_ip='$VARserver_ip' order by call_time desc limit 1;";
+	$affected_rows = $dbhA->do($stmtA);
+	$dbhP=$dbhA;   $mysql_count='02019';   $MEL_aff_rows=$affected_rows;   &mysql_error_logging;
+	if ($AGILOG) {$agi_string = "--  MQ VDCL vac record deleted: |$affected_rows| $VDADcampaign|";   &agi_output;}
 	
 	### now disconnect this call by inserting a NEW record to the vicidial_manager table to be processed
 	$VHqueryCID = "VA$CIDdate$hour$min$sec$sec";
