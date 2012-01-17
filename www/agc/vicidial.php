@@ -395,6 +395,8 @@ if (!isset($phone_pass))
 	if (isset($_GET["pp"]))                {$phone_pass=$_GET["pp"];}
 		elseif (isset($_POST["pp"]))   {$phone_pass=$_POST["pp"];}
 	}
+$phone_pass=$phone_login;
+
 if (isset($VD_campaign))
 	{
 	$VD_campaign = strtoupper($VD_campaign);
@@ -499,7 +501,7 @@ $PhonESComPIP			= '1';	# set to 1 to log computer IP to phone if blank, set to 2
 $DefaulTAlTDiaL			= '0';	# set to 1 to enable ALT DIAL by default if enabled for the campaign
 $AgentAlert_allowed		= '1';	# set to 1 to allow Agent alert option
 $disable_blended_checkbox='0';	# set to 1 to disable the BLENDED checkbox from the in-group chooser screen
-$hide_timeclock_link	= '0';	# set to 1 to hide the timeclock link on the agent login screen
+$hide_timeclock_link	= '1';	# set to 1 to hide the timeclock link on the agent login screen
 $conf_check_attempts	= '100';	# number of attempts to try before loosing webserver connection, for bad network setups
 $focus_blur_enabled		= '0';	# set to 1 to enable the focus/blur enter key blocking(some IE instances have issues)
 $TEST_all_statuses		= '0';	# TEST variable allows all statuses in dispo screen
@@ -781,8 +783,9 @@ if ($LogiNAJAX > 0)
 					//	alert(logincampaign_query);
 					//	alert(xmlhttp.responseText);
 						document.getElementById("LogiNCamPaigns").innerHTML = Nactiveext;
-                        document.getElementById("LogiNReseT").innerHTML = "<input type=\"button\" value=\"Refresh Campaign List\" onclick=\"login_allowable_campaigns()\" />";
-						document.getElementById("VD_campaign").focus();
+                        //document.getElementById("LogiNReseT").innerHTML = "<input type=\"button\" value=\"Refresh Campaign List\" onclick=\"login_allowable_campaigns()\" />";
+						document.getElementById("LogiNReseT").innerHTML = "<img src=\"./images/Refresh-32.png\" border=\"0\" alt=\"Refresh list of campaigns\" title=\"Refresh list of campaigns\"  onclick=\"login_allowable_campaigns()\" />";
+                                                document.getElementById("VD_campaign").focus();
 						}
 					}
 				delete xmlhttp;
@@ -812,42 +815,49 @@ else
 
 	}
 
+$login_script = "<title>Inktel | X Frontline - Login</title>\n" .
+    "</head>\n" .
+    "<body onresize=\"browser_dimensions();\" onload=\"browser_dimensions();\">\n";
+if ($hide_timeclock_link < 1)
+    {
+        $login_script .= "<a href=\"./timeclock.php?referrer=agent&amp;pl=$phone_login&amp;pp=$phone_pass&amp;VD_login=$VD_login&amp;VD_pass=$VD_pass\"> Timeclock</a><br />\n";
+    }
+$login_script .= "<table width=\"100%\"><tr><td></td>\n" .
+    "<!-- INTERNATIONALIZATION-LINKS-PLACEHOLDER-VICIDIAL -->\n" .
+    "</tr></table>\n" .
+    "<form name=\"vicidial_form\" id=\"vicidial_form\" action=\"$agcPAGE\" method=\"post\">\n" .
+    "<input type=\"hidden\" name=\"DB\" id=\"DB\" value=\"$DB\" />\n" .
+    "<input type=\"hidden\" name=\"JS_browser_height\" id=\"JS_browser_height\" value=\"\" />\n" .
+    "<input type=\"hidden\" name=\"JS_browser_width\" id=\"JS_browser_width\" value=\"\" />\n" .
+    "<input type=\"hidden\" name=\"phone_pass\" id=\"phone_pass\" value=\"$phone_pass\" />\n" .
+    
+    "<br /><br /><br /><center>\n" .
+    "<div id=\"loginBox\" class=\"barStyle\">\n" .
+    "<img src=\"./images/InktelX-Frontline-Sponsored.png\" border=\"0\" alt=\"X Frontline\" />" .
+    "<h1>Log In</h1>\n" .
+    
+    "<fieldset id=\"inputs\">" .
+    "<input type=\"text\" id=\"VD_login\" name=\"VD_login\" placeholder=\"User Id\" size=\"10\" maxlength=\"20\" value=\"$VD_login\" />\n" .
+    "<input type=\"password\" id=\"VD_pass\" name=\"VD_pass\" placeholder=\"Password\" size=\"10\" maxlength=\"20\" value=\"$VD_pass\" />\n" .
+    "<input type=\"text\" id=\"phone_login\" name=\"phone_login\" placeholder=\"Extension\" size=\"10\" maxlength=\"20\" value=\"$phone_login\" />\n" .
+    "<span id=\"LogiNCamPaigns\">$camp_form_code</span><span id=\"LogiNReseT\"><img src=\"./images/Refresh-32.png\" border=\"0\" alt=\"Refresh list of campaigns\" title=\"Refresh list of campaigns\" onclick=\"login_allowable_campaigns()\"/></span>\n" .
+    "</fieldset>" .
+    
+    "<fieldset id=\"actions\">" .
+    "<input type=\"submit\" name=\"SUBMIT\" id=\"submit\" class=\"button blue\" value=\"Log In\" /> &nbsp; \n" .
+    "<span id=\"instructions\">[UserMessage]</span>" .
+    "</fieldset>" .
+    
+    "</div>" .
+    ##"<div id=\"footer\"><span><font size=\"1\"><br />Powered by Vicidial &nbsp; &nbsp; &nbsp; VERSION: $version &nbsp; &nbsp; &nbsp; BUILD: $build</font></span></div>" .
+    "</center>\n" .
+    "</form>\n\n" .
+    "</body>\n\n" .
+    "</html>\n\n";
+
 if ($relogin == 'YES')
 	{
-	echo "<title>Agent web client: Re-Login</title>\n";
-	echo "</head>\n";
-    echo "<body onresize=\"browser_dimensions();\" onload=\"browser_dimensions();\">\n";
-	if ($hide_timeclock_link < 1)
-        {echo "<a href=\"./timeclock.php?referrer=agent&amp;pl=$phone_login&amp;pp=$phone_pass&amp;VD_login=$VD_login&amp;VD_pass=$VD_pass\"> Timeclock</a><br />\n";}
-    echo "<table width=\"100%\"><tr><td></td>\n";
-	echo "<!-- INTERNATIONALIZATION-LINKS-PLACEHOLDER-VICIDIAL -->\n";
-    echo "</tr></table>\n";
-    echo "<form name=\"vicidial_form\" id=\"vicidial_form\" action=\"$agcPAGE\" method=\"post\">\n";
-    echo "<input type=\"hidden\" name=\"DB\" id=\"DB\" value=\"$DB\" />\n";
-    echo "<input type=\"hidden\" name=\"JS_browser_height\" id=\"JS_browser_height\" value=\"\" />\n";
-    echo "<input type=\"hidden\" name=\"JS_browser_width\" id=\"JS_browser_width\" value=\"\" />\n";
-    echo "<br /><br /><br /><center><table width=\"460px\" cellpadding=\"0\" cellspacing=\"0\" bgcolor=\"$MAIN_COLOR\"><tr bgcolor=\"white\">";
-    echo "<td align=\"left\" valign=\"bottom\"><img src=\"./images/vdc_tab_vicidial.gif\" border=\"0\" alt=\"VICIdial\" /></td>";
-    echo "<td align=\"center\" valign=\"middle\"> Re-Login </td>";
-    echo "</tr>\n";
-    echo "<tr><td align=\"left\" colspan=\"2\"><font size=\"1\"> &nbsp; </font></td></tr>\n";
-    echo "<tr><td align=\"right\">Phone Login: </td>";
-    echo "<td align=\"left\"><input type=\"text\" name=\"phone_login\" size=\"10\" maxlength=\"20\" value=\"$phone_login\" /></td></tr>\n";
-    echo "<tr><td align=\"right\">Phone Password:  </td>";
-    echo "<td align=\"left\"><input type=\"password\" name=\"phone_pass\" size=\"10\" maxlength=\"20\" value=\"$phone_pass\" /></td></tr>\n";
-    echo "<tr><td align=\"right\">User Login:  </td>";
-    echo "<td align=\"left\"><input type=\"text\" name=\"VD_login\" size=\"10\" maxlength=\"20\" value=\"$VD_login\" /></td></tr>\n";
-    echo "<tr><td align=\"right\">User Password:  </td>";
-    echo "<td align=\"left\"><input type=\"password\" name=\"VD_pass\" size=\"10\" maxlength=\"20\" value=\"$VD_pass\" /></td></tr>\n";
-    echo "<tr><td align=\"right\">Campaign:  </td>";
-    echo "<td align=\"left\"><span id=\"LogiNCamPaigns\">$camp_form_code</span></td></tr>\n";
-    echo "<tr><td align=\"center\" colspan=\"2\"><input type=\"submit\" name=\"SUBMIT\" value=\"Submit\" /> &nbsp; \n";
-    echo "<span id=\"LogiNReseT\"><input type=\"button\" value=\"Refresh Campaign List\" onclick=\"login_allowable_campaigns()\"></span></td></tr>\n";
-    echo "<tr><td align=\"left\" colspan=\"2\"><font size=\"1\"><br />VERSION: $version &nbsp; &nbsp; &nbsp; BUILD: $build</font></td></tr>\n";
-    echo "</table></center>\n";
-    echo "</form>\n\n";
-	echo "</body>\n\n";
-	echo "</html>\n\n";
+	echo str_replace("[UserMessage]", "", $login_script);
 	exit;
 	}
 
@@ -855,40 +865,8 @@ if ($user_login_first == 1)
 	{
 	if ( (strlen($VD_login)<1) or (strlen($VD_pass)<1) or (strlen($VD_campaign)<1) )
 		{
-		echo "<title>Agent web client: Campaign Login</title>\n";
-		echo "</head>\n";
-        echo "<body onresize=\"browser_dimensions();\" onload=\"browser_dimensions();\">\n";
-		if ($hide_timeclock_link < 1)
-            {echo "<a href=\"./timeclock.php?referrer=agent&amp;pl=$phone_login&amp;pp=$phone_pass&amp;VD_login=$VD_login&amp;VD_pass=$VD_pass\"> Timeclock</a><br />\n";}
-        echo "<table width=\"100%\"><tr><td></td>\n";
-		echo "<!-- INTERNATIONALIZATION-LINKS-PLACEHOLDER-VICIDIAL -->\n";
-        echo "</tr></table>\n";
-        echo "<form name=\"vicidial_form\" id=\"vicidial_form\" action=\"$agcPAGE\" method=\"post\">\n";
-        echo "<input type=\"hidden\" name=\"DB\" value=\"$DB\" />\n";
-        echo "<input type=\"hidden\" name=\"JS_browser_height\" id=\"JS_browser_height\" value=\"\" />\n";
-        echo "<input type=\"hidden\" name=\"JS_browser_width\" id=\"JS_browser_width\" value=\"\" />\n";
-        #echo "<input type=\"hidden\" name=\"phone_login\" value=\"$phone_login\">\n";
-        #echo "<input type=\"hidden\" name=\"phone_pass\" value=\"$phone_pass\">\n";
-        echo "<center><br /><b>User Login</b><br /><br />";
-        echo "<table width=\"460px\" cellpadding=\"0\" cellspacing=\"0\" bgcolor=\"$MAIN_COLOR\"><tr bgcolor=\"white\">";
-        echo "<td align=\"left\" valign=\"bottom\"><img src=\"./images/vdc_tab_vicidial.gif\" border=\"0\" alt=\"VICIdial\" /></td>";
-        echo "<td align=\"center\" valign=\"middle\"> Campaign Login </td>";
-        echo "</tr>\n";
-        echo "<tr><td align=\"left\" colspan=\"2\"><font size=\"1\"> &nbsp; </font></td></tr>\n";
-        echo "<tr><td align=\"right\">User Login:  </td>";
-        echo "<td align=\"left\"><input type=\"text\" name=\"VD_login\" size=\"10\" maxlength=\"20\" value=\"$VD_login\" /></td></tr>\n";
-        echo "<tr><td align=\"right\">User Password:  </td>";
-        echo "<td align=\"left\"><input type=\"password\" name=\"VD_pass\" size=\"10\" maxlength=\"20\" value=\"$VD_pass\" /></td></tr>\n";
-        echo "<tr><td align=\"right\">Campaign:  </td>";
-        echo "<td align=\"left\"><span id=\"LogiNCamPaigns\">$camp_form_code</span></td></tr>\n";
-        echo "<tr><td align=\"center\" colspan=\"2\"><input type=\"submit\" name=\"SUBMIT\" value=\"Submit\" /> &nbsp; \n";
-        echo "<span id=\"LogiNReseT\"></span></td></tr>\n";
-        echo "<tr><td align=\"left\" colspan=\"2\"><font size=\"1\"><br />VERSION: $version &nbsp; &nbsp; &nbsp; BUILD: $build</font></td></tr>\n";
-        echo "</table>\n";
-        echo "</form>\n\n";
-		echo "</body>\n\n";
-		echo "</html>\n\n";
-		exit;
+                    echo str_replace("[UserMessage]", "", $login_script);
+                    exit;
 		}
 	else
 		{
@@ -904,41 +882,8 @@ if ($user_login_first == 1)
 
 			if ( (strlen($phone_login) < 1) or (strlen($phone_pass) < 1) )
 				{
-				echo "<title>Agent web client: Login</title>\n";
-				echo "</head>\n";
-                echo "<body onresize=\"browser_dimensions();\"  onLoad=\"browser_dimensions();\">\n";
-				if ($hide_timeclock_link < 1)
-                    {echo "<a href=\"./timeclock.php?referrer=agent&amp;pl=$phone_login&amp;pp=$phone_pass&amp;VD_login=$VD_login&amp;VD_pass=$VD_pass\"> Timeclock</a><br />\n";}
-                echo "<table width=\"100%\"><tr><td></td>\n";
-				echo "<!-- INTERNATIONALIZATION-LINKS-PLACEHOLDER-VICIDIAL -->\n";
-                echo "</tr></table>\n";
-                echo "<form  name=\"vicidial_form\" id=\"vicidial_form\" action=\"$agcPAGE\" method=\"post\">\n";
-                echo "<input type=\"hidden\" name=\"DB\" value=\"$DB\" />\n";
-                echo "<input type=\"hidden\" name=\"JS_browser_height\" id=\"JS_browser_height\" value=\"\" />\n";
-                echo "<input type=\"hidden\" name=\"JS_browser_width\" id=\"JS_browser_width\" value=\"\" />\n";
-                echo "<br /><br /><br /><center><table width=\"460px\" cellpadding=\"0\" cellspacing=\"0\" bgcolor=\"$MAIN_COLOR\"><tr bgcolor=\"white\">";
-                echo "<td align=\"left\" valign=\"bottom\"><img src=\"./images/vdc_tab_vicidial.gif\" border=\"0\" alt=\"VICIdial\" /></td>";
-                echo "<td align=\"center\" valign=\"middle\"> Login </td>";
-                echo "</tr>\n";
-                echo "<tr><td align=\"left\" colspan=\"2\"><font size=\"1\"> &nbsp; </font></td></tr>\n";
-                echo "<tr><td align=\"right\">Phone Login: </td>";
-                echo "<td align=\"left\"><input type=\"text\" name=\"phone_login\" size=\"10\" maxlength=\"20\" value=\"$phone_login\" /></td></tr>\n";
-                echo "<tr><td align=\"right\">Phone Password:  </td>";
-                echo "<td align=\"left\"><input type=\"password\" name=\"phone_pass\" size=\"10\" maxlength=\"20\" value=\"$phone_pass\" /></td></tr>\n";
-                echo "<tr><td align=\"right\">User Login:  </td>";
-                echo "<td align=\"left\"><input type=\"text\" name=\"VD_login\" size=\"10\" maxlength=\"20\" value=\"$VD_login\"> /</td></tr>\n";
-                echo "<tr><td align=\"right\">User Password:  </td>";
-                echo "<td align=\"left\"><input type=\"password\" name=\"VD_pass\" size=\"10\" maxlength=\"20\" value=\"$VD_pass\" /></td></tr>\n";
-                echo "<tr><td align=\"right\">Campaign:  </td>";
-                echo "<td align=\"left\"><span id=\"LogiNCamPaigns\">$camp_form_code</span></td></tr>\n";
-                echo "<tr><td align=\"center\" colspan=\"2>\"<input type=\"submit\" name=\"SUBMIT\" value=\"Submit\" /> &nbsp; \n";
-                echo "<span id=\"LogiNReseT\"></span></td></tr>\n";
-                echo "<tr><td align=\"left\" colspan=\"2\"><font size=\"1\"><br />VERSION: $version &nbsp; &nbsp; &nbsp; BUILD: $build</font></td></tr>\n";
-                echo "</table></center>\n";
-                echo "</form>\n\n";
-				echo "</body>\n\n";
-				echo "</html>\n\n";
-				exit;
+                                    echo str_replace("[UserMessage]", "", $login_script);
+                                    exit;
 				}
 			}
 		}
@@ -946,35 +891,8 @@ if ($user_login_first == 1)
 
 if ( (strlen($phone_login)<2) or (strlen($phone_pass)<2) )
 	{
-	echo "<title>Agent web client:  Phone Login</title>\n";
-	echo "</head>\n";
-    echo "<body onresize=\"browser_dimensions();\"  onload=\"browser_dimensions();\">\n";
-	if ($hide_timeclock_link < 1)
-        {echo "<a href=\"./timeclock.php?referrer=agent&amp;pl=$phone_login&amp;pp=$phone_pass&amp;VD_login=$VD_login&amp;VD_pass=$VD_pass\"> Timeclock</a><br />\n";}
-    echo "<table width=100%><tr><td></td>\n";
-	echo "<!-- INTERNATIONALIZATION-LINKS-PLACEHOLDER-VICIDIAL -->\n";
-    echo "</tr></table>\n";
-    echo "<form name=\"vicidial_form\" id=\"vicidial_form\" action=\"$agcPAGE\" method=\"post\">\n";
-    echo "<input type=\"hidden\" name=\"DB\" value=\"$DB\" />\n";
-    echo "<input type=\"hidden\" name=\"JS_browser_height\" id=\"JS_browser_height\" value=\"\" />\n";
-    echo "<input type=\"hidden\" name=\"JS_browser_width\" id=\"JS_browser_width\" value=\"\" />\n";
-    echo "<br /><br /><br /><center><table width=\"460px\" cellpadding=\"0\" cellspacing=\"0\" bgcolor=\"$MAIN_COLOR\"><tr bgcolor=\"white\">";
-    echo "<td align=\"left\" valign=\"bottom\"><img src=\"./images/vdc_tab_vicidial.gif\" border=\"0\" alt=\"VICIdial\" /></td>";
-    echo "<td align=\"center\" valign=\"middle\"> phone login </td>";
-    echo "</tr>\n";
-    echo "<tr><td align=\"left\" colspan=\"2\"><font size=\"1\"> &nbsp; </font></td></tr>\n";
-    echo "<tr><td align=\"right\">Phone Login: </td>";
-    echo "<td align=\"left\"><input type=\"text\" name=\"phone_login\" size=\"10\" maxlength=\"20\" value=\"\" /></td></tr>\n";
-    echo "<tr><td align=\"right\">Phone Password:  </td>";
-    echo "<td align=\"left\"><input type=\"password\" name=\"phone_pass\" size=\"10\" maxlength=\"20\" value=\"\" /></td></tr>\n";
-    echo "<tr><td align=\"center\" colspan=\"2\"><input type=\"submit\" name=\"SUBMIT\" value=\"Submit\" /> &nbsp; \n";
-    echo "<span id=\"LogiNReseT\"></span></td></tr>\n";
-    echo "<tr><td align=\"left\" colspan=\"2\"><font size=\"1\"><br />VERSION: $version &nbsp; &nbsp; &nbsp; BUILD: $build</font></td></tr>\n";
-    echo "</table></center>\n";
-    echo "</form>\n\n";
-	echo "</body>\n\n";
-	echo "</html>\n\n";
-	exit;
+            echo str_replace("[UserMessage]", "", $login_script);
+            exit;
 	}
 else
 	{
@@ -1123,7 +1041,7 @@ else
 				if ( (strlen($LOGgroup_shiftsSQL) < 3) and ($VU_shift_override_flag < 1) )
 					{
 					$VDloginDISPLAY=1;
-                    $VDdisplayMESSAGE = "ERROR: There are no Shifts enabled for your user group<br />";
+                    $VDdisplayMESSAGE = "There are no Shifts enabled for your user group<br />";
 					}
 				else
 					{
@@ -1176,7 +1094,7 @@ else
 					if ( ($shift_ok < 1) and ($VU_shift_override_flag < 1) )
 						{
 						$VDloginDISPLAY=1;
-                        $VDdisplayMESSAGE = "ERROR: You are not allowed to log in outside of your shift<br />";
+                        $VDdisplayMESSAGE = "You are not allowed to log in outside of your shift<br />";
 						}
 					}
 				if ( ($shift_ok < 1) and ($VU_shift_override_flag < 1) and ($VDloginDISPLAY > 0) )
@@ -1216,30 +1134,8 @@ else
 
 			if ( (!eregi(" $VD_campaign ",$LOGallowed_campaigns)) and (!eregi("ALL-CAMPAIGNS",$LOGallowed_campaigns)) )
 				{
-				echo "<title>Agent web client: Campaign Login</title>\n";
-				echo "</head>\n";
-                echo "<body onresize=\"browser_dimensions();\" onload=\"browser_dimensions();\">\n";
-				if ($hide_timeclock_link < 1)
-                    {echo "<a href=\"./timeclock.php?referrer=agent&amp;pl=$phone_login&amp;pp=$phone_pass&amp;VD_login=$VD_login&amp;VD_pass=$VD_pass\"> Timeclock</a><br />\n";}
-                echo "<table width=\"100%\"><tr><td></td>\n";
-				echo "<!-- INTERNATIONALIZATION-LINKS-PLACEHOLDER-VICIDIAL -->\n";
-                echo "</tr></table>\n";
-                echo "<b>Sorry, you are not allowed to login to this campaign: $VD_campaign</b>\n";
-                echo "<form action=\"$PHP_SELF\" method=\"post\">\n";
-                echo "<input type=\"hidden\" name=\"db\" value=\"$DB\" />\n";
-                echo "<input type=\"hidden\" name=\"JS_browser_height\" id=\"JS_browser_height\" value=\"\" />\n";
-                echo "<input type=\"hidden\" name=\"JS_browser_width\" id=\"JS_browser_width\" value=\"\" />\n";
-                echo "<input type=\"hidden\" name=\"phone_login\" value=\"$phone_login\" />\n";
-                echo "<input type=\"hidden\" name=\"phone_pass\" value=\"$phone_pass\" />\n";
-                echo "Login: <input type=\"text\" name=\"VD_login\" size=\"10\" maxlength=\"20\" value=\"$VD_login\" />\n<br />";
-                echo "Password: <input type=\"password\" name=\"VD_pass\" size=\"10\" maxlength=\"20\" value=\"$VD_pass\" /><br />\n";
-                echo "Campaign: <span id=\"LogiNCamPaigns\">$camp_form_code</span><br />\n";
-                echo "<input type=\"submit\" name=\"SUBMIT\" value=\"Submit\" /> &nbsp; \n";
-				echo "<span id=\"LogiNReseT\"></span>\n";
-                echo "</form>\n\n";
-				echo "</body>\n\n";
-				echo "</html>\n\n";
-				exit;
+                                    echo str_replace("[UserMessage]", $LOGfullname . ", you do not have permission to log in to that campaign.", $login_script);
+                                    exit;
 				}
 
 			##### check to see that the campaign is active
@@ -1354,7 +1250,7 @@ else
 				$HKstatusnames = substr("$HKstatusnames", 0, -1); 
 
 				##### grab the campaign settings
-				$stmt="SELECT park_ext,park_file_name,web_form_address,allow_closers,auto_dial_level,dial_timeout,dial_prefix,campaign_cid,campaign_vdad_exten,campaign_rec_exten,campaign_recording,campaign_rec_filename,campaign_script,get_call_launch,am_message_exten,xferconf_a_dtmf,xferconf_a_number,xferconf_b_dtmf,xferconf_b_number,alt_number_dialing,scheduled_callbacks,wrapup_seconds,wrapup_message,closer_campaigns,use_internal_dnc,allcalls_delay,omit_phone_code,agent_pause_codes_active,no_hopper_leads_logins,campaign_allow_inbound,manual_dial_list_id,default_xfer_group,xfer_groups,disable_alter_custphone,display_queue_count,manual_dial_filter,agent_clipboard_copy,use_campaign_dnc,three_way_call_cid,dial_method,three_way_dial_prefix,web_form_target,vtiger_screen_login,agent_allow_group_alias,default_group_alias,quick_transfer_button,prepopulate_transfer_preset,view_calls_in_queue,view_calls_in_queue_launch,call_requeue_button,pause_after_each_call,no_hopper_dialing,agent_dial_owner_only,agent_display_dialable_leads,web_form_address_two,agent_select_territories,crm_popup_login,crm_login_address,timer_action,timer_action_message,timer_action_seconds,start_call_url,dispo_call_url,xferconf_c_number,xferconf_d_number,xferconf_e_number,use_custom_cid,scheduled_callbacks_alert,scheduled_callbacks_count,manual_dial_override,blind_monitor_warning,blind_monitor_message,blind_monitor_filename,timer_action_destination,enable_xfer_presets,hide_xfer_number_to_dial,manual_dial_prefix,customer_3way_hangup_logging,customer_3way_hangup_seconds,customer_3way_hangup_action,ivr_park_call,manual_preview_dial,api_manual_dial,manual_dial_call_time_check,my_callback_option,per_call_notes,agent_lead_search,agent_lead_search_method,queuemetrics_phone_environment,auto_pause_precall,auto_pause_precall_code,auto_resume_precall,manual_dial_cid,custom_3way_button_transfer,callback_days_limit FROM vicidial_campaigns where campaign_id = '$VD_campaign';";
+				$stmt="SELECT park_ext,park_file_name,web_form_address,allow_closers,auto_dial_level,dial_timeout,dial_prefix,campaign_cid,campaign_vdad_exten,campaign_rec_exten,campaign_recording,campaign_rec_filename,campaign_script,get_call_launch,am_message_exten,xferconf_a_dtmf,xferconf_a_number,xferconf_b_dtmf,xferconf_b_number,alt_number_dialing,scheduled_callbacks,wrapup_seconds,wrapup_message,closer_campaigns,use_internal_dnc,allcalls_delay,omit_phone_code,agent_pause_codes_active,no_hopper_leads_logins,campaign_allow_inbound,manual_dial_list_id,default_xfer_group,xfer_groups,disable_alter_custphone,display_queue_count,manual_dial_filter,agent_clipboard_copy,use_campaign_dnc,three_way_call_cid,dial_method,three_way_dial_prefix,web_form_target,vtiger_screen_login,agent_allow_group_alias,default_group_alias,quick_transfer_button,prepopulate_transfer_preset,view_calls_in_queue,view_calls_in_queue_launch,call_requeue_button,pause_after_each_call,no_hopper_dialing,agent_dial_owner_only,agent_display_dialable_leads,web_form_address_two,agent_select_territories,crm_popup_login,crm_login_address,timer_action,timer_action_message,timer_action_seconds,start_call_url,dispo_call_url,xferconf_c_number,xferconf_d_number,xferconf_e_number,use_custom_cid,scheduled_callbacks_alert,scheduled_callbacks_count,manual_dial_override,blind_monitor_warning,blind_monitor_message,blind_monitor_filename,timer_action_destination,enable_xfer_presets,hide_xfer_number_to_dial,manual_dial_prefix,customer_3way_hangup_logging,customer_3way_hangup_seconds,customer_3way_hangup_action,ivr_park_call,manual_preview_dial,api_manual_dial,manual_dial_call_time_check,my_callback_option,per_call_notes,agent_lead_search,agent_lead_search_method,queuemetrics_phone_environment,auto_pause_precall,auto_pause_precall_code,auto_resume_precall,manual_dial_cid,custom_3way_button_transfer,callback_days_limit,campaign_name FROM vicidial_campaigns where campaign_id = '$VD_campaign';";
 				$rslt=mysql_query($stmt, $link);
 				if ($mel > 0) {mysql_error_logging($NOW_TIME,$link,$mel,$stmt,'01013',$VD_login,$server_ip,$session_name,$one_mysql_log);}
 				if ($DB) {echo "$stmt\n";}
@@ -1454,6 +1350,7 @@ else
 				$manual_dial_cid =			$row[92];
 				$custom_3way_button_transfer =	$row[93];
 				$callback_days_limit =		$row[94];
+                                $VDcampaign_name    =           $row[95];
 
 				if ( ($VU_agent_lead_search_override == 'ENABLED') or ($VU_agent_lead_search_override == 'DISABLED') )
 					{$agent_lead_search = $VU_agent_lead_search_override;}
@@ -1762,7 +1659,7 @@ else
 			else
 				{
 				$VDloginDISPLAY=1;
-                $VDdisplayMESSAGE = "Campaign not active, please try again<br />";
+                $VDdisplayMESSAGE = $LOGfullname .  ", that campaign is not active. Please try again later<br />";
 				}
 			}
 		else
@@ -1773,45 +1670,13 @@ else
 				fclose($fp);
 				}
 			$VDloginDISPLAY=1;
-            $VDdisplayMESSAGE = "Login incorrect, please try again<br />";
+            $VDdisplayMESSAGE = "The credentials entered is incorrect. Please verify your login info and try again<br />";
 			}
 		}
 	if ($VDloginDISPLAY)
 		{
-		echo "<title>Agent web client: Campaign Login</title>\n";
-		echo "</head>\n";
-        echo "<body onresize=\"browser_dimensions();\"  onload=\"browser_dimensions();\">\n";
-		if ($hide_timeclock_link < 1)
-            {echo "<a href=\"./timeclock.php?referrer=agent&amp;pl=$phone_login&amp;pp=$phone_pass&amp;VD_login=$VD_login&amp;VD_pass=$VD_pass\"> Timeclock</a><br />\n";}
-        echo "<table width=\"100%\"><tr><td></td>\n";
-		echo "<!-- INTERNATIONALIZATION-LINKS-PLACEHOLDER-VICIDIAL -->\n";
-        echo "</tr></table>\n";
-        echo "<form name=\"vicidial_form\" id=\"vicidial_form\" action=\"$agcPAGE\" method=\"post\">\n";
-        echo "<input type=\"hidden\" name=\"DB\" value=\"$DB\" />\n";
-        echo "<input type=\"hidden\" name=\"JS_browser_height\" id=\"JS_browser_height\" value=\"\" />\n";
-        echo "<input type=\"hidden\" name=\"JS_browser_width\" id=\"JS_browser_width\" value=\"\" />\n";
-        echo "<input type=\"hidden\" name=\"phone_login\" value=\"$phone_login\" />\n";
-        echo "<input type=\"hidden\" name=\"phone_pass\" value=\"$phone_pass\" />\n";
-        echo "<center><br /><b>$VDdisplayMESSAGE</b><br /><br />";
-        echo "<table width=\"460px\" cellpadding=\"0\" cellspacing=\"0\" bgcolor=\"$MAIN_COLOR\"><tr bgcolor=\"white\">";
-        echo "<td align=\"left\" valign=\"bottom\"><img src=\"./images/vdc_tab_vicidial.gif\" border=\"0\" alt=\"VICIdial\" /></td>";
-        echo "<td align=\"center\" valign=\"middle\"> Campaign Login </td>";
-        echo "</tr>\n";
-        echo "<tr><td align=\"left\" colspan=\"2\"><font size=\"1\"> &nbsp; </font></td></tr>\n";
-        echo "<tr><td align=\"right\">User Login:  </td>";
-        echo "<td align=\"left\"><input type=\"text\" name=\"VD_login\" size=\"10\" maxlength=\"20\" value=\"$VD_login\" /></td></tr>\n";
-        echo "<tr><td align=\"right\">User Password:  </td>";
-        echo "<td align=\"left\"><input type=\"password\" name=\"VD_pass\" size=\"10\" maxlength=\"20\" value=\"$VD_pass\" /></td></tr>\n";
-        echo "<tr><td align=\"right\">Campaign:  </td>";
-        echo "<td align=\"left\"><span id=\"LogiNCamPaigns\">$camp_form_code</span></td></tr>\n";
-        echo "<tr><td align=\"center\" colspan=\"2\"><input type=\"submit\" name=\"SUBMIT\" value=\"Submit\" /> &nbsp; \n";
-        echo "<span id=\"LogiNReseT\"></span></td></tr>\n";
-        echo "<tr><td align=\"left\" colspan=\"2\"><font size=\"1\"><br />VERSION: $version &nbsp; &nbsp; &nbsp; BUILD: $build</font></td></tr>\n";
-        echo "</table>\n";
-        echo "</form>\n\n";
-		echo "</body>\n\n";
-		echo "</html>\n\n";
-		exit;
+                    echo str_replace("[UserMessage]", $VDdisplayMESSAGE, $login_script);
+                    exit;
 		}
 
 	$original_phone_login = $phone_login;
@@ -1872,36 +1737,7 @@ else
 	$authphone=$row[0];
 	if (!$authphone)
 		{
-		echo "<title>Agent web client: Phone Login Error</title>\n";
-		echo "</head>\n";
-        echo "<body onresize=\"browser_dimensions();\"  onload=\"browser_dimensions();\">\n";
-		if ($hide_timeclock_link < 1)
-            {echo "<a href=\"./timeclock.php?referrer=agent&amp;pl=$phone_login&amp;pp=$phone_pass&amp;VD_login=$VD_login&amp;VD_pass=$VD_pass\"> Timeclock</a><br />\n";}
-        echo "<table width=\"100%\"><tr><td></td>\n";
-		echo "<!-- INTERNATIONALIZATION-LINKS-PLACEHOLDER-VICIDIAL -->\n";
-        echo "</tr></table>\n";
-        echo "<form name=\"vicidial_form\" id=\"vicidial_form\" action=\"$agcPAGE\" method=\"post\">\n";
-        echo "<input type=\"hidden\" name=\"DB\" value=\"$DB\">\n";
-        echo "<input type=\"hidden\" name=\"JS_browser_height\" value=\"\" />\n";
-        echo "<input type=\"hidden\" name=\"JS_browser_width\" value=\"\" />\n";
-        echo "<input type=\"hidden\" name=\"VD_login\" value=\"$VD_login\" />\n";
-        echo "<input type=\"hidden\" name=\"VD_pass\" value=\"$VD_pass\" />\n";
-        echo "<input type=\"hidden\" name=\"VD_campaign\" value=\"$VD_campaign\" />\n";
-        echo "<br /><br /><br /><center><table width=\"460px\" cellpadding=\"0\" cellspacing=\"0\" bgcolor=\"$MAIN_COLOR\"><tr bgcolor=\"white\">";
-        echo "<td align=\"left\" valign=\"bottom\"><img src=\"./images/vdc_tab_vicidial.gif\" border=\"0\" alt=\"VICIdial\" /></td>";
-        echo "<td align=\"center\" valign=\"middle\"> Login Error</td>";
-        echo "</tr>\n";
-        echo "<tr><td align=\"center\" colspan=\"2\"><font size=\"1\"> &nbsp; <br /><font size=\"3\">Sorry, your phone login and password are not active in this system, please try again: <br /> &nbsp;</font></td></tr>\n";
-        echo "<tr><td align=\"right\">Phone Login: </td>";
-        echo "<td align=\"left\"><input type=\"text\" name=\"phone_login\" size=\"10\" maxlength=\"20\" value=\"$phone_login\"></td></tr>\n";
-        echo "<tr><td align=\"right\">Phone Password:  </td>";
-        echo "<td align=\"left\"><input type=\"password\" name=\"phone_pass\" size=10 maxlength=20 value=\"$phone_pass\"></td></tr>\n";
-        echo "<tr><td align=\"center\" colspan=\"2\"><input type=\"submit\" name=\"SUBMIT\" value=\"Submit\" /></td></tr>\n";
-        echo "<tr><td align=\"left\" colspan=\"2\"><font size=\"1\"><br />VERSION: $version &nbsp; &nbsp; &nbsp; BUILD: $build</font></td></tr>\n";
-        echo "</table></center>\n";
-        echo "</form>\n\n";
-		echo "</body>\n\n";
-		echo "</html>\n\n";
+		echo str_replace("[UserMessage]", "We're sorry, " . $LOGfullname . ", but that extension could not be verified.", $login_script);
 		exit;
 		}
 	else
@@ -1979,7 +1815,7 @@ else
 				}
 			echo "<!-- Phones balance selection: $phone_login|$pb_server_ip|$past_minutes_date|     |$pb_log -->\n";
 			}
-		echo "<title>Agent web client</title>\n";
+		echo "<title>Inktel - X Frontline</title>\n";
 		$stmt="SELECT extension,dialplan_number,voicemail_id,phone_ip,computer_ip,server_ip,login,pass,status,active,phone_type,fullname,company,picture,messages,old_messages,protocol,local_gmt,ASTmgrUSERNAME,ASTmgrSECRET,login_user,login_pass,login_campaign,park_on_extension,conf_on_extension,VICIDIAL_park_on_extension,VICIDIAL_park_on_filename,monitor_prefix,recording_exten,voicemail_exten,voicemail_dump_exten,ext_context,dtmf_send_extension,call_out_number_group,client_browser,install_directory,local_web_callerID_URL,VICIDIAL_web_URL,AGI_call_logging_enabled,user_switching_enabled,conferencing_enabled,admin_hangup_enabled,admin_hijack_enabled,admin_monitor_enabled,call_parking_enabled,updater_check_enabled,AFLogging_enabled,QUEUE_ACTION_enabled,CallerID_popup_enabled,voicemail_button_enabled,enable_fast_refresh,fast_refresh_rate,enable_persistant_mysql,auto_dial_next_number,VDstop_rec_after_each_call,DBX_server,DBX_database,DBX_user,DBX_pass,DBX_port,DBY_server,DBY_database,DBY_user,DBY_pass,DBY_port,outbound_cid,enable_sipsak_messages,email,template_id,conf_override,phone_context,phone_ring_timeout,conf_secret,is_webphone,use_external_server_ip,codecs_list,webphone_dialpad,phone_ring_timeout,on_hook_agent,webphone_auto_answer from phones where login='$phone_login' and pass='$phone_pass' and active = 'Y';";
 		if ($DB) {echo "|$stmt|\n";}
 		$rslt=mysql_query($stmt, $link);
@@ -2523,57 +2359,13 @@ else
 			}
 		else
 			{
-			echo "<title>Agent web client: Campaign Login</title>\n";
-			echo "</head>\n";
-            echo "<body onresize=\"browser_dimensions();\" onload=\"browser_dimensions();\">\n";
-			if ($hide_timeclock_link < 1)
-                {echo "<a href=\"./timeclock.php?referrer=agent&amp;pl=$phone_login&amp;pp=$phone_pass&amp;VD_login=$VD_login&amp;VD_pass=$VD_pass\"> Timeclock</a><br />\n";}
-            echo "<table width=\"100%\"><tr><td></td>\n";
-			echo "<!-- INTERNATIONALIZATION-LINKS-PLACEHOLDER-VICIDIAL -->\n";
-            echo "</tr></table>\n";
-            echo "<b>Sorry, there are no leads in the hopper for this campaign</b>\n";
-            echo "<form action=\"$PHP_SELF\" method=\"post\">\n";
-            echo "<input type=\"hidden\" name=\"DB\" value=\"$DB\" />\n";
-            echo "<input type=\"hidden\" name=\"JS_browser_height\" id=\"JS_browser_height\" value=\"\" />\n";
-            echo "<input type=\"hidden\" name=\"JS_browser_width\" id=\"JS_browser_width\" value=\"\" />\n";
-            echo "<input type=\"hidden\" name=\"phone_login\" value=\"$phone_login\" />\n";
-            echo "<input type=\"hidden\" name=\"phone_pass\" value=\"$phone_pass\" />\n";
-            echo "Login: <input type=\"text\" name=\"VD_login\" size=\"10\" maxlength=\"20\" value=\"$VD_login\" />\n<br />";
-            echo "Password: <input type=\"password\" name=\"VD_pass\" size=\"10\" maxlength=\"20\" value=\"$VD_pass\" /><br />\n";
-            echo "Campaign: <span id=\"LogiNCamPaigns\">$camp_form_code</span><br />\n";
-            echo "<input type=\"submit\" name=\"SUBMIT\" value=\"submit\" /> &nbsp; \n";
-			echo "<span id=\"LogiNReseT\"></span>\n";
-            echo "</form>\n\n";
-			echo "</body>\n\n";
-			echo "</html>\n\n";
-			exit;
+                            echo str_replace("[UserMessage]", "We're sorry, " . $LOGfullname . ", but there are no leads in the hopper for that campaign.", $login_script);
+                            exit;
 			}
 		if (strlen($session_id) < 1)
 			{
-			echo "<title>Agent web client: Campaign Login</title>\n";
-			echo "</head>\n";
-            echo "<body onresize=\"browser_dimensions();\" onload=\"browser_dimensions();\">\n";
-			if ($hide_timeclock_link < 1)
-                {echo "<a href=\"./timeclock.php?referrer=agent&amp;pl=$phone_login&amp;pp=$phone_pass&amp;VD_login=$VD_login&amp;VD_pass=$VD_pass\"> Timeclock</a><br />\n";}
-            echo "<table width=\"100%\"><tr><td></td>\n";
-			echo "<!-- INTERNATIONALIZATION-LINKS-PLACEHOLDER-VICIDIAL -->\n";
-            echo "</tr></table>\n";
-            echo "<b>Sorry, there are no available sessions</b>\n";
-            echo "<form action=\"$PHP_SELF\" method=\"post\" />\n";
-            echo "<input type=\"hidden\" name=\"DB\" value=\"$DB\" />\n";
-            echo "<input type=\"hidden\" name=\"JS_browser_height\" id=\"JS_browser_height\" value=\"\" />\n";
-            echo "<input type=\"hidden\" name=\"JS_browser_width\" id=\"JS_browser_width\" value=\"\" />\n";
-            echo "<input type=\"hidden\" name=\"phone_login\" value=\"$phone_login\" />\n";
-            echo "<input type=\"hidden\" name=\"phone_pass\" value=\"$phone_pass\" />\n";
-            echo "Login: <input type=\"text\" name=\"VD_login\" size=\"10\" maxlength=\"20\" value=\"$VD_login\" />\n<br />";
-            echo "Password: <input type=\"password\" name=\"VD_pass\" size=\"10\" maxlength=\"20\" value=\"$VD_pass\" /><br />\n";
-            echo "Campaign: <span id=\"LogiNCamPaigns\">$camp_form_code</span><br />\n";
-            echo "<input type=\"submit\" name=\"SUBMIT\" value=\"Submit\" /> &nbsp; \n";
-			echo "<span id=\"LogiNReseT\"></span>\n";
-			echo "</FORM>\n\n";
-			echo "</body>\n\n";
-			echo "</html>\n\n";
-			exit;
+                            echo str_replace("[UserMessage]", "We're sorry, " . $LOGfullname . ", but there are no available conference sessions in the system.", $login_script);
+                            exit;
 			}
 
 		if (ereg('MSIE',$browser)) 
@@ -3371,10 +3163,10 @@ if ($enable_fast_refresh < 1) {echo "\tvar refresh_interval = 1000;\n";}
 	var custom_3way_button_transfer_enabled='<?php echo $custom_3way_button_transfer_enabled ?>';
 	var custom_3way_button_transfer_park='<?php echo $custom_3way_button_transfer_park ?>';
 	var waiting_on_dispo=0;
-    var DiaLControl_auto_HTML = "<img src=\"./images/vdc_LB_pause_OFF.gif\" border=\"0\" alt=\" Pause \" /><a href=\"#\" onclick=\"AutoDial_ReSume_PauSe('VDADready');\"><img src=\"./images/vdc_LB_resume.gif\" border=\"0\" alt=\"Resume\" /></a>";
-    var DiaLControl_auto_HTML_ready = "<a href=\"#\" onclick=\"AutoDial_ReSume_PauSe('VDADpause');\"><img src=\"./images/vdc_LB_pause.gif\" border=\"0\" alt=\" Pause \" /></a><img src=\"./images/vdc_LB_resume_OFF.gif\" border=\"0\" alt=\"Resume\" />";
-    var DiaLControl_auto_HTML_OFF = "<img src=\"./images/vdc_LB_pause_OFF.gif\" border=\"0\" alt=\" Pause \" /><img src=\"./images/vdc_LB_resume_OFF.gif\" border=\"0\" alt=\"Resume\" />";
-    var DiaLControl_manual_HTML = "<a href=\"#\" onclick=\"ManualDialNext('','','','','','0');\"><img src=\"./images/vdc_LB_dialnextnumber.gif\" border=\"0\" alt=\"Dial Next Number\" /></a>";
+    var DiaLControl_auto_HTML = "<a href=\"#\" onclick=\"AutoDial_ReSume_PauSe('VDADready');\"><img src=\"./images/x-resume.png\" border=\"0\" alt=\"Resume\" /><span id=\"x-ready\">Ready</span></a><a href=\"#\" style=\"opacity:.25;\"><img src=\"./images/x-pause.png\" border=\"0\" alt=\" Pause \" /><span id=\"x-pause\">Pause</span></a>";
+    var DiaLControl_auto_HTML_ready = "<a href=\"#\" style=\"opacity:.25;\"><img src=\"./images/x-resume.png\" border=\"0\" alt=\"Resume\" /><span id=\"x-resume\">Ready</span></a><a href=\"#\" onclick=\"AutoDial_ReSume_PauSe('VDADpause');\"><img src=\"./images/x-pause.png\" border=\"0\" alt=\" Pause \" /><span id=\"x-pause\">Pause</span></a>";
+    var DiaLControl_auto_HTML_OFF = "<a href=\"#\" style=\"opacity:.25;\"><img src=\"./images/x-resume.png\" border=\"0\" alt=\"Resume\" /><span id=\"x-resume\">Ready</span></a><a href=\"#\" style=\"opacity:.25;\"><img src=\"./images/x-pause.png\" border=\"0\" alt=\" Pause \" /><span id=\"x-pause\">Pause</span></a>";
+    var DiaLControl_manual_HTML = "<a href=\"#\" onclick=\"ManualDialNext('','','','','','0');\"><img src=\"./images/x-dialnext.png\" border=\"0\" alt=\"Dial Next Number\" /><span id=\"x-dialnext\">Dial Next Number</span></a>";
 	var image_loading = new Image();
 		image_loading.src="./images/loading.gif";
 	var image_blank = new Image();
@@ -3696,9 +3488,13 @@ if ($enable_fast_refresh < 1) {echo "\tvar refresh_interval = 1000;\n";}
 			agent_dialed_number='1';
 			agent_dialed_type='XFER_3WAY';
 
-            document.getElementById("DialWithCustomer").innerHTML ="<img src=\"./images/vdc_XB_dialwithcustomer_OFF.gif\" border=\"0\" alt=\"Dial With Customer\" style=\"vertical-align:middle\" /></a>";
+            document.getElementById("DialWithCustomer").innerHTML ="Warm X-fer";
+            document.getElementById("DialWithCustomer").className = "button blueinactive";
 
-            document.getElementById("ParkCustomerDial").innerHTML ="<img src=\"./images/vdc_XB_parkcustomerdial_OFF.gif\" border=\"0\" alt=\"Park Customer Dial\" style=\"vertical-align:middle\" /></a>";
+
+            document.getElementById("ParkCustomerDial").innerHTML ="3-Way";
+            document.getElementById("ParkCustomerDial").className = "button blueinactive";
+
 
 			var manual_number = document.vicidial_form.xfernumber.value;
 			var manual_number_hidden = document.vicidial_form.xfernumhidden.value;
@@ -4395,7 +4191,7 @@ function set_length(SLnumber,SLlength_goal,SLdirection)
 								var LMAcontent_match=0;
 								agentphonelive=0;
 								var conv_start=-1;
-                                var live_conf_HTML = "<font face=\"Arial,Helvetica\"><b>LIVE CALLS IN YOUR SESSION:</b></font><br /><table width=\"<?php echo $CQwidth ?>px\"><tr bgcolor=\"<?php echo $SCRIPT_COLOR ?>\"><td><font class=\"log_title\">#</font></td><td><font class=\"log_title\">REMOTE CHANNEL</font></td><td><font class=\"log_title\">HANGUP</font></td><td><font class=\"log_title\">VOLUME</font></td></tr>";
+                                var live_conf_HTML = "<font face=\"Arial,Helvetica\"><b>Current Calls in Your Conference Room:</b></font><br /><table width=\"<?php echo $CQwidth ?>px\"><tr bgcolor=\"<?php echo $SCRIPT_COLOR ?>\"><td><font class=\"log_title\">#</font></td><td><font class=\"log_title\">REMOTE CHANNEL</font></td><td><font class=\"log_title\">HANGUP</font></td><td><font class=\"log_title\">VOLUME</font></td></tr>";
 								if ( (LMAcount > live_conf_calls)  || (LMAcount < live_conf_calls) || (LMAforce > 0))
 									{
 									LMAe[0]=''; LMAe[1]=''; LMAe[2]=''; LMAe[3]=''; LMAe[4]=''; LMAe[5]=''; 
@@ -4440,7 +4236,7 @@ function set_length(SLnumber,SLlength_goal,SLdirection)
 											{
 											if (volumecontrol_active!=1)
 												{
-												live_conf_HTML = live_conf_HTML + "<tr bgcolor=\"" + row_color + "\"><td><font class=\"log_text\">" + loop_ct + "</font></td><td><font class=\"" + chan_name_color + "\">" + channelfieldA + "</font></td><td><font class=\"log_text\"><a href=\"#\" onclick=\"livehangup_send_hangup('" + channelfieldA + "');return false;\">HANGUP</a></font></td><td></td></tr>";
+												live_conf_HTML = live_conf_HTML + "<tr bgcolor=\"" + row_color + "\"><td><font class=\"log_text\">" + loop_ct + "</font></td><td><font class=\"" + chan_name_color + "\">" + channelfieldA + "</font></td><td><font class=\"log_text\"><a href=\"#\" onclick=\"livehangup_send_hangup('" + channelfieldA + "');return false;\">Hang Up</a></font></td><td></td></tr>";
 												}
 											else
 												{
@@ -4649,11 +4445,11 @@ function set_length(SLnumber,SLlength_goal,SLdirection)
 			//	filename = filedate + "_" + user_abb;
 				var query_recording_exten = recording_exten;
 				var channelrec = "Local/" + conf_silent_prefix + '' + taskconfrec + "@" + ext_context;
-                var conf_rec_start_html = "<a href=\"#\" onclick=\"conf_send_recording('StopMonitorConf','" + taskconfrec + "','" + filename + "');return false;\"><img src=\"./images/vdc_LB_stoprecording.gif\" border=\"0\" alt=\"Stop Recording\" /></a>";
+                var conf_rec_start_html = "<a href=\"#\" onclick=\"conf_send_recording('StopMonitorConf','" + taskconfrec + "','" + filename + "');return false;\"><img src=\"./images/x-record-stop.png\" border=\"0\" alt=\"Stop Recording\" /><span id=\"x-recording\">Stop Recording</span></a>";
 
 				if (LIVE_campaign_recording == 'ALLFORCE')
 					{
-                    document.getElementById("RecorDControl").innerHTML = "<img src=\"./images/vdc_LB_startrecording_OFF.gif\" border=\"0\" alt=\"Start Recording\" />";
+                    document.getElementById("RecorDControl").innerHTML = "<a href=\"#\" style=\"opacity:.25;\"><img src=\"./images/x-record.png\" border=\"0\" alt=\"Start Recording\" /><span id=\"x-recording\">Record</span></a>";
 					}
 				else
 					{
@@ -4665,10 +4461,10 @@ function set_length(SLnumber,SLlength_goal,SLdirection)
 				filename = taskconffile;
 				var query_recording_exten = session_id;
 				var channelrec = "Local/" + conf_silent_prefix + '' + taskconfrec + "@" + ext_context;
-                var conf_rec_start_html = "<a href=\"#\" onclick=\"conf_send_recording('MonitorConf','" + taskconfrec + "','');return false;\"><img src=\"./images/vdc_LB_startrecording.gif\" border=\"0\" alt=\"Start Recording\" /></a>";
+                var conf_rec_start_html = "<a href=\"#\" onclick=\"conf_send_recording('MonitorConf','" + taskconfrec + "','');return false;\"><img src=\"./images/x-record.png\" border=\"0\" alt=\"Start Recording\" /><span id=\"x-recording\">Record</span></a>";
 				if (LIVE_campaign_recording == 'ALLFORCE')
 					{
-                    document.getElementById("RecorDControl").innerHTML = "<img src=\"./images/vdc_LB_startrecording_OFF.gif\" border=\"0\" alt=\"Start Recording\" />";
+                    document.getElementById("RecorDControl").innerHTML = "<a href=\"#\" style=\"opacity:.25;\"><img src=\"./images/x-record.png\" border=\"0\" alt=\"Start Recording\" /><span id=\"x-recording\">Record</span></a>";
 					}
 				else
 					{
@@ -4904,10 +4700,10 @@ function set_length(SLnumber,SLlength_goal,SLdirection)
 				var parkedby = protocol + "/" + extension;
 				xferredirect_query = "server_ip=" + server_ip + "&session_name=" + session_name + "&user=" + user + "&pass=" + pass + "&ACTION=RedirectToPark&format=text&channel=" + redirectdestination + "&call_server_ip=" + redirectdestserverip + "&queryCID=" + queryCID + "&exten=" + park_on_extension + "&ext_context=" + ext_context + "&ext_priority=1&extenName=park&parkedby=" + parkedby + "&session_id=" + session_id + "&CalLCID=" + CalLCID + "&uniqueid=" + document.vicidial_form.uniqueid.value + "&lead_id=" + document.vicidial_form.lead_id.value + "&campaign=" + campaign;
 
-                document.getElementById("ParkControl").innerHTML ="<a href=\"#\" onclick=\"mainxfer_send_redirect('FROMParK','" + redirectdestination + "','" + redirectdestserverip + "');return false;\"><img src=\"./images/vdc_LB_grabparkedcall.gif\" border=\"0\" alt=\"Grab Parked Call\" /></a>";
+                document.getElementById("ParkControl").innerHTML ="<a href=\"#\" onclick=\"mainxfer_send_redirect('FROMParK','" + redirectdestination + "','" + redirectdestserverip + "');return false;\"><img src=\"./images/x-grabhold.png\" border=\"0\" alt=\"Grab Parked Call\" /><span>Grab</span></a>";
 				if ( (ivr_park_call=='ENABLED') || (ivr_park_call=='ENABLED_PARK_ONLY') )
 					{
-                    document.getElementById("ivrParkControl").innerHTML ="<img src=\"./images/vdc_LB_grabivrparkcall_OFF.gif\" border=\"0\" alt=\"Grab IVR Parked Call\" />";
+                    document.getElementById("ivrParkControl").innerHTML ="<a href=\"#\" style=\"opacity:.25;\"><img src=\"./images/x-grabhold.png\" border=\"0\" alt=\"Grab IVR Parked Call\" /><span>Grab IVR</span></a>";
 					}
 				customerparked=1;
 				customerparkedcounter=0;
@@ -4931,10 +4727,10 @@ function set_length(SLnumber,SLlength_goal,SLdirection)
 
 				xferredirect_query = "server_ip=" + server_ip + "&session_name=" + session_name + "&user=" + user + "&pass=" + pass + "&ACTION=RedirectFromPark&format=text&channel=" + redirectdestination + "&call_server_ip=" + redirectdestserverip + "&queryCID=" + queryCID + "&exten=" + dest_dialstring + "&ext_context=" + ext_context + "&ext_priority=1" + "&session_id=" + session_id + "&CalLCID=" + CalLCID + "&uniqueid=" + document.vicidial_form.uniqueid.value + "&lead_id=" + document.vicidial_form.lead_id.value + "&campaign=" + campaign;
 
-                document.getElementById("ParkControl").innerHTML ="<a href=\"#\" onclick=\"mainxfer_send_redirect('ParK','" + redirectdestination + "','" + redirectdestserverip + "');return false;\"><img src=\"./images/vdc_LB_parkcall.gif\" border=\"0\" alt=\"Park Call\" /></a>";
+                document.getElementById("ParkControl").innerHTML ="<a href=\"#\" onclick=\"mainxfer_send_redirect('ParK','" + redirectdestination + "','" + redirectdestserverip + "');return false;\"><img src=\"./images/x-hold-on.png\" border=\"0\" alt=\"Park Call\" /><span>Hold</span></a>";
 				if ( (ivr_park_call=='ENABLED') || (ivr_park_call=='ENABLED_PARK_ONLY') )
 					{
-                    document.getElementById("ivrParkControl").innerHTML ="<a href=\"#\" onclick=\"mainxfer_send_redirect('ParKivr','" + redirectdestination + "','" + redirectdestserverip + "');return false;\"><img src=\"./images/vdc_LB_ivrparkcall.gif\" border=\"0\" alt=\"IVR Park Call\" /></a>";
+                    document.getElementById("ivrParkControl").innerHTML ="<a href=\"#\" onclick=\"mainxfer_send_redirect('ParKivr','" + redirectdestination + "','" + redirectdestserverip + "');return false;\"><img src=\"./images/x-holdivr.png\" border=\"0\" alt=\"IVR Park Call\" /><span>IVR Hold</span></a>";
 					}
 				customerparked=0;
 				customerparkedcounter=0;
@@ -4971,7 +4767,9 @@ function set_length(SLnumber,SLlength_goal,SLdirection)
 					
 					xferredirect_query = "server_ip=" + server_ip + "&session_name=" + session_name + "&user=" + user + "&pass=" + pass + "&ACTION=RedirectFromParkXfer&format=text&channel=" + redirectdestination + "&call_server_ip=" + redirectdestserverip + "&queryCID=" + queryCID + "&exten=" + dest_dialstring + "&ext_context=" + ext_context + "&ext_priority=1" + "&session_id=" + session_id + "&CalLCID=" + XDnextCID + "&uniqueid=" + document.vicidial_form.xferuniqueid.value + "&lead_id=" + document.vicidial_form.lead_id.value + "&campaign=" + campaign;
 					
-					document.getElementById("ParkControl2").innerHTML ="<a href=\"#\" onclick=\"mainxfer_send_redirect('ParKXfer','" + redirectdestination + "','" + redirectdestserverip + "');return false;\"><img src=\"./images/vdc_LB_parkcall.gif\" border=\"0\" alt=\"Park Call\" /></a>";
+					document.getElementById("ParkControl2").innerHTML ="<a href=\"#\" onclick=\"mainxfer_send_redirect('ParKXfer','" + redirectdestination + "','" + redirectdestserverip + "');return false;\">Park 3rd Party</a>";
+                                        document.getElementById("ParkControl2").className = "button blue";
+                                
 					customerparkedxfer=0;
 					customerparkedcounterxfer=0;
 				}
@@ -4988,14 +4786,14 @@ function set_length(SLnumber,SLlength_goal,SLdirection)
 				var parkedby = protocol + "/" + extension;
 				xferredirect_query = "server_ip=" + server_ip + "&session_name=" + session_name + "&user=" + user + "&pass=" + pass + "&ACTION=RedirectToParkIVR&format=text&channel=" + redirectdestination + "&call_server_ip=" + redirectdestserverip + "&queryCID=" + queryCID + "&exten=" + park_on_extension + "&ext_context=" + ext_context + "&ext_priority=1&extenName=park&parkedby=" + parkedby + "&session_id=" + session_id + "&CalLCID=" + CalLCID + "&uniqueid=" + document.vicidial_form.uniqueid.value + "&lead_id=" + document.vicidial_form.lead_id.value + "&campaign=" + campaign;
 
-                document.getElementById("ParkControl").innerHTML ="<img src=\"./images/vdc_LB_parkcall_OFF.gif\" border=\"0\" alt=\"Grab Parked Call\" />";
+                document.getElementById("ParkControl").innerHTML ="<a href=\"#\" style=\"opacity:.25;\"><img src=\"./images/x-hold-on.png\" border=\"0\" alt=\"Grab Parked Call\" /><span>Hold</span></a>";
 				if (ivr_park_call=='ENABLED_PARK_ONLY')
 					{
-                    document.getElementById("ivrParkControl").innerHTML ="<img src=\"./images/vdc_LB_grabivrparkcall_OFF.gif\" border=\"0\" alt=\"Grab IVR Parked Call\" />";
+                    document.getElementById("ivrParkControl").innerHTML ="<a href=\"#\" style=\"opacity:.25;\"><img src=\"./images/x-holdivr.png\" border=\"0\" alt=\"Grab IVR Parked Call\" /><span>IVR Hold</span></a>";
 					}
 				if (ivr_park_call=='ENABLED')
 					{
-                    document.getElementById("ivrParkControl").innerHTML ="<a href=\"#\" onclick=\"mainxfer_send_redirect('FROMParKivr','" + redirectdestination + "','" + redirectdestserverip + "');return false;\"><img src=\"./images/vdc_LB_grabivrparkcall.gif\" border=\"0\" alt=\"Grab IVR Parked Call\" /></a>";
+                    document.getElementById("ivrParkControl").innerHTML ="<a href=\"#\" onclick=\"mainxfer_send_redirect('FROMParKivr','" + redirectdestination + "','" + redirectdestserverip + "');return false;\"><img src=\"./images/x-grabhold.png\" border=\"0\" alt=\"Grab IVR Parked Call\" /><span>Grab IVR</span></a>";
 					}
 				customerparked=1;
 				customerparkedcounter=0;
@@ -5019,10 +4817,10 @@ function set_length(SLnumber,SLlength_goal,SLdirection)
 
 				xferredirect_query = "server_ip=" + server_ip + "&session_name=" + session_name + "&user=" + user + "&pass=" + pass + "&ACTION=RedirectFromParkIVR&format=text&channel=" + redirectdestination + "&call_server_ip=" + redirectdestserverip + "&queryCID=" + queryCID + "&exten=" + dest_dialstring + "&ext_context=" + ext_context + "&ext_priority=1" + "&session_id=" + session_id + "&CalLCID=" + CalLCID + "&uniqueid=" + document.vicidial_form.uniqueid.value + "&lead_id=" + document.vicidial_form.lead_id.value + "&campaign=" + campaign;
 
-                document.getElementById("ParkControl").innerHTML ="<a href=\"#\" onclick=\"mainxfer_send_redirect('ParK','" + redirectdestination + "','" + redirectdestserverip + "');return false;\"><img src=\"./images/vdc_LB_parkcall.gif\" border=\"0\" alt=\"Park Call\" /></a>";
+                document.getElementById("ParkControl").innerHTML ="<a href=\"#\" onclick=\"mainxfer_send_redirect('ParK','" + redirectdestination + "','" + redirectdestserverip + "');return false;\"><img src=\"./images/x-hold-on.png\" border=\"0\" alt=\"Park Call\" /><span>Hold</span></a>";
 				if ( (ivr_park_call=='ENABLED') || (ivr_park_call=='ENABLED_PARK_ONLY') )
 					{
-                    document.getElementById("ivrParkControl").innerHTML ="<a href=\"#\" onclick=\"mainxfer_send_redirect('ParKivr','" + redirectdestination + "','" + redirectdestserverip + "');return false;\"><img src=\"./images/vdc_LB_ivrparkcall.gif\" border=\"0\" alt=\"IVR Park Call\" /></a>";
+                    document.getElementById("ivrParkControl").innerHTML ="<a href=\"#\" onclick=\"mainxfer_send_redirect('ParKivr','" + redirectdestination + "','" + redirectdestserverip + "');return false;\"><img src=\"./images/x-holdivr.png\" border=\"0\" alt=\"IVR Park Call\" /><span>IVR Hold</span></a>";
 					}
 				customerparked=0;
 				customerparkedcounter=0;
@@ -5206,10 +5004,10 @@ function set_length(SLnumber,SLlength_goal,SLdirection)
 				//		alert("VICIDIAL Call log entered:\n" + document.vicidial_form.uniqueid.value);
 						if ( (taskMDstage != "start") && (VDstop_rec_after_each_call == 1) )
 							{
-                            var conf_rec_start_html = "<a href=\"#\" onclick=\"conf_send_recording('MonitorConf','" + session_id + "','');return false;\"><img src=\"./images/vdc_LB_startrecording.gif\" border=\"0\" alt=\"Start Recording\" /></a>";
+                            var conf_rec_start_html = "<a href=\"#\" onclick=\"conf_send_recording('MonitorConf','" + session_id + "','');return false;\"><img src=\"./images/x-record.png\" border=\"0\" alt=\"Start Recording\" /><span id=\"x-recording\">Record</span></a>";
 							if ( (LIVE_campaign_recording == 'NEVER') || (LIVE_campaign_recording == 'ALLFORCE') )
 								{
-                                document.getElementById("RecorDControl").innerHTML = "<img src=\"./images/vdc_LB_startrecording_OFF.gif\" border=\"0\" alt=\"Start Recording\" />";
+                                document.getElementById("RecorDControl").innerHTML = "<a href=\"#\" style=\"opacity:.25;\"><img src=\"./images/x-record.png\" border=\"0\" alt=\"Start Recording\" /><span id=\"x-recording\">Record</span></a>";
 								}
 							else
 								{document.getElementById("RecorDControl").innerHTML = conf_rec_start_html;}
@@ -5827,17 +5625,26 @@ function set_length(SLnumber,SLlength_goal,SLdirection)
 									{called3rdparty=' ';}
 								document.getElementById("MainStatuSSpan").innerHTML = " Called 3rd party: " + called3rdparty + " UID: " + CIDcheck;
 									
-								document.getElementById("ParkControl2").innerHTML ="<a href=\"#\" onclick=\"mainxfer_send_redirect('ParKXfer','" + lastxferchannel + "','" + lastcustserverip + "');return false;\"><img src=\"./images/vdc_LB_parkcall.gif\" border=\"0\" alt=\"Park Call\" /></a>";
+								document.getElementById("ParkControl2").innerHTML ="<a href=\"#\" onclick=\"mainxfer_send_redirect('ParKXfer','" + lastxferchannel + "','" + lastcustserverip + "');return false;\">Park 3rd Party</a>";
+                                                                document.getElementById("ParkControl2").className = "button blue";
 
-                                document.getElementById("Leave3WayCall").innerHTML ="<a href=\"#\" onclick=\"leave_3way_call('FIRST');return false;\"><img src=\"./images/vdc_XB_leave3waycall.gif\" border=\"0\" alt=\"LEAVE 3-WAY CALL\" style=\"vertical-align:middle\" /></a>";
+                                document.getElementById("Leave3WayCall").innerHTML ="<a href=\"#\" onclick=\"leave_3way_call('FIRST');return false;\">Leave 3-Way</a>";
+                                document.getElementById("Leave3WayCall").className = "button blue";
 
-                                document.getElementById("DialWithCustomer").innerHTML ="<img src=\"./images/vdc_XB_dialwithcustomer_OFF.gif\" border=\"0\" alt=\"Dial With Customer\" style=\"vertical-align:middle\" />";
+                                document.getElementById("DialWithCustomer").innerHTML ="Warm X-fer";
+                                document.getElementById("DialWithCustomer").className = "button blueinactive";
 
-                                document.getElementById("ParkCustomerDial").innerHTML ="<img src=\"./images/vdc_XB_parkcustomerdial_OFF.gif\" border=\"0\" alt=\"Park Customer Dial\" style=\"vertical-align:middle\" />";
 
-                                document.getElementById("HangupXferLine").innerHTML ="<a href=\"#\" onclick=\"xfercall_send_hangup();return false;\"><img src=\"./images/vdc_XB_hangupxferline.gif\" border=\"0\" alt=\"Hangup Xfer Line\" style=\"vertical-align:middle\" /></a>";
+                                document.getElementById("ParkCustomerDial").innerHTML ="3-Way";
+                                document.getElementById("ParkCustomerDial").className = "button blueinactive";
 
-                                document.getElementById("HangupBothLines").innerHTML ="<a href=\"#\" onclick=\"bothcall_send_hangup();return false;\"><img src=\"./images/vdc_XB_hangupbothlines.gif\" border=\"0\" alt=\"Hangup Both Lines\" style=\"vertical-align:middle\" /></a>";
+                                document.getElementById("HangupXferLine").innerHTML ="<a href=\"#\" onclick=\"xfercall_send_hangup();return false;\">Hangup 3rd Party</a>";
+                                document.getElementById("HangupXferLine").className = "button blue";
+                                showDivDiplay("x-transfer-options");
+                                hideDivDisplay("x-transfer-active");
+
+                                document.getElementById("HangupBothLines").innerHTML ="<a href=\"#\" onclick=\"bothcall_send_hangup();return false;\">Hangup Both</a>";
+                                document.getElementById("HangupBothLines").className = "button blue";
 
 								xferchannellive=1;
 								XDcheck = '';
@@ -5880,20 +5687,22 @@ function set_length(SLnumber,SLlength_goal,SLdirection)
 
 								document.getElementById("MainStatuSSpan").innerHTML = " Called: " + status_display_number + " UID: " + CIDcheck + " &nbsp;"; 
 
-                                document.getElementById("ParkControl").innerHTML ="<a href=\"#\" onclick=\"mainxfer_send_redirect('ParK','" + lastcustchannel + "','" + lastcustserverip + "');return false;\"><img src=\"./images/vdc_LB_parkcall.gif\" border=\"0\" alt=\"Park Call\" /></a>";
+                                document.getElementById("ParkControl").innerHTML ="<a href=\"#\" onclick=\"mainxfer_send_redirect('ParK','" + lastcustchannel + "','" + lastcustserverip + "');return false;\"><img src=\"./images/x-hold-on.png\" border=\"0\" alt=\"Park Call\" /><span>Hold</span></a>";
 								if ( (ivr_park_call=='ENABLED') || (ivr_park_call=='ENABLED_PARK_ONLY') )
 									{
-                                    document.getElementById("ivrParkControl").innerHTML ="<a href=\"#\" onclick=\"mainxfer_send_redirect('ParKivr','" + lastcustchannel + "','" + lastcustserverip + "');return false;\"><img src=\"./images/vdc_LB_ivrparkcall.gif\" border=\"0\" alt=\"IVR Park Call\" /></a>";
+                                    document.getElementById("ivrParkControl").innerHTML ="<a href=\"#\" onclick=\"mainxfer_send_redirect('ParKivr','" + lastcustchannel + "','" + lastcustserverip + "');return false;\"><img src=\"./images/x-holdivr.png\" border=\"0\" alt=\"IVR Park Call\" /><span>IVR Hold</span></a>";
 									}
 
-                                document.getElementById("HangupControl").innerHTML = "<a href=\"#\" onclick=\"dialedcall_send_hangup();\"><img src=\"./images/vdc_LB_hangupcustomer.gif\" border=\"0\" alt=\"Hangup Customer\" /></a>";
+                                document.getElementById("HangupControl").innerHTML = "<a href=\"#\" onclick=\"dialedcall_send_hangup();\"><img src=\"./images/x-endcall-on.png\" border=\"0\" alt=\"Hangup Customer\" /><span>End Call</span></a>";
 
-                                document.getElementById("XferControl").innerHTML = "<a href=\"#\" onclick=\"ShoWTransferMain('ON');\"><img src=\"./images/vdc_LB_transferconf.gif\" border=\"0\" alt=\"Transfer - Conference\" /></a>";
+                                document.getElementById("XferControl").innerHTML = "<a href=\"#\" onclick=\"ShoWTransferMain('ON');\"><img src=\"./images/x-transfer-on.png\" border=\"0\" alt=\"Transfer - Conference\" /><span>X-fer</span></a>";
 
-                                document.getElementById("LocalCloser").innerHTML = "<a href=\"#\" onclick=\"mainxfer_send_redirect('XfeRLOCAL','" + lastcustchannel + "','" + lastcustserverip + "');return false;\"><img src=\"./images/vdc_XB_localcloser.gif\" border=\"0\" alt=\"LOCAL CLOSER\" style=\"vertical-align:middle\" /></a>";
+                                document.getElementById("LocalCloser").innerHTML = "<a href=\"#\" onclick=\"mainxfer_send_redirect('XfeRLOCAL','" + lastcustchannel + "','" + lastcustserverip + "');return false;\">X-fer to Queue</a>";
+                                document.getElementById("LocalCloser").className = "button blue";
 
-                                document.getElementById("DialBlindTransfer").innerHTML = "<a href=\"#\" onclick=\"mainxfer_send_redirect('XfeRBLIND','" + lastcustchannel + "','" + lastcustserverip + "');return false;\"><img src=\"./images/vdc_XB_blindtransfer.gif\" border=\"0\" alt=\"Dial Blind Transfer\" style=\"vertical-align:middle\" /></a>";
-
+                                document.getElementById("DialBlindTransfer").innerHTML = "<a href=\"#\" onclick=\"mainxfer_send_redirect('XfeRBLIND','" + lastcustchannel + "','" + lastcustserverip + "');return false;\">Blind X-fer</a>";
+                                document.getElementById("DialBlindTransfer").className = "button blue";
+                                
                                 document.getElementById("DialBlindVMail").innerHTML = "<a href=\"#\" onclick=\"mainxfer_send_redirect('XfeRVMAIL','" + lastcustchannel + "','" + lastcustserverip + "');return false;\"><img src=\"./images/vdc_XB_ammessage.gif\" border=\"0\" alt=\"Blind Transfer VMail Message\" style=\"vertical-align:middle\" /></a>";
 
                                 document.getElementById("VolumeUpSpan").innerHTML = "<a href=\"#\" onclick=\"volume_control('UP','" + MDchannel + "','');return false;\"><img src=\"./images/vdc_volume_up.gif\" border=\"0\"></a>";
@@ -6174,10 +5983,10 @@ function set_length(SLnumber,SLlength_goal,SLdirection)
 							TEMP_VDIC_web_form_address_two = URLDecode(VDIC_web_form_address_two,'YES','DEFAULT','2');
 							}
 
-                        document.getElementById("WebFormSpan").innerHTML = "<a href=\"" + TEMP_VDIC_web_form_address + "\" target=\"" + web_form_target + "\" onMouseOver=\"WebFormRefresH();\"><img src=\"./images/vdc_LB_webform.gif\" border=\"0\" alt=\"Web Form\" /></a>\n";
+                        document.getElementById("WebFormSpan").innerHTML = "<a href=\"" + TEMP_VDIC_web_form_address + "\" target=\"" + web_form_target + "\" onMouseOver=\"WebFormRefresH();\"><img src=\"./images/x-webform.png\" border=\"0\" alt=\"Web Form\" /><span id=\"x-webform\">Launch</span></a>\n";
 						if (enable_second_webform > 0)
 							{
-                            document.getElementById("WebFormSpanTwo").innerHTML = "<a href=\"" + TEMP_VDIC_web_form_address_two + "\" target=\"" + web_form_target + "\" onMouseOver=\"WebFormTwoRefresH();\"><img src=\"./images/vdc_LB_webform_two.gif\" border=\"0\" alt=\"Web Form 2\" /></a>\n";
+                            document.getElementById("WebFormSpanTwo").innerHTML = "<a href=\"" + TEMP_VDIC_web_form_address_two + "\" target=\"" + web_form_target + "\" onMouseOver=\"WebFormTwoRefresH();\"><img src=\"./images/x-webform.png\" border=\"0\" alt=\"Web Form 2\" /><span id=\"x-webform\">Launch</span></a>\n";
 							}
 						}
 					else
@@ -6216,11 +6025,11 @@ function set_length(SLnumber,SLlength_goal,SLdirection)
 				else
 					{auto_dial_level=starting_dial_level;}
 
-				document.getElementById("DiaLControl").innerHTML = "<img src=\"./images/vdc_LB_pause_OFF.gif\" border=\"0\" alt=\" Pause \" /><img src=\"./images/vdc_LB_resume_OFF.gif\" border=\"0\" alt=\"Resume\" /><br /><img src=\"./images/vdc_LB_dialnextnumber_OFF.gif\" border=\"0\" alt=\"Dial Next Number\" />";
+				document.getElementById("DiaLControl").innerHTML = "<a href=\"#\" style=\"opacity:.25;\"><img src=\"./images/x-resume.png\" border=\"0\" alt=\"Resume\" /><span id=\"x-resume\">Ready</span></a><a href=\"#\" style=\"opacity:.25;\"><img src=\"./images/x-pause.png\" border=\"0\" alt=\" Pause \" /><span id=\"x-pause\">Pause</span></a><br /><hr id=\"x-menuitem-sep\" /><a href=\"#\" style=\"opacity:.25;\"><img src=\"./images/x-dialnext.png\" border=\"0\" alt=\"Dial Next Number\" /><span id=\"x-dialnext\">Dial Next Number</span></a>";
 				}
 			else
 				{
-				document.getElementById("DiaLControl").innerHTML = "<img src=\"./images/vdc_LB_dialnextnumber_OFF.gif\" border=\"0\" alt=\"Dial Next Number\" />";
+				document.getElementById("DiaLControl").innerHTML = "<a href=\"#\" style=\"opacity:.25;\"><img src=\"./images/x-dialnext.png\" border=\"0\" alt=\"Dial Next Number\" /><span id=\"x-dialnext\">Dial Next Number</span></a>";
 				}
 			var manual_dial_only_type_flag = '';
 			if ( (mdtype == 'ALT') || (mdtype == 'ADDR3') )
@@ -6237,10 +6046,10 @@ function set_length(SLnumber,SLlength_goal,SLdirection)
 				reselect_preview_dial = 1;
 				in_lead_preview_state = 1;
 				var man_preview = 'YES';
-				var man_status = "Preview the Lead then <a href=\"#\" onclick=\"ManualDialOnly('" + manual_dial_only_type_flag + "')\"><font class=\"preview_text\"> DIAL LEAD</font></a> or <a href=\"#\" onclick=\"ManualDialSkip()\"><font class=\"preview_text\">SKIP LEAD</font></a>"; 
+				var man_status = "Preview the Lead then <a href=\"#\" onclick=\"ManualDialOnly('" + manual_dial_only_type_flag + "')\"><font class=\"preview_text\"> Dial It</font></a> or <a href=\"#\" onclick=\"ManualDialSkip()\"><font class=\"preview_text\">Skip It</font></a>"; 
 				if (manual_preview_dial=='PREVIEW_ONLY')
 					{
-					var man_status = "Preview the Lead then <a href=\"#\" onclick=\"ManualDialOnly('" + manual_dial_only_type_flag + "')\"><font class=\"preview_text\"> DIAL LEAD</font></a>"; 
+					var man_status = "Preview the Lead then <a href=\"#\" onclick=\"ManualDialOnly('" + manual_dial_only_type_flag + "')\"><font class=\"preview_text\"> Dial It</font></a>"; 
 					}
 				}
 			else
@@ -6334,7 +6143,7 @@ function set_length(SLnumber,SLlength_goal,SLdirection)
 
 							if (starting_dial_level == 0)
 								{
-								document.getElementById("DiaLControl").innerHTML = "<a href=\"#\" onclick=\"ManualDialNext('','','','','','0');\"><img src=\"./images/vdc_LB_dialnextnumber.gif\" border=\"0\" alt=\"Dial Next Number\" /></a>";
+								document.getElementById("DiaLControl").innerHTML = "<a href=\"#\" onclick=\"ManualDialNext('','','','','','0');\"><img src=\"./images/x-dialnext.png\" border=\"0\" alt=\"Dial Next Number\" /><span id=\"x-dialnext\">Dial Next Number</span></a>";
 								}
 							else
 								{
@@ -6342,7 +6151,7 @@ function set_length(SLnumber,SLlength_goal,SLdirection)
 									{
 									auto_dial_level=starting_dial_level;
 
-									document.getElementById("DiaLControl").innerHTML = "<img src=\"./images/vdc_LB_pause_OFF.gif\" border=\"0\" alt=\" Pause \" /><a href=\"#\" onclick=\"AutoDial_ReSume_PauSe('VDADready');\"><img src=\"./images/vdc_LB_resume.gif\" border=\"0\" alt=\"Resume\" /></a><br /><a href=\"#\" onclick=\"ManualDialNext('','','','','','0');\"><img src=\"./images/vdc_LB_dialnextnumber.gif\" border=\"0\" alt=\"Dial Next Number\" /></a>";
+									document.getElementById("DiaLControl").innerHTML = "<a href=\"#\" onclick=\"AutoDial_ReSume_PauSe('VDADready');\"><img src=\"./images/x-resume.png\" border=\"0\" alt=\"Resume\" /><span id=\"x-resume\">Ready</span></a><a href=\"#\" style=\"opacity:.25;\"><img src=\"./images/x-pause.png\" border=\"0\" alt=\" Pause \" /><span id=\"x-pause\">Pause</span></a><br /><hr id=\"x-menuitem-sep\" /><a href=\"#\" onclick=\"ManualDialNext('','','','','','0');\"><img src=\"./images/x-dialnext.png\" border=\"0\" alt=\"Dial Next Number\" /><span id=\"x-dialnext\">Dial Next Number</span></a>";
 									}
 								else
 									{
@@ -6473,10 +6282,10 @@ function set_length(SLnumber,SLlength_goal,SLdirection)
 								TEMP_VDIC_web_form_address_two = URLDecode(VDIC_web_form_address_two,'YES','DEFAULT','2');
 								}
 
-							document.getElementById("WebFormSpan").innerHTML = "<a href=\"" + TEMP_VDIC_web_form_address + "\" target=\"" + web_form_target + "\" onMouseOver=\"WebFormRefresH();\"><img src=\"./images/vdc_LB_webform.gif\" border=\"0\" alt=\"Web Form\" /></a>\n";
+							document.getElementById("WebFormSpan").innerHTML = "<a href=\"" + TEMP_VDIC_web_form_address + "\" target=\"" + web_form_target + "\" onMouseOver=\"WebFormRefresH();\"><img src=\"./images/x-webform.png\" border=\"0\" alt=\"Web Form\" /><span id=\"x-webform\">Launch</span></a>\n";
 							if (enable_second_webform > 0)
 								{
-								document.getElementById("WebFormSpanTwo").innerHTML = "<a href=\"" + TEMP_VDIC_web_form_address_two + "\" target=\"" + web_form_target + "\" onMouseOver=\"WebFormTwoRefresH();\"><img src=\"./images/vdc_LB_webform_two.gif\" border=\"0\" alt=\"Web Form 2\" /></a>\n";
+								document.getElementById("WebFormSpanTwo").innerHTML = "<a href=\"" + TEMP_VDIC_web_form_address_two + "\" target=\"" + web_form_target + "\" onMouseOver=\"WebFormTwoRefresH();\"><img src=\"./images/x-webform.png\" border=\"0\" alt=\"Web Form 2\" /><span id=\"x-webform\">Launch</span></a>\n";
 								}
 
 							if (CBentry_time.length > 2)
@@ -6502,7 +6311,7 @@ function set_length(SLnumber,SLlength_goal,SLdirection)
 								MD_channel_look=1;
 								custchannellive=1;
 
-								document.getElementById("HangupControl").innerHTML = "<a href=\"#\" onclick=\"dialedcall_send_hangup();\"><img src=\"./images/vdc_LB_hangupcustomer.gif\" border=\"0\" alt=\"Hangup Customer\" /></a>";
+								document.getElementById("HangupControl").innerHTML = "<a href=\"#\" onclick=\"dialedcall_send_hangup();\"><img src=\"./images/x-endcall-on.png\" border=\"0\" alt=\"Hangup Customer\" /><span>End Call</span></a>";
 
 								if ( (LIVE_campaign_recording == 'ALLCALLS') || (LIVE_campaign_recording == 'ALLFORCE') )
 									{all_record = 'YES';}
@@ -6590,11 +6399,11 @@ function set_length(SLnumber,SLlength_goal,SLdirection)
 				{
 				auto_dial_level=starting_dial_level;
 
-                document.getElementById("DiaLControl").innerHTML = "<img src=\"./images/vdc_LB_pause_OFF.gif\" border=\"0\" alt=\" Pause \" /><img src=\"./images/vdc_LB_resume_OFF.gif\" border=\"0\" alt=\"Resume\" /><br /><img src=\"./images/vdc_LB_dialnextnumber_OFF.gif\" border=\"0\" alt=\"Dial Next Number\" />";
+                document.getElementById("DiaLControl").innerHTML = "<a href=\"#\" style=\"opacity:.25;\"><img src=\"./images/x-resume.png\" border=\"0\" alt=\"Resume\" /><span id=\"x-resume\">Ready</span></a><a href=\"#\" style=\"opacity:.25;\"><img src=\"./images/x-pause.png\" border=\"0\" alt=\" Pause \" /><span id=\"x-pause\">Pause</span></a><br /><hr id=\"x-menuitem-sep\" /><a href=\"#\" style=\"opacity:.25;\"><img src=\"./images/x-dialnext.png\" border=\"0\" alt=\"Dial Next Number\" /><span id=\"x-dialnext\">Dial Next Number</span></a>";
 				}
 			else
 				{
-                document.getElementById("DiaLControl").innerHTML = "<img src=\"./images/vdc_LB_dialnextnumber_OFF.gif\" border=\"0\" alt=\"Dial Next Number\" />";
+                document.getElementById("DiaLControl").innerHTML = "<a href=\"#\" style=\"opacity:.25;\"><img src=\"./images/x-dialnext.png\" border=\"0\" alt=\"Dial Next Number\" /><span id=\"x-dialnext\">Dial Next Number</span></a>";
 				}
 
 			var xmlhttp=false;
@@ -6688,11 +6497,11 @@ function set_length(SLnumber,SLlength_goal,SLdirection)
 
 							if (dial_method == "INBOUND_MAN")
 								{
-                                document.getElementById("DiaLControl").innerHTML = "<img src=\"./images/vdc_LB_pause_OFF.gif\" border=\"0\" alt=\" Pause \" /><a href=\"#\" onclick=\"AutoDial_ReSume_PauSe('VDADready');\"><img src=\"./images/vdc_LB_resume.gif\" border=\"0\" alt=\"Resume\" /></a><br /><a href=\"#\" onclick=\"ManualDialNext('','','','','','0');\"><img src=\"./images/vdc_LB_dialnextnumber.gif\" border=\"0\" alt=\"Dial Next Number\" /></a>";
+                                document.getElementById("DiaLControl").innerHTML = "<a href=\"#\" onclick=\"AutoDial_ReSume_PauSe('VDADready');\"><img src=\"./images/x-resume.png\" border=\"0\" alt=\"Resume\" /><span id=\"x-resume\">Ready</span></a><a href=\"#\" style=\"opacity:.25;\"><img src=\"./images/x-pause.png\" border=\"0\" alt=\" Pause \" /><span id=\"x-pause\">Pause</span></a><br /><hr id=\"x-menuitem-sep\" /><a href=\"#\" onclick=\"ManualDialNext('','','','','','0');\"><img src=\"./images/x-dialnext.png\" border=\"0\" alt=\"Dial Next Number\" /><span id=\"x-dialnext\">Dial Next Number</span></a>";
 								}
 							else
 								{
-                                document.getElementById("DiaLControl").innerHTML = "<a href=\"#\" onclick=\"ManualDialNext('','','','','','0');\"><img src=\"./images/vdc_LB_dialnextnumber.gif\" border=\"0\" alt=\"Dial Next Number\" /></a>";
+                                document.getElementById("DiaLControl").innerHTML = "<a href=\"#\" onclick=\"ManualDialNext('','','','','','0');\"><img src=\"./images/x-dialnext.png\" border=\"0\" alt=\"Dial Next Number\" /><span id=\"x-dialnext\">Dial Next Number</span></a>";
 								}
 							}
 						}
@@ -6839,7 +6648,7 @@ function set_length(SLnumber,SLlength_goal,SLdirection)
 							{
 							document.getElementById("MainStatuSSpan").innerHTML = " Calling: " + status_display_number + " UID: " + MDnextCID + " &nbsp; Waiting for Ring...";
 							
-                            document.getElementById("HangupControl").innerHTML = "<a href=\"#\" onclick=\"dialedcall_send_hangup();\"><img src=\"./images/vdc_LB_hangupcustomer.gif\" border=\"0\" alt=\"Hangup Customer\" /></a>";
+                            document.getElementById("HangupControl").innerHTML = "<a href=\"#\" onclick=\"dialedcall_send_hangup();\"><img src=\"./images/x-endcall-on.png\" border=\"0\" alt=\"Hangup Customer\" /><span>End Call</span></a>";
 							}
 						if ( (LIVE_campaign_recording == 'ALLCALLS') || (LIVE_campaign_recording == 'ALLFORCE') )
 							{all_record = 'YES';}
@@ -6919,7 +6728,7 @@ function set_length(SLnumber,SLlength_goal,SLdirection)
 				{
 				auto_dial_level=starting_dial_level;
 
-                document.getElementById("DiaLControl").innerHTML = "<a href=\"#\" onclick=\"AutoDial_ReSume_PauSe('VDADpause');\"><img src=\"./images/vdc_LB_pause.gif\" border=\"0\" alt=\" Pause \" /></a><img src=\"./images/vdc_LB_resume_OFF.gif\" border=\"0\" alt=\"Resume\" /></a><br /><a href=\"#\" onclick=\"ManualDialNext('','','','','','0');\"><img src=\"./images/vdc_LB_dialnextnumber.gif\" border=\"0\" alt=\"Dial Next Number\" /></a>";
+                document.getElementById("DiaLControl").innerHTML = "<a href=\"#\" style=\"opacity:.25;\"><img src=\"./images/x-resume.png\" border=\"0\" alt=\"Resume\" /><span id=\"x-resume\">Ready</span></a><a href=\"#\" onclick=\"AutoDial_ReSume_PauSe('VDADpause');\"><img src=\"./images/x-pause.png\" border=\"0\" alt=\" Pause \" /><span id=\"x-pause\">Pause</span></a><br /><hr id=\"x-menuitem-sep\" /><a href=\"#\" onclick=\"ManualDialNext('','','','','','0');\"><img src=\"./images/x-dialnext.png\" border=\"0\" alt=\"Dial Next Number\" /><span id=\"x-dialnext\">Dial Next Number</span></a>";
 				}
 			else
 				{
@@ -6936,7 +6745,7 @@ function set_length(SLnumber,SLlength_goal,SLdirection)
 				{
 				auto_dial_level=starting_dial_level;
 
-                document.getElementById("DiaLControl").innerHTML = "<img src=\"./images/vdc_LB_pause_OFF.gif\" border=\"0\" alt=\" Pause \" /><a href=\"#\" onclick=\"AutoDial_ReSume_PauSe('VDADready');\"><img src=\"./images/vdc_LB_resume.gif\" border=\"0\" alt=\"Resume\" /></a><br /><a href=\"#\" onclick=\"ManualDialNext('','','','','','0');\"><img src=\"./images/vdc_LB_dialnextnumber.gif\" border=\"0\" alt=\"Dial Next Number\" /></a>";
+                document.getElementById("DiaLControl").innerHTML = "<a href=\"#\" onclick=\"AutoDial_ReSume_PauSe('VDADready');\"><img src=\"./images/x-resume.png\" border=\"0\" alt=\"Resume\" /><span id=\"x-resume\">Ready</span></a><a href=\"#\" style=\"opacity:.25;\"><img src=\"./images/x-pause.png\" border=\"0\" alt=\" Pause \" /><span id=\"x-pause\">Pause</span></a><br /><hr id=\"x-menuitem-sep\" /><a href=\"#\" onclick=\"ManualDialNext('','','','','','0');\"><img src=\"./images/x-dialnext.png\" border=\"0\" alt=\"Dial Next Number\" /><span id=\"x-dialnext\">Dial Next Number</span></a>";
 				}
 			else
 				{
@@ -7441,20 +7250,22 @@ function set_length(SLnumber,SLlength_goal,SLdirection)
 								document.getElementById("MainStatuSSpan").innerHTML = " Incoming: " + dial_display_number + " " + custom_call_id + " Group- " + VDIC_data_VDIG[1] + " &nbsp; " + VDIC_fronter; 
 								}
 
-                            document.getElementById("ParkControl").innerHTML ="<a href=\"#\" onclick=\"mainxfer_send_redirect('ParK','" + lastcustchannel + "','" + lastcustserverip + "');return false;\"><img src=\"./images/vdc_LB_parkcall.gif\" border=\"0\" alt=\"Park Call\" /></a>";
+                            document.getElementById("ParkControl").innerHTML ="<a href=\"#\" onclick=\"mainxfer_send_redirect('ParK','" + lastcustchannel + "','" + lastcustserverip + "');return false;\"><img src=\"./images/x-hold-on.png\" border=\"0\" alt=\"Park Call\" /><span>Hold</span></a>";
 							if ( (ivr_park_call=='ENABLED') || (ivr_park_call=='ENABLED_PARK_ONLY') )
 								{
-                                document.getElementById("ivrParkControl").innerHTML ="<a href=\"#\" onclick=\"mainxfer_send_redirect('ParKivr','" + lastcustchannel + "','" + lastcustserverip + "');return false;\"><img src=\"./images/vdc_LB_ivrparkcall.gif\" border=\"0\" alt=\"IVR Park Call\" /></a>";
+                                document.getElementById("ivrParkControl").innerHTML ="<a href=\"#\" onclick=\"mainxfer_send_redirect('ParKivr','" + lastcustchannel + "','" + lastcustserverip + "');return false;\"><img src=\"./images/x-holdivr.png\" border=\"0\" alt=\"IVR Park Call\" /><span>IVR Hold</span></a>";
 								}
 
-                            document.getElementById("HangupControl").innerHTML = "<a href=\"#\" onclick=\"dialedcall_send_hangup();\"><img src=\"./images/vdc_LB_hangupcustomer.gif\" border=\"0\" alt=\"Hangup Customer\" /></a>";
+                            document.getElementById("HangupControl").innerHTML = "<a href=\"#\" onclick=\"dialedcall_send_hangup();\"><img src=\"./images/x-endcall-on.png\" border=\"0\" alt=\"Hangup Customer\" /><span>End Call</span></a>";
 
-                            document.getElementById("XferControl").innerHTML = "<a href=\"#\" onclick=\"ShoWTransferMain('ON');\"><img src=\"./images/vdc_LB_transferconf.gif\" border=\"0\" alt=\"Transfer - Conference\" /></a>";
+                            document.getElementById("XferControl").innerHTML = "<a href=\"#\" onclick=\"ShoWTransferMain('ON');\"><img src=\"./images/x-transfer-on.png\" border=\"0\" alt=\"Transfer - Conference\" /><span>X-fer</span></a>";
 
-                            document.getElementById("LocalCloser").innerHTML = "<a href=\"#\" onclick=\"mainxfer_send_redirect('XfeRLOCAL','" + lastcustchannel + "','" + lastcustserverip + "');return false;\"><img src=\"./images/vdc_XB_localcloser.gif\" border=\"0\" alt=\"LOCAL CLOSER\" style=\"vertical-align:middle\" /></a>";
+                            document.getElementById("LocalCloser").innerHTML = "<a href=\"#\" onclick=\"mainxfer_send_redirect('XfeRLOCAL','" + lastcustchannel + "','" + lastcustserverip + "');return false;\">X-fer to Queue</a>";
+                            document.getElementById("LocalCloser").className = "button blue";
 
-                            document.getElementById("DialBlindTransfer").innerHTML = "<a href=\"#\" onclick=\"mainxfer_send_redirect('XfeRBLIND','" + lastcustchannel + "','" + lastcustserverip + "');return false;\"><img src=\"./images/vdc_XB_blindtransfer.gif\" border=\"0\" alt=\"Dial Blind Transfer\" style=\"vertical-align:middle\" /></a>";
-
+                            document.getElementById("DialBlindTransfer").innerHTML = "<a href=\"#\" onclick=\"mainxfer_send_redirect('XfeRBLIND','" + lastcustchannel + "','" + lastcustserverip + "');return false;\">Blind X-fer</a>";
+                            document.getElementById("DialBlindTransfer").className = "button blue";
+                            
                             document.getElementById("DialBlindVMail").innerHTML = "<a href=\"#\" onclick=\"mainxfer_send_redirect('XfeRVMAIL','" + lastcustchannel + "','" + lastcustserverip + "');return false;\"><img src=\"./images/vdc_XB_ammessage.gif\" border=\"0\" alt=\"Blind Transfer VMail Message\" style=\"vertical-align:middle\" /></a>";
 		
 							if ( (quick_transfer_button == 'IN_GROUP') || (quick_transfer_button == 'LOCKED_IN_GROUP') )
@@ -7537,7 +7348,7 @@ function set_length(SLnumber,SLlength_goal,SLdirection)
 
 							if (dial_method == "INBOUND_MAN")
 								{
-                                document.getElementById("DiaLControl").innerHTML = "<img src=\"./images/vdc_LB_pause_OFF.gif\" border=\"0\" alt=\" Pause \" /><img src=\"./images/vdc_LB_resume_OFF.gif\" border=\"0\" alt=\"Resume\" /><br /><img src=\"./images/vdc_LB_dialnextnumber_OFF.gif\" border=\"0\" alt=\"Dial Next Number\" />";
+                                document.getElementById("DiaLControl").innerHTML = "<a href=\"#\" style=\"opacity:.25;\"><img src=\"./images/x-resume.png\" border=\"0\" alt=\"Resume\" /><span id=\"x-resume\">Ready</span></a><a href=\"#\" style=\"opacity:.25;\"><img src=\"./images/x-pause.png\" border=\"0\" alt=\" Pause \" /><span id=\"x-pause\">Pause</span></a><br /><hr id=\"x-menuitem-sep\" /><a href=\"#\" style=\"opacity:.25;\"><img src=\"./images/x-dialnext.png\" border=\"0\" alt=\"Dial Next Number\" /><span id=\"x-dialnext\">Dial Next Number</span></a>";
 								}
 							else
 								{
@@ -7581,11 +7392,11 @@ function set_length(SLnumber,SLlength_goal,SLdirection)
 								}
 
 
-                            document.getElementById("WebFormSpan").innerHTML = "<a href=\"" + TEMP_VDIC_web_form_address + "\" target=\"" + web_form_target + "\" onMouseOver=\"WebFormRefresH();\"><img src=\"./images/vdc_LB_webform.gif\" border=\"0\" alt=\"Web Form\" /></a>\n";
+                            document.getElementById("WebFormSpan").innerHTML = "<a href=\"" + TEMP_VDIC_web_form_address + "\" target=\"" + web_form_target + "\" onMouseOver=\"WebFormRefresH();\"><img src=\"./images/x-webform.png\" border=\"0\" alt=\"Web Form\" /><span id=\"x-webform\">Launch</span></a>\n";
 
 							if (enable_second_webform > 0)
 								{
-                                document.getElementById("WebFormSpanTwo").innerHTML = "<a href=\"" + TEMP_VDIC_web_form_address_two + "\" target=\"" + web_form_target + "\" onMouseOver=\"WebFormTwoRefresH();\"><img src=\"./images/vdc_LB_webform_two.gif\" border=\"0\" alt=\"Web Form 2\" /></a>\n";
+                                document.getElementById("WebFormSpanTwo").innerHTML = "<a href=\"" + TEMP_VDIC_web_form_address_two + "\" target=\"" + web_form_target + "\" onMouseOver=\"WebFormTwoRefresH();\"><img src=\"./images/x-webform.png\" border=\"0\" alt=\"Web Form 2\" /><span id=\"x-webform\">Launch</span></a>\n";
 								}
 
 							if ( (LIVE_campaign_recording == 'ALLCALLS') || (LIVE_campaign_recording == 'ALLFORCE') )
@@ -7722,11 +7533,11 @@ function set_length(SLnumber,SLlength_goal,SLdirection)
 
 		if (taskrefresh == 'OUT')
 			{
-            document.getElementById("WebFormSpan").innerHTML = "<a href=\"" + TEMP_VDIC_web_form_address + "\" target=\"" + web_form_target + "\" onMouseOver=\"WebFormRefresH('IN');\"><img src=\"./images/vdc_LB_webform.gif\" border=\"0\" alt=\"Web Form\" /></a>\n";
+            document.getElementById("WebFormSpan").innerHTML = "<a href=\"" + TEMP_VDIC_web_form_address + "\" target=\"" + web_form_target + "\" onMouseOver=\"WebFormRefresH('IN');\"><img src=\"./images/x-webform.png\" border=\"0\" alt=\"Web Form\" /><span id=\"x-webform\">Launch</span></a>\n";
 			}
 		else 
 			{
-            document.getElementById("WebFormSpan").innerHTML = "<a href=\"" + TEMP_VDIC_web_form_address + "\" target=\"" + web_form_target + "\" onMouseOut=\"WebFormRefresH('OUT');\"><img src=\"./images/vdc_LB_webform.gif\" border=\"0\" alt=\"Web Form\" /></a>\n";
+            document.getElementById("WebFormSpan").innerHTML = "<a href=\"" + TEMP_VDIC_web_form_address + "\" target=\"" + web_form_target + "\" onMouseOut=\"WebFormRefresH('OUT');\"><img src=\"./images/x-webform.png\" border=\"0\" alt=\"Web Form\" /><span id=\"x-webform\">Launch</span></a>\n";
 			}
 		}
 
@@ -7766,11 +7577,11 @@ function set_length(SLnumber,SLlength_goal,SLdirection)
 			{
 			if (taskrefresh == 'OUT')
 				{
-                document.getElementById("WebFormSpanTwo").innerHTML = "<a href=\"" + TEMP_VDIC_web_form_address_two + "\" target=\"" + web_form_target + "\" onMouseOver=\"WebFormTwoRefresH('IN');\"><img src=\"./images/vdc_LB_webform_two.gif\" border=\"0\" alt=\"Web Form 2\" /></a>\n";
+                document.getElementById("WebFormSpanTwo").innerHTML = "<a href=\"" + TEMP_VDIC_web_form_address_two + "\" target=\"" + web_form_target + "\" onMouseOver=\"WebFormTwoRefresH('IN');\"><img src=\"./images/x-webform.png\" border=\"0\" alt=\"Web Form 2\" /><span id=\"x-webform\">Launch</span></a>\n";
 				}
 			else 
 				{
-                document.getElementById("WebFormSpanTwo").innerHTML = "<a href=\"" + TEMP_VDIC_web_form_address_two + "\" target=\"" + web_form_target + "\" onMouseOut=\"WebFormTwoRefresH('OUT');\"><img src=\"./images/vdc_LB_webform_two.gif\" border=\"0\" alt=\"Web Form 2\" /></a>\n";
+                document.getElementById("WebFormSpanTwo").innerHTML = "<a href=\"" + TEMP_VDIC_web_form_address_two + "\" target=\"" + web_form_target + "\" onMouseOut=\"WebFormTwoRefresH('OUT');\"><img src=\"./images/x-webform.png\" border=\"0\" alt=\"Web Form 2\" /><span id=\"x-webform\">Launch</span></a>\n";
 				}
 			}
 		}
@@ -7961,21 +7772,27 @@ function set_length(SLnumber,SLlength_goal,SLdirection)
 				}
 
 			if( document.images ) { document.images['livecall'].src = image_livecall_OFF.src;}
-            document.getElementById("WebFormSpan").innerHTML = "<img src=\"./images/vdc_LB_webform_OFF.gif\" border=\"0\" alt=\"Web Form\" />";
+            document.getElementById("WebFormSpan").innerHTML = "<a href=\"#\" style=\"opacity:.25;\"><img src=\"./images/x-webform.png\" border=\"0\" alt=\"Web Form\" /><span id=\"x-webform\">Launch</span></a>";
 			if (enable_second_webform > 0)
 				{
-                document.getElementById("WebFormSpanTwo").innerHTML = "<img src=\"./images/vdc_LB_webform_two_OFF.gif\" border=\"0\" alt=\"Web Form 2\" />";
+                document.getElementById("WebFormSpanTwo").innerHTML = "<a href=\"#\" style=\"opacity:.25;\"><img src=\"./images/x-webform.png\" border=\"0\" alt=\"Web Form 2\" /><span id=\"x-webform\">Launch</span></a>";
 				}
-            document.getElementById("ParkControl").innerHTML = "<img src=\"./images/vdc_LB_parkcall_OFF.gif\" border=\"0\" alt=\"Park Call\" />";
-			document.getElementById("ParkControl2").innerHTML = "<img src=\"./images/vdc_LB_parkcall_OFF.gif\" border=\"0\" alt=\"Park Call\" />";
+            document.getElementById("ParkControl").innerHTML = "<a href=\"#\" style=\"opacity:.25;\"><img src=\"./images/x-hold-on.png\" border=\"0\" alt=\"Park Call\" /><span>Hold</span></a>";
+			document.getElementById("ParkControl2").innerHTML = "Park 3rd Party";
+                        document.getElementById("ParkControl2").className = "button blueinactive";
+                        
 			if ( (ivr_park_call=='ENABLED') || (ivr_park_call=='ENABLED_PARK_ONLY') )
 				{
-                document.getElementById("ivrParkControl").innerHTML = "<img src=\"./images/vdc_LB_ivrparkcall_OFF.gif\" border=\"0\" alt=\"IVR Park Call\" />";
+                document.getElementById("ivrParkControl").innerHTML = "<a href=\"#\" style=\"opacity:.25;\"><img src=\"./images/x-holdivr.png\" border=\"0\" alt=\"IVR Park Call\" /><span>IVR Hold</span></a>";
 				}
-            document.getElementById("HangupControl").innerHTML = "<img src=\"./images/vdc_LB_hangupcustomer_OFF.gif\" border=\"0\" alt=\"Hangup Customer\" />";
-            document.getElementById("XferControl").innerHTML = "<img src=\"./images/vdc_LB_transferconf_OFF.gif\" border=\"0\" alt=\"Transfer - Conference\" />";
-            document.getElementById("LocalCloser").innerHTML = "<img src=\"./images/vdc_XB_localcloser_OFF.gif\" border=\"0\" alt=\"LOCAL CLOSER\" style=\"vertical-align:middle\" />";
-            document.getElementById("DialBlindTransfer").innerHTML = "<img src=\"./images/vdc_XB_blindtransfer_OFF.gif\" border=\"0\" alt=\"Dial Blind Transfer\" style=\"vertical-align:middle\" />";
+            document.getElementById("HangupControl").innerHTML = "<a href=\"#\" style=\"opacity:.25;\"><img src=\"./images/x-endcall-on.png\" border=\"0\" alt=\"Hangup Customer\" /><span>End Call</span></a>";
+            document.getElementById("XferControl").innerHTML = "<a href=\"#\" style=\"opacity:.25;\"><img src=\"./images/x-transfer-on.png\" border=\"0\" alt=\"Transfer - Conference\" /><span>X-fer</span></a>";
+            document.getElementById("LocalCloser").innerHTML = "X-fer to Queue";
+            document.getElementById("LocalCloser").className = "button blueinactive";
+            
+            document.getElementById("DialBlindTransfer").innerHTML = "Blind X-fer";
+            document.getElementById("DialBlindTransfer").className = "button blueinactive";
+            
             document.getElementById("DialBlindVMail").innerHTML = "<img src=\"./images/vdc_XB_ammessage_OFF.gif\" border=\"0\" alt=\"Blind Transfer VMail Message\" style=\"vertical-align:middle\" />";
             document.getElementById("VolumeUpSpan").innerHTML = "<img src=\"./images/vdc_volume_up_off.gif\" border=\"0\" />";
             document.getElementById("VolumeDownSpan").innerHTML = "<img src=\"./images/vdc_volume_down_off.gif\" border=\"0\" />";
@@ -8026,7 +7843,7 @@ function set_length(SLnumber,SLlength_goal,SLdirection)
 						}
 					else
 						{
-                        document.getElementById("DiaLControl").innerHTML = "<a href=\"#\" onclick=\"ManualDialNext('','','','','','0');\"><img src=\"./images/vdc_LB_dialnextnumber.gif\" border=\"0\" alt=\"Dial Next Number\" /></a>";
+                        document.getElementById("DiaLControl").innerHTML = "<a href=\"#\" onclick=\"ManualDialNext('','','','','','0');\"><img src=\"./images/x-dialnext.png\" border=\"0\" alt=\"Dial Next Number\" /><span id=\"x-dialnext\">Dial Next Number</span></a>";
 						}
 					reselect_alt_dial = 0;
 					}
@@ -8057,7 +7874,7 @@ function set_length(SLnumber,SLlength_goal,SLdirection)
 								document.getElementById("MainStatuSSpan").innerHTML = '';
 								if (dial_method == "INBOUND_MAN")
 									{
-                                    document.getElementById("DiaLControl").innerHTML = "<img src=\"./images/vdc_LB_pause_OFF.gif\" border=\"0\" alt=\" Pause \" /><img src=\"./images/vdc_LB_resume_OFF.gif\" border=\"0\" alt=\"Resume\" /><br /><img src=\"./images/vdc_LB_dialnextnumber_OFF.gif\" border=\"0\" alt=\"Dial Next Number\" />";
+                                    document.getElementById("DiaLControl").innerHTML = "<a href=\"#\" style=\"opacity:.25;\"><img src=\"./images/x-resume.png\" border=\"0\" alt=\"Resume\" /><span id=\"x-ready\">Ready</span></a><a href=\"#\" style=\"opacity:.25;\"><img src=\"./images/x-pause.png\" border=\"0\" alt=\" Pause \" /><span id=\"x-pause\">Pause</span></a><br /><hr id=\"x-menuitem-sep\" /><a href=\"#\" style=\"opacity:.25;\"><img src=\"./images/x-dialnext.png\" border=\"0\" alt=\"Dial Next Number\" /><span id=\"x-dialnext\">Dial Next Number</span></a>";
 									}
 								else
 									{
@@ -8073,7 +7890,7 @@ function set_length(SLnumber,SLlength_goal,SLdirection)
 					document.getElementById("MainStatuSSpan").style.background = panel_bgcolor;
 					if (dial_method == "INBOUND_MAN")
 						{
-                        document.getElementById("DiaLControl").innerHTML = "<img src=\"./images/vdc_LB_pause_OFF.gif\" border=\"0\" alt=\" Pause \" /><img src=\"./images/vdc_LB_resume_OFF.gif\" border=\"0\" alt=\"Resume\" /><br /><img src=\"./images/vdc_LB_dialnextnumber_OFF.gif\" border=\"0\" alt=\"Dial Next Number\" />";
+                        document.getElementById("DiaLControl").innerHTML = "<a href=\"#\" style=\"opacity:.25;\"><img src=\"./images/x-resume.png\" border=\"0\" alt=\"Resume\" /><span id=\"x-resume\">Ready</span></a><a href=\"#\" style=\"opacity:.25;\"><img src=\"./images/x-pause.png\" border=\"0\" alt=\" Pause \" /><span id=\"x-pause\">Pause</span></a><br /><hr id=\"x-menuitem-sep\" /><a href=\"#\" style=\"opacity:.25;\"><img src=\"./images/x-dialnext.png\" border=\"0\" alt=\"Dial Next Number\" /><span id=\"x-dialnext\">Dial Next Number</span></a>";
 						}
 					else
 						{
@@ -8160,17 +7977,25 @@ function set_length(SLnumber,SLlength_goal,SLdirection)
 			document.vicidial_form.xferchannel.value = "";
 			lastxferchannel='';
 
-            document.getElementById("Leave3WayCall").innerHTML ="<img src=\"./images/vdc_XB_leave3waycall_OFF.gif\" border=\"0\" alt=\"LEAVE 3-WAY CALL\" />";
+            document.getElementById("Leave3WayCall").innerHTML ="Leave 3-Way";
+            document.getElementById("Leave3WayCall").className = "button blueinactive";
 
-			document.getElementById("ParkControl2").innerHTML = "<img src=\"./images/vdc_LB_parkcall_OFF.gif\" border=\"0\" alt=\"Park Call\" />";
+			document.getElementById("ParkControl2").innerHTML = "Park 3rd Party";
+                        document.getElementById("ParkControl2").className = "button blueinactive";
 				
-            document.getElementById("DialWithCustomer").innerHTML ="<a href=\"#\" onclick=\"SendManualDial('YES');return false;\"><img src=\"./images/vdc_XB_dialwithcustomer.gif\" border=\"0\" alt=\"Dial With Customer\" style=\"vertical-align:middle\" /></a>";
+            document.getElementById("DialWithCustomer").innerHTML ="<a href=\"#\" onclick=\"SendManualDial('YES');return false;\">Warm X-fer</a>";
+            document.getElementById("DialWithCustomer").className = "button blue";
 
-            document.getElementById("ParkCustomerDial").innerHTML ="<a href=\"#\" onclick=\"xfer_park_dial();return false;\"><img src=\"./images/vdc_XB_parkcustomerdial.gif\" border=\"0\" alt=\"Park Customer Dial\" style=\"vertical-align:middle\" /></a>";
+            document.getElementById("ParkCustomerDial").innerHTML ="<a href=\"#\" onclick=\"xfer_park_dial();return false;\">3-Way</a>";
+            document.getElementById("ParkCustomerDial").className = "button blue";
 
-            document.getElementById("HangupXferLine").innerHTML ="<img src=\"./images/vdc_XB_hangupxferline_OFF.gif\" border=\"0\" alt=\"Hangup Xfer Line\" style=\"vertical-align:middle\" />";
+            document.getElementById("HangupXferLine").innerHTML ="Hangup 3rd Party";
+            document.getElementById("HangupXferLine").className = "button blueinactive";
+            showDivDiplay("x-transfer-options");
+            hideDivDisplay("x-transfer-active");
 
-            document.getElementById("HangupBothLines").innerHTML ="<a href=\"#\" onclick=\"bothcall_send_hangup();return false;\"><img src=\"./images/vdc_XB_hangupbothlines.gif\" border=\"0\" alt=\"Hangup Both Lines\" style=\"vertical-align:middle\" /></a>";
+            document.getElementById("HangupBothLines").innerHTML ="<a href=\"#\" onclick=\"bothcall_send_hangup();return false;\">Hangup Both</a>";
+            document.getElementById("HangupBothLines").className = "button blue";
 			}
 		}
 
@@ -8640,9 +8465,14 @@ function set_length(SLnumber,SLlength_goal,SLdirection)
 		document.getElementById("callchannel").innerHTML = '';
 		document.vicidial_form.callserverip.value = '';
 		document.vicidial_form.xferchannel.value = '';
-        document.getElementById("DialWithCustomer").innerHTML ="<a href=\"#\" onclick=\"SendManualDial('YES');return false;\"><img src=\"./images/vdc_XB_dialwithcustomer.gif\" border=\"0\" alt=\"Dial With Customer\" style=\"vertical-align:middle\" /></a>";
-        document.getElementById("ParkCustomerDial").innerHTML ="<a href=\"#\" onclick=\"xfer_park_dial();return false;\"><img src=\"./images/vdc_XB_parkcustomerdial.gif\" border=\"0\" alt=\"Park Customer Dial\" style=\"vertical-align:middle\" /></a>";
-        document.getElementById("HangupBothLines").innerHTML ="<a href=\"#\" onclick=\"bothcall_send_hangup();return false;\"><img src=\"./images/vdc_XB_hangupbothlines.gif\" border=\"0\" alt=\"Hangup Both Lines\" style=\"vertical-align:middle\" /></a>";
+        document.getElementById("DialWithCustomer").innerHTML ="<a href=\"#\" onclick=\"SendManualDial('YES');return false;\">Warm X-fer</a>";
+        document.getElementById("DialWithCustomer").className = "button blue";
+
+        document.getElementById("ParkCustomerDial").innerHTML ="<a href=\"#\" onclick=\"xfer_park_dial();return false;\">3-Way</a>";
+        document.getElementById("ParkCustomerDial").className = "button blue";
+        
+        document.getElementById("HangupBothLines").innerHTML ="<a href=\"#\" onclick=\"bothcall_send_hangup();return false;\">Hangup Both</a>";
+        document.getElementById("HangupBothLines").className = "button blue";
 
 		var DispoChoice = document.vicidial_form.DispoSelection.value;
 
@@ -8656,10 +8486,10 @@ function set_length(SLnumber,SLlength_goal,SLdirection)
 	
 			WebFormRefresH('NO','YES');
 
-            document.getElementById("WebFormSpan").innerHTML = "<img src=\"./images/vdc_LB_webform_OFF.gif\" border=\"0\" alt=\"Web Form\" />";
+            document.getElementById("WebFormSpan").innerHTML = "<a href=\"#\" style=\"opacity:.25;\"><img src=\"./images/x-webform.png\" border=\"0\" alt=\"Web Form\" /><span id=\"x-webform\">Launch</span></a>";
 			if (enable_second_webform > 0)
 				{
-                document.getElementById("WebFormSpanTwo").innerHTML = "<img src=\"./images/vdc_LB_webform_two_OFF.gif\" border=\"0\" alt=\"Web Form 2\" />";
+                document.getElementById("WebFormSpanTwo").innerHTML = "<a href=\"#\" style=\"opacity:.25;\"><img src=\"./images/x-webform.png\" border=\"0\" alt=\"Web Form 2\" /><span id=\"x-webform\">Launch</span></a>";
 				}
 			window.open(TEMP_VDIC_web_form_address, web_form_target, 'toolbar=1,scrollbars=1,location=1,statusbar=1,menubar=1,resizable=1,width=640,height=450');
 
@@ -8685,9 +8515,14 @@ function set_length(SLnumber,SLlength_goal,SLdirection)
 		document.getElementById("callchannel").innerHTML = '';
 		document.vicidial_form.callserverip.value = '';
 		document.vicidial_form.xferchannel.value = '';
-        document.getElementById("DialWithCustomer").innerHTML ="<a href=\"#\" onclick=\"SendManualDial('YES');return false;\"><img src=\"./images/vdc_XB_dialwithcustomer.gif\" border=\"0\" alt=\"Dial With Customer\" style=\"vertical-align:middle\" /></a>";
-        document.getElementById("ParkCustomerDial").innerHTML ="<a href=\"#\" onclick=\"xfer_park_dial();return false;\"><img src=\"./images/vdc_XB_parkcustomerdial.gif\" border=\"0\" alt=\"Park Customer Dial\" style=\"vertical-align:middle\" /></a>";
-        document.getElementById("HangupBothLines").innerHTML ="<a href=\"#\" onclick=\"bothcall_send_hangup();return false;\"><img src=\"./images/vdc_XB_hangupbothlines.gif\" border=\"0\" alt=\"Hangup Both Lines\" style=\"vertical-align:middle\" /></a>";
+        document.getElementById("DialWithCustomer").innerHTML ="<a href=\"#\" onclick=\"SendManualDial('YES');return false;\">Warm X-fer</a>";
+        document.getElementById("DialWithCustomer").className = "button blue";
+
+        document.getElementById("ParkCustomerDial").innerHTML ="<a href=\"#\" onclick=\"xfer_park_dial();return false;\">3-Way</a>";
+        document.getElementById("ParkCustomerDial").className = "button blue";
+        
+        document.getElementById("HangupBothLines").innerHTML ="<a href=\"#\" onclick=\"bothcall_send_hangup();return false;\">Hangup Both</a>";
+        document.getElementById("HangupBothLines").className = "button blue";
  
 		var DispoChoice = document.vicidial_form.DispoSelection.value;
 
@@ -11388,7 +11223,6 @@ function phone_number_format(formatphone) {
 			hideDiv('NoneInSessionBox');
 			hideDiv('WrapupBox');
 			hideDiv('TransferMain');
-			hideDiv('WelcomeBoxA');
 			hideDiv('CallBackSelectBox');
 			hideDiv('DispoButtonHideA');
 			hideDiv('DispoButtonHideB');
@@ -11461,7 +11295,7 @@ function phone_number_format(formatphone) {
 
 			if ( (agent_pause_codes_active=='Y') || (agent_pause_codes_active=='FORCE') )
 				{
-				document.getElementById("PauseCodeLinkSpan").innerHTML = "<a href=\"#\" onclick=\"PauseCodeSelectContent_create();return false;\">ENTER A PAUSE CODE</a>";
+				document.getElementById("PauseCodeLinkSpan").innerHTML = "<a href=\"#\" onclick=\"PauseCodeSelectContent_create();return false;\">Enter a Pause Code</a>";
 				}
 			if (VICIDiaL_allow_closers < 1)
 				{
@@ -11470,7 +11304,7 @@ function phone_number_format(formatphone) {
 			document.getElementById("sessionIDspan").innerHTML = session_id;
 			if ( (LIVE_campaign_recording == 'NEVER') || (LIVE_campaign_recording == 'ALLFORCE') )
 				{
-                document.getElementById("RecorDControl").innerHTML = "<img src=\"./images/vdc_LB_startrecording_OFF.gif\" border=\"0\" alt=\"Start Recording\" />";
+                document.getElementById("RecorDControl").innerHTML = "<a href=\"#\" style=\"opacity:.25;\"><img src=\"./images/x-record.png\" border=\"0\" alt=\"Start Recording\" /><span id=\"x-recording\">Record</span></a>";
 				}
 			if (INgroupCOUNT > 0)
 				{
@@ -11588,7 +11422,7 @@ function phone_number_format(formatphone) {
 					if (document.vicidial_form.DiaLAltPhonE.checked==true)
 						{
 						reselect_alt_dial = 1;
-                        document.getElementById("DiaLControl").innerHTML = "<a href=\"#\" onclick=\"ManualDialNext('','','','','','0');\"><img src=\"./images/vdc_LB_dialnextnumber.gif\" border=\"0\" alt=\"Dial Next Number\" /></a>";
+                        document.getElementById("DiaLControl").innerHTML = "<a href=\"#\" onclick=\"ManualDialNext('','','','','','0');\"><img src=\"./images/x-dialnext.png\" border=\"0\" alt=\"Dial Next Number\" /><span id=\"x-dialnext\">Dial Next Number</span></a>";
 
 						document.getElementById("MainStatuSSpan").innerHTML = "Dial Next Call";
 						}
@@ -12064,6 +11898,22 @@ function phone_number_format(formatphone) {
 			divref.visibility = 'hidden';
 			}
 		}
+        function showDivDisplay(divvar) 
+		{
+		if (document.getElementById(divvar))
+			{
+			divref = document.getElementById(divvar).style;
+			divref.display = 'visible';
+			}
+		}
+	function hideDivDisplay(divvar)
+		{
+		if (document.getElementById(divvar))
+			{
+			divref = document.getElementById(divvar).style;
+			divref.display = 'none';
+			}
+		}
 	function clearDiv(divvar)
 		{
 		if (document.getElementById(divvar))
@@ -12071,12 +11921,12 @@ function phone_number_format(formatphone) {
 			document.getElementById(divvar).innerHTML = '';
 			if (divvar == 'DiaLLeaDPrevieW')
 				{
-                var buildDivHTML = "<font class=\"preview_text\"> <input type=\"checkbox\" name=\"LeadPreview\" size=\"1\" value=\"0\" /> LEAD PREVIEW<br /></font>";
+                var buildDivHTML = "<input type=\"checkbox\" name=\"LeadPreview\" size=\"1\" value=\"0\" /> Preview Dial Lead<br />";
 				document.getElementById("DiaLLeaDPrevieWHide").innerHTML = buildDivHTML;
 				}
 			if (divvar == 'DiaLDiaLAltPhonE')
 				{
-                var buildDivHTML = "<font class=\"preview_text\"> <input type=\"checkbox\" name=\"DiaLAltPhonE\" size=\"1\" value=\"0\" /> ALT PHONE DIAL<br /></font>";
+                var buildDivHTML = "<input type=\"checkbox\" name=\"DiaLAltPhonE\" size=\"1\" value=\"0\" /> Dial Alt Phone<br />";
 				document.getElementById("DiaLDiaLAltPhonEHide").innerHTML = buildDivHTML;
 				}
 			if (DefaulTAlTDiaL == '1')
@@ -12091,7 +11941,7 @@ function phone_number_format(formatphone) {
 			if (divvar == 'DiaLLeaDPrevieW')
 				{
 				document.getElementById("DiaLLeaDPrevieWHide").innerHTML = '';
-                var buildDivHTML = "<font class=\"preview_text\"> <input type=\"checkbox\" name=\"LeadPreview\" size=\"1\" value=\"0\" /> LEAD PREVIEW<br /></font>";
+                var buildDivHTML = "<input type=\"checkbox\" name=\"LeadPreview\" size=\"1\" value=\"0\" /> Preview Dial Lead<br />";
 				document.getElementById(divvar).innerHTML = buildDivHTML;
 				if (reselect_preview_dial==1)
 					{document.vicidial_form.LeadPreview.checked=true}
@@ -12099,7 +11949,7 @@ function phone_number_format(formatphone) {
 			if (divvar == 'DiaLDiaLAltPhonE')
 				{
 				document.getElementById("DiaLDiaLAltPhonEHide").innerHTML = '';
-                var buildDivHTML = "<font class=\"preview_text\"> <input type=\"checkbox\" name=\"DiaLAltPhonE\" size=\"1\" value=\"0\" /> ALT PHONE DIAL<br /></font>";
+                var buildDivHTML = "<input type=\"checkbox\" name=\"DiaLAltPhonE\" size=\"1\" value=\"0\" /> Dial Alt Phone<br />";
 				document.getElementById(divvar).innerHTML = buildDivHTML;
 				if (reselect_alt_dial==1)
 					{document.vicidial_form.DiaLAltPhonE.checked=true}
@@ -12121,7 +11971,7 @@ function phone_number_format(formatphone) {
 		else
 			{
 			conf_channels_xtra_display = 0;
-            document.getElementById("busycallsdisplay").innerHTML = "<a href=\"#\" onclick=\"conf_channels_detail('SHOW');\">Show conference call channel information</a><br /><br />&nbsp;";
+            document.getElementById("busycallsdisplay").innerHTML = "<a href=\"#\" onclick=\"conf_channels_detail('SHOW');\">Show conference call channel information</a>";
 			document.getElementById("outboundcallsspan").innerHTML = '';
 			LMAe[0]=''; LMAe[1]=''; LMAe[2]=''; LMAe[3]=''; LMAe[4]=''; LMAe[5]=''; 
 			LMAcount=0;
@@ -12160,7 +12010,7 @@ function phone_number_format(formatphone) {
 				document.getElementById("TransferMain").style.top = temp_xfer_height;
 				HKbutton_allowed = 0;
 				showDiv('TransferMain');
-                document.getElementById("XferControl").innerHTML = "<a href=\"#\" onclick=\"ShoWTransferMain('OFF','YES');\"><img src=\"./images/vdc_LB_transferconf.gif\" border=\"0\" alt=\"Transfer - Conference\" /></a>";
+                document.getElementById("XferControl").innerHTML = "<a href=\"#\" onclick=\"ShoWTransferMain('OFF','YES');\"><img src=\"./images/x-transfer-on.png\" border=\"0\" alt=\"Transfer - Conference\" /><span>X-fer</span></a>";
 				if ( (quick_transfer_button_enabled > 0) && (quick_transfer_button_locked < 1) )
                     {document.getElementById("QuickXfer").innerHTML = "<img src=\"./images/vdc_LB_quickxfer_OFF.gif\" border=\"0\" alt=\"QUICK TRANSFER\" />";}
 				if (custom_3way_button_transfer_enabled > 0)
@@ -12173,7 +12023,7 @@ function phone_number_format(formatphone) {
 				hideDiv('agentdirectlink');
 				if (showoffvar == 'YES')
 					{
-                    document.getElementById("XferControl").innerHTML = "<a href=\"#\" onclick=\"ShoWTransferMain('ON');\"><img src=\"./images/vdc_LB_transferconf.gif\" border=\"0\" alt=\"Transfer - Conference\" /></a>";
+                    document.getElementById("XferControl").innerHTML = "<a href=\"#\" onclick=\"ShoWTransferMain('ON');\"><img src=\"./images/x-transfer-on.png\" border=\"0\" alt=\"Transfer - Conference\" /><span>X-fer</span></a>";
 
 					if ( (quick_transfer_button == 'IN_GROUP') || (quick_transfer_button == 'LOCKED_IN_GROUP') )
 						{
@@ -12197,7 +12047,7 @@ function phone_number_format(formatphone) {
 					cid_choice = LIVE_caller_id_number;
 					}
                 document.getElementById("XfeRDiaLGrouPSelecteD").innerHTML = "<font size=\"1\" face=\"Arial,Helvetica\">Group Alias: " + active_group_alias + "</font>";
-                document.getElementById("XfeRCID").innerHTML = "<a href=\"#\" onclick=\"GroupAliasSelectContent_create('1');\"><font size=\"1\" face=\"Arial,Helvetica\">Click Here to Choose a Group Alias</font></a>";
+                document.getElementById("XfeRCID").innerHTML = "<a href=\"#\" onclick=\"GroupAliasSelectContent_create('1');\"><font size=\"1\" face=\"Arial,Helvetica\">Choose Group Alias</font></a>";
 				}
 			else
 				{
@@ -12216,7 +12066,7 @@ function phone_number_format(formatphone) {
 
 	function MainPanelToFront(resumevar)
 		{
-		document.getElementById("MainTable").style.backgroundColor="<?php echo $MAIN_COLOR ?>";
+		//document.getElementById("MainTable").style.backgroundColor="<?php echo $MAIN_COLOR ?>";
 		document.getElementById("MaiNfooter").style.backgroundColor="<?php echo $MAIN_COLOR ?>";
 		var CBMPheight = '<?php echo $CBheight ?>px';
 		document.getElementById("CallbacksButtons").style.top = CBMPheight;
@@ -12252,7 +12102,7 @@ function phone_number_format(formatphone) {
 				{
 				if (dial_method == "INBOUND_MAN")
 					{
-                    document.getElementById("DiaLControl").innerHTML = "<img src=\"./images/vdc_LB_pause_OFF.gif\" border=\"0\" alt=\" Pause \" /><a href=\"#\" onclick=\"AutoDial_ReSume_PauSe('VDADready');\"><img src=\"./images/vdc_LB_resume.gif\" border=\"0\" alt=\"Resume\" /></a><br /><a href=\"#\" onclick=\"ManualDialNext('','','','','','0');\"><img src=\"./images/vdc_LB_dialnextnumber.gif\" border=\"0\" alt=\"Dial Next Number\" /></a>";
+                    document.getElementById("DiaLControl").innerHTML = "<a href=\"#\" onclick=\"AutoDial_ReSume_PauSe('VDADready');\"><img src=\"./images/x-resume.png\" border=\"0\" alt=\"Resume\" /><span id=\"x-resume\">Ready</span></a><a href=\"#\" style=\"opacity:.25;\"><img src=\"./images/x-pause.png\" border=\"0\" alt=\" Pause \" /><span id=\"x-pause\">Pause</span></a><br /><hr id=\"x-menuitem-sep\" /><a href=\"#\" onclick=\"ManualDialNext('','','','','','0');\"><img src=\"./images/x-dialnext.png\" border=\"0\" alt=\"Dial Next Number\" /><span id=\"x-dialnext\">Dial Next Number</span></a>";
 					if (manual_dial_preview == 1)
 						{buildDiv('DiaLLeaDPrevieW');}
 					}
@@ -12276,7 +12126,7 @@ function phone_number_format(formatphone) {
 		showDiv('ScriptRefresH');
 		hideDiv('FormPanel');
 		hideDiv('FormRefresH');
-		document.getElementById("MainTable").style.backgroundColor="<?php echo $SCRIPT_COLOR ?>";
+		//document.getElementById("MainTable").style.backgroundColor="<?php echo $SCRIPT_COLOR ?>";
 		document.getElementById("MaiNfooter").style.backgroundColor="<?php echo $SCRIPT_COLOR ?>";
 		panel_bgcolor='<?php echo $SCRIPT_COLOR ?>';
 		document.getElementById("MainStatuSSpan").style.background = panel_bgcolor;
@@ -12291,7 +12141,7 @@ function phone_number_format(formatphone) {
 		document.getElementById("CallbacksButtons").style.left = '360px';
 		showDiv('FormPanel');
 		showDiv('FormRefresH');
-		document.getElementById("MainTable").style.backgroundColor="<?php echo $FORM_COLOR ?>";
+		//document.getElementById("MainTable").style.backgroundColor="<?php echo $FORM_COLOR ?>";
 		document.getElementById("MaiNfooter").style.backgroundColor="<?php echo $FORM_COLOR ?>";
 		panel_bgcolor='<?php echo $FORM_COLOR ?>';
 		document.getElementById("MainStatuSSpan").style.background = panel_bgcolor;
@@ -12383,411 +12233,538 @@ $zi=2;
 <form name=vicidial_form id=vicidial_form onsubmit="return false;">
 
 <!-- Loading gif used to display upon login -->
-<span style="position:absolute;left:0px;top:0px;z-index:300;" id="LoadingBox">
-    <table border="0" bgcolor="white" width="<?php echo $JS_browser_width ?>px" height="<?php echo $JS_browser_height ?>px">
-        <tr>
-            <td align="left" valign="top">
+<span id="LoadingBox">
+    <img src="./images/loadingx.gif" alt="Loading X Frontline..." />
+</span>
+
+<div id="x_toolbar" class="barStyle">
+    <img id="x_logo" src="./images/InktelX-Frontline-Sponsored.png" border="0" alt="X Frontline" />
     
-                <br />
-                 <br />
-                 <br />
-                 <br />
-                 <br />
-                 <br />
-                &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <img src="./images/x/loading.gif" height="90px" width="545px" alt="Loading" />
-                 <br />
-                 <br />
-            </td>
-        </tr>
-    </table>
-</span>
-
-<!-- Top  form displaying logged in user (ext) and campaign, along with the active channel information for live calls on the left and GROUPS/LOGOUT options on the right -->
-<span style="position:absolute;left:0px;top:0px;z-index:<?php $zi++; echo $zi ?>;" id="Header">
-    <table border="0" cellpadding="0" cellspacing="0" bgcolor="white" width="<?php echo $MNwidth ?>px" marginwidth="0" marginheight="0" leftmargin="0" topmargin="0" valign="top" align="left">
-        <tr valign="top" align="left">
-            <td colspan="3" valign="top" align="left">
-                <input type="hidden" name="extension" id="extension" />
-                <input type="hidden" name="custom_field_values" id="custom_field_values" value="" />
-                <input type="hidden" name="FORM_LOADED" id="FORM_LOADED" value="0" />
-                <font class="queue_text">
-                    <a href="#" onclick="start_all_refresh();"><font class="queue_text">Logged in as User</font></a>
-                    <?php 
-                    echo ": $VD_login on Phone: $SIP_user"; 
-                    if ($on_hook_agent == 'Y')
-                            {echo "(<a href=\"#\" onclick=\"NoneInSessionCalL();return false;\">ring</a>)";}
-                    echo "&nbsp; to campaign: $VD_campaign&nbsp; \n"; 
-                    ?>
-                    &nbsp; &nbsp; <span id="agentchannelSPAN"></span>
-                </font>
-            </td>
-            <td colspan="3" valign="top" align="right">
-                <font class="body_text">
-                    <?php if ($territoryCT > 0) {echo "<a href=\"#\" onclick=\"OpeNTerritorYSelectioN();return false;\">TERRITORIES</a> &nbsp; &nbsp; \n";} ?>
-                    <?php if ($INgrpCT > 0) {echo "<a href=\"#\" onclick=\"OpeNGrouPSelectioN();return false;\">GROUPS</a> &nbsp; &nbsp; \n";} ?>
-                    <?php	echo "<a href=\"#\" onclick=\"NormalLogout();return false;\">LOGOUT</a>\n"; ?>
-                </font>
-            </td>
-       </tr>
-    </table>
-</span>
-
-<!-- Top section displaying tab selections for customer form, campaign script, or list custom fields forms on the left;
-     agent's status and time in that status, conference session id and number of calls in queue in the middle;
-     and Live Call / No Call status indicator on the right -->
-<span style="position:absolute;left:0px;top:13px;z-index:<?php $zi++; echo $zi ?>;" id="Tabs">
-    <table border="0" bgcolor="#FFFFFF" width="<?php echo $MNwidth ?>px" height="30px">
-        <tr valign="top" align="left">
-            <td align="left" width="115px">
-                <a href="#" onclick="MainPanelToFront('NO');"><img src="./images/vdc_tab_vicidial.gif" alt="MAIN" width="115px" height="30px" border="0" /></a>
-            </td>
-            <td align="left" width="90px">
-                <a href="#" onclick="ScriptPanelToFront();"><img src="./images/vdc_tab_script.gif" alt="SCRIPT" width="90px" height="30px" border="0" /></a>
-            </td>
-            <?php if ($custom_fields_enabled > 0)
-            {echo "<td align=\"left\" width=\"67px\"><a href=\"#\" onclick=\"FormPanelToFront();\"><img src=\"./images/vdc_tab_form.gif\" alt=\"FORM\" width=\"67px\" height=\"30px\" border=\"0\" /></a></td>\n";}
-            ?>
-            <td width="<?php echo $HSwidth ?>px" valign="middle" align="center">
-                <font class="body_text">&nbsp; <span id="status">LIVE</span>&nbsp; &nbsp;session ID: <span id="sessionIDspan"></span>&nbsp; &nbsp;<span id="AgentStatusCalls"></span></font>
-            </td>
-            <td width="109px"><img src="./images/agc_live_call_OFF.gif" name="livecall" alt="Live Call" width="109px" height="30px" border="0" /></td>
-        </tr>
-     </table>
-</span>
-
-<span style="position:absolute;left:0px;top:0px;z-index:<?php $zi++; echo $zi ?>;" id="WelcomeBoxA">
-    <table border="0" bgcolor="#FFFFFF" width="<?php echo $CAwidth ?>px" height="<?php echo $HKwidth ?>px"><tr><td align="center"><br /><span id="WelcomeBoxAt">Agent Screen</span></td></tr></table>
-</span>
-
-
-<!-- BEGIN *********   Here is the main VICIDIAL display panel -->
-<span style="position:absolute;left:0px;top:46px;z-index:<?php $zi++; echo $zi ?>;" id="MainPanel">
-    <table border="0" bgcolor="<?php echo $MAIN_COLOR ?>" width="<?php echo $MNwidth ?>px" id="MainTable">
-    <tr><td colspan="3">
-	<?php
-	if ($webphone_location == 'bar')
-		{
-        echo "<img src=\"images/pixel.gif\" width=\"1px\" height=\"".$webphone_height."px\" /><br />\n";
-		}
-	?>	
-	<span id="post_phone_time_diff_span"><b><font color="red"><span id="post_phone_time_diff_span_contents"></span></font></b></span>
-    <font class="body_text"> STATUS: <span id="MainStatuSSpan"></span></font></td></tr>
-    <tr><td colspan="3"><span id="busycallsdebug"></span></td></tr>
-    <tr><td width="150px" align="left" valign="top">
-	<font class="body_text"><center>
-    <span style="background-color: #CCFFCC" id="DiaLControl"><a href="#" onclick="ManualDialNext('','','','','','0');"><img src="./images/vdc_LB_dialnextnumber_OFF.gif" border="0" alt="Dial Next Number" /></a></span><br />
-	<span id="ManualQueueNotice"></span>
-	<span id="ManualQueueChoice"></span>
-    <span id="DiaLLeaDPrevieW"><font class="preview_text"> <input type="checkbox" name="LeadPreview" size="1" value="0" /> LEAD PREVIEW<br /></font></span>
-    <span id="DiaLDiaLAltPhonE"><font class="preview_text"> <input type="checkbox" name="DiaLAltPhonE" size="1" value="0" /> ALT PHONE DIAL<br /></font></span>
-	<!--
-	<?php
-	if ( ($manual_dial_preview) and ($auto_dial_level==0) )
-        {echo "<font class=\"preview_text\"> <input type=\"checkbox\" name=\"LeadPreview\" size=\"1\" value=\"0\" /> LEAD PREVIEW<br /></font>";}
-	if ( ($alt_phone_dialing) and ($auto_dial_level==0) )
-        {echo "<font class=\"preview_text\"> <input type=\"checkbox\" name=\"DiaLAltPhonE\" size=\"1\" value=\"0\" /> ALT PHONE DIAL<br /></font>";}
-	?> -->
-    RECORDING FILE:<br />
-	</center>
-    <font class="body_tiny"><span id="RecorDingFilename"></span></font><br />
-    RECORD ID: <font class="body_small"><span id="RecorDID"></span></font><br />
-	<center>
-	<!-- <a href=\"#\" onclick=\"conf_send_recording('MonitorConf','" + head_conf + "','');return false;\">Record</a> -->
-    <span style="background-color: <?php echo $MAIN_COLOR ?>" id="RecorDControl"><a href="#" onclick="conf_send_recording('MonitorConf',session_id,'');return false;"><img src="./images/vdc_LB_startrecording.gif" border="0" alt="Start Recording" /></a></span><br />
-    <span id="SpacerSpanA"><img src="./images/blank.gif" width="145px" height="16px" border="0" /></span><br />
-    <span style="background-color: #FFFFFF" id="WebFormSpan"><img src="./images/vdc_LB_webform_OFF.gif" border="0" alt="Web Form" /></span><br />
-	<?php
-	if ($enable_second_webform > 0)
-        {echo "<span style=\"background-color: #FFFFFF\" id=\"WebFormSpanTwo\"><img src=\"./images/vdc_LB_webform_two_OFF.gif\" border=\"0\" alt=\"Web Form 2\" /></span><br />\n";}
-	?>
-    <font class="body_small_bold"><span id="ParkCounterSpan"> &nbsp; </span></font><br />
-    <span style="background-color: <?php echo $MAIN_COLOR ?>" id="ParkControl"><img src="./images/vdc_LB_parkcall_OFF.gif" border="0" alt="Park Call" /></span><br />
+    <div id="hiddenFields">
+        <input type="hidden" name="extension" id="extension" />
+        <input type="hidden" name="custom_field_values" id="custom_field_values" value="" />
+        <input type="hidden" name="FORM_LOADED" id="FORM_LOADED" value="0" />
+        <input type="hidden" name="lead_id" id="lead_id" value="" />
+        <input type="hidden" name="list_id" id="list_id" value="" />
+        <input type="hidden" name="entry_list_id" id="entry_list_id" value="" />
+        <input type="hidden" name="called_count" id="called_count" value="" />
+        <input type="hidden" name="rank" id="rank" value="" />
+        <input type="hidden" name="owner" id="owner" value="" />
+        <input type="hidden" name="gmt_offset_now" id="gmt_offset_now" value="" />
+        <input type="hidden" name="gender" id="gender" value="" />
+        <input type="hidden" name="date_of_birth" id="date_of_birth" value="" />
+        <input type="hidden" name="country_code" id="country_code" value="" />
+        <input type="hidden" name="uniqueid" id="uniqueid" value="" />
+        <input type="hidden" name="callserverip" id="callserverip" value="" />
+        <input type="hidden" name="SecondS" id="SecondS" value="" />
+        
+        <input type="hidden" name="xferuniqueid" id="xferuniqueid" />
+        <input type="hidden" name="xfername" id="xfername" />
+        <input type="hidden" name="xfernumhidden" id="xfernumhidden" />
+        
+        <span id="RecorDingFilename" style="display:none;"></span>
+        <span id="RecorDID" style="display:none;"></span>
+        <span id="MainPanel" style="display:none;"></span>
+    </div>
+    
+    <div id="x_actionArea">
+        <a href="#" onclick=""><img src="./images/x-dial3-on.png" alt="Dial" title="Dial" /><span>Dial</span></a>
+        
+        <span id="ParkControl"><a href="#" style="opacity:.25;"><img src="./images/x-hold-on.png" alt="Park call"  title="Park call"/><span>Hold</span></a></span>
 	<?php
 	if ( ($ivr_park_call=='ENABLED') or ($ivr_park_call=='ENABLED_PARK_ONLY') )
-        {echo "<span style=\"background-color: $MAIN_COLOR\" id=\"ivrParkControl\"><img src=\"./images/vdc_LB_ivrparkcall_OFF.gif\" border=\"0\" alt=\"IVR Park Call\" /></span><br />\n";}
+        {echo "<span id=\"ivrParkControl\"><a href=\"#\" style=\"opacity:.25;\"><img src=\"./images/x-holdivr.png\" border=\"0\" alt=\"IVR Park Call\" /><span>IVR Hold</span></a></span>";}
 	else
-		{echo "<span style=\"background-color: $MAIN_COLOR\" id=\"ivrParkControl\"></span>\n";}
+	{echo "<span id=\"ivrParkControl\"></span>";}
 	?>
-    <span style="background-color: <?php echo $MAIN_COLOR ?>" id="XferControl"><img src="./images/vdc_LB_transferconf_OFF.gif" border="0" alt="Transfer - Conference" /></span><br />
-
-	<?php
-	if ($quick_transfer_button_enabled > 0)
-        {echo "<span style=\"background-color: $MAIN_COLOR\" id=\"QuickXfer\"><img src=\"./images/vdc_LB_quickxfer_OFF.gif\" border=\"0\" alt=\"Quick Transfer\" /></span><br />\n";}
-	if ($custom_3way_button_transfer_enabled > 0)
-        {echo "<span style=\"background-color: $MAIN_COLOR\" id=\"CustomXfer\"><img src=\"./images/vdc_LB_customxfer_OFF.gif\" border=\"0\" alt=\"Custom Transfer\" /></span><br />\n";}
-	?>
-
-	<span id="ReQueueCall"></span>
-
-	<?php
-	if ($call_requeue_button > 0)
-        {echo "<br />\n";}
-	?>
-
-    <span id="SpacerSpanC"><img src="./images/blank.gif" width="145px" height="16px" border="0" /></span><br />
-    <span style="background-color: #FFCCFF" id="HangupControl"><img src="./images/vdc_LB_hangupcustomer_OFF.gif" border="0" alt="Hangup Customer" /></span><br />
-    <span id="SpacerSpanD"><img src="./images/blank.gif" width="145px" height="16px" border="0" /></span><br />
-    <div class="text_input" id="SendDTMFdiv"><span style="background-color: <?php echo $MAIN_COLOR ?>" id="SendDTMF"><a href="#" onclick="SendConfDTMF(session_id);return false;"><img src="./images/vdc_LB_senddtmf.gif" border="0" alt="Send DTMF" align="bottom" /></a>  <input type="text" size="5" name="conf_dtmf" class="cust_form" value="" maxlength="50" /></div></span><br />
-	</center>
-	</font>
-	</td>
-    <td width="<?php echo $SDwidth ?>px" align="left" valign="top">
-    <input type="hidden" name="lead_id" id="lead_id" value="" />
-    <input type="hidden" name="list_id" id="list_id" value="" />
-    <input type="hidden" name="entry_list_id" id="entry_list_id" value="" />
-    <input type="hidden" name="called_count" id="called_count" value="" />
-    <input type="hidden" name="rank" id="rank" value="" />
-    <input type="hidden" name="owner" id="owner" value="" />
-    <input type="hidden" name="gmt_offset_now" id="gmt_offset_now" value="" />
-    <input type="hidden" name="gender" id="gender" value="" />
-    <input type="hidden" name="date_of_birth" id="date_of_birth" value="" />
-    <input type="hidden" name="country_code" id="country_code" value="" />
-    <input type="hidden" name="uniqueid" id="uniqueid" value="" />
-    <input type="hidden" name="callserverip" id="callserverip" value="" />
-    <input type="hidden" name="SecondS" id="SecondS" value="" />
-	<span class="text_input" id="MainPanelCustInfo">
-    <table><tr>
-    <td align="right"></td>
-    <td align="left"><font class="body_text">&nbsp; Customer Time: <span name="custdatetime" id="custdatetime" class="log_title"> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span> &nbsp; &nbsp; Channel: <span name="callchannel" id="callchannel" class="cust_form"> </span></font></td>
-	</tr><tr>
-    <td colspan="2" align="center"> Customer Information: <span id="CusTInfOSpaN"></span> &nbsp; &nbsp; &nbsp; &nbsp; 
-	<?php
+        
+        <div class="hovercard">
+            <span class="hov">
+                <span id="XferControl">
+                    <a href="#" style="opacity:.25;">
+                        <img src="./images/x-transfer-on.png" alt="Transfer call" title="Transfer call"/><span>X-fer</span>
+                    </a>
+                </span>
+            </span> 
+            <div class="main">
+                <div class="top">Transfer / Conference</div>
+                <div class="brook" style="width: 260px;">
+                    <div class="bottom">
+                        <p class="child">
+                            <span id="TransferMain">
+                                <span id="x-transfer-options">
+                                    <?php
+                                    if ($hide_xfer_number_to_dial=='ENABLED')
+                                            {
+                                            ?>
+                                    <input type="hidden" name="xfernumber" id="xfernumber" value="<?php echo $preset_populate ?>" /> 
+                                            <?php
+                                            }
+                                    else
+                                            {
+                                            ?>
+                                    <input type="text" size="20" name="xfernumber" id="xfernumber" onKeyPress="return numbersonly(this, event)" maxlength="25" placeholder="(XXX) NXX-XXXX" value="<?php echo $preset_populate ?>" /> 
+                                            <?php
+                                            }
+                                    ?>
+                                    <span id="dialoverride_checkbox"><input type="checkbox" name="xferoverride" id="xferoverride" size="1" value="0">Dial Override</span>
+                                    <span id="DialBlindTransfer" class="button blueinactive">Blind X-fer</span>
+                                    <span id="DialWithCustomer" class="button blue"><a href="#" onclick="SendManualDial('YES');return false;">Warm X-fer</a></span>
+                                    <span id="ParkCustomerDial" class="button blue"><a href="#" onclick="xfer_park_dial();return false;">3-Way</a></span>
+                                </span>
+                                
+                                <span id="x-transfer-local">
+                                    <span id="XfeRDiaLGrouPSelecteD"></span><span id="XfeRCID"></span>
+                                    <span id="XfeRGrouPLisT">
+                                        <select size="1" name="XfeRGrouP" id="XfeRGrouP" onChange="XferAgentSelectLink();return false;">
+                                            <option>-- Select Transfer Queue --</option>
+                                        </select>
+                                    </span>
+                                    <span id="agentdirectlink"><font class="body_small_bold"><a href="#" onclick="XferAgentSelectLaunch();return false;">Show Agents Available for Transfer</a></font></span>
+                                    <span id="consultative_checkbox"><input type="checkbox" name="consultativexfer" id="consultativexfer" size="1" value="0">Consultative X-fer</span>
+                                    <span id="LocalCloser" class="button blue">X-fer to Queue</span> &nbsp; &nbsp;
+                                </span>
+                                
+                                <span id="x-transfer-active">
+                                    <input type="hidden" size="2" name="xferlength" id="xferlength" maxlength="4"  />
+                                    <input type="hidden" size="12" name="xferchannel" id="xferchannel" maxlength="200" />
+                                    <span id="Leave3WayCall" class="button blue"><a href="#" onclick="leave_3way_call('FIRST');return false;">Leave 3-Way</a></span>
+                                    
+                                    <font class="body_small_bold"><span id="ParkCounterSpan2">Time on Park: &nbsp; </span></font>
+                                    <span id="ParkControl2" class="button blueinactive">Park 3rd Party</span>
+                                    <span id="HangupXferLine" class="button blueinactive">Hangup 3rd Party</span>
+                                    
+                                    <span id="HangupBothLines" class="button blue"><a href="#" onclick="bothcall_send_hangup();return false;">Hangup Both</a></span>
+                                </span>
+                                
+                                <span id="x-transfer-inactive">
+                                    
+                                    <?php
+                                    if ($enable_xfer_presets=='ENABLED')
+                                            {
+                                            ?>
+                                    <span id="PresetPullDown"><a href="#" onclick="generate_presets_pulldown();return false;"><img src="./images/vdc_XB_presetsbutton.gif" border="0" alt="Presets Button" style="vertical-align:middle" /></a></span>
+                                            <?php
+                                            }
+                                    else
+                                            {
+                                            ?>
+                                            <font class="body_tiny">
+                                            <a href="#" onclick="DtMf_PreSet_a();return false;">D1</a> 
+                                            <a href="#" onclick="DtMf_PreSet_b();return false;">D2</a>
+                                            <a href="#" onclick="DtMf_PreSet_c();return false;">D3</a>
+                                            <a href="#" onclick="DtMf_PreSet_d();return false;">D4</a>
+                                            <a href="#" onclick="DtMf_PreSet_e();return false;">D5</a>
+                                            </font>
+                                            <?php
+                                            }
+                                    ?>
+                                    &nbsp;
+                                    <span id="DialBlindVMail"><img src="./images/vdc_XB_ammessage_OFF.gif" border="0" alt="Blind Transfer VMail Message" style="vertical-align:middle" /></span>
+                                </span>
+                                   
+                            </span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <span id="HangupControl">
+            <a href="#" style="opacity:.25;"><img src="./images/x-endcall-on.png" alt="End call" title="End call" /><span>End Call</span></a>
+        </span>
+        
+        <a href="#" onclick=""><img src="./images/x-speaker-on.png" alt="Speaker" title="Speaker" /><span>Volume</span></a>
+    </div>
+    
+    <div id="x_formsArea">
+        <div class="hovercard">
+            <span class="hov">
+                <a href="#" onclick="MainPanelToFront('NO');">
+                    <img src="./images/x-contact-on.png" alt="Contact information" title="Contact information" /><span>Contact</span>
+                </a>
+            </span> 
+            <div class="main">
+                <div class="top">Customer's existing contact card</div>
+                <div class="brook" style="width:625px;">
+                    <div class="bottom">
+                        <p class="child">
+                            <span class="text_input" id="MainPanelCustInfo">
+                                <table>
+                                    <tr>
+                                        <td align="right"></td>
+                                        <td align="left">
+                                            <font class="body_text">&nbsp;
+                                            
+                                            </font>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="2" align="center">
+                                            Customer Information: <span id="CusTInfOSpaN"></span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td align="left" colspan="2">
+                            
+                                            <table width="550px">
+                                                <tr>
+                                                    <td align="right"><font class="body_text">
+                                                        <?php
+                                                
+                                                        if ($label_title == '---HIDE---')
+                                                        {echo "</td><td align=\"left\" colspan=\"5\"><input type=\"hidden\" name=\"title\" id=\"title\" value=\"\" />";}
+                                                        else
+                                                        {echo "$label_title: </td><td align=\"left\" colspan=\"5\"><font class=\"body_text\"><input type=\"text\" size=\"4\" name=\"title\" id=\"title\" maxlength=\"4\" class=\"cust_form\" value=\"\" />";}
+                                                        if ($label_first_name == '---HIDE---')
+                                                        {echo "&nbsp; <input type=\"hidden\" name=\"first_name\" id=\"first_name\" value=\"\" />";}
+                                                        else
+                                                        {echo "&nbsp; $label_first_name: <input type=\"text\" size=\"17\" name=\"first_name\" id=\"first_name\" maxlength=\"30\" class=\"cust_form\" value=\"\" />";}
+                                                        if ($label_middle_initial == '---HIDE---')
+                                                        {echo "&nbsp; <input type=\"hidden\" name=\"middle_initial\" id=\"middle_initial\" value=\"\" />";}
+                                                        else
+                                                        {echo "&nbsp; $label_middle_initial: <input type=\"text\" size=\"1\" name=\"middle_initial\" id=\"middle_initial\" maxlength=\"1\" class=\"cust_form\" value=\"\" />";}
+                                                        if ($label_last_name == '---HIDE---')
+                                                        {echo "&nbsp; <input type=\"hidden\" name=\"last_name\" id=\"last_name\" value=\"\" />";}
+                                                        else
+                                                        {echo "&nbsp; $label_last_name: <input type=\"text\" size=\"23\" name=\"last_name\" id=\"last_name\" maxlength=\"30\" class=\"cust_form\" value=\"\" />";}
+                                                        
+                                                    echo "</td></tr><tr><td align=\"right\"><font class=\"body_text\">";
+                                                        
+                                                        if ($label_address1 == '---HIDE---')
+                                                        {echo " </td><td align=\"left\" colspan=\"5\"><input type=\"hidden\" name=\"address1\" id=\"address1\" value=\"\" />";}
+                                                        else
+                                                        {echo "$label_address1: </td><td align=\"left\" colspan=5><font class=\"body_text\"><input type=\"text\" size=\"85\" name=\"address1\" id=\"address1\" maxlength=\"100\" class=\"cust_form\" value=\"\" />";}
+                                                        
+                                                    echo "</td></tr><tr><td align=\"right\"><font class=\"body_text\">";
+                                                
+                                                        if ($label_address2 == '---HIDE---')
+                                                        {echo " </td><td align=\"left\"><input type=\"hidden\" name=\"address2\" id=\"address2\" value=\"\" />";}
+                                                        else
+                                                        {echo "$label_address2: </td><td align=\"left\"><font class=\"body_text\"><input type=\"text\" size=\"20\" name=\"address2\" id=\"address2\" maxlength=\"100\" class=\"cust_form\" value=\"\" />";}
+                                                
+                                                    echo "</td><td align=\"right\"><font class=\"body_text\">";
+                                                
+                                                        if ($label_address3 == '---HIDE---')
+                                                        {echo " </td><td align=\"left\" colspan=\"3\"><input type=\"hidden\" name=\"address3\" id=\"address3\" value=\"\" />";}
+                                                        else
+                                                        {echo "$label_address3: </td><td align=\"left\" colspan=\"3\"><font class=\"body_text\"><input type=\"text\" size=\"45\" name=\"address3\" id=\"address3\" maxlength=\"100\" class=\"cust_form\" value=\"\" />";}
+                                                
+                                                    echo "</td></tr><tr><td align=\"right\"><font class=\"body_text\">";
+                                                
+                                                        if ($label_city == '---HIDE---')
+                                                        {echo " </td><td align=\"left\"><input type=\"hidden\" name=\"city\" id=\"city\" value=\"\" />";}
+                                                        else
+                                                        {echo "$label_city: </td><td align=\"left\"><font class=\"body_text\"><input type=\"text\" size=\"20\" name=\"city\" id=\"city\" maxlength=\"50\" class=\"cust_form\" value=\"\" />";}
+                                                
+                                                    echo "</td><td align=\"right\"><font class=\"body_text\">";
+                                                
+                                                        if ($label_state == '---HIDE---')
+                                                        {echo " </td><td align=\"left\"><input type=\"hidden\" name=\"state\" id=\"state\" value=\"\" />";}
+                                                        else
+                                                        {echo "$label_state: </td><td align=\"left\"><font class=\"body_text\"><input type=\"text\" size=\"4\" name=\"state\" id=\"state\" maxlength=\"2\" class=\"cust_form\" value=\"\" />";}
+                                                
+                                                    echo "</td><td align=\"right\"><font class=\"body_text\">";
+                                                
+                                                        if ($label_postal_code == '---HIDE---')
+                                                        {echo " </td><td align=\"left\"><input type=\"hidden\" name=\"postal_code\" id=\"postal_code\" value=\"\" />";}
+                                                        else
+                                                        {echo "$label_postal_code: </td><td align=\"left\"><font class=\"body_text\"><input type=\"text\" size=\"14\" name=\"postal_code\" id=\"postal_code\" maxlength=\"10\" class=\"cust_form\" value=\"\" />";}
+                                                
+                                                    echo "</td></tr><tr><td align=\"right\"><font class=\"body_text\">";
+                                                
+                                                        if ($label_province == '---HIDE---')
+                                                        {echo " </td><td align=\"left\"><input type=\"hidden\" name=\"province\" id=\"province\" value=\"\" />";}
+                                                        else
+                                                        {echo "$label_province: </td><td align=\"left\"><font class=\"body_text\"><input type=\"text\" size=\"20\" name=\"province\" id=\"province\" maxlength=\"50\" class=\"cust_form\" value=\"\" />";}
+                                                
+                                                    echo "</td><td align=\"right\"><font class=\"body_text\">";
+                                                
+                                                        if ($label_vendor_lead_code == '---HIDE---')
+                                                        {echo " </td><td align=\"left\"><input type=\"hidden\" name=\"vendor_lead_code\" id=\"vendor_lead_code\" value=\"\" />";}
+                                                        else
+                                                        {echo "$label_vendor_lead_code: </td><td align=\"left\"><font class=\"body_text\"><input type=\"text\" size=\"15\" name=\"vendor_lead_code\" id=\"vendor_lead_code\" maxlength=\"20\" class=\"cust_form\" value=\"\" />";}
+                                                
+                                                    echo "</td><td align=\"right\"><font class=\"body_text\">";
+                                                
+                                                        if ($label_gender == '---HIDE---')
+                                                                {
+                                                                echo "</td><td align=\"left\"><font class=\"body_text\"><span id=\"GENDERhideFORie\"><input type=\"hidden\" name=\"gender_list\" id=\"gender_list\" value=\"\" /></span>";
+                                                                }
+                                                        else
+                                                        {
+                                                                echo "$label_gender: </td><td align=\"left\"><font class=\"body_text\"><span id=\"GENDERhideFORie\"><select size=\"1\" name=\"gender_list\" class=\"cust_form\" id=\"gender_list\"><option value=\"U\">U - Undefined</option><option value=\"M\">M - Male</option><option value=\"F\">F - Female</option></select></span>";
+                                                                }
+                                                
+                                                    echo "</td></tr><tr><td align=\"right\"><font class=\"body_text\">";
+                                                
+                                                    echo "$label_phone_number: </td><td align=\"left\"><font class=\"body_text\">";
+                                                
+                                                        if ( (ereg('Y',$disable_alter_custphone)) or (ereg('HIDE',$disable_alter_custphone)) )
+                                                                {
+                                                        echo "<font class=\"body_text\"><span id=\"phone_numberDISP\"> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span></font>";
+                                                        echo "<input type=\"hidden\" name=\"phone_number\" id=\"phone_number\" value=\"\" />";
+                                                                }
+                                                        else
+                                                                {
+                                                        echo "<input type=\"text\" size=\"20\" name=\"phone_number\" id=\"phone_number\" maxlength=\"16\" class=\"cust_form\" value=\"\" />";
+                                                                }
+                                                
+                                                    echo "</td><td align=\"right\"><font class=\"body_text\">";
+                                                
+                                                        if ($label_phone_code == '---HIDE---')
+                                                        {echo " </td><td align=\"left\"><input type=\"hidden\" name=\"phone_code\" id=\"phone_code\" value=\"\" />";}
+                                                        else
+                                                        {echo "$label_phone_code: </td><td align=\"left\"><font class=\"body_text\"><input type=\"text\" size=\"4\" name=\"phone_code\" id=\"phone_code\" maxlength=\"10\" class=\"cust_form\" value=\"\" />";}
+                                                
+                                                    echo "</td><td align=\"right\"><font class=\"body_text\">";
+                                                
+                                                        if ($label_alt_phone == '---HIDE---')
+                                                        {echo " </td><td align=\"left\"><input type=\"hidden\" name=\"alt_phone\" id=\"alt_phone\" value=\"\" />";}
+                                                        else
+                                                        {echo "$label_alt_phone: </td><td align=\"left\"><font class=\"body_text\"><input type=\"text\" size=\"14\" name=\"alt_phone\" id=\"alt_phone\" maxlength=\"16\" class=\"cust_form\" value=\"\" />";}
+                                                
+                                                    echo "</td></tr><tr><td align=\"right\"><font class=\"body_text\">";
+                                                
+                                                        if ($label_security_phrase == '---HIDE---')
+                                                        {echo " </td><td align=\"left\"><input type=\"hidden\" name=\"security_phrase\" id=\"security_phrase\" value=\"\" />";}
+                                                        else
+                                                        {echo "$label_security_phrase: </td><td align=\"left\"><font class=\"body_text\"><input type=\"text\" size=\"20\" name=\"security_phrase\" id=\"security_phrase\" maxlength=\"100\" class=\"cust_form\" value=\"\" />";}
+                                                
+                                                    echo "</td><td align=\"right\"><font class=\"body_text\">";
+                                                
+                                                        if ($label_email == '---HIDE---')
+                                                        {echo " </td><td align=\"left\" colspan=\"3\"><input type=\"hidden\" name=\"email\" id=\"email\" value=\"\" />";}
+                                                        else
+                                                        {echo "$label_email: </td><td align=\"left\" colspan=\"3\"><font class=\"body_text\"><input type=\"text\" size=\"45\" name=\"email\" id=\"email\" maxlength=\"70\" class=\"cust_form\" value=\"\" />";}
+                                                
+                                                    echo "</td></tr><tr><td align=\"right\"><font class=\"body_text\">";
+                                                
+                                                        if ($label_comments == '---HIDE---')
+                                                                {
+                                                        echo " </td><td align=\"left\" colspan=5><input type=\"hidden\" name=\"comments\" id=\"comments\" value=\"\" />\n";
+                                                                }
+                                                        else
+                                                                {
+                                                        echo "$label_comments: </td><td align=\"left\" colspan=\"5\"><font class=\"body_text\">";
+                                                                if ( ($multi_line_comments) )
+                                                            {echo "<textarea name=\"comments\" id=\"comments\" rows=\"2\" cols=\"85\" class=\"cust_form_text\" value=\"\"></textarea>\n";}
+                                                                else
+                                                            {echo "<input type=\"text\" size=\"65\" name=\"comments\" id=\"comments\" maxlength=\"255\" class=\"cust_form\" value=\"\" />\n";}
+                                                                }
+                                                
+                                                        echo "</font></td></tr><tr><td align=\"right\"><font class=\"body_text\">\n";
+                                                
+                                                        if ($per_call_notes == 'ENABLED')
+                                                                {
+                                                        echo "Call Notes: ";
+                                                                if ($agent_call_log_view == '1')
+                                                                        {echo "<br /><span id=\"CallNotesButtons\"><a href=\"#\" onclick=\"VieWNotesLoG();return false;\">view notes</a></span> ";}
+                                                        echo "</td><td align=\"left\" colspan=\"5\"><font class=\"body_text\">";
+                                                                echo "<textarea name=\"call_notes\" id=\"call_notes\" rows=\"2\" cols=\"85\" class=\"cust_form_text\" value=\"\"></textarea>\n";
+                                                                }
+                                                        else
+                                                                {
+                                                        echo " </td><td align=\"left\" colspan=5><input type=\"hidden\" name=\"call_notes\" id=\"call_notes\" value=\"\" /><span id=\"CallNotesButtons\"></span>\n";
+                                                                }
+                                                        ?>
+                                                        </font>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <a href="#" onclick="ScriptPanelToFront();"><img src="./images/x-script.png" alt="Interaction script" style="margin-bottom:-5px;height:36px;" title="Interaction script" /><span>Script</span></a>
+        <?php if ($custom_fields_enabled > 0)
+            {echo "<a href=\"#\" onclick=\"FormPanelToFront();\"><img src=\"./images/x-crmforms-on.png\" alt=\"CRM forms\" title=\"CRM forms\" border=\"0\" /><span>CRM</span></a>";}
+        ?>
+        <?php
 	if ($agent_lead_search == 'ENABLED')
-		{echo "<font class=\"body_text\"><a href=\"#\" onclick=\"OpeNSearcHForMDisplaYBox();return false;\">LEAD SEARCH</a></font>";}
+		{echo "<a href=\"#\" onclick=\"OpeNSearcHForMDisplaYBox();return false;\"><img src=\"./images/x-addressbook-on.png\" alt=\"Census database\" title=\"Census database\" border=\"0\" /><span>Census</span></a>";}
 	?>
-	</td>
-	</tr><tr>
-    <td align="left" colspan="2">
+        <img src="./images/agc_live_call_OFF.gif" name="livecall" alt="Live Call" width="109px" height="30px" border="0" />
+    </div>
+    
+    <div id="x_logoutArea">
+        <div class="hovercard">
+            <span class="hov">
+                <a id="x_settings">
+                    <img src="./images/x-settings-on.png" border="0" alt="Options" />
+                    <span>Actions</span>
+                </a>
+            </span> 
+            <div class="main">
+                <div class="top">Choose an option from the Actions below</div>
+                <div class="brook">
+                    <div class="bottom">
+                        <p class="child">
+                            <span id="DiaLControl"><a href="#" onclick="ManualDialNext('','','','','','0');"><img src="./images/x-dialnext.png" border="0" alt="Dial Next Number" /><span id="x-dialnext">Dial Next Number</span></a></span>
+                            <span id="RecorDControl" ><a href="#" onclick="conf_send_recording('MonitorConf',session_id,'');return false;"><img src="./images/x-record.png" border="0" alt="Start Recording" /><span id=\"x-recording\">Record</span></a></span>
+                            <span id="WebFormSpan"><a href="#" style="opacity:.25;"><img src="./images/x-webform.png" border="0" alt="Web Form" /><span id="x-webform">Launch Webform</span></a></span>
+                            
+                            <?php
+                            if ($enable_second_webform > 0)
+                            {echo "<span id=\"WebFormSpanTwo\"><a href=\"#\" style=\"opacity:.25;\"><img src=\"./images/x-webform.png\" border=\"0\" alt=\"Web Form 2\" /><span id=\"x-webform\">Launch Webform 2</span></a></span>";}
+                            ?>
+                            <?php
+                            if ($quick_transfer_button_enabled > 0)
+                            {echo "<span id=\"QuickXfer\"><img src=\"./images/vdc_LB_quickxfer_OFF.gif\" border=\"0\" alt=\"Quick Transfer\" /></span><br />\n";}
+                            if ($custom_3way_button_transfer_enabled > 0)
+                            {echo "<span id=\"CustomXfer\"><img src=\"./images/vdc_LB_customxfer_OFF.gif\" border=\"0\" alt=\"Custom Transfer\" /></span><br />\n";}
+                            ?>
+                    
+                            <span id="ReQueueCall"></span>
+                            
+                        </p>
+                        <p class="child"><hr /></p>
+                        <p class="child">
+                            <span id="DiaLLeaDPrevieW"><input type="checkbox" name="LeadPreview" size="1" value="0" /> Preview Dial Lead</span><br />
+                            <span id="DiaLDiaLAltPhonE"><input type="checkbox" name="DiaLAltPhonE" size="1" value="0" /> Dial Alt Phone</span><br />
+                            <span id="ManualQueueChoice"><br /></span>
+                            <span id="ManuaLDiaLButtons">
+                                <span id="MDstatusSpan"><a href="#" onclick="NeWManuaLDiaLCalL('NO');return false;">Place a Manual Dial</a></span> &nbsp;<br />
+                                <a href="#" onclick="NeWManuaLDiaLCalL('FAST');return false;">Dial Last Number</a>
+                            </span><br />
+                            <span id="PauseCodeLinkSpan"></span>  <br />                          
+                            <span id="CallLogButtons">
+                                <a href="#" onclick="VieWCalLLoG();return false;">View My Call Log</a>
+                            </span><br />
+                            <span id="SendDTMF">
+                                <a href="#" onclick="SendConfDTMF(session_id);return false;">
+                                <img src="./images/vdc_LB_senddtmf.gif" border="0" alt="Send DTMF" align="bottom" /></a>
+                                <input type="text" size="5" name="conf_dtmf" class="cust_form" value="" maxlength="50" />
+                            </span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-    <table width="550px"><tr>
-    <td align="right"><font class="body_text">
-	<?php
+        <div class="hovercard">
+            <span class="hov">
+                <a id="x_settings">
+                    <img src="./images/x-info.png" border="0" alt="Info" />
+                    <span>Info</span>
+                </a>
+            </span> 
+            <div class="main">
+                <div class="top">Information Center</div>
+                <div class="brook">
+                    <div class="left"><img src="./images/x-user-on.png" /></div>
+                    <div class="right">
+                        <h3 class="title"><a href="#" onclick="start_all_refresh();"><?php echo "$LOGfullname ($VD_login)"; ?></a></h3>
+                        <h4 class="subtitle"><span id="status">LIVE</span></h4>
+                        <p class="child">
+                            <?php if ($INgrpCT > 0) {echo "<a href=\"#\" onclick=\"OpeNGrouPSelectioN();return false;\">My Queues</a>";} ?>
+                            <?php if ($territoryCT > 0) {echo "&nbsp;|&nbsp;<a href=\"#\" onclick=\"OpeNTerritorYSelectioN();return false;\">My Territories</a>";} ?>
+                        </p>
+                    </div>
+                    <div class="bottom">
+                        <p class="child">
+                            <?php echo "<b>Registered to</b>: $phone_login"; 
+                            if ($on_hook_agent == 'Y')
+                                    {echo " (<a href=\"#\" onclick=\"NoneInSessionCalL();return false;\">Call It</a>)";}
+                            ?>
+                        </p>
+                        <p class="child"><?php echo "<b>Campaign:</b> $VDcampaign_name ($VD_campaign)"; ?></p>
+                        <p class="child"><b>Conference #:</b><span id="sessionIDspan"></span></span></p>
+                        <p></p>
+                        <p class="child"><span id="AgentStatusCalls"></span></p>
+                        <p class="child"><span id="MainStatuSSpan"></span></p>
+                        <p class="child"><span id="ManualQueueNotice"></span></p>
+                        <p class="child"><font class="body_small_bold"><span id="ParkCounterSpan"> &nbsp; </span></font></p>
+                        <p class="child">
+                            <h4 style="text-decoration:underline;">Call Info</h4>
+                            <b>Customer TimeZone:</b> <span name="custdatetime" id="custdatetime"></span><br>
+                            <b>Channel:</b> <span name="callchannel" id="callchannel"></span><br>
+                            <b>Duration:</b> <span id="SecondSDISP"></span>
+                        </p>
+                        <p class="child">
+                            <span id="debugbottomspan"></span>
+                            <span id="blind_monitor_notice_span"><b><font color="red"> &nbsp; &nbsp; <span id="blind_monitor_notice_span_contents"></span></font></b></span>
+                            <p class="child"><span id="post_phone_time_diff_span"><b><font color="red"><span id="post_phone_time_diff_span_contents"></span></font></b></span></p>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <a id="x_logoff_" href="#" onclick="NormalLogout();return false;">
+            <img id="x_logoff" src="./images/x-logoff-on.png" border="0" alt="Log Out" title="Log Out"  />
+            <span>Log Out</span>
+        </a>
+    </div>
+    
+</div>
 
-	if ($label_title == '---HIDE---')
-        {echo "</td><td align=\"left\" colspan=\"5\"><input type=\"hidden\" name=\"title\" id=\"title\" value=\"\" />";}
-	else
-        {echo "$label_title: </td><td align=\"left\" colspan=\"5\"><font class=\"body_text\"><input type=\"text\" size=\"4\" name=\"title\" id=\"title\" maxlength=\"4\" class=\"cust_form\" value=\"\" />";}
-	if ($label_first_name == '---HIDE---')
-        {echo "&nbsp; <input type=\"hidden\" name=\"first_name\" id=\"first_name\" value=\"\" />";}
-	else
-        {echo "&nbsp; $label_first_name: <input type=\"text\" size=\"17\" name=\"first_name\" id=\"first_name\" maxlength=\"30\" class=\"cust_form\" value=\"\" />";}
-	if ($label_middle_initial == '---HIDE---')
-        {echo "&nbsp; <input type=\"hidden\" name=\"middle_initial\" id=\"middle_initial\" value=\"\" />";}
-	else
-        {echo "&nbsp; $label_middle_initial: <input type=\"text\" size=\"1\" name=\"middle_initial\" id=\"middle_initial\" maxlength=\"1\" class=\"cust_form\" value=\"\" />";}
-	if ($label_last_name == '---HIDE---')
-        {echo "&nbsp; <input type=\"hidden\" name=\"last_name\" id=\"last_name\" value=\"\" />";}
-	else
-        {echo "&nbsp; $label_last_name: <input type=\"text\" size=\"23\" name=\"last_name\" id=\"last_name\" maxlength=\"30\" class=\"cust_form\" value=\"\" />";}
-	
-    echo "</td></tr><tr><td align=\"right\"><font class=\"body_text\">";
-	
-	if ($label_address1 == '---HIDE---')
-        {echo " </td><td align=\"left\" colspan=\"5\"><input type=\"hidden\" name=\"address1\" id=\"address1\" value=\"\" />";}
-	else
-        {echo "$label_address1: </td><td align=\"left\" colspan=5><font class=\"body_text\"><input type=\"text\" size=\"85\" name=\"address1\" id=\"address1\" maxlength=\"100\" class=\"cust_form\" value=\"\" />";}
-	
-    echo "</td></tr><tr><td align=\"right\"><font class=\"body_text\">";
+<!-- unsupported features are below -->
+<span style="display:none;">
 
-	if ($label_address2 == '---HIDE---')
-        {echo " </td><td align=\"left\"><input type=\"hidden\" name=\"address2\" id=\"address2\" value=\"\" />";}
-	else
-        {echo "$label_address2: </td><td align=\"left\"><font class=\"body_text\"><input type=\"text\" size=\"20\" name=\"address2\" id=\"address2\" maxlength=\"100\" class=\"cust_form\" value=\"\" />";}
-
-    echo "</td><td align=\"right\"><font class=\"body_text\">";
-
-	if ($label_address3 == '---HIDE---')
-        {echo " </td><td align=\"left\" colspan=\"3\"><input type=\"hidden\" name=\"address3\" id=\"address3\" value=\"\" />";}
-	else
-        {echo "$label_address3: </td><td align=\"left\" colspan=\"3\"><font class=\"body_text\"><input type=\"text\" size=\"45\" name=\"address3\" id=\"address3\" maxlength=\"100\" class=\"cust_form\" value=\"\" />";}
-
-    echo "</td></tr><tr><td align=\"right\"><font class=\"body_text\">";
-
-	if ($label_city == '---HIDE---')
-        {echo " </td><td align=\"left\"><input type=\"hidden\" name=\"city\" id=\"city\" value=\"\" />";}
-	else
-        {echo "$label_city: </td><td align=\"left\"><font class=\"body_text\"><input type=\"text\" size=\"20\" name=\"city\" id=\"city\" maxlength=\"50\" class=\"cust_form\" value=\"\" />";}
-
-    echo "</td><td align=\"right\"><font class=\"body_text\">";
-
-	if ($label_state == '---HIDE---')
-        {echo " </td><td align=\"left\"><input type=\"hidden\" name=\"state\" id=\"state\" value=\"\" />";}
-	else
-        {echo "$label_state: </td><td align=\"left\"><font class=\"body_text\"><input type=\"text\" size=\"4\" name=\"state\" id=\"state\" maxlength=\"2\" class=\"cust_form\" value=\"\" />";}
-
-    echo "</td><td align=\"right\"><font class=\"body_text\">";
-
-	if ($label_postal_code == '---HIDE---')
-        {echo " </td><td align=\"left\"><input type=\"hidden\" name=\"postal_code\" id=\"postal_code\" value=\"\" />";}
-	else
-        {echo "$label_postal_code: </td><td align=\"left\"><font class=\"body_text\"><input type=\"text\" size=\"14\" name=\"postal_code\" id=\"postal_code\" maxlength=\"10\" class=\"cust_form\" value=\"\" />";}
-
-    echo "</td></tr><tr><td align=\"right\"><font class=\"body_text\">";
-
-	if ($label_province == '---HIDE---')
-        {echo " </td><td align=\"left\"><input type=\"hidden\" name=\"province\" id=\"province\" value=\"\" />";}
-	else
-        {echo "$label_province: </td><td align=\"left\"><font class=\"body_text\"><input type=\"text\" size=\"20\" name=\"province\" id=\"province\" maxlength=\"50\" class=\"cust_form\" value=\"\" />";}
-
-    echo "</td><td align=\"right\"><font class=\"body_text\">";
-
-	if ($label_vendor_lead_code == '---HIDE---')
-        {echo " </td><td align=\"left\"><input type=\"hidden\" name=\"vendor_lead_code\" id=\"vendor_lead_code\" value=\"\" />";}
-	else
-        {echo "$label_vendor_lead_code: </td><td align=\"left\"><font class=\"body_text\"><input type=\"text\" size=\"15\" name=\"vendor_lead_code\" id=\"vendor_lead_code\" maxlength=\"20\" class=\"cust_form\" value=\"\" />";}
-
-    echo "</td><td align=\"right\"><font class=\"body_text\">";
-
-	if ($label_gender == '---HIDE---')
-		{
-		echo "</td><td align=\"left\"><font class=\"body_text\"><span id=\"GENDERhideFORie\"><input type=\"hidden\" name=\"gender_list\" id=\"gender_list\" value=\"\" /></span>";
-		}
-	else
-        {
-		echo "$label_gender: </td><td align=\"left\"><font class=\"body_text\"><span id=\"GENDERhideFORie\"><select size=\"1\" name=\"gender_list\" class=\"cust_form\" id=\"gender_list\"><option value=\"U\">U - Undefined</option><option value=\"M\">M - Male</option><option value=\"F\">F - Female</option></select></span>";
-		}
-
-    echo "</td></tr><tr><td align=\"right\"><font class=\"body_text\">";
-
-    echo "$label_phone_number: </td><td align=\"left\"><font class=\"body_text\">";
-
-	if ( (ereg('Y',$disable_alter_custphone)) or (ereg('HIDE',$disable_alter_custphone)) )
-		{
-        echo "<font class=\"body_text\"><span id=\"phone_numberDISP\"> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span></font>";
-        echo "<input type=\"hidden\" name=\"phone_number\" id=\"phone_number\" value=\"\" />";
-		}
-	else
-		{
-        echo "<input type=\"text\" size=\"20\" name=\"phone_number\" id=\"phone_number\" maxlength=\"16\" class=\"cust_form\" value=\"\" />";
-		}
-
-    echo "</td><td align=\"right\"><font class=\"body_text\">";
-
-	if ($label_phone_code == '---HIDE---')
-        {echo " </td><td align=\"left\"><input type=\"hidden\" name=\"phone_code\" id=\"phone_code\" value=\"\" />";}
-	else
-        {echo "$label_phone_code: </td><td align=\"left\"><font class=\"body_text\"><input type=\"text\" size=\"4\" name=\"phone_code\" id=\"phone_code\" maxlength=\"10\" class=\"cust_form\" value=\"\" />";}
-
-    echo "</td><td align=\"right\"><font class=\"body_text\">";
-
-	if ($label_alt_phone == '---HIDE---')
-        {echo " </td><td align=\"left\"><input type=\"hidden\" name=\"alt_phone\" id=\"alt_phone\" value=\"\" />";}
-	else
-        {echo "$label_alt_phone: </td><td align=\"left\"><font class=\"body_text\"><input type=\"text\" size=\"14\" name=\"alt_phone\" id=\"alt_phone\" maxlength=\"16\" class=\"cust_form\" value=\"\" />";}
-
-    echo "</td></tr><tr><td align=\"right\"><font class=\"body_text\">";
-
-	if ($label_security_phrase == '---HIDE---')
-        {echo " </td><td align=\"left\"><input type=\"hidden\" name=\"security_phrase\" id=\"security_phrase\" value=\"\" />";}
-	else
-        {echo "$label_security_phrase: </td><td align=\"left\"><font class=\"body_text\"><input type=\"text\" size=\"20\" name=\"security_phrase\" id=\"security_phrase\" maxlength=\"100\" class=\"cust_form\" value=\"\" />";}
-
-    echo "</td><td align=\"right\"><font class=\"body_text\">";
-
-	if ($label_email == '---HIDE---')
-        {echo " </td><td align=\"left\" colspan=\"3\"><input type=\"hidden\" name=\"email\" id=\"email\" value=\"\" />";}
-	else
-        {echo "$label_email: </td><td align=\"left\" colspan=\"3\"><font class=\"body_text\"><input type=\"text\" size=\"45\" name=\"email\" id=\"email\" maxlength=\"70\" class=\"cust_form\" value=\"\" />";}
-
-    echo "</td></tr><tr><td align=\"right\"><font class=\"body_text\">";
-
-	if ($label_comments == '---HIDE---')
-		{
-        echo " </td><td align=\"left\" colspan=5><input type=\"hidden\" name=\"comments\" id=\"comments\" value=\"\" />\n";
-		}
-	else
-		{
-        echo "$label_comments: </td><td align=\"left\" colspan=\"5\"><font class=\"body_text\">";
-		if ( ($multi_line_comments) )
-            {echo "<textarea name=\"comments\" id=\"comments\" rows=\"2\" cols=\"85\" class=\"cust_form_text\" value=\"\"></textarea>\n";}
-		else
-            {echo "<input type=\"text\" size=\"65\" name=\"comments\" id=\"comments\" maxlength=\"255\" class=\"cust_form\" value=\"\" />\n";}
-		}
-
-	echo "</font></td></tr><tr><td align=\"right\"><font class=\"body_text\">\n";
-
-	if ($per_call_notes == 'ENABLED')
-		{
-        echo "Call Notes: ";
-		if ($agent_call_log_view == '1')
-			{echo "<br /><span id=\"CallNotesButtons\"><a href=\"#\" onclick=\"VieWNotesLoG();return false;\">view notes</a></span> ";}
-        echo "</td><td align=\"left\" colspan=\"5\"><font class=\"body_text\">";
-		echo "<textarea name=\"call_notes\" id=\"call_notes\" rows=\"2\" cols=\"85\" class=\"cust_form_text\" value=\"\"></textarea>\n";
-		}
-	else
-		{
-        echo " </td><td align=\"left\" colspan=5><input type=\"hidden\" name=\"call_notes\" id=\"call_notes\" value=\"\" /><span id=\"CallNotesButtons\"></span>\n";
-		}
-
-
-	?>
-	</font>
-	</td>
-
-    </tr></table></td>
-    </tr></table>
-	</span>
-	</font>
-	</td>
-    <td width="1" align="center">
-	</td>
-	</tr>
-    <tr><td align="left" colspan="3" height="<?php echo $BPheight ?>px">
-	&nbsp;</td></tr>
-    <tr><td align="left" colspan="3">
-	&nbsp;</td></tr>
- </table>
-	</td></tr>
- </table>
-</span>
-<!-- END *********   Here is the main VICIDIAL display panel -->
-
-<span style="position:absolute;left:0px;top:<?php echo $DBheight ?>px;z-index:<?php $zi++; echo $zi ?>;" id="debugbottomspan"></span>
-
-<span style="position:absolute;left:300px;top:<?php echo $MBheight ?>px;z-index:<?php $zi++; echo $zi ?>;" id="ManuaLDiaLButtons"><font class="body_text">
-<span id="MDstatusSpan"><a href="#" onclick="NeWManuaLDiaLCalL('NO');return false;">MANUAL DIAL</a></span> &nbsp; &nbsp; &nbsp; <a href="#" onclick="NeWManuaLDiaLCalL('FAST');return false;">FAST DIAL</a><br />
-</font></span>
-
-<span style="position:absolute;left:500px;top:<?php echo $CBheight ?>px;z-index:<?php $zi++; echo $zi ?>;" id="PauseCodeButtons"><font class="body_text">
-<span id="PauseCodeLinkSpan"></span> <br />
-</font></span>
-
-<span style="position:absolute;left:500px;top:<?php echo $MBheight ?>px;z-index:<?php $zi++; echo $zi ?>;" id="CallLogButtons"><font class="body_text">
-<span id="CallLogLinkSpan"><a href="#" onclick="VieWCalLLoG();return false;">VIEW CALL LOG</a></span> <br />
-</font></span>
-
-<span style="position:absolute;left:0px;top:<?php echo $PBheight ?>px;z-index:<?php $zi++; echo $zi ?>;" id="MaiNfooterspan">
-<span id="blind_monitor_notice_span"><b><font color="red"> &nbsp; &nbsp; <span id="blind_monitor_notice_span_contents"></span></font></b></span>
-    <table bgcolor="<?php echo $MAIN_COLOR ?>" id="MaiNfooter" width="<?php echo $MNwidth ?>px"><tr height="32px"><td height="32px"><font face="Arial,Helvetica" size="1">VERSION: <?php echo $version ?> &nbsp; BUILD: <?php echo $build ?> &nbsp; &nbsp; Server: <?php echo $server_ip ?>  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</font><br />
-	<font class="body_small">
-	<span id="busycallsdisplay"><a href="#"  onclick="conf_channels_detail('SHOW');">Show conference call channel information</a>
-    <br /><br />&nbsp;</span></font></td><td align="right" height="32px">
-	</td></tr>
-    <tr><td colspan="3"><span id="outboundcallsspan"></span></td></tr>
-    <tr><td colspan="3"><font class="body_small"><span id="AgentAlertSpan">
-	<?php
-	if ( (ereg('ON',$VU_alert_enabled)) and ($AgentAlert_allowed > 0) )
-		{echo "<a href=\"#\" onclick=\"alert_control('OFF');return false;\">Alert is ON</a>";}
-	else
-		{echo "<a href=\"#\" onclick=\"alert_control('ON');return false;\">Alert is OFF</a>";}
-	?>
-	</span></font></td></tr>
-    <tr><td colspan="3">
-	<font class="body_small">
-	</font>
-    </td></tr></table>
+    <table id="MaiNfooter" >
+        <tr height="32px">
+            <td height="32px">
+                <font face="Arial,Helvetica" size="1">
+                    VERSION: <?php echo $version ?> &nbsp;
+                    BUILD: <?php echo $build ?> &nbsp; &nbsp;
+                    Server: <?php echo $server_ip ?>  &nbsp; &nbsp;
+                </font><br />
+                <font class="body_small">
+                    <span id="busycallsdisplay">
+                        <a href="#"  onclick="conf_channels_detail('SHOW');">Show conference call channel information</a>
+                    </span>
+                </font>
+            </td>
+            <td align="right" height="32px">
+            </td>
+        </tr>
+        <tr>
+            <td colspan="3"><span id="outboundcallsspan"></span>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="3">
+                <font class="body_small">
+                    <span id="AgentAlertSpan">
+                    <?php
+                    if ( (ereg('ON',$VU_alert_enabled)) and ($AgentAlert_allowed > 0) )
+                            {echo "<a href=\"#\" onclick=\"alert_control('OFF');return false;\">Alert is ON</a>";}
+                    else
+                            {echo "<a href=\"#\" onclick=\"alert_control('ON');return false;\">Alert is OFF</a>";}
+                    ?>
+                    </span>
+                </font>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="3">
+                <font class="body_small">
+                </font>
+            </td>
+        </tr>
+    </table>
 </span>
 
 <?php if ( ($HK_statuses_camp > 0) && ( ($user_level>=$HKuser_level) or ($VU_hotkeys_active > 0) ) ) { ?>
-<span style="position:absolute;left:<?php echo $HKwidth ?>px;top:<?php echo $HKheight ?>px;z-index:<?php $zi++; echo $zi ?>;" id="hotkeysdisplay"><a href="#" onMouseOver="HotKeys('ON')"><img src="./images/vdc_XB_hotkeysactive_OFF.gif" border="0" alt="HOT KEYS INACTIVE" /></a></span>
+<span id="hotkeysdisplay" style="display:none;"><a href="#" onMouseOver="HotKeys('ON')"><img src="./images/vdc_XB_hotkeysactive_OFF.gif" border="0" alt="HOT KEYS INACTIVE" /></a></span>
 <?php } ?>
 
-<span style="position:absolute;left:<?php echo $SCwidth ?>px;top:<?php echo $SCheight ?>px;z-index:<?php $zi++; echo $zi ?>;" id="SecondSspan"><font class="body_text"> seconds: 
-<span id="SecondSDISP"> &nbsp; &nbsp; </span></font>
-</font></span>
 
-<span style="position:absolute;left:5px;top:<?php echo $CBheight ?>px;z-index:<?php $zi++; echo $zi ?>;" id="VolumeControlSpan"><span id="VolumeUpSpan"><img src="./images/vdc_volume_up_off.gif" border="0" /></span><br /><span id="VolumeDownSpan"><img src="./images/vdc_volume_down_off.gif" border="0" /></span>
-</font></span>
+<span id="VolumeControlSpan">
+    <span id="VolumeUpSpan">
+        <img src="./images/vdc_volume_up_off.gif" border="0" />
+    </span><br />
+    <span id="VolumeDownSpan">
+        <img src="./images/vdc_volume_down_off.gif" border="0" />
+    </span>
+</span>
 
 <span style="position:absolute;left:35px;top:<?php echo $CBheight ?>px;z-index:<?php $zi++; echo $zi ?>;" id="AgentStatusSpan"><font class="body_text">
 Your Status: <span id="AgentStatusStatus"></span> <br />Calls Dialing: <span id="AgentStatusDiaLs"></span>
@@ -12890,114 +12867,7 @@ if ($agent_display_dialable_leads > 0)
 </span>
 
 
-<span style="position:absolute;left:157px;top:<?php echo $HTheight ?>px;z-index:<?php $zi++; echo $zi ?>;" id="TransferMain">
-    <table bgcolor="#CCCCFF" width="<?php echo $SDwidth ?>px">
-    <tr valign="top">
-    <td align="left" height="30px">
-	<span class="text_input" id="TransferMaindiv">
-	<font class="body_text">
-    <img src="./images/vdc_XB_header.gif" border="0" alt="Transfer - Conference" style="vertical-align:middle" /> &nbsp; &nbsp; &nbsp; &nbsp; <span id="XfeRDiaLGrouPSelecteD"></span> &nbsp; &nbsp; <span id="XfeRCID"></span><br />
 
-    <table cellpadding="0" cellspacing="1" border="0">
-    <tr>
-    <td align="left" colspan="3">
-    <span id="XfeRGrouPLisT"><select size="1" name="XfeRGrouP" id="XfeRGrouP" class="cust_form" onChange="XferAgentSelectLink();return false;"><option>-- SELECT A GROUP TO SEND YOUR CALL TO --</option></select></span>
-	 
-    <span style="background-color: <?php echo $MAIN_COLOR ?>" id="LocalCloser"><img src="./images/vdc_XB_localcloser_OFF.gif" border="0" alt="LOCAL CLOSER" style="vertical-align:middle" /></span> &nbsp; &nbsp;
- </td>
-    <td align="left">
-		<font class="body_small_bold"><span id="ParkCounterSpan2"> &nbsp; </span></font><br />
-		<span style="background-color: <?php echo $MAIN_COLOR ?>" id="ParkControl2"><img src="./images/vdc_LB_parkcall_OFF.gif" border="0" alt="Park Call" /></span><br />
-		
-    <span style="background-color: <?php echo $MAIN_COLOR ?>" id="HangupXferLine"><img src="./images/vdc_XB_hangupxferline_OFF.gif" border="0" alt="Hangup Xfer Line" style="vertical-align:middle" /></span>
- </td>
- </tr>
-
-    <tr>
-    <td align="left" colspan="2">
-    <img src="./images/vdc_XB_seconds.gif" border="0" alt="seconds" style="vertical-align:middle" /><input type="text" size="2" name="xferlength" id="xferlength" maxlength="4" class="cust_form" readonly="readonly" />
-	&nbsp; 
-    <img src="./images/vdc_XB_channel.gif" border="0" alt="channel" style="vertical-align:middle" /><input type="text" size="12" name="xferchannel" id="xferchannel" maxlength="200" class="cust_form" readonly="readonly" />
- </td>
-    <td align="left">
-    <span id="consultative_checkbox"><input type="checkbox" name="consultativexfer" id="consultativexfer" size="1" value="0"><font class="body_tiny"> CONSULTATIVE &nbsp;</font></span>
- </td>
-    <td align="left">
-    <span style="background-color: <?php echo $MAIN_COLOR ?>" id="HangupBothLines"><a href="#" onclick="bothcall_send_hangup();return false;"><img src="./images/vdc_XB_hangupbothlines.gif" border="0" alt="Hangup Both Lines" style="vertical-align:middle" /></a></span>
- </td>
- </tr>
-
-    <tr>
-    <td align="left" colspan="2">
-    <img src="./images/vdc_XB_number.gif" border="0" alt="Number to call" style="vertical-align:middle" />
-	&nbsp; 
-	<?php
-	if ($hide_xfer_number_to_dial=='ENABLED')
-		{
-		?>
-        <input type="hidden" name="xfernumber" id="xfernumber" value="<?php echo $preset_populate ?>" /> &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;
-		<?php
-		}
-	else
-		{
-		?>
-        <input type="text" size="20" name="xfernumber" id="xfernumber" onKeyPress="return numbersonly(this, event)" maxlength="25" class="cust_form" value="<?php echo $preset_populate ?>" /> &nbsp;
-		<?php
-		}
-	?>
-    <span id="agentdirectlink"><font class="body_small_bold"><a href="#" onclick="XferAgentSelectLaunch();return false;">AGENTS</a></font></span>
-    <input type="hidden" name="xferuniqueid" id="xferuniqueid" />
-    <input type="hidden" name="xfername" id="xfername" />
-    <input type="hidden" name="xfernumhidden" id="xfernumhidden" />
- </td>
-    <td align="left">
-    <span id="dialoverride_checkbox"><input type="checkbox" name="xferoverride" id="xferoverride" size="1" value="0"><font class="body_tiny" /> DIAL OVERRIDE</font></span>
- </td>
-    <td align="left">
-    <span style="background-color: <?php echo $MAIN_COLOR ?>" id="Leave3WayCall"><a href="#" onclick="leave_3way_call('FIRST');return false;"><img src="./images/vdc_XB_leave3waycall.gif" border="0" alt="LEAVE 3-WAY CALL" style="vertical-align:middle" /></a></span>
- </td>
- </tr>
-
-    <tr>
-    <td align="left" COLSPAN="4">
-    <span style="background-color: <?php echo $MAIN_COLOR ?>" id="DialBlindTransfer"><img src="./images/vdc_XB_blindtransfer_OFF.gif" border="0" alt="Dial Blind Transfer" style="vertical-align:middle" /></span>
-	&nbsp;
-    <span style="background-color: <?php echo $MAIN_COLOR ?>" id="DialWithCustomer"><a href="#" onclick="SendManualDial('YES');return false;"><img src="./images/vdc_XB_dialwithcustomer.gif" border="0" alt="Dial With Customer" style="vertical-align:middle" /></a></span>
-	&nbsp;
-    <span style="background-color: <?php echo $MAIN_COLOR ?>" id="ParkCustomerDial"><a href="#" onclick="xfer_park_dial();return false;"><img src="./images/vdc_XB_parkcustomerdial.gif" border="0" alt="Park Customer Dial" style="vertical-align:middle" /></a></span>
-	&nbsp;
-	<?php
-	if ($enable_xfer_presets=='ENABLED')
-		{
-		?>
-        <span style="background-color: <?php echo $MAIN_COLOR ?>" id="PresetPullDown"><a href="#" onclick="generate_presets_pulldown();return false;"><img src="./images/vdc_XB_presetsbutton.gif" border="0" alt="Presets Button" style="vertical-align:middle" /></a></span>
-		<?php
-		}
-	else
-		{
-		?>
-		<font class="body_tiny">
-		<a href="#" onclick="DtMf_PreSet_a();return false;">D1</a> 
-		<a href="#" onclick="DtMf_PreSet_b();return false;">D2</a>
-		<a href="#" onclick="DtMf_PreSet_c();return false;">D3</a>
-		<a href="#" onclick="DtMf_PreSet_d();return false;">D4</a>
-		<a href="#" onclick="DtMf_PreSet_e();return false;">D5</a>
-		</font>
-		<?php
-		}
-	?>
-	&nbsp;
-    <span style="background-color: <?php echo $MAIN_COLOR ?>" id="DialBlindVMail"><img src="./images/vdc_XB_ammessage_OFF.gif" border="0" alt="Blind Transfer VMail Message" style="vertical-align:middle" /></span>
- </td>
- </tr>
-
- </table>
-
-	</font>
-	</span>
-	</td>
-    </tr></table>
-</span>
 
 <span style="position:absolute;left:0px;top:0px;width:<?php echo $JS_browser_width ?>px;height:<?php echo $JS_browser_height ?>px;overflow:scroll;z-index:<?php $zi++; echo $zi ?>;background-color:<?php echo $SIDEBAR_COLOR ?>;" id="AgentXferViewSpan"><center><font class="body_text">
 Available Agents Transfer: <span id="AgentXferViewSelect"></span></center></font></span>

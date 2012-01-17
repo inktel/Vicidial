@@ -1,1 +1,650 @@
- 
+body
+{
+    font: 12px 'Lucida Sans Unicode', 'Trebuchet MS', Arial, Helvetica;    
+    margin: 0;   
+}
+
+/*---------------------------
+ BEGIN styles for login box
+ --------------------------*/
+.barStyle
+{
+    background-color: #fff;
+    background-image: -webkit-gradient(linear, left top, left bottom, from(#fff), to(#eee));
+    background-image: -webkit-linear-gradient(top, #fff, #eee);
+    background-image: -moz-linear-gradient(top, #fff, #eee);
+    background-image: -ms-linear-gradient(top, #fff, #eee);
+    background-image: -o-linear-gradient(top, #fff, #eee);
+    background-image: linear-gradient(top, #fff, #eee);
+    
+    -moz-border-radius: 3px;
+    -webkit-border-radius: 3px;
+    border-radius: 3px;  
+    -webkit-box-shadow:
+          0 0 2px rgba(0, 0, 0, 0.2),
+          0 1px 1px rgba(0, 0, 0, .2),
+          0 3px 0 #fff,
+          0 4px 0 rgba(0, 0, 0, .2),
+          0 6px 0 #fff,  
+          0 7px 0 rgba(0, 0, 0, .2);
+    -moz-box-shadow:
+          0 0 2px rgba(0, 0, 0, 0.2),  
+          1px 1px   0 rgba(0,   0,   0,   .1),
+          3px 3px   0 rgba(255, 255, 255, 1),
+          4px 4px   0 rgba(0,   0,   0,   .1),
+          6px 6px   0 rgba(255, 255, 255, 1),  
+          7px 7px   0 rgba(0,   0,   0,   .1);
+    box-shadow:
+          0 0 2px rgba(0, 0, 0, 0.2),  
+          0 1px 1px rgba(0, 0, 0, .2),
+          0 3px 0 #fff,
+          0 4px 0 rgba(0, 0, 0, .2),
+          0 6px 0 #fff,  
+          0 7px 0 rgba(0, 0, 0, .2);
+}
+
+#loginBox
+{
+    height: 375px;
+    width: 400px;
+    margin: -150px 0 0 -230px;
+    padding: 30px;
+    position: absolute;
+    top: 35%;
+    left: 50%;
+    z-index: 0;
+}
+
+#loginBox:before
+{
+    content: '';
+    position: absolute;
+    z-index: -1;
+    border: 1px dashed #ccc;
+    top: 5px;
+    bottom: 5px;
+    left: 5px;
+    right: 5px;
+    -moz-box-shadow: 0 0 0 1px #fff;
+    -webkit-box-shadow: 0 0 0 1px #fff;
+    box-shadow: 0 0 0 1px #fff;
+}
+
+/*--------------------*/
+
+#loginBox h1
+{
+    text-shadow: 0 1px 0 rgba(255, 255, 255, .7), 0px 2px 0 rgba(0, 0, 0, .5);
+    text-transform: uppercase;
+    text-align: center;
+    color: #666;
+    margin: 0 0 30px 0;
+    letter-spacing: 4px;
+    font: normal 26px/1 Verdana, Helvetica;
+    position: relative;
+}
+
+#loginBox h1:after, #loginBox h1:before
+{
+    background-color: #777;
+    content: "";
+    height: 1px;
+    position: absolute;
+    top: 15px;
+    width: 120px;   
+}
+
+#loginBox h1:after
+{ 
+    background-image: -webkit-gradient(linear, left top, right top, from(#777), to(#fff));
+    background-image: -webkit-linear-gradient(left, #777, #fff);
+    background-image: -moz-linear-gradient(left, #777, #fff);
+    background-image: -ms-linear-gradient(left, #777, #fff);
+    background-image: -o-linear-gradient(left, #777, #fff);
+    background-image: linear-gradient(left, #777, #fff);      
+    right: 0;
+}
+
+#loginBox h1:before
+{
+    background-image: -webkit-gradient(linear, right top, left top, from(#777), to(#fff));
+    background-image: -webkit-linear-gradient(right, #777, #fff);
+    background-image: -moz-linear-gradient(right, #777, #fff);
+    background-image: -ms-linear-gradient(right, #777, #fff);
+    background-image: -o-linear-gradient(right, #777, #fff);
+    background-image: linear-gradient(right, #777, #fff);
+    left: 0;
+}
+
+/*--------------------*/
+
+#loginBox #instructions
+{
+    color: red;
+}
+#loginBox fieldset, #TransferMain
+{
+    border: 0;
+    padding: 0;
+    margin: 0;
+}
+
+/*--------------------*/
+
+#loginBox #inputs input, #loginBox #inputs #LogiNCamPaigns select, #TransferMain input, #TransferMain select
+{
+    background: #f1f1f1 url(http://www.red-team-design.com/wp-content/uploads/2011/09/login-sprite.png) no-repeat;
+    padding: 15px 15px 15px 30px;
+    margin: 0 0 10px 0;
+    width: 330px;
+    border: 1px solid #ccc;
+    font-size: 12pt;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    border-radius: 5px;
+    -moz-box-shadow: 0 1px 1px #ccc inset, 0 1px 0 #fff;
+    -webkit-box-shadow: 0 1px 1px #ccc inset, 0 1px 0 #fff;
+    box-shadow: 0 1px 1px #ccc inset, 0 1px 0 #fff;
+}
+
+#loginBox #VD_login
+{
+    background-position: 5px -2px !important;
+}
+
+#loginBox #VD_pass
+{
+    background-position: 5px -52px !important;
+}
+
+#loginBox #phone_login
+{
+    background-position: 5px -52px !important;
+}
+
+#loginBox #inputs #LogiNReseT
+{
+    float:right;
+    cursor: pointer;
+    margin-right: 15px;
+}
+#loginBox #inputs #LogiNCamPaigns select
+{
+    background-position: 5px -302px !important;
+    height: 30px;
+    width: 333px;
+    margin-right: 0px;
+}
+
+#loginBox #inputs input:focus, #TransferMain input:focus
+{
+    background-color: #fff;
+    border-color: #e8c291;
+    outline: none;
+    -moz-box-shadow: 0 0 0 1px #e8c291 inset;
+    -webkit-box-shadow: 0 0 0 1px #e8c291 inset;
+    box-shadow: 0 0 0 1px #e8c291 inset;
+}
+
+/*--------------------*/
+#loginBox #actions
+{
+    margin: 5px 0 0 18px;
+}
+
+#loginBox #submit
+{       
+    float: left;
+    height: 35px;
+    padding: 0;
+    width: 120px;
+    cursor: pointer;
+    /*font: bold 15px Arial, Helvetica;
+    color: #8f5a0a;*/
+}
+
+#loginBox #submit:focus
+{       
+    text-decoration: none;
+}   
+
+#loginBox #submit::-moz-focus-inner
+{
+  border: none;
+}
+
+#loginBox #footer
+{
+    margin-top: 40px;
+}
+/*---------------------------
+ END styles for login box
+ --------------------------*/
+
+
+/*---------------------------
+ BEGIN generic button styles
+ --------------------------*/
+.button
+{
+    text-decoration: none;
+    font: bold 1.5em 'Trebuchet MS',Arial, Helvetica; /*Change the em value to scale the button*/
+    display: inline-block;
+    text-align: center;
+    color: #fff;
+
+    border: 1px solid #9c9c9c; /* Fallback style */
+    border: 1px solid rgba(0, 0, 0, 0.3);            
+
+    moz-border-radius: .3em;
+    border-radius: .3em;
+
+    text-shadow: 0 1px 0 rgba(0,0,0,0.4);
+
+    box-shadow: 0 0 .05em rgba(0,0,0,0.4);
+    -moz-box-shadow: 0 0 .05em rgba(0,0,0,0.4);
+    -webkit-box-shadow: 0 0 .05em rgba(0,0,0,0.4);
+}
+.button:hover
+{
+    box-shadow: 0 0 .1em rgba(0,0,0,0.4);
+    -moz-box-shadow: 0 0 .1em rgba(0,0,0,0.4);
+    -webkit-box-shadow: 0 0 .1em rgba(0,0,0,0.4);
+}
+.button:active
+{
+    position: relative;
+    top: 1px;
+}
+.blue {
+    background: #4477a1;
+    background: -webkit-gradient(linear, left top, left bottom, from(#81a8cb), to(#4477a1) );
+    background: -moz-linear-gradient(-90deg, #81a8cb, #4477a1);
+    filter:  progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr='#81a8cb', endColorstr='#4477a1');
+}
+.blue:hover {
+    background: #81a8cb;
+    background: -webkit-gradient(linear, left top, left bottom, from(#4477a1), to(#81a8cb) );
+    background: -moz-linear-gradient(-90deg, #4477a1, #81a8cb);
+    filter:  progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr='#4477a1', endColorstr='#81a8cb');
+}
+.blueinactive {
+    background: #4477a1;
+    background: -webkit-gradient(linear, left top, left bottom, from(#81a8cb), to(#4477a1) );
+    background: -moz-linear-gradient(-90deg, #81a8cb, #4477a1);
+    filter:  progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr='#81a8cb', endColorstr='#4477a1');
+    opacity: .25;
+}
+/*---------------------------
+ END generic button styles
+ --------------------------*/
+
+
+/*-----------------------------------
+  BEGIN Main interface toolbar styles
+  ----------------------------------*/
+#x_toolbar
+{
+    height: 60px;
+    width: 100%;
+    margin: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 9;
+}
+
+#x_toolbar #x_logo
+{
+    float: left;
+    height: 60px;
+}
+
+#x_toolbar #x_actionArea, #x_toolbar #x_formsArea
+{
+    float: left;
+    height: 100%;
+    margin-left: 4%;
+    margin-top: 5px;
+}
+
+#x_toolbar #x_actionArea a, #x_toolbar #x_formsArea a, #x_toolbar #x_logoff_, #x_toolbar #x_logoutArea #x_settings
+{
+    height: 50px;
+    width: 60px;
+    display: inline-block;
+    text-align: center;
+    text-decoration: none;
+}
+
+#x_toolbar #x_actionArea a:hover, #x_toolbar #x_formsArea a:hover, #x_toolbar #x_logoff_:hover, #x_toolbar #x_logoutArea #x_settings:hover
+{
+    
+}
+
+#x_toolbar #x_formsArea img, #x_toolbar #x_actionArea img, #x_toolbar #x_logoff_ img, #x_toolbar #x_logoutArea #x_settings img
+{
+    height: 50px;
+    margin-bottom: -12px;
+}
+
+#x_toolbar #x_actionArea #ivrParkControl img
+{
+    height: 38px;
+    padding: 0px 12px 12px 12px;
+}
+
+#x_toolbar #x_actionArea a span, #x_toolbar #x_formsArea a span, #x_toolbar #x_logoff_ span, #x_toolbar #x_logoutArea #x_settings span
+{
+    color: #797979;
+}
+
+#x_toolbar #x_logoutArea
+{
+    float: right;
+    margin-right: 20px;
+    margin-top: 5px;
+}
+
+#x_toolbar #x_logoff
+{
+    float: right;
+}
+
+#x_toolbar #x_userInfo
+{
+    visibility: visible;
+    height: 200px;
+    width: 300px;
+    margin: 0;
+    position: relative;
+    top: 68px;
+    z-index: 100;
+    font-size: 10pt;
+    display: inline-block;
+    
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    border-radius: 5px;
+    
+    border: 1px solid #ccc;
+}
+
+#x_toolbar #x_userInfo span 
+{
+    font: 12px 'Lucida Sans Unicode', 'Trebuchet MS', Arial, Helvetica;
+    margin: auto;
+    
+}
+
+/*-----------------------------------
+  END Main interface toolbar styles
+  ----------------------------------*/
+
+/*-------------------------------------------------------------
+ BEGIN styles for hover card functionality on menubar commands
+ ------------------------------------------------------------*/
+.hovercard
+{
+   position: relative;
+   cursor: default;
+   display: inline;
+   text-decoration: none;
+   color: #0066aa;
+   outline: none;
+   
+}
+.hovercard .main
+{
+   visibility: hidden;   
+   position: absolute; 
+   color:#666;
+   top: 23px;
+   left: 15%;
+   z-index: 9999;
+   /*280px;*/
+   min-height:100px;
+   margin-left: -150px;
+   border: 1px solid #555;
+   background-color: #fff; 
+   color:#777;   
+   font-size:12.5px;
+   display:inline;
+   font-family:arial,verdana, helvetica, sans-serif;
+   padding:0;
+   
+   box-shadow:1px 2px 5px #888;
+}
+.hovercard:hover
+{
+   border: 0;
+}
+.hov{
+   cursor:pointer
+}
+
+.hovercard:hover .main
+{
+   visibility: visible;
+}
+.hovercard .main:before,
+.hovercard .main:after
+{
+   content: "";
+   position: absolute;
+   z-index: 1000;
+   top: -7px;
+   left: 60%;
+   margin-left: -8px;  
+   border-bottom: 7px solid #efefef;
+   border-left: 7px solid transparent;
+   border-right: 7px solid transparent;   
+   border-top: 0;  
+}
+.hovercard .main:before
+{
+   border-bottom-color: #555;
+   top: -8px;
+}
+/**CSS FOR THE HTML WITHIN THE HOVERCARD**/
+.title{
+   font-size:17px;
+   color:#0066aa;
+   font-weight:bold;
+   margin:3px 0
+}
+.subtitle{
+   font-size:13px;
+   color:#0066aa;
+   font-weight:normal;
+   margin:0
+}
+.child{
+   font-size:12px;
+}
+.child span a
+{
+    padding: 0px 0px 5px 8px;
+}
+.brook{
+   display:block;
+   padding:6px 8px;
+   width:250px
+}
+.top{
+   background-color:#efefef;
+   border-bottom:1px solid #999;
+   padding:5px 6px;
+   color:#222;
+   margin:0;
+   display:block;
+   clear:both
+}
+a{
+   color:#0066aa;
+   text-decoration:none
+}
+a:hover{
+   text-decoration:underline
+}
+.left{
+   display:inline-block;
+   float:left;
+   width:70px
+}
+.right{
+   display:inline-block;
+   float:left;
+   padding:2px;
+   width:165px
+}
+.bottom{
+    display:inline-block;
+    float: left;
+    padding: 2px;
+    width: 245px;
+}
+.hov{
+   color:#cc0000;
+}
+/*-----------------------------------------------------------
+ END styles for hover card functionality on menubar commands
+ -------------------------------------------------------*/
+
+
+/*-------------------------------------------------------------------
+ BEGIN styles for resume, pause, manual dial buttons and their labels
+ -------------------------------------------------------------------*/
+#DiaLControl a, #RecorDControl a, #WebFormSpan a, #WebFormSpanTwo a
+{
+    height: 50px;
+    width: 60px;
+    display: inline-block;
+    text-align: center;
+    text-decoration: none;
+}
+
+#DiaLControl img, #RecorDControl img, #WebFormSpan img, #WebFormSpanTwo img
+{
+    height: 50px;
+    margin-bottom: -12px;
+}
+
+#RecorDControl img, #WebFormSpan img, #WebFormSpanTwo img
+{
+    margin-bottom: 0px;
+    height: 44px;
+}
+
+#DiaLControl span, #RecorDControl span, #WebFormSpan span, #WebFormSpanTwo span
+{
+    color: #797979;
+}
+/*-------------------------------------------------------------------
+ END styles for resume, pause, manual dial buttons and their labels
+ -------------------------------------------------------------------*/
+
+
+/*------------------------------------------------------------------------------------
+ BEGIN styles for transfer conference options (some settings inherited from #loginBox)
+ -------------------------------------------------------------------------------------*/
+#TransferMain
+{
+    width: 245px;
+}
+
+#TransferMain #x-transfer-options, #TransferMain #x-transfer-inactive, #TransferMain #x-transfer-active, #TransferMain #x-transfer-local
+{
+    width: 243px;
+    display: inline-block;
+    text-align: left;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    border-radius: 5px;
+    border: 1px solid;
+    padding: 5px;
+    margin-bottom: 5px;
+}
+
+#TransferMain #x-transfer-options span, #TransferMain #x-transfer-inactive span, #TransferMain #x-transfer-active span, #TransferMain #x-transfer-local span
+{
+    float:left;
+    margin: 5px 25px 5px 36px;
+    width: 150px;
+    font: bold 1.0em !important;
+    padding: 5px;
+    vertical-align: top;
+}
+
+#TransferMain #x-transfer-options span a, #TransferMain #x-transfer-inactive span a, #TransferMain #x-transfer-active span a, #TransferMain #x-transfer-local span a
+{
+    width: auto;
+    height: 20px !important;
+    color: #eee;
+    padding: 0px;
+}
+
+#TransferMain #x-transfer-local #agentdirectlink
+{
+    color: #666;
+}
+
+#TransferMain #dialoverride_checkbox
+{
+    height: 13px;    
+}
+
+#TransferMain input, #TransferMain select
+{
+    background: none;
+    padding: 5px 5px 5px 5px;
+    margin: 0 0 0 36px;
+    width: 150px;
+    height: 20px;
+    border: 1px solid #ccc;
+    font-size: 10pt;
+}
+
+#TransferMain select, #TransferMain #XfeRGrouPLisT
+{
+    margin: 0 0 0 6px !important;
+}
+
+#TransferMain input[type="checkbox"]
+{
+    margin: 0px;
+    width: 20px;
+    text-align: left;
+}
+
+#TransferMain select
+{
+    width: 205px;   
+}
+
+#TransferMain img
+{
+    margin-bottom: 0px !important;
+    height: 15px !important;
+}
+
+/*------------------------------------------------------------------------------------
+ END styles for transfer conference options (some settings inherited from #loginBox)
+ -------------------------------------------------------------------------------------*/
+
+#LoadingBox
+{
+    position:absolute;
+    left:0px;
+    top:0px;
+    z-index:300;
+    margin: auto;
+}
+#Header
+{
+    position:absolute;left:0px;top:300px;z-index:1;visibility:hidden;
+}
+#Tabs
+{
+    position:absolute;left:0px;top:400px;z-index:2;visibility:hidden;
+}
