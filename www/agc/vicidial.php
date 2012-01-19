@@ -4700,7 +4700,7 @@ function set_length(SLnumber,SLlength_goal,SLdirection)
 				var parkedby = protocol + "/" + extension;
 				xferredirect_query = "server_ip=" + server_ip + "&session_name=" + session_name + "&user=" + user + "&pass=" + pass + "&ACTION=RedirectToPark&format=text&channel=" + redirectdestination + "&call_server_ip=" + redirectdestserverip + "&queryCID=" + queryCID + "&exten=" + park_on_extension + "&ext_context=" + ext_context + "&ext_priority=1&extenName=park&parkedby=" + parkedby + "&session_id=" + session_id + "&CalLCID=" + CalLCID + "&uniqueid=" + document.vicidial_form.uniqueid.value + "&lead_id=" + document.vicidial_form.lead_id.value + "&campaign=" + campaign;
 
-                document.getElementById("ParkControl").innerHTML ="<a href=\"#\" onclick=\"mainxfer_send_redirect('FROMParK','" + redirectdestination + "','" + redirectdestserverip + "');return false;\"><img src=\"./images/x-grabhold.png\" border=\"0\" alt=\"Grab Parked Call\" /><span>Grab</span></a>";
+                document.getElementById("ParkControl").innerHTML ="<a href=\"#\" onclick=\"mainxfer_send_redirect('FROMParK','" + redirectdestination + "','" + redirectdestserverip + "');return false;\"><img style=\"height:38px;margin-bottom:-2px;\" src=\"./images/x-grabhold.png\" border=\"0\" alt=\"Grab Parked Call\" /><span>Grab</span></a>";
 				if ( (ivr_park_call=='ENABLED') || (ivr_park_call=='ENABLED_PARK_ONLY') )
 					{
                     document.getElementById("ivrParkControl").innerHTML ="<a href=\"#\" style=\"opacity:.25;\"><img src=\"./images/x-holdivr.png\" border=\"0\" alt=\"IVR Park Call\" /><span>IVR Hold</span></a>";
@@ -4788,7 +4788,7 @@ function set_length(SLnumber,SLlength_goal,SLdirection)
 				var parkedby = protocol + "/" + extension;
 				xferredirect_query = "server_ip=" + server_ip + "&session_name=" + session_name + "&user=" + user + "&pass=" + pass + "&ACTION=RedirectToParkIVR&format=text&channel=" + redirectdestination + "&call_server_ip=" + redirectdestserverip + "&queryCID=" + queryCID + "&exten=" + park_on_extension + "&ext_context=" + ext_context + "&ext_priority=1&extenName=park&parkedby=" + parkedby + "&session_id=" + session_id + "&CalLCID=" + CalLCID + "&uniqueid=" + document.vicidial_form.uniqueid.value + "&lead_id=" + document.vicidial_form.lead_id.value + "&campaign=" + campaign;
 
-                document.getElementById("ParkControl").innerHTML ="<a href=\"#\" style=\"opacity:.25;\"><img src=\"./images/x-hold-on.png\" border=\"0\" alt=\"Grab Parked Call\" /><span>Hold</span></a>";
+                document.getElementById("ParkControl").innerHTML ="<a href=\"#\" style=\"opacity:.25;\"><img src=\"./images/x-hold-on.png\" border=\"0\" alt=\"Park Call\" /><span>Hold</span></a>";
 				if (ivr_park_call=='ENABLED_PARK_ONLY')
 					{
                     document.getElementById("ivrParkControl").innerHTML ="<a href=\"#\" style=\"opacity:.25;\"><img src=\"./images/x-holdivr.png\" border=\"0\" alt=\"IVR Park Call\" /><span>IVR Hold</span></a>";
