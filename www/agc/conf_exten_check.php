@@ -280,8 +280,8 @@ if ($ACTION == 'refresh')
 		if ($mel > 0) {mysql_error_logging($NOW_TIME,$link,$mel,$stmt,'03007',$user,$server_ip,$session_name,$one_mysql_log);}
 				$row=mysql_fetch_row($rslt);
 				$RingCalls=$row[0];
-				if ($RingCalls > 0) {$RingCalls = "<font class=\"queue_text_red\">Calls in Queue: $RingCalls</font>";}
-				else {$RingCalls = "<font class=\"queue_text\">Calls in Queue: $RingCalls</font>";}
+				if ($RingCalls > 0) {$RingCalls = "<font class=\"queue_text_red\"><b>Calls in Queue</b>: $RingCalls</font>";}
+				else {$RingCalls = "<font class=\"queue_text\"><b>Calls in Queue</b>: $RingCalls</font>";}
 
 				### grab the number of calls being placed from this server and campaign
 				$stmt="SELECT count(*) from vicidial_auto_calls where status NOT IN('XFER') and ( (campaign_id='$Acampaign') or (campaign_id IN('$AccampSQL')) );";
