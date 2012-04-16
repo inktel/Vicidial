@@ -283,7 +283,7 @@
 # 110317-0222 - Logging bug fixes
 # 110413-1245 - Added ALT dialing from scheduled callback list
 # 110430-1925 - Added post_phone_time_diff_alert campaign feature
-#
+# 120124-1540 - Fixed bug which overrides talk_sec when outbound dial is performed during existing call (~ line 3228)
 
 $version = '2.4-188';
 $build = '110430-1925';
@@ -705,7 +705,14 @@ if ($ACTION == 'LogiNCamPaigns')
 	if ( (strlen($user)<1) )
 		{
 		echo "<select size=1 name=VD_campaign id=VD_campaign onFocus=\"login_allowable_campaigns()\">\n";
-		echo "<option value=\"\">-- ERROR --</option>\n";
+		echo "<option value=\"\">-- No User Specified --</option>\n";
+		echo "</select>\n";
+		exit;
+		}
+        else if ( (strlen($pass)<1) )
+		{
+		echo "<select size=1 name=VD_campaign id=VD_campaign onFocus=\"login_allowable_campaigns()\">\n";
+		echo "<option value=\"\">-- No Password Specified --</option>\n";
 		echo "</select>\n";
 		exit;
 		}
@@ -853,7 +860,7 @@ if ($ACTION == 'LogiNCamPaigns')
 
 	if ($show_campaign_list > 0)
 		{
-		$stmt="SELECT campaign_id,campaign_name from vicidial_campaigns where active='Y' $LOGallowed_campaignsSQL order by campaign_id";
+		$stmt="SELECT campaign_id,campaign_name from vicidial_campaigns where active='Y' $LOGallowed_campaignsSQL order by campaign_name,campaign_id";
 		$rslt=mysql_query($stmt, $link);
 			if ($mel > 0) {mysql_error_logging($NOW_TIME,$link,$mel,$stmt,'00006',$user,$server_ip,$session_name,$one_mysql_log);}
 		$camps_to_print = mysql_num_rows($rslt);
@@ -865,7 +872,7 @@ if ($ACTION == 'LogiNCamPaigns')
 		while ($camps_to_print > $o) 
 			{
 			$rowx=mysql_fetch_row($rslt);
-			echo "<option value=\"$rowx[0]\">$rowx[0] - $rowx[1]</option>\n";
+			echo "<option value=\"$rowx[0]\">$rowx[1] ($rowx[0])</option>\n";
 			$o++;
 			}
 		echo "</select>\n";
@@ -2438,7 +2445,8 @@ if ($ACTION == 'manDiaLnextCaLL')
 
 				$val_pause_epoch=0;
 				$val_pause_sec=0;
-				$stmt = "SELECT pause_epoch FROM vicidial_agent_log where agent_log_id='$agent_log_id';";
+                                $new_wait_epoch=$StarTtime;
+				$stmt = "SELECT pause_epoch, wait_epoch FROM vicidial_agent_log where agent_log_id='$agent_log_id';";
 				$rslt=mysql_query($stmt, $link);
 				if ($mel > 0) {mysql_error_logging($NOW_TIME,$link,$mel,$stmt,'00323',$user,$server_ip,$session_name,$one_mysql_log);}
 				if ($DB) {echo "$stmt\n";}
@@ -2448,9 +2456,11 @@ if ($ACTION == 'manDiaLnextCaLL')
 					$row=mysql_fetch_row($rslt);
 					$val_pause_epoch =	$row[0];
 					$val_pause_sec = ($StarTtime - $val_pause_epoch);
+                                        if ( (!eregi("NULL",$row[1])) and ($row[1] > 1000) )
+                                            {$new_wait_epoch = $row[1];}
 					}
 
-				$stmt="UPDATE vicidial_agent_log set pause_sec='$val_pause_sec',wait_epoch='$StarTtime' where agent_log_id='$agent_log_id';";
+				$stmt="UPDATE vicidial_agent_log set pause_sec='$val_pause_sec',wait_epoch='$new_wait_epoch' where agent_log_id='$agent_log_id';";
 					if ($format=='debug') {echo "\n<!-- $stmt -->";}
 				$rslt=mysql_query($stmt, $link);
 					if ($mel > 0) {mysql_error_logging($NOW_TIME,$link,$mel,$stmt,'00324',$user,$server_ip,$session_name,$one_mysql_log);}
@@ -3211,8 +3221,10 @@ if ($ACTION == 'manDiaLlookCaLL')
 		if ($call_good > 0)
 			{
 			$wait_sec=0;
+                        $talk_sec=0;
+                        $talk_epoch = $StarTtime;
 			$dead_epochSQL = '';
-			$stmt = "select wait_epoch,wait_sec,dead_epoch from vicidial_agent_log where agent_log_id='$agent_log_id';";
+			$stmt = "select wait_epoch,wait_sec,dead_epoch,talk_epoch,talk_sec from vicidial_agent_log where agent_log_id='$agent_log_id';";
 			if ($DB) {echo "$stmt\n";}
 			$rslt=mysql_query($stmt, $link);
 				if ($mel > 0) {mysql_error_logging($NOW_TIME,$link,$mel,$stmt,'00053',$user,$server_ip,$session_name,$one_mysql_log);}
@@ -3224,8 +3236,13 @@ if ($ACTION == 'manDiaLlookCaLL')
 				$now_dead_epoch = $row[2];
 				if ( ($now_dead_epoch > 1000) and ($now_dead_epoch < $StarTtime) )
 					{$dead_epochSQL = ",dead_epoch='$StarTtime'";}
+                                if ( (!eregi("NULL",$row[3])) and ($row[3] > 1000) ) # already on a call, do not override wait/talk times!
+                                        {
+                                            $talk_epoch = $row[3];
+                                            $wait_sec = $row[1];
+                                        }
 				}
-			$stmt="UPDATE vicidial_agent_log set wait_sec='$wait_sec',talk_epoch='$StarTtime',lead_id='$lead_id' $dead_epochSQL where agent_log_id='$agent_log_id';";
+			$stmt="UPDATE vicidial_agent_log set wait_sec='$wait_sec',talk_epoch='$talk_epoch',lead_id='$lead_id' $dead_epochSQL where agent_log_id='$agent_log_id';";
 				if ($format=='debug') {echo "\n<!-- $stmt -->";}
 			$rslt=mysql_query($stmt, $link);
 				if ($mel > 0) {mysql_error_logging($NOW_TIME,$link,$mel,$stmt,'00054',$user,$server_ip,$session_name,$one_mysql_log);}
@@ -7852,17 +7869,17 @@ if ($ACTION == 'AGENTSview')
 
 		if ( ($status=='READY') or ($status=='CLOSER') ) 
 			{
-			$statuscolor='#ADD8E6';
+			$statuscolor='#66CCFF';
 			$call_time = ($StarTtime - $call_finish);
 			}
 		if ( ($status=='QUEUE') or ($status=='INCALL') ) 
 			{
-			$statuscolor='#D8BFD8';
+			$statuscolor='#B1FB17';
 			$call_time = ($StarTtime - $call_start);
 			}
 		if ($status=='PAUSED') 
 			{
-			$statuscolor='#F0E68C';
+			$statuscolor='#FF0000';
 			$call_time = ($StarTtime - $call_finish);
 			}
 
@@ -7872,14 +7889,7 @@ if ($ACTION == 'AGENTSview')
 			}
 		else
 			{
-			$Fminutes_M = ($call_time / 60);
-			$Fminutes_M_int = floor($Fminutes_M);
-			$Fminutes_M_int = intval("$Fminutes_M_int");
-			$Fminutes_S = ($Fminutes_M - $Fminutes_M_int);
-			$Fminutes_S = ($Fminutes_S * 60);
-			$Fminutes_S = round($Fminutes_S, 0);
-			if ($Fminutes_S < 10) {$Fminutes_S = "0$Fminutes_S";}
-			$call_time = "$Fminutes_M_int:$Fminutes_S";
+			$call_time = format_callseconds($call_time);
 			}
 
 		if ($comments=='AgentXferViewSelect') 
@@ -7894,7 +7904,7 @@ if ($ACTION == 'AGENTSview')
 		else
 			{
 			echo "<TR BGCOLOR=\"$statuscolor\"><TD><font style=\"font-size: 12px;  font-family: sans-serif;\"> &nbsp; ";
-			echo "$row[0] - $row[2]";
+			echo "$row[2] ($row[0])";
 			echo "&nbsp;</font></TD>";
 			if ($agent_status_view_time > 0)
 				{echo "<TD><font style=\"font-size: 12px;  font-family: sans-serif;\">&nbsp; $call_time &nbsp;</font></TD>";}
@@ -7931,7 +7941,7 @@ if ($ACTION == 'AGENTSview')
 			else
 				{
 				echo "<TR BGCOLOR=\"white\"><TD><font style=\"font-size: 12px;  font-family: sans-serif;\"> &nbsp; ";
-				echo "$user - $full_name";
+				echo "$full_name ($user)";
 				echo "&nbsp;</font></TD>";
 				if ($agent_status_view_time > 0)
 					{echo "<TD><font style=\"font-size: 12px;  font-family: sans-serif;\">&nbsp; 0:00 &nbsp;</font></TD>";}
@@ -7964,7 +7974,7 @@ if ($ACTION == 'AGENTSview')
 			$order_split = explode("_",$AXVSuserORDER[$k]);
 			$i = $order_split[1];
 
-			echo "<TR BGCOLOR=\"$AXVSstatuscolor[$i]\"><TD><font style=\"font-size: $AXVSfontsize; font-family: sans-serif;\"> &nbsp; <a href=\"#\" onclick=\"AgentsXferSelect('$AXVSuser[$i]','AgentXferViewSelect');return false;\">$AXVSuser[$i] - $AXVSfull_name[$i]</a>&nbsp;</font></TD>";
+			echo "<TR BGCOLOR=\"$AXVSstatuscolor[$i]\"><TD><font style=\"font-size: $AXVSfontsize; font-family: sans-serif;\"> &nbsp; <a href=\"#\" onclick=\"AgentsXferSelect('$AXVSuser[$i]','AgentXferViewSelect');return false;\">$AXVSfull_name[$i] ($AXVSuser[$i])</a>&nbsp;</font></TD>";
 			if ($agent_status_view_time > 0)
 				{echo "<TD><font style=\"font-size: $AXVSfontsize;  font-family: sans-serif;\">&nbsp; $AXVScall_time[$i] &nbsp;</font></TD>";}
 			echo "</TR>";
@@ -7982,7 +7992,7 @@ if ($ACTION == 'AGENTSview')
 		}
 
 	echo "</TABLE><BR>\n";
-	echo "<font style=\"font-size:10px;font-family:sans-serif;\"><font style=\"background-color:#ADD8E6;\"> &nbsp; &nbsp;</font>-READY &nbsp; <font style=\"background-color:#D8BFD8;\">&nbsp; &nbsp;</font>-INCALL &nbsp; <font style=\"background-color:#F0E68C;\"> &nbsp; &nbsp;</font>-PAUSED &nbsp;\n";
+	echo "<font style=\"font-size:10px;font-family:sans-serif;\"><font style=\"background-color:#66CCFF;\"> &nbsp; &nbsp;</font>-READY &nbsp; <font style=\"background-color:#B1FB17;\">&nbsp; &nbsp;</font>-INCALL &nbsp; <font style=\"background-color:#FF0000;\"> &nbsp; &nbsp;</font>-PAUSED &nbsp;\n";
 	if (ereg("NOT-LOGGED-IN-AGENTS",$agent_status_viewable_groups))
 		{echo "<font style=\"background-color:#FFFFFF;\"> &nbsp; &nbsp;</font>-LOGGED-OUT &nbsp;\n";}
 
@@ -8208,10 +8218,10 @@ if ($ACTION == 'CALLLOGview')
 		{echo "<a href=\"#\" onclick=\"VieWCalLLoG('$next_day_date','');return false;\"> $next_day_date > </a> &nbsp; &nbsp; ";}
 	echo "<input type=text name=calllogdate id=calllogdate value=\"$date\" size=12 maxlength=10> ";
 	echo "<a href=\"#\" onclick=\"VieWCalLLoG('','form');return false;\">GO</a> &nbsp;  &nbsp; &nbsp; ";
-	echo "<a href=\"#\" onclick=\"hideDiv('CalLLoGDisplaYBox');return false;\">close</a>";
+	##echo "<a href=\"#\" onclick=\"hideDiv('CalLLoGDisplaYBox');return false;\">close</a>";
 	echo "</B></font>\n";
 	echo "<BR>\n";
-	echo "<TABLE CELLPADDING=0 CELLSPACING=1 BORDER=0 WIDTH=$stage>";
+	echo "<TABLE CELLPADDING=0 CELLSPACING=1 BORDER=0>";
 	echo "<TR>";
 	echo "<TD BGCOLOR=\"#CCCCCC\"><font style=\"font-size:10px;font-family:sans-serif;\"><B> &nbsp; # &nbsp; </font></TD>";
 	echo "<TD BGCOLOR=\"#CCCCCC\"><font style=\"font-size:11px;font-family:sans-serif;\"><B> &nbsp; DATE/TIME &nbsp; </font></TD>";
@@ -8242,10 +8252,10 @@ if ($ACTION == 'CALLLOGview')
 		$ALLstart_epoch[$g] =	$row[0];
 		$ALLcall_date[$g] =		$row[1];
 		$ALLcampaign_id[$g] =	$row[2];
-		$ALLlength_in_sec[$g] =	$row[3];
+		$ALLlength_in_sec[$g] =	format_callseconds($row[3]);
 		$ALLstatus[$g] =		$row[4];
 		$ALLphone_code[$g] =	$row[5];
-		$ALLphone_number[$g] =	$row[6];
+		$ALLphone_number[$g] =	format_phone($row[6]);
 		$ALLlead_id[$g] =		$row[7];
 		$ALLhangup_reason[$g] =	$row[8];
 		$ALLalt_dial[$g] =		$row[9];
@@ -8277,9 +8287,10 @@ if ($ACTION == 'CALLLOGview')
 		$ALLcampaign_id[$g] =	$row[2];
 		$ALLlength_in_sec[$g] =	($row[3] - $row[9]);
 		if ($ALLlength_in_sec[$g] < 0) {$ALLlength_in_sec[$g]=0;}
+                $ALLlength_in_sec[$g] = format_callseconds($ALLlength_in_sec[$g]);
 		$ALLstatus[$g] =		$row[4];
 		$ALLphone_code[$g] =	$row[5];
-		$ALLphone_number[$g] =	$row[6];
+		$ALLphone_number[$g] =	format_phone($row[6]);
 		$ALLlead_id[$g] =		$row[7];
 		$ALLhangup_reason[$g] =	$row[8];
 		$ALLalt_dial[$g] =		"MAIN";
@@ -8307,9 +8318,9 @@ if ($ACTION == 'CALLLOGview')
 		$i = $sort_split[1];
 
 		if (eregi("1$|3$|5$|7$|9$", $u))
-			{$bgcolor='bgcolor="#B9CBFD"';} 
+			{$bgcolor='bgcolor="#ffffff"';} 
 		else
-			{$bgcolor='bgcolor="#9BB9FB"';}
+			{$bgcolor='bgcolor="#dfdfdf"';}
 
 		$u++;
 		echo "<tr $bgcolor>";
@@ -8317,7 +8328,7 @@ if ($ACTION == 'CALLLOGview')
 		echo "<td align=right><font size=2>$ALLcall_date[$i]</td>";
 		echo "<td align=right><font size=2> $ALLlength_in_sec[$i]</td>\n";
 		echo "<td align=right><font size=2> $ALLstatus[$i]</td>\n";
-		echo "<td align=right><font size=2> $ALLphone_code[$i] $ALLphone_number[$i] </td>\n";
+		echo "<td align=right><font size=2> $ALLphone_number[$i] </td>\n";
 		echo "<td align=right><font size=2> $Allfirst_name[$i] $Alllast_name[$i] </td>\n";
 		echo "<td align=right><font size=2> $ALLcampaign_id[$i] </td>\n";
 		echo "<td align=right><font size=2> $ALLin_out[$i] </td>\n";
@@ -8330,7 +8341,7 @@ if ($ACTION == 'CALLLOGview')
 
 	echo "</TABLE>";
 	echo "<BR>";
-	echo "<a href=\"#\" onclick=\"CalLLoGVieWClose();return false;\">Close Call Log</a>";
+	echo "<a href=\"#\" onclick=\"CalLLoGVieWClose();return false;\" class=\"button blue\">Close Call Log</a>";
 	echo "</CENTER>";
 	}
 
@@ -8603,7 +8614,7 @@ if ($ACTION == 'SEARCHRESULTSview')
 					$ALLsort[$g] =			"$row[0]-----$g";
 					$ALLname[$g] =			"$row[0] $row[1]";
 					$ALLphone_code[$g] =	$row[2];
-					$ALLphone_number[$g] =	$row[3];
+					$ALLphone_number[$g] =	format_phone($row[3]);
 					$ALLstatus[$g] =		$row[4];
 					$ALLcall_date[$g] =		$row[5];
 					$ALLlead_id[$g] =		$row[6];
@@ -8625,15 +8636,15 @@ if ($ACTION == 'SEARCHRESULTSview')
 					$i = $sort_split[1];
 
 					if (eregi("1$|3$|5$|7$|9$", $u))
-						{$bgcolor='bgcolor="#B9CBFD"';} 
+						{$bgcolor='bgcolor="#ffffff"';} 
 					else
-						{$bgcolor='bgcolor="#9BB9FB"';}
+						{$bgcolor='bgcolor="#dfdfdf"';}
 
 					$u++;
 					echo "<tr $bgcolor>";
 					echo "<td><font size=1>$u</td>";
 					echo "<td align=right><font size=2>$ALLname[$i] </td>\n";
-					echo "<td align=right><font size=2> $ALLphone_code[$i] $ALLphone_number[$i] </td>\n";
+					echo "<td align=right><font size=2> $ALLphone_number[$i] </td>\n";
 					echo "<td align=right><font size=2> $ALLstatus[$i] </td>\n";
 					echo "<td align=right><font size=2> $ALLcall_date[$i] </td>\n";
 					echo "<td align=right><font size=2> $ALLcity[$i] </td>\n";
@@ -8688,7 +8699,7 @@ if ($ACTION == 'SEARCHRESULTSview')
 if ($ACTION == 'LEADINFOview')
 	{
 	if (strlen($lead_id) < 1)
-		{echo "ERROR: no Lead ID";}
+		{echo "We're sorry, but you must be on a call to view the notes associated with the caller.";}
 	else
 		{
 		$hide_dial_links=0;
@@ -8709,7 +8720,7 @@ if ($ACTION == 'LEADINFOview')
 			if ($cb_to_print > 0)
 				{
 				$row=mysql_fetch_row($rslt);
-				echo "<TABLE CELLPADDING=0 CELLSPACING=1 BORDER=0 WIDTH=500>";
+				echo "<TABLE CELLPADDING=0 CELLSPACING=1 BORDER=0>";
 				echo "<tr bgcolor=white><td ALIGN=right><font size=2>Callback Status: &nbsp; </td><td ALIGN=left><font size=2>$row[0]</td></tr>";
 				echo "<tr bgcolor=white><td ALIGN=right><font size=2>Callback Lead Status: &nbsp; </td><td ALIGN=left><font size=2>$row[7]</td></tr>";
 				echo "<tr bgcolor=white><td ALIGN=right><font size=2>Callback Entry Time: &nbsp; </td><td ALIGN=left><font size=2>$row[1]</td></tr>";
@@ -8805,6 +8816,7 @@ if ($ACTION == 'LEADINFOview')
 				### get current gmt_offset of the phone_number
 				$postalgmtNOW = '';
 				$USarea = substr($phone_number, 0, 3);
+                                $phone_number = format_phone($phone_number);
 				$PHONEgmt_offset = lookup_gmt($phone_code,$USarea,$state,$LOCAL_GMT_OFF_STD,$Shour,$Smin,$Ssec,$Smon,$Smday,$Syear,$postalgmtNOW,$postal_code);
 				$PHONEdialable = dialable_gmt($DB,$link,$local_call_time,$PHONEgmt_offset,$state);
 
@@ -8853,7 +8865,7 @@ if ($ACTION == 'LEADINFOview')
 			$INFOout .= "<tr bgcolor=white><td ALIGN=right><font size=2>Timezone: &nbsp; </td><td ALIGN=left><font size=2>$row[3]</td></tr>";
 			$INFOout .= "<tr bgcolor=white><td ALIGN=right><font size=2>Called Since Last Reset: &nbsp; </td><td ALIGN=left><font size=2>$row[4]</td></tr>";
 			$INFOout .= "<tr bgcolor=white><td ALIGN=right><font size=2>$label_phone_code: &nbsp; </td><td ALIGN=left><font size=2>$row[5]</td></tr>";
-			$INFOout .= "<tr bgcolor=white><td ALIGN=right><font size=2>$label_phone_number: &nbsp; </td><td ALIGN=left><font size=2>$row[6] - &nbsp; &nbsp; &nbsp; &nbsp; ";
+			$INFOout .= "<tr bgcolor=white><td ALIGN=right><font size=2>$label_phone_number: &nbsp; </td><td ALIGN=left><font size=2>$phone_number - &nbsp; &nbsp; &nbsp; &nbsp; ";
 			if ($hide_dial_links < 1)
 				{$INFOout .= "<a href=\"#\" onclick=\"NeWManuaLDiaLCalL('CALLLOG',$row[5], $row[6], $lead_id);return false;\">DIAL</a>";}
 			$INFOout .= "</td></tr>";
@@ -8951,7 +8963,7 @@ if ($ACTION == 'LEADINFOview')
 		$NOTESout='';
 		if ($search != 'logfirst')
 			{$NOTESout .= "<CENTER>CALL LOG FOR THIS LEAD:<br>\n";}
-		$NOTESout .= "<TABLE CELLPADDING=0 CELLSPACING=1 BORDER=0 WIDTH=$stage>";
+		$NOTESout .= "<TABLE CELLPADDING=0 CELLSPACING=1 BORDER=0>";
 		$NOTESout .= "<TR>";
 		$NOTESout .= "<TD BGCOLOR=\"#CCCCCC\"><font style=\"font-size:10px;font-family:sans-serif;\"><B> &nbsp; # &nbsp; </font></TD>";
 		$NOTESout .= "<TD BGCOLOR=\"#CCCCCC\"><font style=\"font-size:11px;font-family:sans-serif;\"><B> &nbsp; DATE/TIME &nbsp; </font></TD>";
@@ -8985,7 +8997,7 @@ if ($ACTION == 'LEADINFOview')
 			$ALLlength_in_sec[$g] =	$row[3];
 			$ALLstatus[$g] =		$row[4];
 			$ALLphone_code[$g] =	$row[5];
-			$ALLphone_number[$g] =	$row[6];
+			$ALLphone_number[$g] =	format_phone($row[6]);
 			$ALLlead_id[$g] =		$row[7];
 			$ALLhangup_reason[$g] =	$row[8];
 			$ALLalt_dial[$g] =		$row[9];
@@ -9036,7 +9048,7 @@ if ($ACTION == 'LEADINFOview')
 			if ($ALLlength_in_sec[$g] < 0) {$ALLlength_in_sec[$g]=0;}
 			$ALLstatus[$g] =		$row[4];
 			$ALLphone_code[$g] =	$row[5];
-			$ALLphone_number[$g] =	$row[6];
+			$ALLphone_number[$g] =	format_phone($row[6]);
 			$ALLlead_id[$g] =		$row[7];
 			$ALLhangup_reason[$g] =	$row[8];
 			$ALLuniqueid[$g] =		$row[10];
@@ -9082,9 +9094,9 @@ if ($ACTION == 'LEADINFOview')
 			$i = $sort_split[1];
 
 			if (eregi("1$|3$|5$|7$|9$", $u))
-				{$bgcolor='bgcolor="#B9CBFD"';} 
+				{$bgcolor='bgcolor="#ffffff"';} 
 			else
-				{$bgcolor='bgcolor="#9BB9FB"';}
+				{$bgcolor='bgcolor="#dfdfdf"';}
 
 			$u++;
 			$NOTESout .= "<tr $bgcolor>";
@@ -9093,7 +9105,7 @@ if ($ACTION == 'LEADINFOview')
 			$NOTESout .= "<td align=right><font size=2> $ALLuser[$i]</td>\n";
 			$NOTESout .= "<td align=right><font size=2> $ALLlength_in_sec[$i]</td>\n";
 			$NOTESout .= "<td align=right><font size=2> $ALLstatus[$i]</td>\n";
-			$NOTESout .= "<td align=right><font size=2> $ALLphone_code[$i] $ALLphone_number[$i] </td>\n";
+			$NOTESout .= "<td align=right><font size=2> $ALLphone_number[$i] </td>\n";
 			$NOTESout .= "<td align=right><font size=2> $ALLcampaign_id[$i] </td>\n";
 			$NOTESout .= "<td align=right><font size=2> $ALLin_out[$i] </td>\n";
 			$NOTESout .= "<td align=right><font size=2> $ALLalt_dial[$i] </td>\n";
@@ -9204,7 +9216,7 @@ if ($ACTION == 'CalLBacKLisT')
 		{$campaignCBsql = "and campaign_id='$campaign'";}
 	else
 		{$campaignCBsql = '';}
-	$stmt = "select callback_id,lead_id,campaign_id,status,entry_time,callback_time,comments from vicidial_callbacks where recipient='USERONLY' and user='$user' $campaignCBsql and status NOT IN('INACTIVE','DEAD') order by callback_time;";
+	$stmt = "select callback_id,lead_id,campaign_id,status,entry_time,callback_time,comments from vicidial_callbacks where recipient='USERONLY' and user='$user' $campaignCBsql and status NOT IN('INACTIVE','DEAD') order by callback_time desc;";
 	if ($DB) {echo "$stmt\n";}
 	$rslt=mysql_query($stmt, $link);
 				if ($mel > 0) {mysql_error_logging($NOW_TIME,$link,$mel,$stmt,'00178',$user,$server_ip,$session_name,$one_mysql_log);}
@@ -9340,5 +9352,25 @@ function hangup_cause_description($code)
 	else { return "Unidentified Hangup Cause Code."; }
 	}
 
+##### format call seconds - user friendly
+function format_callseconds($call_time)
+{
+    $Fminutes_M = ($call_time / 60);
+    $Fminutes_M_int = floor($Fminutes_M);
+    $Fminutes_M_int = intval("$Fminutes_M_int");
+    $Fminutes_S = ($Fminutes_M - $Fminutes_M_int);
+    $Fminutes_S = ($Fminutes_S * 60);
+    $Fminutes_S = round($Fminutes_S, 0);
+    if ($Fminutes_S < 10) {$Fminutes_S = "0$Fminutes_S";}
+    $call_time = "$Fminutes_M_int:$Fminutes_S";
+    
+    return $call_time;
+}
+
+##### very simple function to format the phone number provided into its US equiv
+function format_phone ($phone)
+{
+    return preg_replace("/([0-9a-zA-Z]{3})([0-9a-zA-Z]{3})([0-9a-zA-Z]{4})/", "($1) $2-$3", $phone);
+}
 
 ?>

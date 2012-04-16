@@ -1,7 +1,163 @@
-body
+/* @group resets and elements */
+* { margin: 0; padding: 0; }
+
+html { height: 101%; font-family: “Helvetica Neue”, Arial, Helvetica, sans-serif; background: #fff; }
+body { font-family: Helvetica, Arial, sans-serif; }
+
+img { border: 0;}
+
+a { color: #3c86b7; text-decoration: none; }
+a:hover { cursor: pointer; }
+
+ul { line-height: 120%; }
+
+p { font-size: 1.2em; line-height: 1.4em; font-family: Arial, sans-serif; color: #333; margin-bottom: 15px; }
+h1 { font-family: Helvetica, Arial, Verdana, sans-serif; color: #757575; font-weight: bold; font-size: 1.7em; line-height: 2.0em; }
+h2 { font-family: Georgia, Tahoma, sans-serif;font-size: 1.4em; letter-spacing: -0.04em; line-height: 1.8em; }
+h3 { color: #115a9f; font-weight: normal; font-size: 1.3em; line-height: 1.6em;  }
+h4 { color: #727272; font-family: Arial, Tahoma, sans-serif; font-size: 1.1em; line-height: 1.3em; margin-bottom: 0px; }
+
+/* @group core */
+.wrapper { width: 850px; overflow: hidden; margin: 0 auto; background: none; }
+
+#content { display: block; width: 820px; margin: 0 auto; padding: 10px; }
+
+#right { display: block; width: 560px; float: left; overflow: hidden; margin-left: 5px; }
+#left { display: block; width: 240px; float: left; overflow: hidden; }
+
+/* @group navigation */
+nav { width: auto; background: #eee; height: 60px; border-bottom: 1px solid #dadada; margin-bottom: 30px; }
+
+ul#n { width: 850px; margin: 0 auto; display: block; list-style: none; }
+ul#n li:first-child {float: left;}
+ul#n li { float: right;}
+/* ul#n li a { display: block; padding: 0 11px; color: #969696; font-size: 15px; font-weight: bold; text-shadow: 0px 1px 1px #fff; } */
+
+#userStats, #notifications { display: block; width: auto; background-color: #f9f9f9; border: 1px solid #ccc; -moz-border-radius: 5px; -webkit-border-radius: 5px; border-radius: 5px; padding: 12px; behavior: url(PIE.php);}
+#userStats {margin-bottom: 5px;}
+#notifications { height:20px; }
+
+#userStats .pic { height: 160px; widows: 160px; float: left; display: block; margin-right: 20px; text-align: center;}
+#userStats .pic img { padding: 7px; background: #fff; border: 1px solid #ccc; margin-bottom: 5px; }
+#livecall { font-size: 1.2em; font-weight: bold; text-transform: uppercase;}
+.on { color: green;}
+.off { color: #808080;}
+.dead { color: red;}
+
+#userStats .data { float: left; display: block; position:  relative; width: 600px; /*height: 166px;*/ padding: 4px; padding-left: 15px; background: #e6e6e6; overflow:  hidden; box-sizing: border-box; -moz-box-sizing: border-box; behavior: url(PIE.php);}
+#userStats .data h1 { color: #474747; line-height: 1.6em; text-shadow: 0px 1px 1px #fff; behavior: url(PIE.php);}
+#userStats .data h3 { color: #666; line-height: 0.9em; margin-bottom: 5px; }
+#userStats .data h4 { font-size: 1.2em; line-height: 1.3em; }
+
+#userStats .data .actionLinks { position: absolute; right: 6px; top: 8px; }
+#userStats .data .actionLinks a img { margin-right: 5px; }
+
+#userStats .data .sep { clear: both; margin-top: 0px; width: 590px; height: 1px; border-bottom: 1px solid #ccc; margin-bottom: 0; }
+#userStats .data ul.numbers { list-style: none; width: 590px; padding-top: 7px; margin-top: 0; border-top: 1px solid #fff; color: #474747; }
+#userStats .data ul.numbers li { width: 135px; float: left; display: block; padding-left: 8px; height: 50px; border-right: 1px dotted #909090; text-transform: uppercase; }
+#userStats .data ul.numbers li strong { color: #7b7b7b; display: block; font-size: 1.4em; line-height: .9em; font-weight: bold; }
+
+#notifications { margin-top: 10px; }
+
+/* @group left */
+#left .gcontent { display: block; margin-bottom: 10px; }
+#left .gcontent .head { background: #589fc6; border: 1px solid #3e82a7; padding-left: 8px; }
+#left .gcontent .head h1 { color: #fafcfd; font-weight: bold; font-size: 1.4em; }
+
+#left .gcontent .boxy { overflow: hidden; border-radius: 0px 0px 5px 5px; border: 1px solid #ccc; border-top: 0px; padding: 10px 8px; background: #f9f9f9; behavior: url(PIE.php);}
+#left .gcontent .boxy span.action { font-size: 1.0em; float: left; padding-bottom: 10px; width: 200px;} /**may need to set width to fix for IE to avoid wrapping text**/
+#left .gcontent .boxy span a img { vertical-align: middle;}
+#left .gcontent .boxy span a span { padding-left: 5px;}
+#left .gcontent .boxy span a { text-decoration: none;}
+
+#left .gcontent .boxy .friendslist { display: block; margin-bottom: 15px; }
+#left .gcontent .boxy .friend { border-top: 1px solid #ccc; float: left; height: 40px; padding: 5px 5px 5px 4px; width: 100px; }
+#left .gcontent .boxy .friend img { border: 1px solid #ccc; float: left; padding: 2px; background: #fff; margin-right: 4px; }
+#left .gcontent .boxy .friend .friendly { position: relative; top: 16px; font-size: 1.2em; }
+
+#right span.action { border: 1px solid #ccc; border-radius: 5px; display: inline-block; font-size: 1.0em; float: left; padding: 15px; height: 79px; width: 109px;
+margin: 10px; text-align: center; overflow: hidden; behavior: url(PIE.php);} /** height here causes mute button to be hidden **/
+
+#right span.action img {  }
+#right span.notice { float: left; display: inline-block; padding: 15px; }
+
+.promptBox {position:absolute;top:1px;width:825px;height:980px;overflow: scroll; border-radius: 5px 5px 5px 5px; border: 1px solid #ccc; padding: 10px 8px; background: #f9f9f9; behavior: url(PIE.php);}
+.promptBox .centerTable { margin-top: 35%; margin-left: 35%; }
+    
+/** @group clearfix **/
+.clearfix:after { content: "."; display: block; clear: both; visibility: hidden; line-height: 0; height: 0; }
+.clearfix { display: inline-block; }
+ 
+html[xmlns] .clearfix { display: block; }
+* html .clearfix { height: 1%; }
+
+.nobrdr { border: 0px !important; }
+
+#x_logo{height: 64px;}
+#DiaLControl, #LogOffControl
 {
-    font: 12px 'Lucida Sans Unicode', 'Trebuchet MS', Arial, Helvetica;    
-    margin: 0;   
+    height: 50px;
+    /*width: 115px;*/
+    display: inline-block;
+    text-align: center;
+    text-decoration: none;
+}
+
+#DiaLControl a, #LogOffControl a{
+    float: left;
+    height: 50px;
+    width:  60px;
+    display: inline-block;
+    text-align: center;
+    text-decoration: none;
+}
+
+#DiaLControl a img, #LogOffControl a img{
+    height:  58px;
+    margin-bottom: -15px;
+    
+}
+
+#DiaLControl a span, #LogOffControl a span{
+    /* all rules below are specific to ie9 and below */
+    position: absolute\9;
+    margin-left: -55px\9; 
+    margin-top: 45px\9;
+}
+
+#ParkCounterSpan
+{
+    margin-left: 50px;
+    color: red;
+}
+#ParkCounterSpan2
+{
+    color: red;
+}
+#MainStatuSSpan
+{
+    float: left;
+}
+#MainPanelCustInfo input, #MainPanelCustInfo select, .input
+{
+    background: #f1f1f1;
+    padding: 2px 2px 2px 5px;
+    margin: 0 0 5px 0;
+    width: 170px;
+    border: 1px solid #ccc;
+    font-size: 12pt;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    border-radius: 5px;
+    -moz-box-shadow: 0 1px 1px #ccc inset, 0 1px 0 #fff;
+    -webkit-box-shadow: 0 1px 1px #ccc inset, 0 1px 0 #fff;
+    box-shadow: 0 1px 1px #ccc inset, 0 1px 0 #fff;
+    behavior: url(PIE.php);
+}
+
+#ScriptContents
+{
+    width: 540px;
 }
 
 /*---------------------------
@@ -41,6 +197,7 @@ body
           0 4px 0 rgba(0, 0, 0, .2),
           0 6px 0 #fff,  
           0 7px 0 rgba(0, 0, 0, .2);
+    behavior: url(PIE.php);
 }
 
 #loginBox
@@ -68,6 +225,7 @@ body
     -moz-box-shadow: 0 0 0 1px #fff;
     -webkit-box-shadow: 0 0 0 1px #fff;
     box-shadow: 0 0 0 1px #fff;
+    behavior: url(PIE.php);
 }
 
 /*--------------------*/
@@ -82,6 +240,7 @@ body
     letter-spacing: 4px;
     font: normal 26px/1 Verdana, Helvetica;
     position: relative;
+    behavior: url(PIE.php);
 }
 
 #loginBox h1:after, #loginBox h1:before
@@ -103,6 +262,7 @@ body
     background-image: -o-linear-gradient(left, #777, #fff);
     background-image: linear-gradient(left, #777, #fff);      
     right: 0;
+    behavior: url(PIE.php);
 }
 
 #loginBox h1:before
@@ -114,6 +274,7 @@ body
     background-image: -o-linear-gradient(right, #777, #fff);
     background-image: linear-gradient(right, #777, #fff);
     left: 0;
+    behavior: url(PIE.php);
 }
 
 /*--------------------*/
@@ -145,6 +306,7 @@ body
     -moz-box-shadow: 0 1px 1px #ccc inset, 0 1px 0 #fff;
     -webkit-box-shadow: 0 1px 1px #ccc inset, 0 1px 0 #fff;
     box-shadow: 0 1px 1px #ccc inset, 0 1px 0 #fff;
+    behavior: url(PIE.php);
 }
 
 #loginBox #VD_login
@@ -173,9 +335,15 @@ body
     background-position: 5px -302px !important;
     height: 30px;
     width: 333px;
+    margin-left: 10px;
     margin-right: 0px;
+    padding: 4px;
+    float: left;
 }
-
+#loginBox #inputs #LogiNReseT select
+{
+    float: right;
+}
 #loginBox #inputs input:focus, #TransferMain input:focus
 {
     background-color: #fff;
@@ -184,12 +352,13 @@ body
     -moz-box-shadow: 0 0 0 1px #e8c291 inset;
     -webkit-box-shadow: 0 0 0 1px #e8c291 inset;
     box-shadow: 0 0 0 1px #e8c291 inset;
+    behavior: url(PIE.php);
 }
 
 /*--------------------*/
 #loginBox #actions
 {
-    margin: 5px 0 0 18px;
+    margin: 5px 0 0 0px;
 }
 
 #loginBox #submit
@@ -199,6 +368,7 @@ body
     padding: 0;
     width: 120px;
     cursor: pointer;
+    margin-left: 11px;
     /*font: bold 15px Arial, Helvetica;
     color: #8f5a0a;*/
 }
@@ -228,7 +398,7 @@ body
 .button
 {
     text-decoration: none;
-    font: bold 1.5em 'Trebuchet MS',Arial, Helvetica; /*Change the em value to scale the button*/
+    font: bold 1.2em 'Trebuchet MS',Arial, Helvetica; /*Change the em value to scale the button*/
     display: inline-block;
     text-align: center;
     color: #fff;
@@ -244,12 +414,14 @@ body
     box-shadow: 0 0 .05em rgba(0,0,0,0.4);
     -moz-box-shadow: 0 0 .05em rgba(0,0,0,0.4);
     -webkit-box-shadow: 0 0 .05em rgba(0,0,0,0.4);
+    behavior: url(PIE.php);
 }
 .button:hover
 {
     box-shadow: 0 0 .1em rgba(0,0,0,0.4);
     -moz-box-shadow: 0 0 .1em rgba(0,0,0,0.4);
     -webkit-box-shadow: 0 0 .1em rgba(0,0,0,0.4);
+    behavior: url(PIE.php);
 }
 .button:active
 {
@@ -261,12 +433,14 @@ body
     background: -webkit-gradient(linear, left top, left bottom, from(#81a8cb), to(#4477a1) );
     background: -moz-linear-gradient(-90deg, #81a8cb, #4477a1);
     filter:  progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr='#81a8cb', endColorstr='#4477a1');
+    behavior: url(PIE.php);
 }
 .blue:hover {
     background: #81a8cb;
     background: -webkit-gradient(linear, left top, left bottom, from(#4477a1), to(#81a8cb) );
     background: -moz-linear-gradient(-90deg, #4477a1, #81a8cb);
     filter:  progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr='#4477a1', endColorstr='#81a8cb');
+    behavior: url(PIE.php);
 }
 .blueinactive {
     background: #4477a1;
@@ -274,288 +448,23 @@ body
     background: -moz-linear-gradient(-90deg, #81a8cb, #4477a1);
     filter:  progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr='#81a8cb', endColorstr='#4477a1');
     opacity: .25;
+    filter: alpha(opacity = 25);
+
+    behavior: url(PIE.php);
 }
 /*---------------------------
  END generic button styles
  --------------------------*/
 
-
-/*-----------------------------------
-  BEGIN Main interface toolbar styles
-  ----------------------------------*/
-#x_toolbar
-{
-    height: 60px;
-    width: 100%;
-    margin: 0;
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: 9;
-}
-
-#x_toolbar #x_logo
-{
-    float: left;
-    height: 60px;
-}
-
-#x_toolbar #x_actionArea, #x_toolbar #x_formsArea
-{
-    float: left;
-    height: 100%;
-    margin-left: 4%;
-    margin-top: 5px;
-}
-
-#x_toolbar #x_actionArea a, #x_toolbar #x_formsArea a, #x_toolbar #x_logoff_, #x_toolbar #x_logoutArea #x_settings
-{
-    height: 50px;
-    width: 60px;
-    display: inline-block;
-    text-align: center;
-    text-decoration: none;
-}
-
-#x_toolbar #x_actionArea a:hover, #x_toolbar #x_formsArea a:hover, #x_toolbar #x_logoff_:hover, #x_toolbar #x_logoutArea #x_settings:hover
-{
-    
-}
-
-#x_toolbar #x_formsArea img, #x_toolbar #x_actionArea img, #x_toolbar #x_logoff_ img, #x_toolbar #x_logoutArea #x_settings img
-{
-    height: 50px;
-    margin-bottom: -12px;
-}
-
-#x_toolbar #x_actionArea #ivrParkControl img
-{
-    height: 38px;
-    padding: 0px 12px 12px 12px;
-}
-
-#x_toolbar #x_actionArea a span, #x_toolbar #x_formsArea a span, #x_toolbar #x_logoff_ span, #x_toolbar #x_logoutArea #x_settings span
-{
-    color: #797979;
-}
-
-#x_toolbar #x_logoutArea
-{
-    float: right;
-    margin-right: 20px;
-    margin-top: 5px;
-}
-
-#x_toolbar #x_logoff
-{
-    float: right;
-}
-
-#x_toolbar #x_userInfo
-{
-    visibility: visible;
-    height: 200px;
-    width: 300px;
-    margin: 0;
-    position: relative;
-    top: 68px;
-    z-index: 100;
-    font-size: 10pt;
-    display: inline-block;
-    
-    -moz-border-radius: 5px;
-    -webkit-border-radius: 5px;
-    border-radius: 5px;
-    
-    border: 1px solid #ccc;
-}
-
-#x_toolbar #x_userInfo span 
-{
-    font: 12px 'Lucida Sans Unicode', 'Trebuchet MS', Arial, Helvetica;
-    margin: auto;
-    
-}
-
-/*-----------------------------------
-  END Main interface toolbar styles
-  ----------------------------------*/
-
-/*-------------------------------------------------------------
- BEGIN styles for hover card functionality on menubar commands
- ------------------------------------------------------------*/
-.hovercard
-{
-   position: relative;
-   cursor: default;
-   display: inline;
-   text-decoration: none;
-   color: #0066aa;
-   outline: none;
-   
-}
-.hovercard .main
-{
-   visibility: hidden;   
-   position: absolute; 
-   color:#666;
-   top: 23px;
-   left: 15%;
-   z-index: 9999;
-   /*280px;*/
-   min-height:100px;
-   margin-left: -150px;
-   border: 1px solid #555;
-   background-color: #fff; 
-   color:#777;   
-   font-size:12.5px;
-   display:inline;
-   font-family:arial,verdana, helvetica, sans-serif;
-   padding:0;
-   
-   box-shadow:1px 2px 5px #888;
-}
-.hovercard:hover
-{
-   border: 0;
-}
-.hov{
-   cursor:pointer
-}
-
-.hovercard:hover .main
-{
-   visibility: visible;
-}
-.hovercard .main:before,
-.hovercard .main:after
-{
-   content: "";
-   position: absolute;
-   z-index: 1000;
-   top: -7px;
-   left: 60%;
-   margin-left: -8px;  
-   border-bottom: 7px solid #efefef;
-   border-left: 7px solid transparent;
-   border-right: 7px solid transparent;   
-   border-top: 0;  
-}
-.hovercard .main:before
-{
-   border-bottom-color: #555;
-   top: -8px;
-}
-/**CSS FOR THE HTML WITHIN THE HOVERCARD**/
-.title{
-   font-size:17px;
-   color:#0066aa;
-   font-weight:bold;
-   margin:3px 0
-}
-.subtitle{
-   font-size:13px;
-   color:#0066aa;
-   font-weight:normal;
-   margin:0
-}
-.child{
-   font-size:12px;
-}
-.child span a
-{
-    padding: 0px 0px 5px 8px;
-}
-.brook{
-   display:block;
-   padding:6px 8px;
-   width:250px
-}
-.top{
-   background-color:#efefef;
-   border-bottom:1px solid #999;
-   padding:5px 6px;
-   color:#222;
-   margin:0;
-   display:block;
-   clear:both
-}
-a{
-   color:#0066aa;
-   text-decoration:none
-}
-a:hover{
-   text-decoration:underline
-}
-.left{
-   display:inline-block;
-   float:left;
-   width:70px
-}
-.right{
-   display:inline-block;
-   float:left;
-   padding:2px;
-   width:165px
-}
-.bottom{
-    display:inline-block;
-    float: left;
-    padding: 2px;
-    width: 245px;
-}
-.hov{
-   color:#cc0000;
-}
-/*-----------------------------------------------------------
- END styles for hover card functionality on menubar commands
- -------------------------------------------------------*/
-
-
-/*-------------------------------------------------------------------
- BEGIN styles for resume, pause, manual dial buttons and their labels
- -------------------------------------------------------------------*/
-#DiaLControl a, #RecorDControl a, #WebFormSpan a, #WebFormSpanTwo a
-{
-    height: 50px;
-    width: 60px;
-    display: inline-block;
-    text-align: center;
-    text-decoration: none;
-}
-
-#DiaLControl img, #RecorDControl img, #WebFormSpan img, #WebFormSpanTwo img
-{
-    height: 50px;
-    margin-bottom: -12px;
-}
-
-#RecorDControl img, #WebFormSpan img, #WebFormSpanTwo img
-{
-    margin-bottom: 0px;
-    height: 44px;
-}
-
-#DiaLControl span, #RecorDControl span, #WebFormSpan span, #WebFormSpanTwo span
-{
-    color: #797979;
-}
-/*-------------------------------------------------------------------
- END styles for resume, pause, manual dial buttons and their labels
- -------------------------------------------------------------------*/
-
-
 /*------------------------------------------------------------------------------------
  BEGIN styles for transfer conference options (some settings inherited from #loginBox)
  -------------------------------------------------------------------------------------*/
-#TransferMain
-{
-    width: 245px;
-}
 
-#TransferMain #x-transfer-options, #TransferMain #x-transfer-inactive, #TransferMain #x-transfer-active, #TransferMain #x-transfer-local
+#TransferMain #x-transfer-options,
+#TransferMain #x-transfer-inactive,
+#TransferMain #x-transfer-active,
+#TransferMain #x-transfer-local
 {
-    width: 243px;
     display: inline-block;
     text-align: left;
     -moz-border-radius: 5px;
@@ -564,19 +473,31 @@ a:hover{
     border: 1px solid;
     padding: 5px;
     margin-bottom: 5px;
+    /*behavior: url(PIE.php);*/
 }
 
-#TransferMain #x-transfer-options span, #TransferMain #x-transfer-inactive span, #TransferMain #x-transfer-active span, #TransferMain #x-transfer-local span
+/* override PIE for transfer number field  for Ie9 & below */
+#TransferMain input, #TransferMain input:focus, #loginBox #inputs #LogiNCamPaigns select
+{
+    behavior: none\9 !important;
+}
+#TransferMain #x-transfer-options span,
+#TransferMain #x-transfer-inactive span,
+#TransferMain #x-transfer-active span,
+#TransferMain #x-transfer-local span
 {
     float:left;
     margin: 5px 25px 5px 36px;
-    width: 150px;
+    width: 180px;
     font: bold 1.0em !important;
     padding: 5px;
     vertical-align: top;
 }
 
-#TransferMain #x-transfer-options span a, #TransferMain #x-transfer-inactive span a, #TransferMain #x-transfer-active span a, #TransferMain #x-transfer-local span a
+#TransferMain #x-transfer-options span a,
+#TransferMain #x-transfer-inactive span a,
+#TransferMain #x-transfer-active span a,
+#TransferMain #x-transfer-local span a
 {
     width: auto;
     height: 20px !important;
@@ -599,15 +520,17 @@ a:hover{
     background: none;
     padding: 5px 5px 5px 5px;
     margin: 0 0 0 36px;
-    width: 150px;
+    width: 200px;
     height: 20px;
     border: 1px solid #ccc;
-    font-size: 10pt;
+    font-size: 13pt;
 }
 
 #TransferMain select, #TransferMain #XfeRGrouPLisT
 {
     margin: 0 0 0 6px !important;
+    padding: 5px;
+    width: 200px;
 }
 
 #TransferMain input[type="checkbox"]
@@ -619,7 +542,8 @@ a:hover{
 
 #TransferMain select
 {
-    width: 205px;   
+    width: 285px;
+    height: 30px;
 }
 
 #TransferMain img
@@ -634,19 +558,25 @@ a:hover{
 
 #LoadingBox
 {
-    position:absolute;
-    left:0px;
-    top:0px;
-    z-index:300;
-    width: 100%;
-    height: 100%;
-    margin: auto;
+    display: none;
 }
-#Header
-{
-    position:absolute;left:0px;top:300px;z-index:1;visibility:hidden;
+
+.log_text {
+    font-size: 14pt;
 }
-#Tabs
+
+.log_text_sm
 {
-    position:absolute;left:0px;top:400px;z-index:2;visibility:hidden;
+    font-size: 10pt;
+}
+
+.log_title
+{
+    font-size: 12pt;
+}
+
+.disabled_img {
+    /* filter: url(filters.svg#grayscale);  Firefox 3.5+ */
+    filter: gray; /* IE5+ */
+    /* -webkit-filter: grayscale(1); /* Webkit Nightlies & Google Chrome Canary */
 }

@@ -131,6 +131,7 @@ if (!isset($client))   {$client="agc";}
 $Alogin='N';
 $RingCalls='N';
 $DiaLCalls='N';
+$CallsToday='0';
 
 $StarTtime = date("U");
 $NOW_DATE = date("Y-m-d");
@@ -224,7 +225,7 @@ if ($ACTION == 'refresh')
 
 			if ($Acount > 0)
 				{
-				$stmt="SELECT status,callerid,agent_log_id,campaign_id,lead_id from vicidial_live_agents where user='$user' and server_ip='$server_ip';";
+				$stmt="SELECT status,callerid,agent_log_id,campaign_id,lead_id,calls_today from vicidial_live_agents where user='$user' and server_ip='$server_ip';";
 				if ($DB) {echo "|$stmt|\n";}
 				$rslt=mysql_query($stmt, $link);
 			if ($mel > 0) {mysql_error_logging($NOW_TIME,$link,$mel,$stmt,'03004',$user,$server_ip,$session_name,$one_mysql_log);}
@@ -234,7 +235,8 @@ if ($ACTION == 'refresh')
 				$Aagent_log_id =	$row[2];
 				$Acampaign_id =		$row[3];
 				$Alead_id =			$row[4];
-
+                                $CallsToday =           $row[5];
+                                
 				$api_manual_dial='STANDARD';
 				$stmt = "SELECT api_manual_dial FROM vicidial_campaigns where campaign_id='$Acampaign_id';";
 				$rslt=mysql_query($stmt, $link);
@@ -280,9 +282,11 @@ if ($ACTION == 'refresh')
 		if ($mel > 0) {mysql_error_logging($NOW_TIME,$link,$mel,$stmt,'03007',$user,$server_ip,$session_name,$one_mysql_log);}
 				$row=mysql_fetch_row($rslt);
 				$RingCalls=$row[0];
-				if ($RingCalls > 0) {$RingCalls = "<font class=\"queue_text_red\"><b>Calls in Queue</b>: $RingCalls</font>";}
-				else {$RingCalls = "<font class=\"queue_text\"><b>Calls in Queue</b>: $RingCalls</font>";}
-
+				#if ($RingCalls > 0) {$RingCalls = "<font class=\"queue_text_red\"><b>Calls in Queue</b>: $RingCalls</font>";}
+				#else {$RingCalls = "<font class=\"queue_text\"><b>Calls in Queue</b>: $RingCalls</font>";}
+				if ($RingCalls > 0) {$RingCalls = "<font color=\"red\"><b>$RingCalls</b></font>";}
+                                else {$RingCalls = "<b>$RingCalls</b>";}
+                                
 				### grab the number of calls being placed from this server and campaign
 				$stmt="SELECT count(*) from vicidial_auto_calls where status NOT IN('XFER') and ( (campaign_id='$Acampaign') or (campaign_id IN('$AccampSQL')) );";
 				if ($DB) {echo "|$stmt|\n";}
@@ -659,7 +663,25 @@ if ($ACTION == 'refresh')
 			if ($Ashift_logout > 0)
 				{$Alogin='SHIFT_LOGOUT';}
 
-			echo 'DateTime: ' . $NOW_TIME . '|UnixTime: ' . $StarTtime . '|Logged-in: ' . $Alogin . '|CampCalls: ' . $RingCalls . '|Status: ' . $Astatus . '|DiaLCalls: ' . $DiaLCalls . '|APIHanguP: ' . $external_hangup . '|APIStatuS: ' . $external_status . '|APIPausE: ' . $external_pause . '|APIDiaL: ' . $external_dial . '|DEADcall: ' . $DEADcustomer . '|InGroupChange: ' . $InGroupChangeDetails . '|APIFields: ' . $external_update_fields . '|APIFieldsData: ' . $external_update_fields_data . '|APITimerAction: ' . $timer_action . '|APITimerMessage: ' . $timer_action_message . '|APITimerSeconds: ' . $timer_action_seconds . '|APIdtmf: ' . $external_dtmf . '|APItransferconf: ' . $external_transferconf . '|APIpark: ' . $external_park . '|APITimerDestination: ' . $timer_action_destination . '|APIManualDialQueue: ' . $MDQ_count . "\n";
+                        ### GET AGENT AVG TIME STATS
+                        $avg_wait_time = '0:00';
+                        $avg_talk_time = $avg_wait_time;
+                        $stmt="SELECT sum(wait_sec)/60 as wait_min, sum(talk_sec)/60 as talk_min FROM vicidial_agent_log where user='$user' and event_time >='$NOW_DATE 00:00:00';";
+			$rslt=mysql_query($stmt, $link);
+				if ($mel > 0) {mysql_error_logging($NOW_TIME,$link,$mel,$stmt,'03004',$user,$server_ip,$session_name,$one_mysql_log);}
+			if ($DB) {echo "$stmt\n";}
+			$stat_record_ct = mysql_num_rows($rslt);
+			if ($stat_record_ct > 0)
+				{
+				$row=mysql_fetch_row($rslt);
+                                    if ($CallsToday > 0)
+                                    {
+                                    $avg_wait_time =	round(	$row[0] / $CallsToday, 2);
+                                    $avg_talk_time =	round(	$row[1] / $CallsToday, 2);
+                                    }
+				}
+
+			echo 'DateTime: ' . $NOW_TIME . '|UnixTime: ' . $StarTtime . '|Logged-in: ' . $Alogin . '|CampCalls: ' . $RingCalls . '|Status: ' . $Astatus . '|DiaLCalls: ' . $DiaLCalls . '|APIHanguP: ' . $external_hangup . '|APIStatuS: ' . $external_status . '|APIPausE: ' . $external_pause . '|APIDiaL: ' . $external_dial . '|DEADcall: ' . $DEADcustomer . '|InGroupChange: ' . $InGroupChangeDetails . '|APIFields: ' . $external_update_fields . '|APIFieldsData: ' . $external_update_fields_data . '|APITimerAction: ' . $timer_action . '|APITimerMessage: ' . $timer_action_message . '|APITimerSeconds: ' . $timer_action_seconds . '|APIdtmf: ' . $external_dtmf . '|APItransferconf: ' . $external_transferconf . '|APIpark: ' . $external_park . '|APITimerDestination: ' . $timer_action_destination . '|APIManualDialQueue: ' . $MDQ_count . '|CallsToday: ' . $CallsToday . '|AvgWaitTime: ' . $avg_wait_time . '|AvgTalkTime: ' . $avg_talk_time . "\n";
 
 			if (strlen($timer_action) > 3)
 				{

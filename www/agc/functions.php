@@ -1414,6 +1414,4 @@ function mysql_error_logging($NOW_TIME,$link,$mel,$stmt,$query_id,$user,$server_
 	$one_mysql_log=0;
 	return $errno;
 	}
-
-
 ?>

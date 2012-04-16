@@ -102,7 +102,7 @@
 # 110513-1745 - Added double-check for dial level difference target, and dial level and avail-only-tally features
 # 110525-1940 - Allow for auto-dial IVR transfers
 # 110602-0953 - Added dl_diff_target_method option
-#
+# 120106-1653 - Disabled 'lagging' feature, which caused a ton of reporting issues in AST_VDauto_dial.pl line 1937
 
 
 ### begin parsing run-time options ###
@@ -1934,17 +1934,17 @@ while($one_day_interval > 0)
 
 		### pause agents that have disconnected or closed their apps over 30 seconds ago
 		$toPAUSEcount=0;
-		$stmtA = "SELECT count(*) FROM vicidial_live_agents where server_ip='$server_ip' and last_update_time < '$PDtsSQLdate' and status NOT IN('PAUSED');";
-		$sthA = $dbhA->prepare($stmtA) or die "preparing: ",$dbhA->errstr;
-		$sthA->execute or die "executing: $stmtA ", $dbhA->errstr;
-		$sthArowsC=$sthA->rows;
-		if ($sthArowsC > 0)
-			{
-			@aryA = $sthA->fetchrow_array;
-			$toPAUSEcount =		$aryA[0];
-			}
-		$sthA->finish();
-		$affected_rows=0;
+		#$stmtA = "SELECT count(*) FROM vicidial_live_agents where server_ip='$server_ip' and last_update_time < '$PDtsSQLdate' and status NOT IN('PAUSED');";
+		#$sthA = $dbhA->prepare($stmtA) or die "preparing: ",$dbhA->errstr;
+		#$sthA->execute or die "executing: $stmtA ", $dbhA->errstr;
+		#$sthArowsC=$sthA->rows;
+		#if ($sthArowsC > 0) 
+		#	{
+		#	@aryA = $sthA->fetchrow_array;
+		#	$toPAUSEcount =		$aryA[0];
+		#	}
+		#$sthA->finish();
+		#$affected_rows=0;
 
 		if ($toPAUSEcount > 0)
 			{

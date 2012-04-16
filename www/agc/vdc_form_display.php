@@ -147,7 +147,7 @@ header ("Cache-Control: no-cache, must-revalidate");  // HTTP/1.1
 header ("Pragma: no-cache");                          // HTTP/1.0
 
 if ($stage=='WELCOME')
-	{echo "FORM"; exit;}
+	{echo "If a form has been setup for this campaign, it will only appear during a live call. Thanks!"; exit;}
 
 $txt = '.txt';
 $StarTtime = date("U");

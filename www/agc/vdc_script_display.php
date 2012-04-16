@@ -507,7 +507,7 @@ echo "<!-- $script_id -->\n";
 echo "<TABLE WIDTH=$script_width><TR><TD>\n";
 if ( ($IFRAME < 1) and ($ScrollDIV > 0) )
 	{ echo "<div class=\"scroll_script\" id=\"NewScriptContents\">";}
-echo "<center><B>$script_name</B><BR></center>\n";
+##echo "<center><B>$script_name</B><BR></center>\n";
 echo "$script_text\n";
 if ( ($IFRAME < 1) and ($ScrollDIV > 0) )
 	{ echo "</div>";}
