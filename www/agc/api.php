@@ -203,7 +203,7 @@ if ($non_latin < 1)
 	$pass=ereg_replace("[^0-9a-zA-Z]","",$pass);
 	$agent_user=ereg_replace("[^0-9a-zA-Z]","",$agent_user);
 	$function = ereg_replace("[^-\_0-9a-zA-Z]","",$function);
-	$value = ereg_replace("[^-\_0-9a-zA-Z]","",$value);
+	//$value = ereg_replace("[^-\_0-9a-zA-Z]","",$value);
 	$vendor_id = ereg_replace("[^-\_0-9a-zA-Z]","",$vendor_id);
 	$focus = ereg_replace("[^-\_0-9a-zA-Z]","",$focus);
 	$preview = ereg_replace("[^-\_0-9a-zA-Z]","",$preview);

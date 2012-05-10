@@ -103,6 +103,11 @@ html[xmlns] .clearfix { display: block; }
     text-decoration: none;
 }
 
+#LogOffControl
+{
+    margin-left: 1px\9;
+}
+
 #DiaLControl a, #LogOffControl a{
     float: left;
     height: 50px;

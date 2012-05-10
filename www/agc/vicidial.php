@@ -2833,6 +2833,7 @@ if ($enable_fast_refresh < 1) {echo "\tvar refresh_interval = 1000;\n";}
 	var xfer_in_call = 0;
 	var open_dispo_screen = 0;
 	var AgentDispoing = 0;
+        var AutoDialNextNumber = 0;
 	var logout_stop_timeouts = 0;
 	var VICIDiaL_allow_closers = '<?php echo $VICIDiaL_allow_closers ?>';
 	var VICIDiaL_closer_blended = '0';
@@ -2881,6 +2882,7 @@ if ($enable_fast_refresh < 1) {echo "\tvar refresh_interval = 1000;\n";}
 	var get_call_launch = '<?php echo $get_call_launch ?>';
 	var campaign_am_message_exten = '<?php echo $campaign_am_message_exten ?>';
 	var park_on_extension = '<?php echo $VICIDiaL_park_on_extension ?>';
+        var auto_dial_next_number = '<?php echo $auto_dial_next_number ?>';
 	var park_count=0;
 	var customerparked=0;
 	var customerparkedcounter=0;
@@ -3182,8 +3184,8 @@ if ($enable_fast_refresh < 1) {echo "\tvar refresh_interval = 1000;\n";}
     var DiaLControl_auto_HTML = "<a href=\"#\" onclick=\"AutoDial_ReSume_PauSe('VDADready');\"><img src=\"./images/x-resume.png\" border=\"0\" alt=\"Resume\" /><span id=\"x-ready\">Ready</span></a><a href=\"#\" style=\"opacity:.15;\" disabled><img class=\"disabled_img\" src=\"./images/x-pause.png\" border=\"0\" alt=\" Pause \" /><span id=\"x-pause\">Pause</span></a>";
     var DiaLControl_auto_HTML_ready = "<a href=\"#\" style=\"opacity:.15;\" disabled><img class=\"disabled_img\" src=\"./images/x-resume.png\" border=\"0\" alt=\"Resume\" /><span id=\"x-resume\">Ready</span></a><a href=\"#\" onclick=\"AutoDial_ReSume_PauSe('VDADpause');\"><img src=\"./images/x-pause.png\" border=\"0\" alt=\" Pause \" /><span id=\"x-pause\">Pause</span></a>";
     var DiaLControl_auto_HTML_OFF = "<a href=\"#\" style=\"opacity:.15;\" disabled><img class=\"disabled_img\" src=\"./images/x-resume.png\" border=\"0\" alt=\"Resume\" /><span id=\"x-resume\">Ready</span></a><a href=\"#\" style=\"opacity:.15;\" disabled><img class=\"disabled_img\" src=\"./images/x-pause.png\" border=\"0\" alt=\" Pause \" /><span id=\"x-pause\">Pause</span></a>";
-    var DiaLControl_manual_HTML = "<a href=\"#\" onclick=\"ManualDialNext('','','','','','0');\"><img src=\"./images/x-dialnext.png\" style=\"margin-bottom:-15px;\" border=\"0\" alt=\"Dial Next Number\" /><br /><span id=\"x-dialnext\">Dial Next Number</span></a>";
-    var DiaLControl_manual_HTML_OFF = "<a href=\"#\" style=\"opacity:.15;\" disabled><img class=\"disabled_img\" src=\"./images/x-dialnext.png\" style=\"margin-bottom:-15px;\" border=\"0\" alt=\"Dial Next Number\" /><br /><span id=\"x-dialnext\">Dial Next Number</span></a>";
+    var DiaLControl_manual_HTML = "<a href=\"#\" onclick=\"ManualDialNext('','','','','','0');\"><img src=\"./images/x-dialnext.png\" style=\"margin-bottom:-15px;\" border=\"0\" alt=\"Dial Next Number\" /><br /><span id=\"x-dialnext\">Dial Next #</span></a>";
+    var DiaLControl_manual_HTML_OFF = "<a href=\"#\" style=\"opacity:.15;\" disabled><img class=\"disabled_img\" src=\"./images/x-dialnext.png\" style=\"margin-bottom:-15px;\" border=\"0\" alt=\"Dial Next Number\" /><br /><span id=\"x-dialnext\">Dial Next #</span></a>";
 	var image_loading = new Image();
 		image_loading.src="./images/loading.gif";
 	var image_blank = new Image();
@@ -6137,11 +6139,11 @@ function set_length(SLnumber,SLlength_goal,SLdirection)
 				else
 					{var call_prefix = manual_dial_prefix;}
 
-            var manual_dial_next_action = 'manDiaLnextCaLL';
-            if (on_hook_agent == 'Y') // if agent is on hook, need to call manDiaLnextCaLL both to agent and manually dialed number
-            {
-                manual_dial_next_action = 'manDiaLnextCaLLOnHook';
-            }
+                                var manual_dial_next_action = 'manDiaLnextCaLL';
+                                if (on_hook_agent == 'Y') // if agent is on hook, need to call manDiaLnextCaLL both to agent and manually dialed number
+                                {
+                                    manual_dial_next_action = 'manDiaLnextCaLLOnHook';
+                                }
                     
 				manDiaLnext_query = "server_ip=" + server_ip + "&session_name=" + session_name + "&ACTION=" + manual_dial_next_action + "&conf_exten=" + session_id + "&user=" + user + "&pass=" + pass + "&campaign=" + campaign + "&ext_context=" + ext_context + "&dial_timeout=" + dial_timeout + "&dial_prefix=" + call_prefix + "&campaign_cid=" + call_cid + "&preview=" + man_preview + "&agent_log_id=" + agent_log_id + "&callback_id=" + mdnCBid + "&lead_id=" + mdnBDleadid + "&phone_code=" + mdnDiaLCodE + "&phone_number=" + mdnPhonENumbeR + "&list_id=" + mdnLisT_id + "&stage=" + mdnStagE  + "&use_internal_dnc=" + use_internal_dnc + "&use_campaign_dnc=" + use_campaign_dnc + "&omit_phone_code=" + omit_phone_code + "&manual_dial_filter=" + manual_dial_filter + "&vendor_lead_code=" + mdVendorid + "&usegroupalias=" + mdgroupalias + "&account=" + active_group_alias + "&agent_dialed_number=" + agent_dialed_number + "&agent_dialed_type=" + agent_dialed_type + "&vtiger_callback_id=" + vtiger_callback_id + "&dial_method=" + dial_method + "&manual_dial_call_time_check=" + manual_dial_call_time_check + "&extrachannel=" + SIP_user_DiaL + "&customCID=" + SIqueryCID;
 				//		alert(manual_dial_filter + "\n" +manDiaLnext_query);
@@ -6789,6 +6791,11 @@ function set_length(SLnumber,SLlength_goal,SLdirection)
                                 document.getElementById("DiaLControl").innerHTML = DiaLControl_auto_HTML_ready;
                                 document.getElementById("ManualDiaLControl").innerHTML = DiaLControl_manual_HTML;
 				}
+                        else if (dial_method == "MANUAL")
+				{
+				document.getElementById("DiaLControl").innerHTML = DiaLControl_auto_HTML_ready;
+                                document.getElementById("ManualDiaLControl").innerHTML = DiaLControl_manual_HTML;
+				}
 			else
 				{
 				document.getElementById("DiaLControl").innerHTML = DiaLControl_auto_HTML_ready;
@@ -6806,6 +6813,11 @@ function set_length(SLnumber,SLlength_goal,SLdirection)
 				auto_dial_level=starting_dial_level;
 
                                 document.getElementById("DiaLControl").innerHTML = DiaLControl_auto_HTML;
+                                document.getElementById("ManualDiaLControl").innerHTML = DiaLControl_manual_HTML;
+				}
+                        else if (dial_method == "MANUAL")
+				{
+				document.getElementById("DiaLControl").innerHTML = DiaLControl_auto_HTML;
                                 document.getElementById("ManualDiaLControl").innerHTML = DiaLControl_manual_HTML;
 				}
 			else
@@ -8801,6 +8813,12 @@ function set_length(SLnumber,SLlength_goal,SLdirection)
 				document.getElementById("DispoSelectMaxMin").innerHTML = "<a href=\"#\" onclick=\"DispoMinimize()\"> minimize </a>";
 				document.getElementById("DispoSelectHAspan").innerHTML = "<a href=\"#\" onclick=\"DispoHanguPAgaiN()\">Hangup Again</a>";
 
+                                if (dial_method == "MANUAL")
+                                {
+                                document.getElementById("DiaLControl").innerHTML = DiaLControl_auto_HTML_ready;
+                                document.getElementById("ManualDiaLControl").innerHTML = DiaLControl_manual_HTML;
+                                }
+                                
 				CBcommentsBoxhide();
 				EAcommentsBoxhide();
 
@@ -11582,7 +11600,18 @@ function phone_number_format(formatphone) {
 				if (AutoDialWaiting == 1)
 					{
 					check_for_auto_incoming();
+                                        
 					}
+                                if (dial_method == "MANUAL" && auto_dial_next_number == '1' && MD_channel_look != 1
+                                    && VD_live_customer_call != 1 && AutoDialWaiting != 0)
+                                    {
+                                        AutoDialNextNumber++;
+                                        if (AutoDialNextNumber == 15)
+                                        {
+                                            ManualDialNext('','','','','','0');
+                                            AutoDialNextNumber = 0;
+                                        }
+                                    }
 				// look for a channel name for the manually dialed call
 				if (MD_channel_look==1)
 					{
@@ -12780,7 +12809,7 @@ $zi=2;
                     <!--<span class="action"><a href="#" onclick="NeWManuaLDiaLCalL('FAST');return false;"><img src="./images/x-dialnext.png" style="margin-bottom:-15px;" border="0" alt="Dial Current Contact" /><span id="x-dialnext">Fast Dial</span></a></span> -->
                 </span>
                 
-                <span class="action" id="ManualDiaLControl"><a href="#" onclick="ManualDialNext('','','','','','0');"><img src="./images/x-dialnext.png" style="margin-bottom:-15px;" border="0" alt="Dial Next Number" /><br /><span id="x-dialnext">Dial Next Number</span></a></span>
+                <span class="action" id="ManualDiaLControl"><a href="#" onclick="ManualDialNext('','','','','','0');"><img src="./images/x-dialnext.png" style="margin-bottom:-15px;" border="0" alt="Dial Next Number" /><br /><span id="x-dialnext">Dial Next #</span></a></span>
                 <span class="action" id="RecorDControl" ><a href="#" onclick="conf_send_recording('MonitorConf',session_id,'');return false;"><img src="./images/x-record.png" border="0" alt="Start Recording" /><br /><span id=\"x-recording\">Record</span></a></span>
                 <span class="action" id="WebFormSpan"><a href="#" style="opacity:.15;" disabled><img src="./images/x-webform.png" border="0" alt="Web Form" class=\"disabled_img\" /><br /><span id="x-webform">Launch Webform</span></a></span>
                 <span class="action" id="CallLogButtons">
