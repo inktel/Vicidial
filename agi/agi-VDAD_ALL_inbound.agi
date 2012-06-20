@@ -2674,6 +2674,11 @@ while ( ($drop_timer <= $DROP_TIME) && ($wait_in_queue > 0) )
 				$affected_rows = $dbhA->do($stmtA);
 					$dbhP=$dbhA;   $mysql_count='02072';   $MEL_aff_rows=$affected_rows;   &mysql_error_logging;
 				if ($AGILOG) {$agi_string = "--    VDCL vcl update: |$affected_rows|$insert_lead_id|\n|$stmtA|";   &agi_output;}
+                                
+                                $stmtA = "UPDATE vicidial_closer_log set status='SENT' where lead_id = '$insert_lead_id' and call_date='$SQLdate' and status != 'INCALL';";
+				$affected_rows = $dbhA->do($stmtA);
+					$dbhP=$dbhA;   $mysql_count='02073';   $MEL_aff_rows=$affected_rows;   &mysql_error_logging;
+				if ($AGILOG) {$agi_string = "--    VDCL vcl update: |$affected_rows|$insert_lead_id|\n|$stmtA|";   &agi_output;}
 
 				$AGI->stream_file('sip-silence');
 				$AGI->stream_file('sip-silence');

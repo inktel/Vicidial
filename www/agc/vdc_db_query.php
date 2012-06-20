@@ -4894,7 +4894,7 @@ if ($ACTION == 'VDADcheckINCOMING')
 			else
 				{
 				### update the vicidial_closer_log user to INCALL
-				$stmt = "UPDATE vicidial_closer_log set user='$user', comments='AUTO', list_id='$list_id', status='INCALL', user_group='$user_group' where lead_id='$lead_id' order by closecallid desc limit 1;";
+				$stmt = "UPDATE vicidial_closer_log set status='INCALL', user='$user', comments='AUTO', list_id='$list_id', user_group='$user_group' where lead_id='$lead_id' order by closecallid desc limit 1;";
 				if ($DB) {echo "$stmt\n";}
 				$rslt=mysql_query($stmt, $link);
 				if ($mel > 0) {mysql_error_logging($NOW_TIME,$link,$mel,$stmt,'00117',$user,$server_ip,$session_name,$one_mysql_log);}

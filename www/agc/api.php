@@ -266,6 +266,8 @@ $ENTRYdate = date("YmdHis");
 $MT[0]='';
 $api_script = 'agent';
 $api_logging = 1;
+$data = $comments + '-';
+
 if ($consultative != 'YES') {$consultative='NO';}
 
 
@@ -274,7 +276,7 @@ if ($consultative != 'YES') {$consultative='NO';}
 ################################################################################
 if ($function == 'version')
 	{
-	$data = "VERSION: $version|BUILD: $build|DATE: $NOW_TIME|EPOCH: $StarTtime";
+	$data .= "VERSION: $version|BUILD: $build|DATE: $NOW_TIME|EPOCH: $StarTtime";
 	$result = 'SUCCESS';
 	echo "$data\n";
 	api_log($link,$api_logging,$api_script,$user,$agent_user,$function,$value,$result,$result_reason,$source,$data);
@@ -569,7 +571,7 @@ if ($function == 'external_pause')
 			$result = 'SUCCESS';
 			$result_reason = "external_pause function set";
 			echo "$result: $result_reason - $value|$epoch|$agent_user\n";
-			$data = "$epoch";
+			$data .= "$epoch";
 			api_log($link,$api_logging,$api_script,$user,$agent_user,$function,$value,$result,$result_reason,$source,$data);
 			}
 		else
@@ -600,7 +602,7 @@ if ($function == 'external_dial')
 		{
 		$result = 'ERROR';
 		$result_reason = "external_dial not valid";
-		$data = "$phone_code|$search|$preview|$focus|$lead_id";
+		$data .= "$phone_code|$search|$preview|$focus|$lead_id";
 		echo "$result: $result_reason - $value|$data|$agent_user|$alt_user\n";
 		api_log($link,$api_logging,$api_script,$user,$agent_user,$function,$value,$result,$result_reason,$source,$data);
 		}
@@ -685,7 +687,7 @@ if ($function == 'external_dial')
 								{
 								$result = 'ERROR';
 								$result_reason = "caller_id_number from group_alias is not valid";
-								$data = "$group_alias|$caller_id_number";
+								$data .= "$group_alias|$caller_id_number";
 								echo "$result: $result_reason - $agent_user|$data\n";
 								api_log($link,$api_logging,$api_script,$user,$agent_user,$function,$value,$result,$result_reason,$source,$data);
 								exit;
@@ -695,7 +697,7 @@ if ($function == 'external_dial')
 							{
 							$result = 'ERROR';
 							$result_reason = "group_alias is not valid";
-							$data = "$group_alias";
+							$data .= "$group_alias";
 							echo "$result: $result_reason - $agent_user|$data\n";
 							api_log($link,$api_logging,$api_script,$user,$agent_user,$function,$value,$result,$result_reason,$source,$data);
 							exit;
@@ -822,7 +824,7 @@ if ($function == 'external_dial')
 								{
 								$result = 'ERROR';
 								$result_reason = "phone number is not valid";
-								$data = "$value|$lead_id|$alt_dial";
+								$data .= "$value|$lead_id|$alt_dial";
 								echo "$result: $result_reason - $agent_user|$data\n";
 								api_log($link,$api_logging,$api_script,$user,$agent_user,$function,$value,$result,$result_reason,$source,$data);
 								exit;
@@ -832,7 +834,7 @@ if ($function == 'external_dial')
 							{
 							$result = 'ERROR';
 							$result_reason = "lead_id is not valid";
-							$data = "$lead_id";
+							$data .= "$lead_id";
 							echo "$result: $result_reason - $agent_user|$data\n";
 							api_log($link,$api_logging,$api_script,$user,$agent_user,$function,$value,$result,$result_reason,$source,$data);
 							exit;
@@ -871,7 +873,7 @@ if ($function == 'external_dial')
 						$rslt=mysql_query($stmt, $link);
 						$result = 'SUCCESS';
 						$result_reason = "external_dial function set";
-						$data = "$phone_code|$search|$preview|$focus|$vendor_id|$epoch|$dial_prefix|$group_alias|$caller_id_number|$alt_dial";
+						$data .= "$phone_code|$search|$preview|$focus|$vendor_id|$epoch|$dial_prefix|$group_alias|$caller_id_number|$alt_dial";
 						echo "$result: $result_reason - $value|$agent_user|$data\n";
 						api_log($link,$api_logging,$api_script,$user,$agent_user,$function,$value,$result,$result_reason,$source,$data);
 						}
@@ -920,7 +922,7 @@ if ($function == 'external_add_lead')
 		{
 		$result = 'ERROR';
 		$result_reason = "external_add_lead not valid";
-		$data = "$value|$phone_code";
+		$data .= "$value|$phone_code";
 		echo "$result: $result_reason - $data|$agent_user|$alt_user\n";
 		api_log($link,$api_logging,$api_script,$user,$agent_user,$function,$value,$result,$result_reason,$source,$data);
 		exit;
@@ -1010,7 +1012,7 @@ if ($function == 'external_add_lead')
 						$result = 'SUCCESS';
 						$result_reason = "lead added";
 						echo "$result: $result_reason - $value|$campaign_id|$list_id|$lead_id|$agent_user\n";
-						$data = "$value|$list_id|$lead_id";
+						$data .= "$value|$list_id|$lead_id";
 						api_log($link,$api_logging,$api_script,$user,$agent_user,$function,$value,$result,$result_reason,$source,$data);
 						}
 					else
@@ -1018,7 +1020,7 @@ if ($function == 'external_add_lead')
 						$result = 'ERROR';
 						$result_reason = "lead insertion failed";
 						echo "$result: $result_reason - $value|$campaign_id|$list_id|$agent_user\n";
-						$data = "$value|$list_id|$stmt";
+						$data .= "$value|$list_id|$stmt";
 						api_log($link,$api_logging,$api_script,$user,$agent_user,$function,$value,$result,$result_reason,$source,$data);
 						}
 					}
@@ -1029,7 +1031,7 @@ if ($function == 'external_add_lead')
 						$result = 'ERROR';
 						$result_reason = "add_lead PHONE NUMBER IN DNC";
 						echo "$result: $result_reason - $value|$agent_user\n";
-						$data = "$value";
+						$data .= "$value";
 						api_log($link,$api_logging,$api_script,$user,$agent_user,$function,$value,$result,$result_reason,$source,$data);
 						}
 					if ($camp_dnc_found>0)
@@ -1037,7 +1039,7 @@ if ($function == 'external_add_lead')
 						$result = 'ERROR';
 						$result_reason = "add_lead PHONE NUMBER IN CAMPAIGN DNC";
 						echo "$result: $result_reason - $value|$campaign_id|$agent_user\n";
-						$data = "$value|$campaign_id";
+						$data .= "$value|$campaign_id";
 						api_log($link,$api_logging,$api_script,$user,$agent_user,$function,$value,$result,$result_reason,$source,$data);
 						}
 					}
@@ -1077,7 +1079,7 @@ if ($function == 'change_ingroups')
 		{
 		$result = 'ERROR';
 		$result_reason = "change_ingroups not valid";
-		$data = "$value|$blended|$ingroup_choices";
+		$data .= "$value|$blended|$ingroup_choices";
 		echo "$result: $result_reason - $data|$agent_user\n";
 		api_log($link,$api_logging,$api_script,$user,$agent_user,$function,$value,$result,$result_reason,$source,$data);
 		}
@@ -1111,7 +1113,7 @@ if ($function == 'change_ingroups')
 							{
 							$result = 'ERROR';
 							$result_reason = "campaign dial_method does not allow outbound autodial";
-							$data = "$blended";
+							$data .= "$blended";
 							echo "$result: $result_reason - $agent_user|$data\n";
 							api_log($link,$api_logging,$api_script,$user,$agent_user,$function,$value,$result,$result_reason,$source,$data);
 							exit;
@@ -1135,7 +1137,7 @@ if ($function == 'change_ingroups')
 									{
 									$result = 'ERROR';
 									$result_reason = "ingroup does not exist";
-									$data = "$in_groups[$k]|$ingroup_choices";
+									$data .= "$in_groups[$k]|$ingroup_choices";
 									echo "$result: $result_reason - $agent_user|$data\n";
 									api_log($link,$api_logging,$api_script,$user,$agent_user,$function,$value,$result,$result_reason,$source,$data);
 									exit;
@@ -1148,7 +1150,7 @@ if ($function == 'change_ingroups')
 						{
 						$result = 'ERROR';
 						$result_reason = "ingroup_choices are required for ADD and REMOVE values";
-						$data = "$value|$ingroup_choices";
+						$data .= "$value|$ingroup_choices";
 						echo "$result: $result_reason - $agent_user|$data\n";
 						api_log($link,$api_logging,$api_script,$user,$agent_user,$function,$value,$result,$result_reason,$source,$data);
 						exit;
@@ -1311,7 +1313,7 @@ if ($function == 'change_ingroups')
 
 					$result = 'SUCCESS';
 					$result_reason = "change_ingroups function set";
-					$data = "$ingroup_choices|$blended|$default_data";
+					$data .= "$ingroup_choices|$blended|$default_data";
 					echo "$result: $result_reason - $user|$agent_user|$data\n";
 					api_log($link,$api_logging,$api_script,$user,$agent_user,$function,$value,$result,$result_reason,$source,$data);
 					}
@@ -1357,7 +1359,7 @@ if ($function == 'update_fields')
 		{
 		$result = 'ERROR';
 		$result_reason = "st_login_log not valid";
-		$data = "$agent_user";
+		$data .= "$agent_user";
 		echo "$result: $result_reason - $data\n";
 		api_log($link,$api_logging,$api_script,$user,$agent_user,$function,$value,$result,$result_reason,$source,$data);
 		}
@@ -1575,7 +1577,7 @@ if ($function == 'update_fields')
 
 						$result = 'SUCCESS';
 						$result_reason = "update_fields lead updated";
-						$data = "$user|$agent_user|$lead_id|$fieldsSQL";
+						$data .= "$user|$agent_user|$lead_id|$fieldsSQL";
 						echo "$result: $result_reason - $data\n";
 						api_log($link,$api_logging,$api_script,$user,$agent_user,$function,$value,$result,$result_reason,$source,$data);
 						}
@@ -1629,7 +1631,7 @@ if ($function == 'set_timer_action')
 		{
 		$result = 'ERROR';
 		$result_reason = "set_timer_action not valid";
-		$data = "$agent_user|$value";
+		$data .= "$agent_user|$value";
 		echo "$result: $result_reason - $data\n";
 		api_log($link,$api_logging,$api_script,$user,$agent_user,$function,$value,$result,$result_reason,$source,$data);
 		}
@@ -1653,7 +1655,7 @@ if ($function == 'set_timer_action')
 
 				$result = 'SUCCESS';
 				$result_reason = "set_timer_action lead updated";
-				$data = "$user|$agent_user|$value|$notes|$rank";
+				$data .= "$user|$agent_user|$value|$notes|$rank";
 				echo "$result: $result_reason - $data\n";
 				api_log($link,$api_logging,$api_script,$user,$agent_user,$function,$value,$result,$result_reason,$source,$data);
 				}
@@ -1691,7 +1693,7 @@ if ($function == 'st_login_log')
 		{
 		$result = 'ERROR';
 		$result_reason = "st_login_log not valid";
-		$data = "$value|$vendor_id";
+		$data .= "$value|$vendor_id";
 		echo "$result: $result_reason - $data\n";
 		api_log($link,$api_logging,$api_script,$user,$agent_user,$function,$value,$result,$result_reason,$source,$data);
 		}
@@ -1714,7 +1716,7 @@ if ($function == 'st_login_log')
 
 			$result = 'SUCCESS';
 			$result_reason = "st_login_log user found";
-			$data = "$row[0]";
+			$data .= "$row[0]";
 			echo "$result: $result_reason - $row[0]\n";
 			api_log($link,$api_logging,$api_script,$user,$agent_user,$function,$value,$result,$result_reason,$source,$data);
 
@@ -1744,7 +1746,7 @@ if ($function == 'st_get_agent_active_lead')
 		{
 		$result = 'ERROR';
 		$result_reason = "st_get_agent_active_lead not valid";
-		$data = "$value|$vendor_id";
+		$data .= "$value|$vendor_id";
 		echo "$result: $result_reason - $data\n";
 		api_log($link,$api_logging,$api_script,$user,$agent_user,$function,$value,$result,$result_reason,$source,$data);
 		}
@@ -1788,7 +1790,7 @@ if ($function == 'st_get_agent_active_lead')
 
 					$result = 'SUCCESS';
 					$result_reason = "st_get_agent_active_lead lead found";
-					$data = "$VC_user|$phone_number|$lead_id|$vendor_lead_code|$province|$security_phrase|$source_id";
+					$data .= "$VC_user|$phone_number|$lead_id|$vendor_lead_code|$province|$security_phrase|$source_id";
 					echo "$result: $result_reason - $data\n";
 					api_log($link,$api_logging,$api_script,$user,$agent_user,$function,$value,$result,$result_reason,$source,$data);
 					}
