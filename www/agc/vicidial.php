@@ -4187,6 +4187,8 @@ function set_length(SLnumber,SLlength_goal,SLdirection)
                                                                 document.getElementById('livecall').className = 'dead';
 								CheckDEADcallON=1;
 
+                                                                // DisableControls();
+                                                                
 								if ( (xfer_in_call > 0) && (customer_3way_hangup_logging=='ENABLED') )
 									{
 									customer_3way_hangup_counter_trigger=1;
@@ -7718,7 +7720,47 @@ function set_length(SLnumber,SLlength_goal,SLdirection)
 	DispO3wayCalLcamptail = '';
 	}
 
+// ################################################################################
+// Disable controls
+        function DisableControls()
+        {
+            document.getElementById("WebFormSpan").innerHTML = "<a href=\"#\" style=\"opacity:.15;\" disabled><img class=\"disabled_img\" src=\"./images/x-webform.png\" border=\"0\" alt=\"Web Form\" /><br /><span id=\"x-webform\">Launch</span></a>";
+            if (enable_second_webform > 0)
+                    {
+                    document.getElementById("WebFormSpanTwo").innerHTML = "<a href=\"#\" style=\"opacity:.15;\" disabled><img class=\"disabled_img\" src=\"./images/x-webform.png\" border=\"0\" alt=\"Web Form 2\" /><br /><span id=\"x-webform\">Launch 2nd</span></a>";
+                    }
+            document.getElementById("ParkControl").innerHTML = "<a href=\"#\" style=\"opacity:.15;\" disabled><img class=\"disabled_img\" src=\"./images/x-hold-on.png\" border=\"0\" alt=\"Park Call\" /><span>Place on Hold</span></a>";
+            document.getElementById("ParkControl2").innerHTML = "Park 3rd Party";
+            document.getElementById("ParkControl2").className = "button blueinactive";
+                        
+            if ( (ivr_park_call=='ENABLED') || (ivr_park_call=='ENABLED_PARK_ONLY') )
+                    {
+                    document.getElementById("ivrParkControl").innerHTML = "<a href=\"#\" style=\"opacity:.15;\" disabled><img class=\"disabled_img\" src=\"./images/x-holdivr.png\" border=\"0\" alt=\"IVR Park Call\" /><span>IVR Hold</span></a>";
+                    }
+            document.getElementById("XferControl").innerHTML = "<a href=\"#\" style=\"opacity:.15;\" disabled><img class=\"disabled_img\" src=\"./images/x-transfer-on.png\" border=\"0\" alt=\"Transfer - Conference\" /><span>X-fer or Conf.</span></a>";
+            
+            document.getElementById("LocalCloser").innerHTML = "X-fer to Queue";
+            document.getElementById("LocalCloser").className = "button blueinactive";
+            
+            document.getElementById("DialBlindTransfer").innerHTML = "Blind X-fer";
+            document.getElementById("DialBlindTransfer").className = "button blueinactive";
+            
+            document.getElementById("DialBlindVMail").innerHTML = "<img src=\"./images/vdc_XB_ammessage_OFF.gif\" border=\"0\" alt=\"Blind Transfer VMail Message\" style=\"vertical-align:middle\" />";
+            document.getElementById("VolumeUpSpan").innerHTML = "<img class=\"disabled_img\" style=\"opacity:.15;margin-bottom:10px;height:35px;\" src=\"./images/x-volume-up.png\" border=\"0\" />";
+            document.getElementById("VolumeDownSpan").innerHTML = "<img class=\"disabled_img\" style=\"opacity:.15;margin-bottom:10px;height:35px;\" src=\"./images/x-volume-down.png\" border=\"0\" />";
+            if (quick_transfer_button_enabled > 0)
+                {document.getElementById("QuickXfer").innerHTML = "<a href=\"#\" style=\"opacity:.15;\" disabled><img class=\"disabled_img\" src=\"./images/x-transfer-quick.png\" border=\"0\" alt=\"QUICK TRANSFER\" /><br /><span>Quick X-fer</span></a>";}
 
+	    if (custom_3way_button_transfer_enabled > 0)
+                {document.getElementById("CustomXfer").innerHTML = "<a href=\"#\" style=\"opacity:.15;\" disabled><img class=\"disabled_img\" src=\"./images/x-transfer-custom.png\" border=\"0\" alt=\"Custom Transfer\" /><br /><span>Custom X-fer</span></a>";}
+
+            if (call_requeue_button > 0)
+                    {
+                    document.getElementById("ReQueueCall").innerHTML =  "<a href=\"#\" style=\"opacity:.15;\" disabled><img class=\"disabled_img\" src=\"./images/x-requeue-call.png\" border=\"0\" alt=\"Re-Queue Call\" /><br /><span>Re-Queue Call</span></a>";
+                    }
+
+        }
+        
 // ################################################################################
 // Start Hangup Functions for both 
 	function bothcall_send_hangup() 
@@ -7867,43 +7909,11 @@ function set_length(SLnumber,SLlength_goal,SLdirection)
 			//if( document.images ) { document.images['livecall'].src = image_livecall_OFF.src;}
                         document.getElementById('livecall').innerHTML = 'Not on Call';
                         document.getElementById('livecall').className = 'off';
-            document.getElementById("WebFormSpan").innerHTML = "<a href=\"#\" style=\"opacity:.15;\" disabled><img class=\"disabled_img\" src=\"./images/x-webform.png\" border=\"0\" alt=\"Web Form\" /><br /><span id=\"x-webform\">Launch</span></a>";
-			if (enable_second_webform > 0)
-				{
-                document.getElementById("WebFormSpanTwo").innerHTML = "<a href=\"#\" style=\"opacity:.15;\" disabled><img class=\"disabled_img\" src=\"./images/x-webform.png\" border=\"0\" alt=\"Web Form 2\" /><br /><span id=\"x-webform\">Launch 2nd</span></a>";
-				}
-            document.getElementById("ParkControl").innerHTML = "<a href=\"#\" style=\"opacity:.15;\" disabled><img class=\"disabled_img\" src=\"./images/x-hold-on.png\" border=\"0\" alt=\"Park Call\" /><span>Place on Hold</span></a>";
-			document.getElementById("ParkControl2").innerHTML = "Park 3rd Party";
-                        document.getElementById("ParkControl2").className = "button blueinactive";
+            
+                        DisableControls();
                         
-			if ( (ivr_park_call=='ENABLED') || (ivr_park_call=='ENABLED_PARK_ONLY') )
-				{
-                document.getElementById("ivrParkControl").innerHTML = "<a href=\"#\" style=\"opacity:.15;\" disabled><img class=\"disabled_img\" src=\"./images/x-holdivr.png\" border=\"0\" alt=\"IVR Park Call\" /><span>IVR Hold</span></a>";
-				}
-            document.getElementById("HangupControl").innerHTML = "<a href=\"#\" style=\"opacity:.15;\" disabled><img class=\"disabled_img\" src=\"./images/x-endcall-on.png\" border=\"0\" alt=\"Hangup Customer\" /><span>End Call</span></a>";
-            document.getElementById("XferControl").innerHTML = "<a href=\"#\" style=\"opacity:.15;\" disabled><img class=\"disabled_img\" src=\"./images/x-transfer-on.png\" border=\"0\" alt=\"Transfer - Conference\" /><span>X-fer or Conf.</span></a>";
+                        document.getElementById("HangupControl").innerHTML = "<a href=\"#\" style=\"opacity:.15;\" disabled><img class=\"disabled_img\" src=\"./images/x-endcall-on.png\" border=\"0\" alt=\"Hangup Customer\" /><span>End Call</span></a>";
             
-            document.getElementById("LocalCloser").innerHTML = "X-fer to Queue";
-            document.getElementById("LocalCloser").className = "button blueinactive";
-            
-            document.getElementById("DialBlindTransfer").innerHTML = "Blind X-fer";
-            document.getElementById("DialBlindTransfer").className = "button blueinactive";
-            
-            document.getElementById("DialBlindVMail").innerHTML = "<img src=\"./images/vdc_XB_ammessage_OFF.gif\" border=\"0\" alt=\"Blind Transfer VMail Message\" style=\"vertical-align:middle\" />";
-            document.getElementById("VolumeUpSpan").innerHTML = "<img class=\"disabled_img\" style=\"opacity:.15;margin-bottom:10px;height:35px;\" src=\"./images/x-volume-up.png\" border=\"0\" />";
-            document.getElementById("VolumeDownSpan").innerHTML = "<img class=\"disabled_img\" style=\"opacity:.15;margin-bottom:10px;height:35px;\" src=\"./images/x-volume-down.png\" border=\"0\" />";
-
-			if (quick_transfer_button_enabled > 0)
-                {document.getElementById("QuickXfer").innerHTML = "<a href=\"#\" style=\"opacity:.15;\" disabled><img class=\"disabled_img\" src=\"./images/x-transfer-quick.png\" border=\"0\" alt=\"QUICK TRANSFER\" /><br /><span>Quick X-fer</span></a>";}
-
-			if (custom_3way_button_transfer_enabled > 0)
-                {document.getElementById("CustomXfer").innerHTML = "<a href=\"#\" style=\"opacity:.15;\" disabled><img class=\"disabled_img\" src=\"./images/x-transfer-custom.png\" border=\"0\" alt=\"Custom Transfer\" /><br /><span>Custom X-fer</span></a>";}
-
-			if (call_requeue_button > 0)
-				{
-                document.getElementById("ReQueueCall").innerHTML =  "<a href=\"#\" style=\"opacity:.15;\" disabled><img class=\"disabled_img\" src=\"./images/x-requeue-call.png\" border=\"0\" alt=\"Re-Queue Call\" /><br /><span>Re-Queue Call</span></a>";
-				}
-
 			document.getElementById("custdatetime").innerHTML = ' &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; ';
                         document.getElementById("MainStatuSSpan").innerHTML = document.getElementById("MainStatuSSpanDefault").innerHTML
 
@@ -8093,7 +8103,7 @@ function set_length(SLnumber,SLlength_goal,SLdirection)
 
             document.getElementById("HangupXferLine").innerHTML ="Hangup 3rd Party";
             document.getElementById("HangupXferLine").className = "button blueinactive";
-            showDivDiplay("x-transfer-options");
+            showDivDisplay("x-transfer-options");
             hideDivDisplay("x-transfer-active");
 
             document.getElementById("HangupBothLines").innerHTML ="<a href=\"#\" onclick=\"bothcall_send_hangup();return false;\">Hangup Both</a>";
@@ -8273,8 +8283,8 @@ function set_length(SLnumber,SLlength_goal,SLdirection)
                         var tempVARSELstatuses_ct = 0;
                         
                         for (var i in VARstatusnames) {
-                            if (VARstatuscategories[i].toLowerCase() == VDCL_group_id.toLowerCase() ||
-                                VARstatuscategories[i].toLowerCase() == "system") { //found a match or is a system dispo
+                            //if (VARstatuscategories[i].toLowerCase() == VDCL_group_id.toLowerCase() || VARstatuscategories[i].toLowerCase() == "system") { //found a match or is a system dispo
+                            if (VARstatuscategories[i].toLowerCase() == VDCL_group_id.toLowerCase() ) {
                                 tempVARSELstatuses[tempVARSELstatuses.length] = VARSELstatuses[i];
                                 tempVARstatuses[tempVARstatuses.length] = VARstatuses[i];
                                 tempVARstatusnames[tempVARstatusnames.length] = VARstatusnames[i];
@@ -8318,26 +8328,60 @@ function set_length(SLnumber,SLlength_goal,SLdirection)
                 
                         VD_statuses_ct_half = parseInt(VARSELstatuses_ct / 2);
                     
+                        //make sure we have undefined status categories, which denotes outbound statuses
+                        //if none are present, simply use the list we have available
+                        var outbound_status_ct = 0;
+                        var can_add_status = 0;
                         while (loop_ct < VD_statuses_ct)
                             {
-                            if (VARSELstatuses[loop_ct] == 'Y')
+                                if (VARstatuscategories[loop_ct].toLowerCase() == "undefined")
+                                {
+                                    outbound_status_ct++;
+                                }
+                                loop_ct++;
+                            }
+                            
+                        loop_ct = 0;
+                        while (loop_ct < VD_statuses_ct)
+                            {
+                                if ( outbound_status_ct > 0 )
+                                {
+                                    if (VARstatuscategories[loop_ct].toLowerCase() == "undefined" ||
+                                        VARstatuscategories[loop_ct].toLowerCase() == "system")
                                     {
-                                    if (VARCBstatuses[loop_ct] == 'Y')
-                                            {CBflag = '*';}
-                                    else
-                                            {CBflag = '';}
-                                    if (taskDSgrp == VARstatuses[loop_ct]) 
-                                            {
-                                            dispo_HTML = dispo_HTML + "<font style=\"BACKGROUND-COLOR: #FFFFFF\"><b><a href=\"#\" onclick=\"DispoSelect_submit();return false;\">" + VARstatusnames[loop_ct] + " (" + VARstatuses[loop_ct] + ")</a> " + CBflag + "</b></font><br /><br />";
-                                            }
-                                    else
-                                            {
-                                            dispo_HTML = dispo_HTML + "<a href=\"#\" onclick=\"DispoSelectContent_create('" + VARstatuses[loop_ct] + "','ADD');return false;\">" + VARstatusnames[loop_ct] + " (" + VARstatuses[loop_ct] + ")</a> " + CBflag + "<br /><br />";
-                                            }
-                                    if (print_ct == VD_statuses_ct_half) 
-                                            {dispo_HTML = dispo_HTML + "</span></font></td><td bgcolor=\"#eaeaea\" height=\"450px\" width=\"320px\" valign=\"top\"><font class=\"log_text\"><span id=\"DispoSelectB\">";}
-                                    print_ct++;
+                                        can_add_status = 1;
                                     }
+                                    else
+                                    {
+                                        can_add_status = 0;
+                                    }
+                                }
+                                else
+                                {
+                                    can_add_status = 1;
+                                }
+                                
+                                if (can_add_status == 1)
+                                {
+                                    if (VARSELstatuses[loop_ct] == 'Y')
+                                        {
+                                        if (VARCBstatuses[loop_ct] == 'Y')
+                                                {CBflag = '*';}
+                                        else
+                                                {CBflag = '';}
+                                        if (taskDSgrp == VARstatuses[loop_ct]) 
+                                                {
+                                                dispo_HTML = dispo_HTML + "<font style=\"BACKGROUND-COLOR: #FFFFFF\"><b><a href=\"#\" onclick=\"DispoSelect_submit();return false;\">" + VARstatusnames[loop_ct] + " (" + VARstatuses[loop_ct] + ")</a> " + CBflag + "</b></font><br /><br />";
+                                                }
+                                        else
+                                                {
+                                                dispo_HTML = dispo_HTML + "<a href=\"#\" onclick=\"DispoSelectContent_create('" + VARstatuses[loop_ct] + "','ADD');return false;\">" + VARstatusnames[loop_ct] + " (" + VARstatuses[loop_ct] + ")</a> " + CBflag + "<br /><br />";
+                                                }
+                                        if (print_ct == VD_statuses_ct_half) 
+                                                {dispo_HTML = dispo_HTML + "</span></font></td><td bgcolor=\"#eaeaea\" height=\"450px\" width=\"320px\" valign=\"top\"><font class=\"log_text\"><span id=\"DispoSelectB\">";}
+                                        print_ct++;
+                                        }
+                                }
                             loop_ct++;
                             }
                     }
@@ -9064,6 +9108,21 @@ function set_length(SLnumber,SLlength_goal,SLdirection)
 		}
 // ################################################################################
 // Show message that there are no voice channels in the VICIDIAL session
+        function NoneInSessionCheck(override)
+            {
+            if ( (check_n > 15) && (no_empty_session_warnings < 1) )
+                {
+                    if (nochannelinsession > 16)
+                    {
+                        NoneInSession();
+                    }
+                    else if (override == 1 && custchannellive == -99) // clicked on agent's name
+                    {
+                        NoneInSessionCalL();
+                        custchannellive = 0;
+                    }
+                }
+            }
 	function NoneInSession()
 		{
 		showDiv('NoneInSessionBox');
@@ -11570,7 +11629,9 @@ function phone_number_format(formatphone) {
 			if (logout_stop_timeouts==1)	{WaitingForNextStep=1;}
 			if ( (custchannellive < -30) && (lastcustchannel.length > 3) && (no_empty_session_warnings < 1) ) {CustomerChanneLGone();}
 			if ( (custchannellive < -10) && (lastcustchannel.length > 3) ) {ReChecKCustoMerChaN();}
-			if ( (nochannelinsession > 16) && (check_n > 15) && (no_empty_session_warnings < 1) ) {NoneInSession();}
+			
+                        NoneInSessionCheck();
+                        
 			if (WaitingForNextStep==0)
 				{
 				if (trigger_ready > 0)
@@ -11601,7 +11662,7 @@ function phone_number_format(formatphone) {
 					{
 					check_for_auto_incoming();
 					}
-                                if (dial_method == "MANUAL" && auto_dial_next_number == '1' && MD_channel_look != 1
+                                if ((dial_method == "MANUAL" || dial_method == "INBOUND_MAN") && auto_dial_next_number == '1' && MD_channel_look != 1
                                     && VD_live_customer_call != 1 && AutoDialWaiting != 0)
                                     {
                                         AutoDialNextNumber++;
@@ -12427,7 +12488,7 @@ $zi=2;
         </div>
         
         <div class="data">
-            <h1><a href="#" onclick="start_all_refresh();"><?php echo "$LOGfullname"; ?></a></h1>
+            <h1><a href="#" onclick="NoneInSessionCheck(1);"><?php echo "$LOGfullname"; ?></a></h1>
             <h3><?php echo "$VDcampaign_name <!-- ($VD_campaign)-->"; ?></h3>
             <h4><span id="status">LIVE</span></h4>
             <div class="actionLinks">

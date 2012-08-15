@@ -1268,6 +1268,10 @@ sub process_request
 											$VDCLSQL_status = "status='DROP',";
 											$VDCLSQL_queue_seconds = "queue_seconds='$VD_seconds',";
 											}
+										else if ($VD_status =~ /SENT/)
+											{
+											$VDCLSQL_status = "status='DROP',";
+											}
 										else
 											{
 											$VDCLSQL_status = '';
@@ -1276,7 +1280,8 @@ sub process_request
 
 										$VDCLSQL_update = "$VDCLSQL_status$VDCLSQL_term_reason$VDCLSQL_queue_seconds";
 										}
-
+									
+									
 									$VD_seconds = ($now_date_epoch - $VD_start_epoch);
 									$stmtA = "UPDATE vicidial_closer_log set $VDCLSQL_update end_epoch='$now_date_epoch',length_in_sec='$VD_seconds' where closecallid = '$VD_closecallid';";
 										if ($AGILOG) {$agi_string = "|$VDCLSQL_update|$VD_status|$VD_length_in_sec|$VD_term_reason|$VD_queue_seconds|\n|$stmtA|";   &agi_output;}
