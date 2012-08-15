@@ -1268,7 +1268,7 @@ sub process_request
 											$VDCLSQL_status = "status='DROP',";
 											$VDCLSQL_queue_seconds = "queue_seconds='$VD_seconds',";
 											}
-										else if ($VD_status =~ /SENT/)
+										elsif ($VD_status =~ /SENT/)
 											{
 											$VDCLSQL_status = "status='DROP',";
 											}
