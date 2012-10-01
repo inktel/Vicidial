@@ -8,3 +8,4 @@
 # 111220-1255 - Added fields to admin.php to capture max_calls_in_queue/max_calls_in_queue_filename options beginning on lines 1525,1803,14373,22615,22720,22857
 # 111220-1738 - Added 'MAXQUEUE' enum value to term_reason field in vicidial_closer_log
 # 120106-1653 - Disabled 'lagging' feature, which caused a ton of reporting issues in AST_VDauto_dial.pl line 1937
+# 120821-1231 - Added end_call_action campaign option to vicidial/admin.php

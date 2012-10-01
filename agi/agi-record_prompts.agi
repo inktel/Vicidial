@@ -38,6 +38,48 @@
 
 $US='_';
 
+# default path to astguiclient configuration file:
+$PATHconf =		'/etc/astguiclient.conf';
+
+open(conf, "$PATHconf") || die "can't open $PATHconf: $!\n";
+@conf = <conf>;
+close(conf);
+$i=0;
+foreach(@conf)
+	{
+	$line = $conf[$i];
+	$line =~ s/ |>|\n|\r|\t|\#.*|;.*//gi;
+	if ( ($line =~ /^PATHhome/) && ($CLIhome < 1) )
+		{$PATHhome = $line;   $PATHhome =~ s/.*=//gi;}
+	if ( ($line =~ /^PATHlogs/) && ($CLIlogs < 1) )
+		{$PATHlogs = $line;   $PATHlogs =~ s/.*=//gi;}
+	if ( ($line =~ /^PATHagi/) && ($CLIagi < 1) )
+		{$PATHagi = $line;   $PATHagi =~ s/.*=//gi;}
+	if ( ($line =~ /^PATHweb/) && ($CLIweb < 1) )
+		{$PATHweb = $line;   $PATHweb =~ s/.*=//gi;}
+	if ( ($line =~ /^PATHsounds/) && ($CLIsounds < 1) )
+		{$PATHsounds = $line;   $PATHsounds =~ s/.*=//gi;}
+	if ( ($line =~ /^PATHmonitor/) && ($CLImonitor < 1) )
+		{$PATHmonitor = $line;   $PATHmonitor =~ s/.*=//gi;}
+	if ( ($line =~ /^VARserver_ip/) && ($CLIserver_ip < 1) )
+		{$VARserver_ip = $line;   $VARserver_ip =~ s/.*=//gi;}
+	if ( ($line =~ /^VARDB_server/) && ($CLIDB_server < 1) )
+		{$VARDB_server = $line;   $VARDB_server =~ s/.*=//gi;}
+	if ( ($line =~ /^VARDB_database/) && ($CLIDB_database < 1) )
+		{$VARDB_database = $line;   $VARDB_database =~ s/.*=//gi;}
+	if ( ($line =~ /^VARDB_user/) && ($CLIDB_user < 1) )
+		{$VARDB_user = $line;   $VARDB_user =~ s/.*=//gi;}
+	if ( ($line =~ /^VARDB_pass/) && ($CLIDB_pass < 1) )
+		{$VARDB_pass = $line;   $VARDB_pass =~ s/.*=//gi;}
+	if ( ($line =~ /^VARDB_port/) && ($CLIDB_port < 1) )
+		{$VARDB_port = $line;   $VARDB_port =~ s/.*=//gi;}
+	$i++;
+	}
+
+if (!$VARDB_port) {$VARDB_port='3306';}
+
+use DBI;
+use Time::HiRes ('gettimeofday','usleep','sleep');  # necessary to have perl sleep command of less than one second
 use Asterisk::AGI;
 $AGI = new Asterisk::AGI;
 
@@ -87,36 +129,50 @@ $pin='';
 $stop_loop=0;
 $quit_program=0;
 $loop_counter=0;
-$REC_id = 85100000;
-$REC_next = 0;
 
-if (-e "/prompt_count.txt")
-	{
-	open(test, "/prompt_count.txt") || die "can't open /prompt_count.txt: $!\n";
-	@test = <test>;
-	close(test);
+#$REC_id = 85100000;
+#$REC_next = 0;
 
-	$REC_next = ($test[0] + 1);
-	$REC_id = ($REC_id + $REC_next);
+#if (-e "/prompt_count.txt")
+#	{
+#	open(test, "/prompt_count.txt") || die "can't open /prompt_count.txt: $!\n";
+#	@test = <test>;
+#	close(test);
 
-	open(test, ">/prompt_count.txt") || die "can't open /prompt_count.txt: $!\n";
-	print test "$REC_next";
-	close(test);
-	}
-else
-	{
-	open(test, ">/prompt_count.txt") || die "can't open /prompt_count.txt: $!\n";
-	print test "1";
-	close(test);
-	$REC_id = ($REC_id + 1);
-	}
+#	$REC_next = ($test[0] + 1);
+#	$REC_id = ($REC_id + $REC_next);
+
+#	open(test, ">/prompt_count.txt") || die "can't open /prompt_count.txt: $!\n";
+#	print test "$REC_next";
+#	close(test);
+#	}
+#else
+#	{
+#	open(test, ">/prompt_count.txt") || die "can't open /prompt_count.txt: $!\n";
+#	print test "1";
+#	close(test);
+#	$REC_id = ($REC_id + 1);
+#	}
 
 $session_recording = "$REC_id";
+$x_sounds_id = 0;
+$keep_file = 0;
+
 print STDERR "Recording ID: $REC_id\n";
 
 &welcome_1;
 
-
+if ($keep_file == 0)
+{
+    # delete record if user didn't complete session
+    $dbhA = DBI->connect("DBI:mysql:$VARDB_database:$VARDB_server:$VARDB_port", "$VARDB_user", "$VARDB_pass")
+            or die "Couldn't connect to database: " . DBI->errstr;
+    
+    $stmtA = "DELETE FROM x_sounds WHERE user_id='$pin' AND sound_id = '$x_sounds_id';";
+    $affected_rows = $dbhA->do($stmtA);
+           
+    $dbhA->disconnect();
+}
 
 print STDERR "DONE Exiting...\n";
 exit;
@@ -129,7 +185,8 @@ exit;
 sub welcome_1
 	{
 	##### Play welcome message and capture PIN ########################################################
-	while ( (length($pin) ne 4) && (!$stop_loop) )	
+	#while ( (length($pin) ne 4) && (!$stop_loop) )
+        while ( (length($pin) == 0) && (!$stop_loop) )
 		{
 		&enter_pin_number;
 		&log_transfer;
@@ -179,6 +236,32 @@ sub record_prompts
 	$digit='';
 	$interrupt_digit='';
 
+        # insert file prompt record in db and generate unique file name
+        $dbhA = DBI->connect("DBI:mysql:$VARDB_database:$VARDB_server:$VARDB_port", "$VARDB_user", "$VARDB_pass")
+                or die "Couldn't connect to database: " . DBI->errstr;
+
+        $stmtA = "INSERT INTO x_sounds SET server_ip='$VARserver_ip',campaign_id='NONE',user_id='$pin';";
+        $affected_rows = $dbhA->do($stmtA);
+
+        $stmtB = "SELECT LAST_INSERT_ID() LIMIT 1;";
+        $sthA = $dbhA->prepare($stmtB) or die "preparing: ",$dbhA->errstr;
+        $sthA->execute or die "executing: $stmtB ", $dbhA->errstr;
+        $sthArows=$sthA->rows;
+        
+        if ($sthArows > 0)
+                {
+                @aryA = $sthA->fetchrow_array;
+                $x_sounds_id = $aryA[0];
+                }
+        $sthA->finish();
+        
+        $session_recording = $x_sounds_id."_".$pin;
+        
+        $stmtA = "UPDATE x_sounds SET filename='$session_recording' WHERE user_id='$pin' AND sound_id = '$x_sounds_id';";
+        $affected_rows = $dbhA->do($stmtA);
+               
+        $dbhA->disconnect();
+            
 	$interrupt_digit = $AGI->record_file("$session_recording", "$format", '123456789*#', "$timeout", 1);
 
 	print STDERR "interrupt_digit |$interrupt_digit|\n";
@@ -275,10 +358,11 @@ sub verify_recording
 		if ($pin == '1')
 			{
 			$AGI->stream_file('auth-thankyou');   
-			$AGI->say_digits("$REC_id");
-			$AGI->stream_file('beep');   
-			$AGI->say_digits("$REC_id");
-			$AGI->stream_file('vm-goodbye');   
+			#$AGI->say_digits("$REC_id");
+			#$AGI->stream_file('beep');   
+			#$AGI->say_digits("$REC_id");
+			$AGI->stream_file('vm-goodbye');
+                        $keep_file = 1;
 			exit;
 			}
 		if ($pin == '2')
@@ -308,10 +392,26 @@ sub log_transfer
 
 sub lookup_account
 	{
-	if ($pin eq '4321')
-		{
-		$rec_count++;
-		} 
+            
+            $dbhA = DBI->connect("DBI:mysql:$VARDB_database:$VARDB_server:$VARDB_port", "$VARDB_user", "$VARDB_pass")
+                or die "Couldn't connect to database: " . DBI->errstr;
+
+            ### Validate that the user's id is valid in db
+            $stmtA = "SELECT user_id FROM vicidial_users where user_id = '$pin';";
+            $sthA = $dbhA->prepare($stmtA) or die "preparing: ",$dbhA->errstr;
+            $sthA->execute or die "executing: $stmtA ", $dbhA->errstr;
+            $sthArows=$sthA->rows;
+            if ($sthArows > 0)
+                {
+                    $rec_count++;
+                }
+            $sthA->finish();
+            $dbhA->disconnect();
+
+	#if ($pin eq '4321')
+	#	{
+	#	$rec_count++;
+	#	} 
 	}
 
 

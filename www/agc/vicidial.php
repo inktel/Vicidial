@@ -583,6 +583,7 @@ $ip = getenv("REMOTE_ADDR");
 $browser = getenv("HTTP_USER_AGENT");
 $script_name = getenv("SCRIPT_NAME");
 $server_name = getenv("SERVER_NAME");
+$server_addr = getenv("SERVER_ADDR");
 $server_port = getenv("SERVER_PORT");
 if (eregi("443",$server_port)) {$HTTPprotocol = 'https://';}
   else {$HTTPprotocol = 'http://';}
@@ -1264,7 +1265,7 @@ else
 				$HKstatusnames = substr("$HKstatusnames", 0, -1); 
 
 				##### grab the campaign settings
-				$stmt="SELECT park_ext,park_file_name,web_form_address,allow_closers,auto_dial_level,dial_timeout,dial_prefix,campaign_cid,campaign_vdad_exten,campaign_rec_exten,campaign_recording,campaign_rec_filename,campaign_script,get_call_launch,am_message_exten,xferconf_a_dtmf,xferconf_a_number,xferconf_b_dtmf,xferconf_b_number,alt_number_dialing,scheduled_callbacks,wrapup_seconds,wrapup_message,closer_campaigns,use_internal_dnc,allcalls_delay,omit_phone_code,agent_pause_codes_active,no_hopper_leads_logins,campaign_allow_inbound,manual_dial_list_id,default_xfer_group,xfer_groups,disable_alter_custphone,display_queue_count,manual_dial_filter,agent_clipboard_copy,use_campaign_dnc,three_way_call_cid,dial_method,three_way_dial_prefix,web_form_target,vtiger_screen_login,agent_allow_group_alias,default_group_alias,quick_transfer_button,prepopulate_transfer_preset,view_calls_in_queue,view_calls_in_queue_launch,call_requeue_button,pause_after_each_call,no_hopper_dialing,agent_dial_owner_only,agent_display_dialable_leads,web_form_address_two,agent_select_territories,crm_popup_login,crm_login_address,timer_action,timer_action_message,timer_action_seconds,start_call_url,dispo_call_url,xferconf_c_number,xferconf_d_number,xferconf_e_number,use_custom_cid,scheduled_callbacks_alert,scheduled_callbacks_count,manual_dial_override,blind_monitor_warning,blind_monitor_message,blind_monitor_filename,timer_action_destination,enable_xfer_presets,hide_xfer_number_to_dial,manual_dial_prefix,customer_3way_hangup_logging,customer_3way_hangup_seconds,customer_3way_hangup_action,ivr_park_call,manual_preview_dial,api_manual_dial,manual_dial_call_time_check,my_callback_option,per_call_notes,agent_lead_search,agent_lead_search_method,queuemetrics_phone_environment,auto_pause_precall,auto_pause_precall_code,auto_resume_precall,manual_dial_cid,custom_3way_button_transfer,callback_days_limit,campaign_name FROM vicidial_campaigns where campaign_id = '$VD_campaign';";
+				$stmt="SELECT park_ext,park_file_name,web_form_address,allow_closers,auto_dial_level,dial_timeout,dial_prefix,campaign_cid,campaign_vdad_exten,campaign_rec_exten,campaign_recording,campaign_rec_filename,campaign_script,get_call_launch,am_message_exten,xferconf_a_dtmf,xferconf_a_number,xferconf_b_dtmf,xferconf_b_number,alt_number_dialing,scheduled_callbacks,wrapup_seconds,wrapup_message,closer_campaigns,use_internal_dnc,allcalls_delay,omit_phone_code,agent_pause_codes_active,no_hopper_leads_logins,campaign_allow_inbound,manual_dial_list_id,default_xfer_group,xfer_groups,disable_alter_custphone,display_queue_count,manual_dial_filter,agent_clipboard_copy,use_campaign_dnc,three_way_call_cid,dial_method,three_way_dial_prefix,web_form_target,vtiger_screen_login,agent_allow_group_alias,default_group_alias,quick_transfer_button,prepopulate_transfer_preset,view_calls_in_queue,view_calls_in_queue_launch,call_requeue_button,pause_after_each_call,no_hopper_dialing,agent_dial_owner_only,agent_display_dialable_leads,web_form_address_two,agent_select_territories,crm_popup_login,crm_login_address,timer_action,timer_action_message,timer_action_seconds,start_call_url,dispo_call_url,xferconf_c_number,xferconf_d_number,xferconf_e_number,use_custom_cid,scheduled_callbacks_alert,scheduled_callbacks_count,manual_dial_override,blind_monitor_warning,blind_monitor_message,blind_monitor_filename,timer_action_destination,enable_xfer_presets,hide_xfer_number_to_dial,manual_dial_prefix,customer_3way_hangup_logging,customer_3way_hangup_seconds,customer_3way_hangup_action,ivr_park_call,manual_preview_dial,api_manual_dial,manual_dial_call_time_check,my_callback_option,per_call_notes,agent_lead_search,agent_lead_search_method,queuemetrics_phone_environment,auto_pause_precall,auto_pause_precall_code,auto_resume_precall,manual_dial_cid,custom_3way_button_transfer,callback_days_limit,campaign_name,end_call_action FROM vicidial_campaigns where campaign_id = '$VD_campaign';";
 				$rslt=mysql_query($stmt, $link);
 				if ($mel > 0) {mysql_error_logging($NOW_TIME,$link,$mel,$stmt,'01013',$VD_login,$server_ip,$session_name,$one_mysql_log);}
 				if ($DB) {echo "$stmt\n";}
@@ -1365,6 +1366,7 @@ else
 				$custom_3way_button_transfer =	$row[93];
 				$callback_days_limit =		$row[94];
                                 $VDcampaign_name    =           $row[95];
+                                $end_call_action    =           $row[96];
 
 				if ( ($VU_agent_lead_search_override == 'ENABLED') or ($VU_agent_lead_search_override == 'DISABLED') )
 					{$agent_lead_search = $VU_agent_lead_search_override;}
@@ -1422,6 +1424,10 @@ else
 					{$quick_transfer_button_enabled=1;}
 				if (preg_match("/LOCKED/",$quick_transfer_button))
 					{$quick_transfer_button_locked=1;}
+                                        
+                                $end_call_action_enabled=0;
+				if (preg_match("/IN_GROUP|PRESET_1|PRESET_2|PRESET_3|PRESET_4|PRESET_5/",$end_call_action))
+					{$end_call_action_enabled=1;}
 
 				$custom_3way_button_transfer_enabled=0;
 				$custom_3way_button_transfer_park=0;
@@ -3047,6 +3053,8 @@ if ($enable_fast_refresh < 1) {echo "\tvar refresh_interval = 1000;\n";}
 	var quick_transfer_button_enabled = '<?php echo $quick_transfer_button_enabled ?>';
 	var quick_transfer_button_orig = '';
 	var quick_transfer_button_locked = '<?php echo $quick_transfer_button_locked ?>';
+        var end_call_action = '<?php echo $end_call_action ?>';
+	var end_call_action_enabled = '<?php echo $end_call_action_enabled ?>';
 	var prepopulate_transfer_preset = '<?php echo $prepopulate_transfer_preset ?>';
 	var prepopulate_transfer_preset_enabled = '<?php echo $prepopulate_transfer_preset_enabled ?>';
 	var view_calls_in_queue = '<?php echo $view_calls_in_queue ?>';
@@ -3748,7 +3756,8 @@ if ($enable_fast_refresh < 1) {echo "\tvar refresh_interval = 1000;\n";}
 						MD_channel_look=1;
 						XDcheck = 'YES';
 
-                //      document.getElementById("HangupXferLine").innerHTML ="<a href=\"#\" onclick=\"xfercall_send_hangup();return false;\"><img src=\"./images/vdc_XB_hangupxferline.gif\" border=\"0\" alt=\"Hangup Xfer Line\" /></a>";
+                                document.getElementById("HangupXferLine").innerHTML ="<a href=\"#\" onclick=\"xfercall_send_hangup();return false;\">Hangup 3rd Party</a>";
+                                document.getElementById("HangupXferLine").className = "button blue";
 						}
 					}
 				}
@@ -4185,10 +4194,12 @@ function set_length(SLnumber,SLlength_goal,SLdirection)
 								//	{ document.images['livecall'].src = image_livecall_DEAD.src;}
                                                                 document.getElementById('livecall').innerHTML = 'Caller Hungup';
                                                                 document.getElementById('livecall').className = 'dead';
+                                                                
+                                                                // reset hangup in case we had an End Call action
+                                                                document.getElementById("HangupControl").innerHTML = "<a href=\"#\" onclick=\"dialedcall_send_hangup();\"><img src=\"./images/x-endcall-on.png\" border=\"0\" alt=\"Hangup Customer\" /><span>End Call</span></a>";
+                                
 								CheckDEADcallON=1;
 
-                                                                // DisableControls();
-                                                                
 								if ( (xfer_in_call > 0) && (customer_3way_hangup_logging=='ENABLED') )
 									{
 									customer_3way_hangup_counter_trigger=1;
@@ -4551,12 +4562,26 @@ function set_length(SLnumber,SLlength_goal,SLdirection)
 // ################################################################################
 // Send Redirect command for live call to Manager sends phone name where call is going to
 // Covers the following types: XFER, VMAIL, ENTRY, CONF, PARK, FROMPARK, XfeRLOCAL, XfeRINTERNAL, XfeRBLIND, VfeRVMAIL, XfeRPARK, XfeRFROMPARK
-	function mainxfer_send_redirect(taskvar,taskxferconf,taskserverip,taskdebugnote,taskdispowindow,tasklockedquick) 
+	function mainxfer_send_redirect(taskvar,taskxferconf,taskserverip,taskdebugnote,taskdispowindow,tasklockedquick,taskispreset) 
 		{
 		blind_transfer=1;
 		var consultativexfer_checked = 0;
 		if (document.vicidial_form.consultativexfer.checked==true)
 			{consultativexfer_checked = 1;}
+                        
+                if (taskispreset == 1 && (quick_transfer_button_enabled == 1 || end_call_action_enabled == 1)) //ensures that we do not pick up an old transfer number value
+                {
+                    if ( (quick_transfer_button == 'PRESET_1') || (quick_transfer_button == 'LOCKED_PRESET_1') || (end_call_action == 'PRESET_1') )
+                            {document.vicidial_form.xfernumber.value = CalL_XC_a_NuMber;   document.vicidial_form.xfername.value='D1';}
+                    if ( (quick_transfer_button == 'PRESET_2') || (quick_transfer_button == 'LOCKED_PRESET_2') || (end_call_action == 'PRESET_2') )
+                            {document.vicidial_form.xfernumber.value = CalL_XC_b_NuMber;   document.vicidial_form.xfername.value='D2';}
+                    if ( (quick_transfer_button == 'PRESET_3') || (quick_transfer_button == 'LOCKED_PRESET_3') || (end_call_action == 'PRESET_3') )
+                            {document.vicidial_form.xfernumber.value = CalL_XC_c_NuMber;   document.vicidial_form.xfername.value='D3';}
+                    if ( (quick_transfer_button == 'PRESET_4') || (quick_transfer_button == 'LOCKED_PRESET_4') || (end_call_action == 'PRESET_4') )
+                            {document.vicidial_form.xfernumber.value = CalL_XC_d_NuMber;   document.vicidial_form.xfername.value='D4';}
+                    if ( (quick_transfer_button == 'PRESET_5') || (quick_transfer_button == 'LOCKED_PRESET_5') || (end_call_action == 'PRESET_5') )
+                            {document.vicidial_form.xfernumber.value = CalL_XC_e_NuMber;   document.vicidial_form.xfername.value='D5';}
+                }
 
 	//	conf_dialed=1;
 		if (auto_dial_level == 0) {RedirecTxFEr = 1;}
@@ -5617,6 +5642,7 @@ function set_length(SLnumber,SLlength_goal,SLdirection)
 					var MDlookResponse_array=MDlookResponse.split("\n");
 					var MDlookCID = MDlookResponse_array[0];
 					var regMDL = new RegExp("^Local","ig");
+                                        
 					if (MDlookCID == "NO")
 						{
 						MD_ring_secondS++;
@@ -5760,7 +5786,7 @@ function set_length(SLnumber,SLlength_goal,SLdirection)
 									if (quick_transfer_button_locked > 0)
 										{quick_transfer_button_orig = default_xfer_group;}
 
-                                    document.getElementById("QuickXfer").innerHTML = "<a href=\"#\" onclick=\"mainxfer_send_redirect('XfeRLOCAL','" + lastcustchannel + "','" + lastcustserverip + "','','','" + quick_transfer_button_locked + "');return false;\"><img src=\"./images/x-transfer-quick.png\" border=\"0\" alt=\"QUICK TRANSFER\" /><br /><span>Quick X-fer</span></a>";
+                                    document.getElementById("QuickXfer").innerHTML = "<a href=\"#\" onclick=\"mainxfer_send_redirect('XfeRLOCAL','" + lastcustchannel + "','" + lastcustserverip + "','','','" + quick_transfer_button_locked + "',1);return false;\"><img src=\"./images/x-transfer-quick.png\" border=\"0\" alt=\"QUICK TRANSFER\" /><br /><span>Quick X-fer</span></a>";
 									}
 								if (prepopulate_transfer_preset_enabled > 0)
 									{
@@ -5775,8 +5801,13 @@ function set_length(SLnumber,SLlength_goal,SLdirection)
 									if ( (prepopulate_transfer_preset == 'PRESET_5') || (prepopulate_transfer_preset == 'LOCKED_PRESET_5') )
 										{document.vicidial_form.xfernumber.value = CalL_XC_e_NuMber;   document.vicidial_form.xfername.value='D5';}
 									}
-								if ( (quick_transfer_button == 'PRESET_1') || (quick_transfer_button == 'PRESET_2') || (quick_transfer_button == 'PRESET_3') || (quick_transfer_button == 'PRESET_4') || (quick_transfer_button == 'PRESET_5') || (quick_transfer_button == 'LOCKED_PRESET_1') || (quick_transfer_button == 'LOCKED_PRESET_2') || (quick_transfer_button == 'LOCKED_PRESET_3') || (quick_transfer_button == 'LOCKED_PRESET_4') || (quick_transfer_button == 'LOCKED_PRESET_5') )
+								if ( (quick_transfer_button == 'PRESET_1') || (quick_transfer_button == 'PRESET_2') || (quick_transfer_button == 'PRESET_3') || (quick_transfer_button == 'PRESET_4') || (quick_transfer_button == 'PRESET_5') ||
+                                                                        (quick_transfer_button == 'LOCKED_PRESET_1') || (quick_transfer_button == 'LOCKED_PRESET_2') || (quick_transfer_button == 'LOCKED_PRESET_3') || (quick_transfer_button == 'LOCKED_PRESET_4') || (quick_transfer_button == 'LOCKED_PRESET_5') ||
+                                                                        (end_call_action == 'PRESET_1') || (end_call_action == 'PRESET_2') || (end_call_action == 'PRESET_3') || (end_call_action == 'PRESET_4') || (end_call_action == 'PRESET_5'))
 									{
+                                                                        if (quick_transfer_button_enabled == 0 && end_call_action_enabled == 1)
+                                                                            {quick_transfer_button = end_call_action;}
+                                                                            
 									if ( (quick_transfer_button == 'PRESET_1') || (quick_transfer_button == 'LOCKED_PRESET_1') )
 										{document.vicidial_form.xfernumber.value = CalL_XC_a_NuMber;   document.vicidial_form.xfername.value='D1';}
 									if ( (quick_transfer_button == 'PRESET_2') || (quick_transfer_button == 'LOCKED_PRESET_2') )
@@ -5791,8 +5822,16 @@ function set_length(SLnumber,SLlength_goal,SLdirection)
 									if (quick_transfer_button_locked > 0)
 										{quick_transfer_button_orig = document.vicidial_form.xfernumber.value;}
 
-                                    document.getElementById("QuickXfer").innerHTML = "<a href=\"#\" onclick=\"mainxfer_send_redirect('XfeRBLIND','" + lastcustchannel + "','" + lastcustserverip + "','','','" + quick_transfer_button_locked + "');return false;\"><img src=\"./images/x-transfer-quick.png\" border=\"0\" alt=\"QUICK TRANSFER\" /><br /><span>Quick X-fer</span></a>";
-									}
+                                                                        if (quick_transfer_button_enabled > 0)
+                                                                            {
+                                                                                document.getElementById("QuickXfer").innerHTML = "<a href=\"#\" onclick=\"mainxfer_send_redirect('XfeRBLIND','" + lastcustchannel + "','" + lastcustserverip + "','','','" + quick_transfer_button_locked + "',1);return false;\"><img src=\"./images/x-transfer-quick.png\" border=\"0\" alt=\"QUICK TRANSFER\" /><br /><span>Quick X-fer</span></a>";
+                                                                            }
+									
+                                                                            if (end_call_action_enabled > 0 && document.vicidial_form.xfernumber.value.length > 0)
+                                                                            {
+                                                                                document.getElementById("HangupControl").innerHTML = "<a href=\"#\" onclick=\"mainxfer_send_redirect('XfeRBLIND','" + lastcustchannel + "','" + lastcustserverip + "','','','" + quick_transfer_button_locked + "',1);return false;\"><img src=\"./images/x-endcall-on.png\" border=\"0\" alt=\"Hangup Customer\" /><span>End Call</span></a>";
+                                                                            }
+                                                                        }
 
 								if (custom_3way_button_transfer_enabled > 0)
 									{
@@ -7366,7 +7405,7 @@ function set_length(SLnumber,SLlength_goal,SLdirection)
 								if (quick_transfer_button_locked > 0)
 									{quick_transfer_button_orig = default_xfer_group;}
 
-                                                                document.getElementById("QuickXfer").innerHTML = "<a href=\"#\" onclick=\"mainxfer_send_redirect('XfeRLOCAL','" + lastcustchannel + "','" + lastcustserverip + "','','','" + quick_transfer_button_locked + "');return false;\"><img src=\"./images/x-transfer-quick.png\" border=\"0\" alt=\"QUICK TRANSFER\" /><br /><span>Quick X-fer</span></a>";
+                                                                document.getElementById("QuickXfer").innerHTML = "<a href=\"#\" onclick=\"mainxfer_send_redirect('XfeRLOCAL','" + lastcustchannel + "','" + lastcustserverip + "','','','" + quick_transfer_button_locked + "',1);return false;\"><img src=\"./images/x-transfer-quick.png\" border=\"0\" alt=\"QUICK TRANSFER\" /><br /><span>Quick X-fer</span></a>";
 								}
 							if (prepopulate_transfer_preset_enabled > 0)
 								{
@@ -7381,8 +7420,14 @@ function set_length(SLnumber,SLlength_goal,SLdirection)
 								if ( (prepopulate_transfer_preset == 'PRESET_5') || (prepopulate_transfer_preset == 'LOCKED_PRESET_5') )
 									{document.vicidial_form.xfernumber.value = CalL_XC_e_NuMber;   document.vicidial_form.xfername.value='D5';}
 								}
-							if ( (quick_transfer_button == 'PRESET_1') || (quick_transfer_button == 'PRESET_2') || (quick_transfer_button == 'PRESET_3') || (quick_transfer_button == 'PRESET_4') || (quick_transfer_button == 'PRESET_5') || (quick_transfer_button == 'LOCKED_PRESET_1') || (quick_transfer_button == 'LOCKED_PRESET_2') || (quick_transfer_button == 'LOCKED_PRESET_3') || (quick_transfer_button == 'LOCKED_PRESET_4') || (quick_transfer_button == 'LOCKED_PRESET_5') )
+							if ( (quick_transfer_button == 'PRESET_1') || (quick_transfer_button == 'PRESET_2') || (quick_transfer_button == 'PRESET_3') || (quick_transfer_button == 'PRESET_4') || (quick_transfer_button == 'PRESET_5') ||
+                                                                (quick_transfer_button == 'LOCKED_PRESET_1') || (quick_transfer_button == 'LOCKED_PRESET_2') || (quick_transfer_button == 'LOCKED_PRESET_3') || (quick_transfer_button == 'LOCKED_PRESET_4') || (quick_transfer_button == 'LOCKED_PRESET_5') ||
+                                                                (end_call_action == 'PRESET_1') || (end_call_action == 'PRESET_2') || (end_call_action == 'PRESET_3') || (end_call_action == 'PRESET_4') || (end_call_action == 'PRESET_5'))
 								{
+                                                                    
+                                                                if (quick_transfer_button_enabled == 0 && end_call_action_enabled == 1)
+                                                                    {quick_transfer_button = end_call_action;}
+                                                                            
 								if ( (quick_transfer_button == 'PRESET_1') || (quick_transfer_button == 'LOCKED_PRESET_1') )
 									{document.vicidial_form.xfernumber.value = CalL_XC_a_NuMber;   document.vicidial_form.xfername.value='D1';}
 								if ( (quick_transfer_button == 'PRESET_2') || (quick_transfer_button == 'LOCKED_PRESET_2') )
@@ -7396,7 +7441,15 @@ function set_length(SLnumber,SLlength_goal,SLdirection)
 								if (quick_transfer_button_locked > 0)
 									{quick_transfer_button_orig = document.vicidial_form.xfernumber.value;}
 
-                                                                document.getElementById("QuickXfer").innerHTML = "<a href=\"#\" onclick=\"mainxfer_send_redirect('XfeRBLIND','" + lastcustchannel + "','" + lastcustserverip + "','','','" + quick_transfer_button_locked + "');return false;\"><img src=\"./images/x-transfer-quick.png\" border=\"0\" alt=\"QUICK TRANSFER\" /><br /><span>Quick X-fer</span></a>";
+                                                                if (quick_transfer_button_enabled > 0)
+                                                                    {
+                                                                        document.getElementById("QuickXfer").innerHTML = "<a href=\"#\" onclick=\"mainxfer_send_redirect('XfeRBLIND','" + lastcustchannel + "','" + lastcustserverip + "','','','" + quick_transfer_button_locked + "',1);return false;\"><img src=\"./images/x-transfer-quick.png\" border=\"0\" alt=\"QUICK TRANSFER\" /><br /><span>Quick X-fer</span></a>";
+                                                                    }
+                                                                    
+                                                                if (end_call_action_enabled > 0 && document.vicidial_form.xfernumber.value.length > 0)
+                                                                    {
+                                                                        document.getElementById("HangupControl").innerHTML = "<a href=\"#\" onclick=\"mainxfer_send_redirect('XfeRBLIND','" + lastcustchannel + "','" + lastcustserverip + "','','','" + quick_transfer_button_locked + "',1);return false;\"><img src=\"./images/x-endcall-on.png\" border=\"0\" alt=\"Hangup Customer\" /><span>End Call</span></a>";
+                                                                    }
 								}
 
 							if (custom_3way_button_transfer_enabled > 0)
@@ -7775,6 +7828,7 @@ function set_length(SLnumber,SLlength_goal,SLdirection)
 // Send Hangup command for customer call connected to the conference now to Manager
 	function dialedcall_send_hangup(dispowindow,hotkeysused,altdispo,nodeletevdac) 
 		{
+                                
 		if (VDCL_group_id.length > 1)
 			{var group = VDCL_group_id;}
 		else
@@ -8146,7 +8200,7 @@ function set_length(SLnumber,SLlength_goal,SLdirection)
 			xmlhttp.setRequestHeader('Content-Type','application/x-www-form-urlencoded; charset=UTF-8');
 			xmlhttp.send(custhangup_query); 
 			xmlhttp.onreadystatechange = function() 
-				{ 
+				{
 				if (xmlhttp.readyState == 4 && xmlhttp.status == 200) 
 					{
 					Nactiveext = null;
@@ -12224,12 +12278,14 @@ function phone_number_format(formatphone) {
                                 hideDiv('MainPanelCustInfo');
                                 hideDiv('ActionPanel');
                                 showDiv('TransferMain');
-                                document.getElementById("XferControl").innerHTML = "<a href=\"#\" onclick=\"ShoWTransferMain('OFF','YES');\"><img src=\"./images/x-transfer-on.png\" border=\"0\" alt=\"Transfer - Conference\" /><span>X-fer or Conf.</span></a>";
+                                /*
+                                 document.getElementById("XferControl").innerHTML = "<a href=\"#\" onclick=\"ShoWTransferMain('OFF','YES');\"><img src=\"./images/x-transfer-on.png\" border=\"0\" alt=\"Transfer - Conference\" /><span>X-fer or Conf.</span></a>";
                                 
 				if ( (quick_transfer_button_enabled > 0) && (quick_transfer_button_locked < 1) )
                                 {document.getElementById("QuickXfer").innerHTML = "<a href=\"#\" style=\"opacity:.15;\" disabled><img class=\"disabled_img\" src=\"./images/x-transfer-quick.png\" border=\"0\" alt=\"QUICK TRANSFER\" /><br /><span>Quick X-fer</span></a>";}
 				if (custom_3way_button_transfer_enabled > 0)
                                 {document.getElementById("CustomXfer").innerHTML = "<a href=\"#\" style=\"opacity:.15;\" disabled><img class=\"disabled_img\" src=\"./images/x-transfer-custom.png\" border=\"0\" alt=\"Custom Transfer\" /><br /><span>Custom X-fer</span></a>";}
+                                */
 				}
 			else
 				{
@@ -12243,24 +12299,28 @@ function phone_number_format(formatphone) {
                                 hideDiv('TransferMain');
 				//hideDiv('agentdirectlink');
                                 
-				if (showoffvar == 'YES')
-					{
-                                        document.getElementById("XferControl").innerHTML = "<a href=\"#\" onclick=\"ShoWTransferMain('ON');\"><img src=\"./images/x-transfer-on.png\" border=\"0\" alt=\"Transfer - Conference\" /><span>X-fer or Conf.</span></a>";
-
-					if ( (quick_transfer_button == 'IN_GROUP') || (quick_transfer_button == 'LOCKED_IN_GROUP') )
-						{
-                                                document.getElementById("QuickXfer").innerHTML = "<a href=\"#\" onclick=\"mainxfer_send_redirect('XfeRLOCAL','" + lastcustchannel + "','" + lastcustserverip + "','','','" + quick_transfer_button_locked + "');return false;\"><img src=\"./images/x-transfer-quick.png\" border=\"0\" alt=\"QUICK TRANSFER\" /><br /><span>Quick X-fer</span></a>";
-						}
-					if ( (quick_transfer_button == 'PRESET_1') || (quick_transfer_button == 'PRESET_2') || (quick_transfer_button == 'PRESET_3') || (quick_transfer_button == 'PRESET_4') || (quick_transfer_button == 'PRESET_5') || (quick_transfer_button == 'LOCKED_PRESET_1') || (quick_transfer_button == 'LOCKED_PRESET_2') || (quick_transfer_button == 'LOCKED_PRESET_3') || (quick_transfer_button == 'LOCKED_PRESET_4') || (quick_transfer_button == 'LOCKED_PRESET_5') )
-						{
-                                                document.getElementById("QuickXfer").innerHTML = "<a href=\"#\" onclick=\"mainxfer_send_redirect('XfeRBLIND','" + lastcustchannel + "','" + lastcustserverip + "','','','" + quick_transfer_button_locked + "');return false;\"><img src=\"./images/x-transfer-quick.png\" border=\"0\" alt=\"QUICK TRANSFER\" /><br /><span>Quick X-fer</span></a>";
-						}
-					if (custom_3way_button_transfer_enabled > 0)
-						{
-                                                document.getElementById("CustomXfer").innerHTML = "<a href=\"#\" onclick=\"custom_button_transfer();return false;\"><img src=\"./images/x-transfer-custom.png\" border=\"0\" alt=\"Custom Transfer\" /><br /><span>Custom X-fer</span></a>";
-						}
-					}
+				//if (showoffvar == 'YES')
+					//{
+                                        //document.getElementById("XferControl").innerHTML = "<a href=\"#\" onclick=\"ShoWTransferMain('ON');\"><img src=\"./images/x-transfer-on.png\" border=\"0\" alt=\"Transfer - Conference\" /><span>X-fer or Conf.</span></a>";
+					//}
 				}
+                                
+                        if (quick_transfer_button_enabled > 0)
+                        {
+                            if ( (quick_transfer_button == 'IN_GROUP') || (quick_transfer_button == 'LOCKED_IN_GROUP') )
+                                    {
+                                    document.getElementById("QuickXfer").innerHTML = "<a href=\"#\" onclick=\"mainxfer_send_redirect('XfeRLOCAL','" + lastcustchannel + "','" + lastcustserverip + "','','','" + quick_transfer_button_locked + "',1);return false;\"><img src=\"./images/x-transfer-quick.png\" border=\"0\" alt=\"QUICK TRANSFER\" /><br /><span>Quick X-fer</span></a>";
+                                    }
+                            if ( (quick_transfer_button == 'PRESET_1') || (quick_transfer_button == 'PRESET_2') || (quick_transfer_button == 'PRESET_3') || (quick_transfer_button == 'PRESET_4') || (quick_transfer_button == 'PRESET_5') || (quick_transfer_button == 'LOCKED_PRESET_1') || (quick_transfer_button == 'LOCKED_PRESET_2') || (quick_transfer_button == 'LOCKED_PRESET_3') || (quick_transfer_button == 'LOCKED_PRESET_4') || (quick_transfer_button == 'LOCKED_PRESET_5') )
+                                    {
+                                    document.getElementById("QuickXfer").innerHTML = "<a href=\"#\" onclick=\"mainxfer_send_redirect('XfeRBLIND','" + lastcustchannel + "','" + lastcustserverip + "','','','" + quick_transfer_button_locked + "',1);return false;\"><img src=\"./images/x-transfer-quick.png\" border=\"0\" alt=\"QUICK TRANSFER\" /><br /><span>Quick X-fer</span></a>";
+                                    }
+                        }
+                        if (custom_3way_button_transfer_enabled > 0)
+                                {
+                                document.getElementById("CustomXfer").innerHTML = "<a href=\"#\" onclick=\"custom_button_transfer();return false;\"><img src=\"./images/x-transfer-custom.png\" border=\"0\" alt=\"Custom Transfer\" /><br /><span>Custom X-fer</span></a>";
+                                }
+                                                
 			if (three_way_call_cid == 'AGENT_CHOOSE')
 				{
 				if ( (active_group_alias.length < 1) && (LIVE_default_group_alias.length > 1) && (LIVE_caller_id_number.length > 3) )
@@ -12568,6 +12628,7 @@ $zi=2;
                     if ($agent_lead_search == 'ENABLED')
                             {echo "<span class=\"action\"><a href=\"#\" onclick=\"OpeNSearcHForMDisplaYBox();return false;\"><img src=\"./images/x-addressbook-on.png\" alt=\"Census database\" title=\"Census database\" border=\"0\" /><span>Population Search</span></a></span>";}
                     ?>
+                    <?php echo "<span style=\"text-align:center;color:#eee\" class=\"action\">$server_addr</span>"; ?>
                     
                     <span id="AgentViewSpan" style="overflow: scroll;">
                         <table cellpadding="0" cellspacing="0" border="0">
@@ -13069,11 +13130,11 @@ $zi=2;
     $zi++;
     if ($webphone_location == 'bar')
             {
-            echo "<span style=\"position:absolute;left:0px;top:46px;overflow:hidden;z-index:$zi;background-color:$SIDEBAR_COLOR;\" id=\"webphoneSpan\"><span id=\"webphonecontent\" style=\"overflow:hidden;\">$webphone_content</span></span>\n";
+            echo "<span style=\"visibility:hidden;position:absolute;left:0px;top:46px;overflow:hidden;z-index:$zi;background-color:$SIDEBAR_COLOR;\" id=\"webphoneSpan\"><span id=\"webphonecontent\" style=\"overflow:hidden;\">$webphone_content</span></span>\n";
             }
     else
             {
-        echo "<span style=\"position:absolute;left:0px;top:15px;height:500px;overflow:scroll;z-index:$zi;background-color:$SIDEBAR_COLOR;\" id=\"webphoneSpan\"><table cellpadding=\"$webphone_pad\" cellspacing=\"0\" border=\"0\"><tr><td width=\"5px\" rowspan=\"2\">&nbsp;</td><td align=\"center\"><font class=\"body_text\">
+        echo "<span style=\"visibility:hidden;position:absolute;left:0px;top:15px;height:500px;overflow:scroll;z-index:$zi;background-color:$SIDEBAR_COLOR;\" id=\"webphoneSpan\"><table cellpadding=\"$webphone_pad\" cellspacing=\"0\" border=\"0\"><tr><td width=\"5px\" rowspan=\"2\">&nbsp;</td><td align=\"center\"><font class=\"body_text\">
         Web Phone: &nbsp; </font></td></tr><tr><td align=\"center\"><span id=\"webphonecontent\">$webphone_content</span></td></tr></table></span>\n";
             }
     ?>
@@ -13553,7 +13614,7 @@ $zi=2;
 
 <form name="alert_form" id="alert_form" onsubmit="return false;">
     <div id="content" class="clearfix" style="padding-top:0px;">
-        <span style="z-index:<?php $zi++; echo $zi ?>;" class="promptBox" id="AlertBox">
+        <span style="visibility: hidden;z-index:<?php $zi++; echo $zi ?>;" class="promptBox" id="AlertBox">
             <table class="centerTable" style="margin-left: 25%;" border="2" bgcolor="#666666" cellpadding="2" cellspacing="1">
                 <tr><td bgcolor="#f0f0f0" align="left">
                 <font face="arial,helvetica" size="2"><b> &nbsp; Agent Alert!</b></font>
