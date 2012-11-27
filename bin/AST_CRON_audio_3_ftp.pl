@@ -340,25 +340,6 @@ $transfered_files = 0;
 
 ### Loop through files a second time to gather filesizes again 5 seconds later
 $i=0;
-$p = Net::Ping->new();
-$ping_good = $p->ping("$VARFTP_host");
-
-if (!$ping_good)
-    {
-    $p = Net::Ping->new("icmp");
-    $ping_good = $p->ping("$VARFTP_host");
-    }
-    
-if (!$ping_good)
-    {
-        if($DB){print "ERROR: Could not ping server $VARFTP_host\n";}
-        exit;
-    }
-    
-$ftp = Net::FTP->new("$VARFTP_host", Port => $VARFTP_port, Debug => $FTPdb);
-$ftp->login("$VARFTP_user","$VARFTP_pass");
-$ftp->cwd("$VARFTP_dir");
-
 foreach(@FILES)
 	{
 	$FILEsize2[$i] = 0;
@@ -400,39 +381,56 @@ foreach(@FILES)
 			if ($DB) {print "|$recording_id|$start_date|$ALLfile|     |$SQLfile|\n";}
 
 	### BEGIN Remote file transfer
-                        $transfered_files++;
-                        
-                        $start_date_PATH='';
-                        $FTPdb=0;
-                        if ($DBX>0) {$FTPdb=1;}
-                        
-                        if ($NODATEDIR < 1)
-                                {
-                                $ftp->mkdir("$start_date");
-                                $ftp->cwd("$start_date");
-                                $start_date_PATH = "$start_date/";
-                                $NODATEDIR = 1; ### already created, do not recreate
-                                }
-                        $ftp->binary();
-                        $ftp->put("$dir2/$ALLfile", "$ALLfile");
+			$p = Net::Ping->new();
+			$ping_good = $p->ping("$VARFTP_host");
 
-                        $stmtA = "UPDATE recording_log set location='$VARHTTP_path/$start_date_PATH$ALLfile' where recording_id='$recording_id';";
-                                if($DB){print STDERR "\n|$stmtA|\n";}
-                        $affected_rows = $dbhA->do($stmtA); #  or die  "Couldn't execute query:|$stmtA|\n";
+			if (!$ping_good)
+				{
+				$p = Net::Ping->new("icmp");
+				$ping_good = $p->ping("$VARFTP_host");
+				}
 
-                        if (!$T)
-                                {
-                                `mv -f "$dir2/$ALLfile" "$PATHDONEmonitor/FTP/$ALLfile"`;
-                                }
-                        
-                        if($DBX){print STDERR "Transfered $transfered_files files\n";}
-                        
-                        if ( $transfered_files == $file_limit) 
-                                {
-                                        if($DBX){print STDERR "Transfer limit of $file_limit reached breaking out of the loop\n";}
-                                        last();
-                                }
+			if ($ping_good)
+				{	
+				$transfered_files++;
 				
+				$start_date_PATH='';
+				$FTPdb=0;
+				if ($DBX>0) {$FTPdb=1;}
+				$ftp = Net::FTP->new("$VARFTP_host", Port => $VARFTP_port, Debug => $FTPdb);
+				$ftp->login("$VARFTP_user","$VARFTP_pass");
+				$ftp->cwd("$VARFTP_dir");
+				if ($NODATEDIR < 1)
+					{
+					$ftp->mkdir("$start_date");
+					$ftp->cwd("$start_date");
+					$start_date_PATH = "$start_date/";
+					}
+				$ftp->binary();
+				$ftp->put("$dir2/$ALLfile", "$ALLfile");
+				$ftp->quit;
+
+				$stmtA = "UPDATE recording_log set location='$VARHTTP_path/$start_date_PATH$ALLfile' where recording_id='$recording_id';";
+					if($DB){print STDERR "\n|$stmtA|\n";}
+				$affected_rows = $dbhA->do($stmtA); #  or die  "Couldn't execute query:|$stmtA|\n";
+
+				if (!$T)
+					{
+					`mv -f "$dir2/$ALLfile" "$PATHDONEmonitor/FTP/$ALLfile"`;
+					}
+				
+				if($DBX){print STDERR "Transfered $transfered_files files\n";}
+				
+				if ( $transfered_files == $file_limit) 
+					{
+						if($DBX){print STDERR "Transfer limit of $file_limit reached breaking out of the loop\n";}
+						last();
+					}
+				}
+			else
+				{
+				if($DB){print "ERROR: Could not ping server $VARFTP_host\n";}
+				}
 	### END Remote file transfer
 
 			### sleep for twenty hundredths of a second to not flood the server with disk activity
@@ -442,7 +440,6 @@ foreach(@FILES)
 		}
 	$i++;
 	}
-$ftp->quit;
 
 if ($DB) {print "DONE... EXITING\n\n";}
 
