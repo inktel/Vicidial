@@ -3025,7 +3025,7 @@ while ( ($drop_timer <= $DROP_TIME) && ($wait_in_queue > 0) )
 			$dbhP=$dbhA;   $mysql_count='02083';   $MEL_aff_rows=$affected_rows;   &mysql_error_logging;
 		if ($AGILOG) {$agi_string = "--    VDAC posttime record: |$affected_rows|$FDtsSQLdate|$callerid|";   &agi_output;}
 
-		$stmtA = "SELECT queue_seconds FROM vicidial_closer_log where campaign_id = '$channel_group' and status NOT IN('NANQUE') order by call_date desc limit 5;";
+		$stmtA = "SELECT queue_seconds FROM vicidial_closer_log where campaign_id = '$channel_group' and status NOT IN('NANQUE', 'QUEUE', 'DROP') order by call_date desc limit 5;";
 			if ($AGILOG) {$agi_string = "|$stmtA|";   &agi_output;}
 		$sthA = $dbhA->prepare($stmtA) or die "preparing: ",$dbhA->errstr;
 		$sthA->execute or die "executing: $stmtA ", $dbhA->errstr;
@@ -3067,16 +3067,17 @@ while ( ($drop_timer <= $DROP_TIME) && ($wait_in_queue > 0) )
 		if ( ($livetime_estimate_sec > 0) && ($t > 0) ) 
 			{
 			$livetime_estimate_sec = int( ($livetime_estimate_sec / $t) + 1);
-			$avgtime_estimate_sec = int( ($livetime_estimate_sec + $holdtime_estimate_sec) / 2);
+			#$avgtime_estimate_sec = int( ($livetime_estimate_sec + $holdtime_estimate_sec) / 2);
+                        $avgtime_estimate_sec = int( ($livetime_estimate_sec + $holdtime_estimate_sec) / 1.9);
 			}
 		else
 			{$avgtime_estimate_sec = $holdtime_estimate_sec;}
 
-		$holdtime_estimate_sec_diff = ($avgtime_estimate_sec - $drop_timer);
-		if ($holdtime_estimate_sec_diff < 10) {$holdtime_estimate_sec_diff=10;}
-		$holdtime_estimate = int($holdtime_estimate_sec_diff / 60);
-		$holdtime_estimate_sec_rem = ( $holdtime_estimate_sec_diff - ($holdtime_estimate * 60) );
-		if ($AGILOG) {$agi_string = "--    HOLD ESTIMATE: |$channel_group|$holdtime_estimate|$holdtime_estimate_sec_rem|$holdtime_estimate_sec_diff|     |$holdtime_estimate_sec|$livetime_estimate_sec|$avgtime_estimate_sec|$drop_timer|";   &agi_output;}
+		$holdtime_estimate_sec_diff = ($avgtime_estimate_sec - $drop_timer); #subtract current time in queue from estimated time
+		if ($holdtime_estimate_sec_diff < 10) {$holdtime_estimate_sec_diff=10;} #means we're close, so set to a minimum of 10 secs
+		$holdtime_estimate = int($holdtime_estimate_sec_diff / 60); #get the minute value from our estimate
+		$holdtime_estimate_sec_rem = ( $holdtime_estimate_sec_diff - ($holdtime_estimate * 60) ); #get the seconds remainder from our estimate
+		if ($AGILOG) {$agi_string = "--    HOLD ESTIMATE for $phone_number: |$channel_group|$holdtime_estimate|$holdtime_estimate_sec_rem|$holdtime_estimate_sec_diff|     |$holdtime_estimate_sec|$livetime_estimate_sec|$avgtime_estimate_sec|$drop_timer|";   &agi_output;}
 
 	##### play the hold time estimate to the caller if option is set
 		if ($play_estimate_hold_time =~ /Y/i) 
@@ -3167,13 +3168,23 @@ while ( ($drop_timer <= $DROP_TIME) && ($wait_in_queue > 0) )
 					if ($holdtime_estimate > 0)
 						{
 						$AGI->say_number("$holdtime_estimate");
-						$AGI->stream_file('queue-minutes'); # minutes
+                                                
+                                                if ($holdtime_estimate == 1)
+                                                    {$AGI->stream_file('queue-minute');} # minutes
+                                                else
+                                                    {$AGI->stream_file('queue-minutes');} # minutes
+                                                
+                                                if ($holdtime_estimate_sec_rem > 0)
+                                                    {
+                                                        $AGI->say_number("$holdtime_estimate_sec_rem");
+                                                        $AGI->stream_file('queue-seconds'); # seconds
+                                                    }
 						}
-					if ($holdtime_estimate < 2) 
+					else 
 						{ 
 						$roundto = 5; # sensible values 5, 10, 15, ( 20, 30) 
-						$rounded_time = $holdtime_estimate_sec_diff - ( $holdtime_estimate_sec_diff % $roundto ) + $roundto;
-						$rounded_time = ($rounded_time - ($holdtime_estimate * 60) );
+						$rounded_time = $holdtime_estimate_sec_diff - ( $holdtime_estimate_sec_diff % $roundto ); #+ $roundto;
+						#$rounded_time = ($rounded_time - ($holdtime_estimate * 60) );
 						$AGI->say_number("$rounded_time");
 						$AGI->stream_file('queue-seconds'); # seconds
 						}
