@@ -2836,6 +2836,7 @@ if ($enable_fast_refresh < 1) {echo "\tvar refresh_interval = 1000;\n";}
 	var VD_live_call_secondS = 0;
 	var XD_live_customer_call = 0;
 	var XD_live_call_secondS = 0;
+        var inbound_hopper_leads_count = 0;
 	var xfer_in_call = 0;
 	var open_dispo_screen = 0;
 	var AgentDispoing = 0;
@@ -5137,8 +5138,50 @@ function set_length(SLnumber,SLlength_goal,SLdirection)
 					{
 				//	alert(xmlhttp.responseText);
 					var DLcounT = xmlhttp.responseText;
-                        document.getElementById("dialableleadsspan").innerHTML ="Dialable Leads:&nbsp; " + DLcounT;
-						
+                                        //document.getElementById("dialableleadsspan").innerHTML = "Dialable Leads:&nbsp; " + DLcounT;
+					}
+				}
+			delete xmlhttp;
+			}
+		}
+                
+// ################################################################################
+// Request number of leads in hopper for inbound groups in this campaign
+	function InboundHopperLeaDsCheck()
+		{
+		var xmlhttp=false;
+		/*@cc_on @*/
+		/*@if (@_jscript_version >= 5)
+		// JScript gives us Conditional compilation, we can cope with old IE versions.
+		// and security blocked creation of the objects.
+		 try {
+		  xmlhttp = new ActiveXObject("Msxml2.XMLHTTP");
+		 } catch (e) {
+		  try {
+		   xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+		  } catch (E) {
+		   xmlhttp = false;
+		  }
+		 }
+		@end @*/
+		if (!xmlhttp && typeof XMLHttpRequest!='undefined')
+			{
+			xmlhttp = new XMLHttpRequest();
+			}
+		if (xmlhttp) 
+			{ 
+			DLcount_query = "server_ip=" + server_ip + "&session_name=" + session_name + "&user=" + user + "&pass=" + pass + "&ACTION=InboundHopperLeaDsCounT&campaign=" + campaign + "&format=text";
+			xmlhttp.open('POST', 'vdc_db_query.php'); 
+			xmlhttp.setRequestHeader('Content-Type','application/x-www-form-urlencoded; charset=UTF-8');
+			xmlhttp.send(DLcount_query); 
+			xmlhttp.onreadystatechange = function() 
+				{ 
+				if (xmlhttp.readyState == 4 && xmlhttp.status == 200) 
+					{
+				//	alert(xmlhttp.responseText);
+					var IBcounT = xmlhttp.responseText;
+                                        inbound_hopper_leads_count = IBcounT;
+                                        document.getElementById("dialableleadsspan").innerHTML = "IB Hopper Leads:&nbsp; " + IBcounT;
 					}
 				}
 			delete xmlhttp;
@@ -6218,7 +6261,11 @@ function set_length(SLnumber,SLlength_goal,SLdirection)
 							CalLBacKsCounTCheck();
 
 							if (MDnextCID.match(regMNCvar))
-								{alert_box("No more leads in the hopper for campaign:\n" + campaign);   alert_displayed=1;}
+								{
+                                                                    if (dial_method != "INBOUND_MAN")
+                                                                        {alert_box("No more leads in the hopper for campaign:\n" + campaign);}
+                                                                    alert_displayed=1;
+                                                                }
 							if (MDnextCID.match(regMDFvarDNC))
 								{alert_box("This phone number is in the DNC list:\n" + mdnPhonENumbeR);   alert_displayed=1;}
 							if (MDnextCID.match(regMDFvarCAMP))
@@ -11712,21 +11759,39 @@ function phone_number_format(formatphone) {
 				if (agentonly_callbacks == '1')
 					{CB_count_check++;}
 
-				if (AutoDialWaiting == 1)
+                                if (AutoDialWaiting == 1)
 					{
 					check_for_auto_incoming();
 					}
-                                if ((dial_method == "MANUAL" || dial_method == "INBOUND_MAN") && auto_dial_next_number == '1' && MD_channel_look != 1
+                                
+                                if (dial_method == "INBOUND_MAN")
+                                    {
+                                        InboundHopperLeaDsCheck();
+                                    }
+                                    
+                                if (auto_dial_next_number == '1' && MD_channel_look != 1
                                     && VD_live_customer_call != 1 && AutoDialWaiting != 0)
                                     {
-                                        AutoDialNextNumber++;
-                                        if (AutoDialNextNumber == 10)
+                                        //only auto dial next if in manual mode or on inbound_man with dialable leads in hopper
+                                        if (dial_method == "INBOUND_MAN" && inbound_hopper_leads_count > 0)
                                         {
+                                            inbound_hopper_leads_count--;
                                             ManualDialNext('','','','','','0');
                                             AutoDialNextNumber = 0;
                                             AutoDialWaiting = 0;
                                         }
+                                        else if (dial_method == "MANUAL")
+                                        {
+                                            AutoDialNextNumber++;
+                                            if (AutoDialNextNumber == 10)
+                                            {
+                                                ManualDialNext('','','','','','0');
+                                                AutoDialNextNumber = 0;
+                                                AutoDialWaiting = 0;
+                                            }
+                                        }
                                     }
+                                        
 				// look for a channel name for the manually dialed call
 				if (MD_channel_look==1)
 					{
@@ -11737,10 +11802,11 @@ function phone_number_format(formatphone) {
 					CalLBacKsCounTCheck();
 					CB_count_check=0;
 					}
-				if ( (even > 0) && (agent_display_dialable_leads > 0) )
+				if ( even > 0 && agent_display_dialable_leads > 0)
 					{
 					DiaLableLeaDsCounT();
 					}
+                                
 				if (VD_live_customer_call==1)
 					{
 					VD_live_call_secondS++;

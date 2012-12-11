@@ -9314,6 +9314,40 @@ if ($ACTION == 'DiaLableLeaDsCounT')
 
 	echo "$DLcount";
 	}
+        
+####################################################################################################
+### InboundHopperLeaDsCounT - send the count of the inbound callback leads hopper for this campaign
+####################################################################################################
+if ($ACTION == 'InboundHopperLeaDsCounT')
+	{
+        #get inbound groups agent is assigned to
+        $stmt="SELECT closer_campaigns from vicidial_live_agents where user='$user' and server_ip='$server_ip';";
+        if ($DB) {echo "|$stmt|\n";}
+        $rslt=mysql_query($stmt, $link);
+            if ($mel > 0) {mysql_error_logging($NOW_TIME,$link,$mel,$stmt,'00229',$user,$server_ip,$session_name,$one_mysql_log);}
+        $row=mysql_fetch_row($rslt);
+        $AccampSQL=$row[0];
+        $AccampSQL = ereg_replace(' -','', $AccampSQL);
+        $AccampSQL = ereg_replace(' ',"','", $AccampSQL);
+        if (eregi('AGENTDIRECT', $AccampSQL))
+            {
+            $AccampSQL = ereg_replace('AGENTDIRECT','', $AccampSQL);
+            }
+            
+        #retrieve the number of callback leads in the hopper, if any, associated with these inbound groups
+	$stmt = "select count(*) from vicidial_inbound_groups g inner join vicidial_hopper h on (h.list_id = g.wait_time_option_callback_list_id or h.list_id = g.hold_time_option_callback_list_id) where group_id IN('$AccampSQL') and h.campaign_id='$campaign';";
+	if ($DB) {echo "$stmt\n";}
+	$rslt=mysql_query($stmt, $link);
+				if ($mel > 0) {mysql_error_logging($NOW_TIME,$link,$mel,$stmt,'00252',$user,$server_ip,$session_name,$one_mysql_log);}
+	if ($rslt) {$IB_hopper_lead_count = mysql_num_rows($rslt);}
+	if ($IB_hopper_lead_count > 0)
+		{
+		$row=mysql_fetch_row($rslt);
+		$IB_hopper_lead_count	= $row[0];
+		}
+
+	echo "$IB_hopper_lead_count";
+	}
 
 
 ################################################################################
