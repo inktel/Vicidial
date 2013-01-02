@@ -1900,7 +1900,24 @@ while ( ($drop_timer <= $DROP_TIME) && ($wait_in_queue > 0) )
 			}
 		$sthA->finish();
 		if ($AGILOG) {$agi_string = "$rec_countWAITrem|$AGENTgrab|$stmtA|";   &agi_output;}
-		
+                
+                if (($wait_time_option_SETTING !~ /NONE/ ) || ($hold_time_option_SETTING !~ /NONE/ ))
+                {
+                    ### Get count of number of calls in this group that were set to callback and are ahead of this call
+                    $stmtA = "select count(*) from vicidial_inbound_groups g inner join vicidial_hopper h on (h.list_id = g.wait_time_option_callback_list_id or h.list_id = g.hold_time_option_callback_list_id) inner join vicidial_list li on li.lead_id = h.lead_id where g.group_id = '$channel_group' and li.entry_date < \"$SQLdateBEGIN\";";
+                    $sthA = $dbhA->prepare($stmtA) or die "preparing: ",$dbhA->errstr;
+                    $sthA->execute or die "executing: $stmtA ", $dbhA->errstr;
+                    $sthArows=$sthA->rows;
+                            $dbhP=$dbhA;   $mysql_count='02054';   $MEL_aff_rows=$sthArows;   &mysql_error_logging;
+                    if ($sthArows > 0)
+                            {
+                            @aryA = $sthA->fetchrow_array;
+                            $rec_countWAITrem = $rec_countWAITrem + $aryA[0];
+                            }
+                    $sthA->finish();
+                    if ($AGILOG) {$agi_string = "$rec_countWAITrem|$AGENTgrab|$stmtA|";   &agi_output;}
+                }
+                
 		if ( ($rec_countWAITrem < 1) || ($AGENTgrab > 0) )
 			{
 			$qp_countWAIT=0;
