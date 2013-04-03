@@ -329,9 +329,12 @@ while(<STDIN>)
 	}
 
 
-if ($calleridname =~ /^V\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d|^Y\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d/)
-	{$callerid = $calleridname;}
-
+#if ($calleridname =~ /^V\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d|^Y\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d/)
+#	{$callerid = $calleridname;}
+# do not replace callierid with name for original CIDs prefixed with outbound call flag
+if ($calleridname =~ /^Y\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d/)
+        {$callerid = $calleridname;}
+        
 if ( ($callerid =~ /\".*\"/) && ( (!$calleridname) or ($calleridname =~ /unknown/) ) )
 	{
 	$calleridname = $callerid;
@@ -1151,6 +1154,112 @@ if ( ( ($hm < $ct_default_start) || ($hm > $ct_default_stop) ) && ($hm >= $ct_st
 	}
 ##### END AFTER HOURS CHECK #####
 
+### RETRIEVE THE QUEUE POSITION OF THE CALL AND CHECK FOR MAXIMUM CALLS IN QUEUE SETTING
+$queue_position=1;
+$stmtA = "SELECT count(*) from vicidial_auto_calls where status = 'LIVE' and campaign_id='$channel_group';";
+$sthA = $dbhA->prepare($stmtA) or die "preparing: ",$dbhA->errstr;
+$sthA->execute or die "executing: $stmtA ", $dbhA->errstr;
+$sthArows=$sthA->rows;
+if ($AGILOG) {$agi_string = "$sthArows|$stmtA|";   &agi_output;}
+$dbhP=$dbhA;   $mysql_count='02120';   $MEL_aff_rows=$sthArows;   &mysql_error_logging;
+if ($sthArows > 0)
+{
+	@aryA = $sthA->fetchrow_array;
+	$queue_position = $aryA[0];
+}
+
+if ( ($max_calls_in_queue > 0) && ($queue_position >= $max_calls_in_queue) ) 
+{
+	### we've reached the maximum number of calls allowed in queue. Play message if we have to before disconnecting call
+	if ( ($max_calls_in_queue_filename !~ /---NONE---/) && (length($max_calls_in_queue_filename) > 0) )
+	{
+		if ($max_calls_in_queue_filename =~ /\|/)
+		{
+			@max_calls_in_queue_filename_array = split(/\|/,$max_calls_in_queue_filename);
+			$w=0;
+			foreach(@max_calls_in_queue_filename_array)
+			{
+				if (length($max_calls_in_queue_filename_array[$w])>0)
+				{
+					$AGI->stream_file("$max_calls_in_queue_filename_array[$w]");
+				}
+				$w++;
+			}
+		}
+		else
+		{$AGI->stream_file("$max_calls_in_queue_filename");}
+	}
+	
+	### add record to call log before hanging up
+	$stmtA = "INSERT INTO vicidial_closer_log set status='MAXQUE',start_epoch='$now_date_epoch',end_epoch='$now_date_epoch',length_in_sec='1',queue_seconds='0',queue_position='$queue_position',lead_id = '$insert_lead_id',campaign_id='$channel_group',user='VDCL',list_id='$list_id',call_date='$now_date',phone_code='$phone_code',phone_number='$phone_number',comments='MAX CALLS IN QUEUE',term_reason='MAXQUEUE',uniqueid='$uniqueid';";
+	$affected_rows = $dbhA->do($stmtA);
+	$dbhP=$dbhA;   $mysql_count='02016';   $MEL_aff_rows=$affected_rows;   &mysql_error_logging;
+	$stmtB = "select LAST_INSERT_ID() LIMIT 1;";
+	$sthA = $dbhA->prepare($stmtB) or die "preparing: ",$dbhA->errstr;
+	$sthA->execute or die "executing: $stmtB ", $dbhA->errstr;
+	$sthArows=$sthA->rows;
+	$dbhP=$dbhA;   $stmtA=$stmtB;   $mysql_count='02017';   $MEL_aff_rows=$sthArows;   &mysql_error_logging;
+	if ($sthArows > 0)
+	{
+		@aryA = $sthA->fetchrow_array;
+		$insert_close_id = $aryA[0];
+		$cbc++; 
+	}
+	$sthA->finish();
+	if ($AGILOG) {$agi_string = "--  MQ VDCL vcl insert: |$affected_rows|$insert_lead_id|$insert_close_id|$hm|$queue_position|$max_calls_in_queue|$max_calls_in_queue_filename\n|$stmtA|";   &agi_output;}
+	
+	if ($VLEcount < 1)
+	{
+		$stmtA = "INSERT INTO vicidial_log_extended set uniqueid='$uniqueid',server_ip='$VARserver_ip',call_date='$now_date',lead_id = '$insert_lead_id',caller_code='$callerid',custom_call_id='$custom_call_id';";
+		$affected_rows = $dbhA->do($stmtA);
+		$dbhP=$dbhA;   $mysql_count='02145';   $MEL_aff_rows=$affected_rows;   &mysql_error_logging;
+		if ($AGILOG) {$agi_string = "--  MQ VLE insert: |$affected_rows|\n|$stmtA|";   &agi_output;}
+		$VLEcount++;
+	}
+	
+	$stmtA = "UPDATE vicidial_list set status='MAXQUE' where lead_id = '$insert_lead_id';";
+	$affected_rows = $dbhA->do($stmtA);
+	$dbhP=$dbhA;   $mysql_count='02018';   $MEL_aff_rows=$affected_rows;   &mysql_error_logging;
+	if ($AGILOG) {$agi_string = "--  MQ VDCL vl update: |$affected_rows|$insert_lead_id|\n|$stmtA|";   &agi_output;}
+	
+	$stmtA = "DELETE FROM vicidial_auto_calls where callerid='$callerid' and server_ip='$VARserver_ip' order by call_time desc limit 1;";
+	$affected_rows = $dbhA->do($stmtA);
+	$dbhP=$dbhA;   $mysql_count='02019';   $MEL_aff_rows=$affected_rows;   &mysql_error_logging;
+	if ($AGILOG) {$agi_string = "--  MQ VDCL vac record deleted: |$affected_rows| $VDADcampaign|";   &agi_output;}
+	
+	### now disconnect this call by inserting a NEW record to the vicidial_manager table to be processed
+	$VHqueryCID = "VA$CIDdate$hour$min$sec$sec";
+	$stmtA = "INSERT INTO vicidial_manager values('','','$SQLdate','NEW','N','$VARserver_ip','','Hangup','$VHqueryCID','Channel: $channel','','','','','','','','','')";
+	$affected_rows = $dbhA->do($stmtA);  
+	$dbhP=$dbhA;   $mysql_count='02102';   $MEL_aff_rows=$affected_rows;   &mysql_error_logging;
+	if ($AGILOG) {$agi_string = "--    VDCL call_hungup maxcallsinqueue: |$VHqueryCID|$VDADconf_exten|$channel|insert to vicidial_manager";   &agi_output;}
+}
+### END	RETRIEVE THE QUEUE POSITION OF THE CALL AND CHECK FOR MAXIMUM CALLS IN QUEUE SETTING
+
+
+##### PLAY WELCOME MESSAGE #####
+if ( ($welcome_message_filename !~ /---NONE---/) && (length($welcome_message_filename) > 0) && ( ($play_welcome_message =~ /ALWAYS/) || ( ($no_delay_call_route =~ /N/) && ($play_welcome_message =~ /YES_UNLESS_NODELAY/) ) ) )
+	{
+	if ($welcome_message_filename =~ /\|/)
+		{
+		@welcome_message_filename_array = split(/\|/,$welcome_message_filename);
+		$w=0;
+		foreach(@welcome_message_filename_array)
+			{
+			if (length($welcome_message_filename_array[$w])>0)
+				{
+				$AGI->stream_file("$welcome_message_filename_array[$w]");
+				}
+			$w++;
+			}
+		}
+	else
+		{$AGI->stream_file("$welcome_message_filename");}
+	}
+if ($play_welcome_message =~ /IF_WAIT_ONLY/)
+	{$if_wait_play_welcome=1;}
+else
+	{$if_wait_play_welcome=0;}
 
 
 ##### BEGIN NO AGENT NO QUEUE CHECK #####
@@ -1368,113 +1477,6 @@ if ($no_agent_no_queue =~ /Y|NO_PAUSED/)
 		}
 	}
 ##### END NO AGENT NO QUEUE CHECK #####
-
-### RETRIEVE THE QUEUE POSITION OF THE CALL AND CHECK FOR MAXIMUM CALLS IN QUEUE SETTING
-$queue_position=1;
-$stmtA = "SELECT count(*) from vicidial_auto_calls where status = 'LIVE' and campaign_id='$channel_group';";
-$sthA = $dbhA->prepare($stmtA) or die "preparing: ",$dbhA->errstr;
-$sthA->execute or die "executing: $stmtA ", $dbhA->errstr;
-$sthArows=$sthA->rows;
-if ($AGILOG) {$agi_string = "$sthArows|$stmtA|";   &agi_output;}
-$dbhP=$dbhA;   $mysql_count='02120';   $MEL_aff_rows=$sthArows;   &mysql_error_logging;
-if ($sthArows > 0)
-{
-	@aryA = $sthA->fetchrow_array;
-	$queue_position = $aryA[0];
-}
-
-if ( ($max_calls_in_queue > 0) && ($queue_position >= $max_calls_in_queue) ) 
-{
-	### we've reached the maximum number of calls allowed in queue. Play message if we have to before disconnecting call
-	if ( ($max_calls_in_queue_filename !~ /---NONE---/) && (length($max_calls_in_queue_filename) > 0) )
-	{
-		if ($max_calls_in_queue_filename =~ /\|/)
-		{
-			@max_calls_in_queue_filename_array = split(/\|/,$max_calls_in_queue_filename);
-			$w=0;
-			foreach(@max_calls_in_queue_filename_array)
-			{
-				if (length($max_calls_in_queue_filename_array[$w])>0)
-				{
-					$AGI->stream_file("$max_calls_in_queue_filename_array[$w]");
-				}
-				$w++;
-			}
-		}
-		else
-		{$AGI->stream_file("$max_calls_in_queue_filename");}
-	}
-	
-	### add record to call log before hanging up
-	$stmtA = "INSERT INTO vicidial_closer_log set status='MAXQUE',start_epoch='$now_date_epoch',end_epoch='$now_date_epoch',length_in_sec='1',queue_seconds='0',queue_position='$queue_position',lead_id = '$insert_lead_id',campaign_id='$channel_group',user='VDCL',list_id='$list_id',call_date='$now_date',phone_code='$phone_code',phone_number='$phone_number',comments='MAX CALLS IN QUEUE',term_reason='MAXQUEUE',uniqueid='$uniqueid';";
-	$affected_rows = $dbhA->do($stmtA);
-	$dbhP=$dbhA;   $mysql_count='02016';   $MEL_aff_rows=$affected_rows;   &mysql_error_logging;
-	$stmtB = "select LAST_INSERT_ID() LIMIT 1;";
-	$sthA = $dbhA->prepare($stmtB) or die "preparing: ",$dbhA->errstr;
-	$sthA->execute or die "executing: $stmtB ", $dbhA->errstr;
-	$sthArows=$sthA->rows;
-	$dbhP=$dbhA;   $stmtA=$stmtB;   $mysql_count='02017';   $MEL_aff_rows=$sthArows;   &mysql_error_logging;
-	if ($sthArows > 0)
-	{
-		@aryA = $sthA->fetchrow_array;
-		$insert_close_id = $aryA[0];
-		$cbc++; 
-	}
-	$sthA->finish();
-	if ($AGILOG) {$agi_string = "--  MQ VDCL vcl insert: |$affected_rows|$insert_lead_id|$insert_close_id|$hm|$queue_position|$max_calls_in_queue|$max_calls_in_queue_filename\n|$stmtA|";   &agi_output;}
-	
-	if ($VLEcount < 1)
-	{
-		$stmtA = "INSERT INTO vicidial_log_extended set uniqueid='$uniqueid',server_ip='$VARserver_ip',call_date='$now_date',lead_id = '$insert_lead_id',caller_code='$callerid',custom_call_id='$custom_call_id';";
-		$affected_rows = $dbhA->do($stmtA);
-		$dbhP=$dbhA;   $mysql_count='02145';   $MEL_aff_rows=$affected_rows;   &mysql_error_logging;
-		if ($AGILOG) {$agi_string = "--  MQ VLE insert: |$affected_rows|\n|$stmtA|";   &agi_output;}
-		$VLEcount++;
-	}
-	
-	$stmtA = "UPDATE vicidial_list set status='MAXQUE' where lead_id = '$insert_lead_id';";
-	$affected_rows = $dbhA->do($stmtA);
-	$dbhP=$dbhA;   $mysql_count='02018';   $MEL_aff_rows=$affected_rows;   &mysql_error_logging;
-	if ($AGILOG) {$agi_string = "--  MQ VDCL vl update: |$affected_rows|$insert_lead_id|\n|$stmtA|";   &agi_output;}
-	
-	$stmtA = "DELETE FROM vicidial_auto_calls where callerid='$callerid' and server_ip='$VARserver_ip' order by call_time desc limit 1;";
-	$affected_rows = $dbhA->do($stmtA);
-	$dbhP=$dbhA;   $mysql_count='02019';   $MEL_aff_rows=$affected_rows;   &mysql_error_logging;
-	if ($AGILOG) {$agi_string = "--  MQ VDCL vac record deleted: |$affected_rows| $VDADcampaign|";   &agi_output;}
-	
-	### now disconnect this call by inserting a NEW record to the vicidial_manager table to be processed
-	$VHqueryCID = "VA$CIDdate$hour$min$sec$sec";
-	$stmtA = "INSERT INTO vicidial_manager values('','','$SQLdate','NEW','N','$VARserver_ip','','Hangup','$VHqueryCID','Channel: $channel','','','','','','','','','')";
-	$affected_rows = $dbhA->do($stmtA);  
-	$dbhP=$dbhA;   $mysql_count='02102';   $MEL_aff_rows=$affected_rows;   &mysql_error_logging;
-	if ($AGILOG) {$agi_string = "--    VDCL call_hungup maxcallsinqueue: |$VHqueryCID|$VDADconf_exten|$channel|insert to vicidial_manager";   &agi_output;}
-}
-### END	RETRIEVE THE QUEUE POSITION OF THE CALL AND CHECK FOR MAXIMUM CALLS IN QUEUE SETTING
-
-
-##### PLAY WELCOME MESSAGE #####
-if ( ($welcome_message_filename !~ /---NONE---/) && (length($welcome_message_filename) > 0) && ( ($play_welcome_message =~ /ALWAYS/) || ( ($no_delay_call_route =~ /N/) && ($play_welcome_message =~ /YES_UNLESS_NODELAY/) ) ) )
-	{
-	if ($welcome_message_filename =~ /\|/)
-		{
-		@welcome_message_filename_array = split(/\|/,$welcome_message_filename);
-		$w=0;
-		foreach(@welcome_message_filename_array)
-			{
-			if (length($welcome_message_filename_array[$w])>0)
-				{
-				$AGI->stream_file("$welcome_message_filename_array[$w]");
-				}
-			$w++;
-			}
-		}
-	else
-		{$AGI->stream_file("$welcome_message_filename");}
-	}
-if ($play_welcome_message =~ /IF_WAIT_ONLY/)
-	{$if_wait_play_welcome=1;}
-else
-	{$if_wait_play_welcome=0;}
 
 
 $vci=0;

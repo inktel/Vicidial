@@ -935,7 +935,35 @@ if ($call_handle_method =~ /SURVEY/)
 		$agi_string = "--    VDAD vicidial_list OPT_CODE update: |$affected_rows|$CIDlead_id|$opt_code|";
 		&agi_output;
 		}
+                
+        ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
+        $year = ($year + 1900);
+        $mon++;
+        if ($mon < 10) {$mon = "0$mon";}
+        if ($mday < 10) {$mday = "0$mday";}
+        if ($hour < 10) {$hour = "0$hour";}
+        if ($min < 10) {$min = "0$min";}
+        if ($sec < 10) {$sec = "0$sec";}
 
+        $CIDdate = "$mon$mday$hour$min$sec";
+
+        while (length($CIDdate) > 9) {$CIDdate =~ s/^.//gi;} # 0902235959 changed to 902235959
+        
+        $CCID_on = 0;
+        $temp_CID = $VDADphone;
+        $temp_CID =~ s/\D//gi;
+        if (length($temp_CID) > 6) 
+            {$CCID = "$temp_CID";   $CCID_on++;}
+            
+        $PADlead_id = sprintf("%010s", $CIDlead_id);
+        while (length($PADlead_id) > 10) {chop($PADlead_id);}
+            
+        $VqueryCID = "V$CIDdate$PADlead_id";
+        if ($CCID_on) {$CIDstring = "\"$VqueryCID\"<$CCID>";}
+        
+        $agi_string = "--    Caller Id Set to: |$CCID_on|$CCID|$CIDstring|";
+	&agi_output;
+                        
 	# they opted out
 	if ($opt_code =~ /$survey_ni_digit/)
 		{
@@ -1078,6 +1106,11 @@ if ($call_handle_method =~ /SURVEY/)
 			if ($AGILOG) {$agi_string = "exiting the VDAD SURVEY app, transferring call to $survey_third_exten";   &agi_output;}
 			print "SET CONTEXT $ext_context\n";
 				checkresult($result);
+                        if ($CCID_on)
+                        {
+                            print "SET CALLERID $CIDstring\n";
+                                checkresult($result);
+                        }
 			print "SET EXTENSION $survey_third_exten\n";
 				checkresult($result);
 			print "SET PRIORITY 1\n";
@@ -1161,6 +1194,11 @@ if ($call_handle_method =~ /SURVEY/)
 			if ($AGILOG) {$agi_string = "exiting the VDAD SURVEY app, transferring call to $survey_fourth_exten";   &agi_output;}
 			print "SET CONTEXT $ext_context\n";
 				checkresult($result);
+                        if ($CCID_on)
+                        {
+                            print "SET CALLERID $CIDstring\n";
+                                checkresult($result);
+                        }
 			print "SET EXTENSION $survey_fourth_exten\n";
 				checkresult($result);
 			print "SET PRIORITY 1\n";
@@ -1295,6 +1333,11 @@ if ($call_handle_method =~ /SURVEY/)
 				if ($AGILOG) {$agi_string = "exiting the VDAD SURVEY app, transferring call to $DROPexten $ext_context";   &agi_output;}
 				print "SET CONTEXT $ext_context\n";
 					checkresult($result);
+                                if ($CCID_on)
+                                {
+                                    print "SET CALLERID $CIDstring\n";
+                                        checkresult($result);
+                                }
 				print "SET EXTENSION $DROPexten\n";
 					checkresult($result);
 				print "SET PRIORITY 1\n";
